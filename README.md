@@ -125,7 +125,7 @@ addChild(scene, lightEntity)
 ...
 ```
 
-![](docs/files/scripts-light-moves.webm)
+![](docs/files/light-moves.gif)
 
 If you run the code, light is going to move around the cube. As you see in the code we used a anonymous function to change light's position.
 You can define a function and use it, here. Feel free to play with nim features.
@@ -154,7 +154,7 @@ addChild(scene, cubeEntity)
 ...
 ```
 
-![](docs/files/scripts-cube-rotates.webm)
+![](docs/files/cube-rotates.gif)
 
 
 ### Material
@@ -188,7 +188,7 @@ addChild(scene, cubeEntity)
 ...
 ```
 
-![](docs/files/cube-diffuse.webm)
+![](docs/files/cube-diffuse.gif)
 
 
 ### Texture
@@ -225,7 +225,7 @@ addChild(scene, cubeEntity)
 ...
 ```
 
-![](docs/files/cube-texture.webm)
+![](docs/files/cube-texture.gif)
 
 The texture used here grabbed from: https://opengameart.org/content/handpainted-stone-floor-texture
 
