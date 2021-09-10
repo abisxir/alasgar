@@ -3,7 +3,7 @@ Alasgar is an experimental game engine. The reason behind it was to learn graphi
 
 ## OpenGL ES
 To make it short, I used opengl es (3.0) because it is easier than Vulkan and also can be ported to android. I hate android, ios and other mobile platforms while they are complex and big.
-To just make a small app, you need to download tons of SDKs. But android is at least open, you can make app for it from most of OSs so I will support android. ios is a different story, you need a mac system to build a
+To just make a small app, you need to download tons of SDKs. But android is open enough and you can make app for it from most of OSs so I will support android. ios is a different story, you need a mac system to build a
 hello world app for mobile so I will not port this game engine to apple platforms. If your target is ios, please ignore this engine.
 
 ## Do not use this engine
@@ -11,6 +11,7 @@ This a basic game engine, and I do not know how long I will maintain it. It is a
 
 ## nimx and vmath
 I copied most of nimx build system here, just removed and reformed some parts. I will rewrite this part later to use nimble instead of nake. nimx is a UI library (and game framework) for nim, check it out here: https://github.com/yglukhov/nimx
+
 Also most of math stuff copied from vmath: https://github.com/treeform/vmath
 
 ## Installation
@@ -95,7 +96,9 @@ addChild(scene, lightEntity)
 ...
 ```
 
-When you run the code, you will see that ugly grey cube. Let us move the light:
+![](docs/files/cube.jpg)
+
+When you run the code, you will see an ugly grey cube. Let us move the light:
 
 ### Scripts
 ```nim
@@ -232,29 +235,21 @@ As you scene our scene has just one light and the light is moving, let us add a 
 ```nim
 ...
 
-# Creates cube entity, by default position is 0, 0, 0
-var cubeEntity = newEntity(scene, "Cube")
-# Set scale to 2
-cubeEntity.transform.scale = vec3(2)
-# Add a cube mesh component to entity
-addComponent(cubeEntity, newCubeMesh())
-# Adds a script component to cube entity
-addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
-    # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
-    script.transform.euler = vec3(
-        sin(engine.age) * sin(engine.age), 
-        cos(engine.age), 
-        sin(engine.age)
-    )
-))
-# Adds a material to cube
-addComponent(cubeEntity, newMaterialComponent(
-    diffuseColor=parseHtmlName("white"),
-    texture=newTexture("res://stone-texture.png")
+# Creats spot point light entity
+var spotLightEntity = newEntity(scene, "SpotLight")
+# Sets position to (-6, 6, 6)
+spotLightEntity.transform.position = vec3(-6, 6, 6)
+# Adds a spot point light component
+addComponent(spotLightEntity, newSpotPointLightComponent(
+    vec3(0) - spotLightEntity.transform.position, # Light direction
+    color=parseHtmlName("aqua"),                            # Light color
+    shadow=false,                                 # Casts shadow or not
+    innerLimit=30,                                # Inner circle of light
+    outerLimit=90                                 # Outer circle of light
     )
 )
-# Makes the cube enity child of scene
-addChild(scene, cubeEntity)
+# Makes the new light child of the scene
+addChild(scene, spotLightEntity)
 
 ...
 ```
