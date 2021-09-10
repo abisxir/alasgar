@@ -66,7 +66,7 @@ addComponent(cubeEntity, newMaterialComponent(
 # Makes the cube enity child of scene
 addChild(scene, cubeEntity)
 
-
+#[
 # Creats spot point light entity
 var spotLightEntity = newEntity(scene, "SpotLight")
 # Sets position to (-6, 6, 6)
@@ -82,8 +82,7 @@ addComponent(spotLightEntity, newSpotPointLightComponent(
 )
 # Makes the new light child of the scene
 addChild(scene, spotLightEntity)
-
-
+]#
 
 # Renders an empty sceene
 render(scene)

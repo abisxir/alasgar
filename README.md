@@ -254,4 +254,4 @@ addChild(scene, spotLightEntity)
 ...
 ```
 
-![](docs/files/spotpoint-light.webm)
+![](docs/files/spotpoint-light.gif)
