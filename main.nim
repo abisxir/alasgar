@@ -1,6 +1,7 @@
 import alasgar
 
 # Creates a window named Hello
+screen(160, 90)
 window("Hello", 640, 360)
    
 # Creates a new scene
@@ -36,6 +37,7 @@ addComponent(
 # Adds a script component to light entity
 addComponent(lightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
     const r = 5 
+    # Change position on transform
     script.transform.positionX = r * sin(engine.age) 
     script.transform.positionZ = r * cos(engine.age)
 ))
@@ -80,9 +82,19 @@ addComponent(spotLightEntity, newSpotPointLightComponent(
     outerLimit=90                                 # Outer circle of light
     )
 )
+# Adds a script component to spot point light entity
+addComponent(spotLightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
+    # Access to point light component, if it returns nil then there is no such a component on this entity.
+    let light = getComponent[SpotPointLightComponent](script)
+    # Changes light color
+    light.color = color(
+        abs(sin(engine.age)), 
+        abs(cos(engine.age)), 
+        abs(sin(engine.age) * sin(engine.age))
+    )
+))
 # Makes the new light child of the scene
 addChild(scene, spotLightEntity)
-
 
 
 # Renders an empty sceene

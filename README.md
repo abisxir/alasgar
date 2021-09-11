@@ -7,7 +7,7 @@ To just make a small app, you need to download tons of SDKs. But android is open
 hello world app for mobile so I will not port this game engine to apple platforms. If your target is ios, please ignore this engine.
 
 ## Do not use this engine
-This a basic game engine, and I do not know how long I will maintain it. It is also too much limited so do not use it for production.
+This is a basic game engine, and I do not know how long I will maintain it. It is also too much limited so do not use it for production.
 
 ## nimx and vmath
 I copied most of nimx build system here, just removed and reformed some parts. I will rewrite this part later to use nimble instead of nake. nimx is a UI library (and game framework) for nim, check it out here: https://github.com/yglukhov/nimx
@@ -16,7 +16,7 @@ Also most of math stuff copied from vmath: https://github.com/treeform/vmath
 
 ## Installation
 ```bash
-nimble install alasgar
+nimble install https://github.com/abisxir/alasgar
 ```
 
 ## Start
@@ -60,6 +60,12 @@ If everything was right, you will see an empty window with the given size. Run i
 nim c -r main.nim
 ```
 
+When you create a window by defult it runs in window mode, you can easily enable fullscreen mode:
+```nim
+# Creates a window named Hello and enables fullscreen mode.
+window("Hello", 640, 360, fullscreen=true)
+```
+
 Let us add a cube to our scene.
 ### First mesh
 ```nim
@@ -101,6 +107,8 @@ addChild(scene, lightEntity)
 When you run the code, you will see an ugly grey cube. Let us move the light:
 
 ### Scripts
+To program an entity, we need to add a ScriptComponent to our light entity. Each component has access to entity, entity's transform and component's data.
+
 ```nim
 ...
 
@@ -116,6 +124,7 @@ addComponent(
 # Adds a script component to light entity
 addComponent(lightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
     const r = 5 
+    # Change position on transform
     script.transform.positionX = r * sin(engine.age) 
     script.transform.positionZ = r * cos(engine.age)
 ))
@@ -255,3 +264,62 @@ addChild(scene, spotLightEntity)
 ```
 
 ![](docs/files/spotpoint-light.gif)
+
+### Access components
+Let us dance with light's color, to access a component we can call getComponent[T] on a entity or a component.
+We add a script component to our spot light to program it:
+
+```nim
+...
+
+# Creats spot point light entity
+var spotLightEntity = newEntity(scene, "SpotLight")
+# Sets position to (-6, 6, 6)
+spotLightEntity.transform.position = vec3(-6, 6, 6)
+# Adds a spot point light component
+addComponent(spotLightEntity, newSpotPointLightComponent(
+    vec3(0) - spotLightEntity.transform.position, # Light direction
+    color=parseHtmlName("aqua"),                            # Light color
+    shadow=false,                                 # Casts shadow or not
+    innerLimit=30,                                # Inner circle of light
+    outerLimit=90                                 # Outer circle of light
+    )
+)
+# Adds a script component to spot point light entity
+addComponent(spotLightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
+    # Access to point light component, if it returns nil then there is no such a component on this entity.
+    let light = getComponent[SpotPointLightComponent](script)
+    # Changes light color
+    light.color = color(
+        abs(sin(engine.age)), 
+        abs(cos(engine.age)), 
+        abs(sin(engine.age) * sin(engine.age))
+    )
+))
+# Makes the new light child of the scene
+addChild(scene, spotLightEntity)
+
+...
+```
+
+![](docs/files/light-color-changes.gif)
+
+As you see we called "let light = getComponent[SpotPointLightComponent](script)" to get access to our component.
+It is the same if we call like this: "let light = getComponent[SpotPointLightComponent](script)"
+
+
+# Screen size
+By default the screen size is equal with window size, but maybe you like to have a lower resolution:
+```nim
+import alasgar
+
+# Creates a window named Hello, and sets screen size to (160, 90)
+screen(160, 90)
+window("Hello", 640, 360)
+
+...   
+```
+
+You need to specify it before creating window, after window creation there is no effect.
+
+![](docs/files/screen-size.gif)
