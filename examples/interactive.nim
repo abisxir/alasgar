@@ -33,15 +33,19 @@ addComponent(
     lightEntity, 
     newPointLightComponent()
 )
-# Adds a script component to light entity
-addComponent(lightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
-    const r = 5 
-    # Change position on transform
-    script.transform.positionX = r * sin(engine.age) 
-    script.transform.positionZ = r * cos(engine.age)
-))
 # Makes the light entity child of the scene
 addChild(scene, lightEntity)
+
+
+# Handles mouse hover in
+proc onCubeHover(interactive: InteractiveComponent, collision: Collision)=
+    let material = getComponent[MaterialComponent](interactive)
+    material.diffuseColor = parseHtmlName("yellow")
+
+# Handles mouse hover out
+proc onCubeOut(interactive: InteractiveComponent)=
+    let material = getComponent[MaterialComponent](interactive)
+    material.diffuseColor = parseHtmlName("green")
 
 # Creates cube entity, by default position is 0, 0, 0
 var cubeEntity = newEntity(scene, "Cube")
@@ -49,19 +53,21 @@ var cubeEntity = newEntity(scene, "Cube")
 cubeEntity.transform.scale = vec3(2)
 # Add a cube mesh component to entity
 addComponent(cubeEntity, newCubeMesh())
-# Adds a script component to cube entity
-addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
-    # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
-    script.transform.euler = vec3(
-        sin(engine.age) * sin(engine.age), 
-        cos(engine.age), 
-        sin(engine.age)
-    )
-))
 # Adds a material to cube
-addComponent(cubeEntity, newMaterialComponent(
-    diffuseColor=parseHtmlName("white"),
-    texture=newTexture("res://stone-texture.png")
+addComponent(cubeEntity, 
+    newMaterialComponent(
+        diffuseColor=parseHtmlName("green"),
+        texture=newTexture("res://stone-texture.png")
+    )
+)
+# Adds a collision compnent to cube entity
+addComponent(cubeEntity, newCollisionComponent(vec3(-1, -1, -1), vec3(1, 1, 1)))
+# Adds an interactive
+addComponent(
+    cubeEntity, 
+    newInteractiveComponent(
+        onHover=onCubeHover,
+        onOut=onCubeOut
     )
 )
 # Makes the cube enity child of scene
@@ -71,7 +77,7 @@ addChild(scene, cubeEntity)
 # Creats spot point light entity
 var spotLightEntity = newEntity(scene, "SpotLight")
 # Sets position to (-6, 6, 6)
-spotLightEntity.transform.position = vec3(-6, 6, 6)
+spotLightEntity.transform.position = vec3(6, 6, 6)
 # Adds a spot point light component
 addComponent(spotLightEntity, newSpotPointLightComponent(
     vec3(0) - spotLightEntity.transform.position, # Light direction
@@ -81,17 +87,6 @@ addComponent(spotLightEntity, newSpotPointLightComponent(
     outerLimit=90                                 # Outer circle of light
     )
 )
-# Adds a script component to spot point light entity
-addComponent(spotLightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
-    # Access to point light component, if it returns nil then there is no such a component on this entity.
-    let light = getComponent[SpotPointLightComponent](script)
-    # Changes light color
-    light.color = color(
-        abs(sin(engine.age)), 
-        abs(cos(engine.age)), 
-        abs(sin(engine.age) * sin(engine.age))
-    )
-))
 # Makes the new light child of the scene
 addChild(scene, spotLightEntity)
 
@@ -100,4 +95,3 @@ addChild(scene, spotLightEntity)
 render(scene)
 # Runs game main loop
 loop()
-
