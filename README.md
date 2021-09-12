@@ -1,13 +1,18 @@
+![](docs/files/screen-size.gif)
+
 # alasgar
-Alasgar is an experimental game engine. The reason behind it was to learn graphic programming using nim programming language.
+Alasgar is a pure nim game engine based on OpenGL ES. The reason behind it was to learn graphic programming using nim programming language.
 
-## OpenGL ES
-To make it short, I used opengl es (3.0) because it is easier than Vulkan and also can be ported to android. I hate android, ios and other mobile platforms while they are complex and big.
-To just make a small app, you need to download tons of SDKs. But android is open enough and you can make app for it from most of OSs so I will support android. ios is a different story, you need a mac system to build a
-hello world app for mobile so I will not port this game engine to apple platforms. If your target is ios, please ignore this engine.
+# Platforms
+ - Linux
+ - Windows
+ - Android
+ - Web (work in progress)
+ - Mac (work in progress)
+ - iOS (not supoorted)
 
-## Do not use this engine
-This is a basic game engine, and I do not know how long I will maintain it. It is also too much limited so do not use it for production.
+## Experimental game engine
+This is a basic game engine, and it is also too much limited so it is not ready for production use.
 
 ## nimx and vmath
 I copied most of nimx build system here, just removed and reformed some parts. I will rewrite this part later to use nimble instead of nake. nimx is a UI library (and game framework) for nim, check it out here: https://github.com/yglukhov/nimx
@@ -19,7 +24,14 @@ Also most of math stuff copied from vmath: https://github.com/treeform/vmath
 nimble install https://github.com/abisxir/alasgar
 ```
 
-## Start
+## Quick start
+```bash
+git clone https://github.com/abisxir/alasgar.git
+cd alasgar/examples
+nim c -r hello.nim
+```
+
+## Window and scene creation
 ```nim
 import alasgar
 
@@ -266,7 +278,7 @@ addChild(scene, spotLightEntity)
 ![](docs/files/spotpoint-light.gif)
 
 ### Access components
-Let us dance with light's color, to access a component we can call getComponent[T] on a entity or a component.
+Let us dance with light's color, to access a component we can call getComponent[T] on an entity or a component.
 We add a script component to our spot light to program it:
 
 ```nim
@@ -304,10 +316,6 @@ addChild(scene, spotLightEntity)
 
 ![](docs/files/light-color-changes.gif)
 
-As you see we called "let light = getComponent[SpotPointLightComponent](script)" to get access to our component.
-It is the same if we call like this: "let light = getComponent[SpotPointLightComponent](script)"
-
-
 # Screen size
 By default the screen size is equal with window size, but maybe you like to have a lower resolution:
 ```nim
@@ -323,3 +331,6 @@ window("Hello", 640, 360)
 You need to specify it before creating window, after window creation there is no effect.
 
 ![](docs/files/screen-size.gif)
+
+# Interactive objects
+It is nice if we can select an object with mouse or by touch on mobile platforms, let us add a InteractiveComponent to our cube:

@@ -1,7 +1,6 @@
 import alasgar
 
 # Creates a window named Hello
-screen(160, 90)
 window("Hello", 640, 360)
    
 # Creates a new scene
