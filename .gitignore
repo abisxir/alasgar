@@ -54,6 +54,11 @@ nakefile
 ./shadow.nim
 ./shadow
 ./test-release.sh
+/example/hello
+/example/main
+/example/nakefile
+/example/interactive
+/example/build
 
 # Build and res direcory
 build/

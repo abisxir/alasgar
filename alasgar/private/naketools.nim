@@ -822,7 +822,7 @@ proc build*(b: Builder) =
         b.makeWindowsResource()
     of "emscripten", "wasm":
         let emcc = emccWrapperPath()
-        b.emscriptenPreloadFiles.add(b.originalResourcePath & "/OpenSans-Regular.ttf@/res/OpenSans-Regular.ttf")
+        #b.emscriptenPreloadFiles.add(b.originalResourcePath & "/OpenSans-Regular.ttf@/res/OpenSans-Regular.ttf")
         b.executablePath = b.buildRoot / "main.js"
         b.nimFlags.add(["--cpu:i386", "-d:emscripten", "--os:linux",
             "--cc:clang",

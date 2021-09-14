@@ -65,7 +65,7 @@ render(scene)
 loop()
 ```
 
-As you see in code (main.nim), we instantiate a scene, add a camera to it and we render the created scene.
+As you see, we instantiate a scene, add a camera to it and we render the created scene.
 If everything was right, you will see an empty window with the given size. Run it using nim compiler:
 
 ```bash
@@ -316,7 +316,7 @@ addChild(scene, spotLightEntity)
 
 ![](docs/files/light-color-changes.gif)
 
-# Screen size
+### Screen size
 By default the screen size is equal with window size, but maybe you like to have a lower resolution:
 ```nim
 import alasgar
@@ -332,5 +332,77 @@ You need to specify it before creating window, after window creation there is no
 
 ![](docs/files/screen-size.gif)
 
-# Interactive objects
+### Normal maps
+It is easy to add a normal map, we need to specify it in material component:
+
+```nim
+...
+
+# Adds a material to cube
+addComponent(cubeEntity, 
+    newMaterialComponent(
+        diffuseColor=parseHtmlName("white"),
+        texture=newTexture("res://stone-texture.png"),
+        normal=newTexture("res://stone-texture-normal.png")
+    )
+)
+# Makes the cube enity child of scene
+addChild(scene, cubeEntity)
+
+...
+```
+
+![](docs/files/cube-texture.gif)
+
+### Interactive objects
 It is nice if we can select an object with mouse or by touch on mobile platforms, let us add a InteractiveComponent to our cube:
+
+```nim
+...
+
+# Handles mouse hover in
+proc onCubeHover(interactive: InteractiveComponent, collision: Collision)=
+    let material = getComponent[MaterialComponent](interactive)
+    material.diffuseColor = parseHtmlName("yellow")
+
+# Handles mouse hover out
+proc onCubeOut(interactive: InteractiveComponent)=
+    let material = getComponent[MaterialComponent](interactive)
+    material.diffuseColor = parseHtmlName("green")
+
+# Creates cube entity, by default position is 0, 0, 0
+var cubeEntity = newEntity(scene, "Cube")
+# Set scale to 2
+cubeEntity.transform.scale = vec3(2)
+# Add a cube mesh component to entity
+addComponent(cubeEntity, newCubeMesh())
+# Adds a material to cube
+addComponent(cubeEntity, 
+    newMaterialComponent(
+        diffuseColor=parseHtmlName("green")
+    )
+)
+# Adds a collision compnent to cube entity
+addComponent(cubeEntity, newCollisionComponent(vec3(-1, -1, -1), vec3(1, 1, 1)))
+# Adds an interactive
+addComponent(
+    cubeEntity, 
+    newInteractiveComponent(
+        onHover=onCubeHover,
+        onOut=onCubeOut
+    )
+)
+# Makes the cube enity child of scene
+addChild(scene, cubeEntity)
+
+...
+```
+
+As you see, we have two functions to handle mouse's in and out (hover) functionalities. To make interactive components working, you need to add a collision component.
+Alsgar supports just two types, AABB and sphere. We also changed the spot light position, stopped point light moving and set our cube diffuse color to green. It is the final result:
+
+![](docs/files/interactive.gif)
+![](examples/interactive.nim)
+
+When you add interactive component, you have: onPress, onRelease, onHover, onOut and onMotion. Except onOut, all of the functions pass collision information.
+
