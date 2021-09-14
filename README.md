@@ -353,7 +353,7 @@ addChild(scene, cubeEntity)
 ```
 
 ![](docs/files/cube-normal.gif)
-![](examples/normal.nim)
+![normal sample](examples/normal.nim)
 
 ### Interactive objects
 It is nice if we can select an object with mouse or by touch on mobile platforms, let us add a InteractiveComponent to our cube:
