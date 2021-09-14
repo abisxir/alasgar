@@ -316,7 +316,7 @@ addChild(scene, spotLightEntity)
 
 ![](docs/files/light-color-changes.gif)
 
-See sample source here: ![hello sample](examples/hello.nim)
+See sample source [here](examples/hello.nim).
 
 ### Screen size
 By default the screen size is equal with window size, but maybe you like to have a lower resolution:
@@ -356,7 +356,7 @@ addChild(scene, cubeEntity)
 
 ![](docs/files/cube-normal.gif)
 
-See sample source here: ![normal sample](examples/normal.nim)
+See normal sample [here](examples/normal.nim).
 
 ### Interactive objects
 It is nice if we can select an object with mouse or by touch on mobile platforms, let us add a InteractiveComponent to our cube:
@@ -409,6 +409,6 @@ Alsgar supports just two types, AABB and sphere. We also changed the spot light 
 
 When you add interactive component, you have: onPress, onRelease, onHover, onOut and onMotion. Except onOut, all of the functions pass collision information.
 
-See interactive sample here: ![](examples/interactive.nim)
+See interactive sample [here](examples/interactive.nim).
 
 
