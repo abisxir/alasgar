@@ -46,6 +46,9 @@ uniform vec3 u_ambient_color;
 uniform vec3 u_camera_position;
 uniform int u_shadow_enabled;
 uniform vec3 u_shadow_position;
+// Normal flag
+uniform int u_normal_enabled;
+
 
 
 // Model
@@ -136,7 +139,24 @@ void main()
     } else {
         vec3 light_color = u_ambient_color;
         vec3 view_direction = normalize(u_camera_position - v_fragment_position.xyz);
-        vec3 surface_normal = normalize(v_normal);
+        vec3 surface_normal;
+
+        if(u_normal_enabled > 0) {
+            vec3 Q1 = dFdx(v_fragment_position.xyz);
+            vec3 Q2 = dFdy(v_fragment_position.xyz);
+            vec2 st1 = dFdx(v_uv);
+            vec2 st2 = dFdy(v_uv);
+            
+            vec3 T = normalize(Q1*st2.t - Q2*st1.t);
+            vec3 B = normalize(-Q1*st2.s + Q2*st1.s);
+            
+            // the transpose of texture-to-eye space matrix
+            mat3 TBN = mat3(T, B, v_normal);            
+            vec3 t_normal = texture(u_normal_texture, v_uv).rgb * 2.0 - 1.0;
+            surface_normal = normalize(TBN * t_normal);
+        } else {
+            surface_normal = normalize(v_normal);
+        }
         
         int point_light_count = min(MAX_POINT_LIGHTS, u_point_lights_count);
         for(int i = 0; i < point_light_count; i++) {

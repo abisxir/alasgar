@@ -75,7 +75,6 @@ void main() {
     } else {
         v_visibilty = -1.0;
     }
-
     
     gl_Position = u_projection_matrix * position_related_to_view;
 }

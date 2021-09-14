@@ -39,7 +39,7 @@ htmldocs/
 *.dSYM/
 
 # Local files
-
+./main.nim
 main
 shadow
 nakefile
@@ -55,6 +55,7 @@ nakefile
 ./shadow
 ./test-release.sh
 /example/hello
+/example/normal
 /example/main
 /example/nakefile
 /example/interactive

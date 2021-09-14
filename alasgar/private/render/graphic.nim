@@ -182,6 +182,7 @@ proc renderFrameBuffer(g: Graphic, drawables: var seq[Drawable]) =
             lastNormal = normal
             use(lastNormal, 2)
             shader["u_normal_texture"] = 2
+            shader["u_normal_enabled"] = if lastNormal != nil: 1 else : 0
 
 
         # Limits instance count by max batch size
