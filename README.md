@@ -31,22 +31,24 @@ cd alasgar/examples
 nim c -r hello.nim
 ```
 
-##### Table of Contents  
-[Window and scene creation](#window)  
-[First mesh](#cube)  
-[Point light](#light)
-[Scripts](#scripts)
-[Rotation](#rotation)
-[Material](#material)
-[Texture](#texture)
-[More lights](#morelights)
-[Access components](#components)
-[Screen size](#size)
-[Normal maps](#normal)
-[Interactive objects](#interactive)
+Table of Contents
+=================
 
-<a name="window"/>
-## Window and scene creation
+*[Window and scene creation](#window)  
+*[First mesh](#cube)  
+*[Point light](#light)
+*[Scripts](#scripts)
+*[Rotation](#rotation)
+*[Material](#material)
+*[Texture](#texture)
+*[More lights](#morelights)
+*[Access components](#components)
+*[Screen size](#size)
+*[Normal maps](#normal)
+*[Interactive objects](#interactive)
+
+Window and scene creation
+=========================
 ```nim
 import alasgar
 
@@ -96,7 +98,6 @@ window("Hello", 640, 360, fullscreen=true)
 Let us add a cube to our scene.
 
 
-<a name="cube"/>
 ## First mesh
 ```nim
 ...
@@ -113,8 +114,6 @@ addChild(scene, cubeEntity)
 
 When you run the game barely you can see the cube, as you guess we need to have a light in our scene, let us add a point light to our scene:
 
-
-<a name="light"/>
 ## Point light
 ```nim
 ...
@@ -139,7 +138,6 @@ addChild(scene, lightEntity)
 When you run the code, you will see an ugly grey cube. Let us move the light:
 
 
-<a name="scripts"/>
 ## Scripts
 To program an entity, we need to add a ScriptComponent to our light entity. Each component has access to entity, entity's transform and component's data.
 
@@ -174,7 +172,6 @@ If you run the code, light is going to move around the cube. As you see in the c
 You can define a function and use it, here. Feel free to play with nim features.
 
 
-<a name="rotation"/>
 ## Rotation
 Let us rotate the cube. To do it we need a script component attached to cube entity:
 
@@ -202,7 +199,6 @@ addChild(scene, cubeEntity)
 ![](docs/files/cube-rotates.gif)
 
 
-<a name="material"/>
 ## Material
 We can change cube color using material components. We scale cube and make it bigger and then we add a component to define cube material.
 I used chroma library to manipulate colors, it is a great library, check here to see how to use it:
@@ -236,8 +232,6 @@ addChild(scene, cubeEntity)
 
 ![](docs/files/cube-diffuse.gif)
 
-
-<a name="texture"/>
 ### Texture
 It is time to give a texture to our cube. To make it multi-platform you need to make "res" folder in you project root and copy your assets inside.
 The assets are accessable using a relative path by res like "res://stone-texture.png". It applies to all other assets like obj files or audio files.
@@ -276,7 +270,6 @@ addChild(scene, cubeEntity)
 
 The texture used here grabbed from: https://opengameart.org/content/handpainted-stone-floor-texture
 
-<a name="morelights"/>
 ## More lights
 As you scene our scene has just one light and the light is moving, let us add a new light to make the scene much clear:
 
@@ -305,7 +298,6 @@ addChild(scene, spotLightEntity)
 ![](docs/files/spotpoint-light.gif)
 
 
-<a name="components"/>
 ## Access components
 Let us dance with light's color, to access a component we can call getComponent[T] on an entity or a component.
 We add a script component to our spot light to program it:
@@ -348,7 +340,6 @@ addChild(scene, spotLightEntity)
 See sample source [here](examples/hello.nim).
 
 
-<a name="size"/>
 ## Screen size
 By default the screen size is equal with window size, but maybe you like to have a lower resolution:
 ```nim
@@ -366,7 +357,6 @@ You need to specify it before creating window, after window creation there is no
 ![](docs/files/screen-size.gif)
 
 
-<a name="normals"/>
 ## Normal maps
 It is easy to add a normal map, we need to specify it in material component:
 
@@ -392,8 +382,9 @@ addChild(scene, cubeEntity)
 See normal sample [here](examples/normal.nim).
 
 
-<a name="interactive"/>
-### Interactive objects
+Interactive objects
+===================
+
 It is nice if we can select an object with mouse or by touch on mobile platforms, let us add a InteractiveComponent to our cube:
 
 ```nim
