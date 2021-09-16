@@ -34,6 +34,7 @@ htmldocs/
 *.x86_64
 *.hex
 *.apk
+*.wasm
 
 # Debug files
 *.dSYM/

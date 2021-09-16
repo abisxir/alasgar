@@ -3,9 +3,10 @@ import strutils, logging
 when defined(js):
     proc native_log(a: cstring) {.importc: "console.log".}
 elif defined(emscripten):
-    proc emscripten_log(flags: cint) {.importc, varargs.}
-    template native_log(a: cstring) =
-        emscripten_log(0, cstring("%s"), cstring(a))
+    #proc emscripten_log(flags: cint) {.importc, varargs.}
+    #template native_log(a: cstring) =
+    #    emscripten_log(0, cstring("%s"), cstring(a))
+    template native_log(a: string) = echo a
 elif defined(macosx) or defined(ios):
     {.passL:"-framework Foundation".}
     {.emit: """
