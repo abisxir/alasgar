@@ -1,15 +1,26 @@
 import alasgar
 
 # Creates a window named Hello
-window("Hello", 640, 360)
+window("Hello", 1920, 1080)
    
 # Creates a new scene
 var scene = newScene()
+# Creates an instance of environment component
 var env = newEnvironmentComponent()
-#enableFog(env, parseHex("121111"), 0.1, 1.0)
-setAmbient(env, parseHtmlName("white"), 0.5)
-#setBackground(env, parseHex("121111"))
+# Sets background color to black
+setBackground(env, parseHtmlName("Black"))
+# Enables simple fog effect
+enableFog(
+    env,                        # Environment instance
+    parseHtmlName("DimGray"),   # Fog color
+    0.01,                       # Fog density
+    1.0                         # Fog gredient
+)
+# Sets ambient color and intensity
+setAmbient(env, parseHtmlName("white"), 0.7)
+# Adds environment to our scene
 addComponent(scene, env)
+
 
 # Creates camera entity
 var cameraEntity = newEntity(scene, "Camera")
