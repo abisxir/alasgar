@@ -46,6 +46,8 @@ Table of Contents
 * [Screen size](#screen-size)
 * [Normal maps](#normal-maps)
 * [Interactive objects](#interactive-objects)
+* [Environment variables](#environment-variables)
+* [Shadows](#shadows)
 
 Window and scene creation
 =========================
@@ -366,6 +368,43 @@ You need to specify it before creating window, after window creation there is no
 ![](docs/files/screen-size.gif)
 
 
+Environment variables
+=====================
+Environment variables are for the scene, you can manipulate scene by following effects:
+    - Background color
+    - Fog
+    - Ambient light
+    - Postprocessing effects
+
+To manipluate environment variables, we create a EnvironmentComponent, set the parameters and then we add it to our scene:
+
+```nim
+...
+
+# Creates a new scene
+var scene = newScene()
+# Creates an instance of environment component
+var env = newEnvironmentComponent()
+# Sets background color to black
+setBackground(env, parseHtmlName("Black"))
+# Enables simple fog effect
+enableFog(
+    env,                        # Environment instance
+    parseHtmlName("DimGray"),   # Fog color
+    0.01,                       # Fog density
+    1.0                         # Fog gredient
+)
+# Sets ambient color and intensity
+setAmbient(env, parseHtmlName("white"), 0.7)
+# Adds environment to our scene
+addComponent(scene, env)
+
+...
+```
+
+We will discuss postprocessing effects later on a dedicated section. You can see and example of environment variables in shadows section.
+
+
 Normal maps
 ===========
 It is easy to add a normal map, we need to specify it in material component:
@@ -448,3 +487,103 @@ When you add interactive component, you have: onPress, onRelease, onHover, onOut
 See interactive sample [here](examples/interactive.nim).
 
 
+Shadows
+=======
+
+For now, shadows are just implemented for SpotPointLight components, also it is limited to just one light.
+Let us setup our scene in a way that we can observe shadows, after setup window, scene and setting up our camera, we create a big platform:
+
+```nim
+...
+
+# Creates platform entity, by default position is (0, 0, 0)
+var platformEntity = newEntity(scene, "Platform")
+# Set scale to 20
+platformEntity.transform.scale = vec3(20)
+platformEntity.transform.euler = vec3(0, 0, -PI / 2)
+# Add a cube mesh component to entity
+addComponent(platformEntity, newPlaneMesh(1, 1))
+# Adds a material to cube
+addComponent(
+    platformEntity, 
+    newMaterialComponent(
+        diffuseColor=parseHtmlName("grey"),
+    )
+)
+# Makes the cube enity child of scene
+addChild(scene, platformEntity)
+
+...
+```
+
+As you see we created a plane mesh and scaled it to 20, and we rotated it as we want to see it from top. Then we make a simple function to add cubes, we need two cubes so this is our function:
+
+```nim
+...
+
+proc createCube(name: string, position: Vec3) =
+    # Creates cube entity
+    var cubeEntity = newEntity(scene, name)
+    # Positions cube to (0, 2, 0)
+    cubeEntity.transform.position = position
+    # Add a cube mesh component to entity
+    addComponent(cubeEntity, newCubeMesh())
+    # Adds a script component to cube entity
+    addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
+        # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
+        script.transform.euler = vec3(
+            engine.age * 0.1, 
+            engine.age * 0.3, 
+            engine.age * 0.2,
+        )
+    ))
+    # Adds a material to cube and specifies that the cube casts shadow.
+    addComponent(
+        cubeEntity, 
+        newMaterialComponent(
+            diffuseColor=parseHtmlName("grey"),
+            castShadow=true,                    # Here we specify that this object casts shadow, default is false
+        )
+    )
+    # Makes the cube enity child of scene
+    addChild(scene, cubeEntity)
+
+
+createCube("Cube1", vec3(1, 4, 0))
+createCube("Cube2", vec3(-4, 2, 0))
+
+...
+```
+
+As you see, we created two cubes in different positions. The important part is that we need to define in object material that it casts shadow.
+Now we create a spot light component and we need to enable shadow for this light source:
+
+```nim
+...
+
+# Creats spot point light entity
+var spotLightEntity = newEntity(scene, "SpotLight")
+# Sets position to (-6, 6, 6)
+spotLightEntity.transform.position = vec3(12, 12, 0)
+# Adds a spot point light component
+addComponent(spotLightEntity, newSpotPointLightComponent(
+    vec3(0) - spotLightEntity.transform.position, # Light direction
+    color=parseHtmlName("LemonChiffon"),          # Light color
+    shadow=true,                                  # Enables shadow
+    innerLimit=30,                                # Inner circle of light
+    outerLimit=90                                 # Outer circle of light
+    )
+)
+# Makes the new light child of the scene
+addChild(scene, spotLightEntity)
+
+...
+```
+
+![](docs/files/shadow.gif)
+
+
+That is all, if you run shadow sample you will see the effects. I hope you also notice the artifacts, light bleeding and so on, I like them :)
+Here I used variance shadow map, but this part needs many improvements specially batching is not enabled for shadow casting objects so the performance is not going to be satisfying. There are going to be many improvements in near future.
+
+See shadow sample [here](examples/shadow.nim).

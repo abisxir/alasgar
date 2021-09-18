@@ -61,6 +61,7 @@ nakefile
 /example/nakefile
 /example/interactive
 /example/build
+/example/shadow
 
 # Build and res direcory
 build/
