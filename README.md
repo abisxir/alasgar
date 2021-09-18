@@ -44,9 +44,9 @@ Table of Contents
 * [More lights](#more-lights)
 * [Access components](#access-components)
 * [Screen size](#screen-size)
+* [Environment variables](#environment-variables)
 * [Normal maps](#normal-maps)
 * [Interactive objects](#interactive-objects)
-* [Environment variables](#environment-variables)
 * [Shadows](#shadows)
 
 Window and scene creation
