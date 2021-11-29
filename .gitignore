@@ -40,7 +40,8 @@ htmldocs/
 *.dSYM/
 
 # Local files
-./main.nim
+res/
+main.nim
 main
 shadow
 nakefile

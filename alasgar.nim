@@ -4,7 +4,8 @@ import sequtils
 import strutils
 
 import alasgar/private/core
-import alasgar/private/image
+import alasgar/private/resources/image
+import alasgar/private/resources/obj
 import alasgar/private/components/camera
 import alasgar/private/components/interactive
 import alasgar/private/components/collision
@@ -13,13 +14,13 @@ import alasgar/private/components/light
 import alasgar/private/components/environment
 import alasgar/private/components/script
 import alasgar/private/components/sprite
-#import alasgar/private/components/sound
+when defined(linux):
+    import alasgar/private/components/sound
 import alasgar/private/geometry/cube
 import alasgar/private/geometry/grid
 import alasgar/private/geometry/sphere
 import alasgar/private/geometry/plane
 import alasgar/private/engine
-import alasgar/private/loader/obj
 import alasgar/private/logger
 import alasgar/private/utils
 import alasgar/private/system
@@ -33,7 +34,6 @@ import alasgar/private/math/vec4
 import alasgar/private/math/quat
 import alasgar/private/animation/easing
 import alasgar/private/animation/curve/catmull
-
 
 
 export core,

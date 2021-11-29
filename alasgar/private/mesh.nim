@@ -38,10 +38,30 @@ func `$`*(v: Mesh): string =
     result = &"Vertices: [{v.count / 3}] triangles"
 
 proc `=destroy`*(mesh: var MeshObject) =
-    glDeleteBuffers(1, mesh.extraBufferObject.addr)
-    glDeleteBuffers(1, mesh.modelBufferObject.addr)
-    glDeleteVertexArrays(1, mesh.vertexArrayObject.addr)
-    glDeleteBuffers(1, mesh.vertexBufferObject.addr)
+    if mesh.vertexBufferObject != 0:
+        glDeleteBuffers(1, mesh.extraBufferObject.addr)
+        glDeleteBuffers(1, mesh.modelBufferObject.addr)
+        glDeleteVertexArrays(1, mesh.vertexArrayObject.addr)
+        glDeleteBuffers(1, mesh.vertexBufferObject.addr)
+
+        mesh.extraBufferObject = 0
+        mesh.modelBufferObject = 0
+        mesh.vertexArrayObject = 0
+        mesh.vertexBufferObject = 0
+
+
+proc destroy*(mesh: Mesh) =
+    if mesh.vertexBufferObject != 0:
+        echo &"Destroying mesh[{mesh.vertexBufferObject}]..."
+        glDeleteBuffers(1, mesh.extraBufferObject.addr)
+        glDeleteBuffers(1, mesh.modelBufferObject.addr)
+        glDeleteVertexArrays(1, mesh.vertexArrayObject.addr)
+        glDeleteBuffers(1, mesh.vertexBufferObject.addr)
+
+        mesh.extraBufferObject = 0
+        mesh.modelBufferObject = 0
+        mesh.vertexArrayObject = 0
+        mesh.vertexBufferObject = 0
 
 proc newMesh*(data: var openArray[Vertex], indices: openArray[uint32], drawMode: GLenum = GL_TRIANGLES, bufferMode: GLenum = GL_STATIC_DRAW): Mesh =
     new(result)
@@ -134,6 +154,7 @@ proc newMesh*(data: var openArray[Vertex], indices: openArray[uint32], drawMode:
     glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     result.count = data.len.GLsizei
+    echo &"Mesh with [{result.count / 3}] faces created."
 
 proc newMesh*(vertices: var openArray[float32], 
               normals: var openArray[float32], 

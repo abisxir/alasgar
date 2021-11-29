@@ -1,4 +1,4 @@
-#version 300 es
+$SHADER_PROFILE$
 precision mediump float;
 precision mediump sampler2DShadow;
 

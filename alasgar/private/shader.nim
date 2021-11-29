@@ -1,5 +1,6 @@
 import hashes
 import strformat
+import strutils
 import tables
 import ports/opengl
 
@@ -111,7 +112,14 @@ proc createProgram*(vs, fs: string,
 
 proc newShader*(vs, fs: string, attributes: openarray[tuple[index: GLuint, name: string]]): Shader =
     new(result)
-    result.program = createProgram(vs, fs, attributes)
+    when defined(macosx):
+        let shaderProfile = "#version 410"
+    else:
+        let shaderProfile = "#version 300 es"
+    
+    result.program = createProgram(
+        vs.replace("$SHADER_PROFILE$", shaderProfile), 
+        fs.replace("$SHADER_PROFILE$", shaderProfile), attributes)
 
 
 proc destroy*(shader: Shader) =

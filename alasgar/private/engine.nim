@@ -20,6 +20,7 @@ import components/camera
 import components/light
 import components/interactive
 import components/environment
+import resources/resource
 #import components/sound
 
 
@@ -123,12 +124,14 @@ proc newEngine*(windowWidth: int,
         flags = SDL_WINDOW_OPENGL or SDL_WINDOW_FULLSCREEN
 
     # Initialize SDL windows
-    let window = createWindow(result.title,
-                              SDL_WINDOWPOS_UNDEFINED,
-                              SDL_WINDOWPOS_UNDEFINED,
-                              windowWidth.cint,
-                              windowHeight.cint,
-                              flags)
+    let window = createWindow(
+        result.title,
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        windowWidth.cint,
+        windowHeight.cint,
+        flags
+    )
 
     echo "* SDL window created!"
 
@@ -140,20 +143,22 @@ proc newEngine*(windowWidth: int,
     let sh = if screenHeight > 0: screenHeight else: actualSize.y
 
     # Creates graphic object
-    result.graphic = newGraphic(window,
-                                screenSize=vec2(sw.float32, sh.float32),
-                                windowSize=vec2(
-                                    actualSize.x.float32,
-                                    actualSize.y.float32
-                                ),
-                                vsync=false,
-                                maxBatchSize=maxBatchSize,
-                                maxPointLights=maxPointLights,
-                                maxDirectLights=maxDirectLights,
-                                multiSample=multiSample,
-                                depthMapSize=depthMapSize)
+    result.graphic = newGraphic(
+        window,
+        screenSize=vec2(sw.float32, sh.float32),
+        windowSize=vec2(
+            actualSize.x.float32,
+            actualSize.y.float32
+        ),
+        vsync=false,
+        maxBatchSize=maxBatchSize,
+        maxPointLights=maxPointLights,
+        maxDirectLights=maxDirectLights,
+        multiSample=multiSample,
+        depthMapSize=depthMapSize
+    )
 
-    echo "* Rendering graphic created!"
+    echo "* Graphic engine initialized!"
 
     setBufferSizeOf(sizeof(Drawable))
 
@@ -299,6 +304,11 @@ proc loop*(engine: Engine) =
             destroy(engine.primary)
             engine.primary = engine.newPrimary
             engine.newPrimary = nil
+
+    echo "Cleaning up resources..."
+    cleanupResources()
+    echo "Cleaning up textures..."
+    cleanupTextures()
 
 
 proc render*(engine: Engine, scene: Scene) =

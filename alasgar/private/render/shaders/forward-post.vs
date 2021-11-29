@@ -1,4 +1,4 @@
-#version 300 es
+$SHADER_PROFILE$
 precision mediump float;
 
 layout(location = 0) in vec2 in_position;

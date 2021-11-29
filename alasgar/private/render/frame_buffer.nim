@@ -139,19 +139,19 @@ proc use*(f: FrameBuffer, clearColor: Color) =
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     glClearColor(clearColor.r, clearColor.g, clearColor.b, 1)
-    glClear(GL_COLOR_BUFFER_BIT or GL_STENCIL_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-    #glStencilMask(0xFF) # Android requires setting stencil mask to clear
     #glClear(GL_COLOR_BUFFER_BIT or GL_STENCIL_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-    #glStencilMask(0x00)
+    glStencilMask(0xFF) # Android requires setting stencil mask to clear
+    glClear(GL_COLOR_BUFFER_BIT or GL_STENCIL_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+    glStencilMask(0x00)
 
 
 proc blit*(f: FrameBuffer) =
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
     glDisable(GL_DEPTH_TEST)
-
-    #glClear(bitand(GL_COLOR_BUFFER_BIT, GL_DEPTH_BITS))
+    glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
 
     use(f.shader)
+
     glBindVertexArray(f.quadVAO)
 
     if f.deferred:

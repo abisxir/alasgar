@@ -25,7 +25,7 @@ proc openAssetStream*(url: string): Stream =
             logi &"Could not open [{filename}]."
         else:
             logi &"File [{filename}] opened."
-    when not defined(android) and defined(linux):
+    else:
         filename = url.replace("res://", "res/")
         logi &"Loading [{filename}] for linux ..."
         result = newFileStream(filename, fmRead)

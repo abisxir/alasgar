@@ -1,4 +1,4 @@
-#version 300 es
+$SHADER_PROFILE$
 precision mediump float;
 
 uniform sampler2D frame_buffer_texture;

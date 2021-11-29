@@ -321,6 +321,7 @@ func getComponent*[T: Component](e: Entity): T = getComponent(e, result)
 func getChildrenCount*(n: Entity): int = n.children.len
 func getChild*(n: Entity, i: int): Entity = n.children[i]
 func hasChild*(n: Entity, name: string): bool = getChild(n, name) != nil
+func `$`*(n: Entity): string = n.name
 template `transform`*(e: Entity): TransformComponent = e.transform
 template `root`*(n: Entity): Entity = head n
 template `parent`*(n: Entity): Entity = n.parent
@@ -413,18 +414,18 @@ proc destroy*(scene: Scene) =
             e.mesh = nil
             e.material = nil
             e.shader = nil
-        setLen(scene.drawables, 0)
+        clear(scene.drawables)
     
         for e in mitems(scene.entities):
             e.scene = nil
             e.transform = nil
             e.parent = nil
-            setLen(e.children, 0)
+            clear(e.children)
             for c in e.components:
                 c[0].entity = nil
-            setLen(e.components, 0)
+            clear(e.components)
 
-        setLen(scene.containers, 0)
+        clear(scene.containers)
         clear(scene.tags)
         scene.root = nil
 
@@ -679,3 +680,8 @@ template `hframes=`*(material: MaterialComponent, value: int) =
 template `frameSize`*(material: MaterialComponent): Vec2 = material.frameSize
 template `frameOffset`*(material: MaterialComponent): Vec2 = material.frameOffset
 
+proc `$`*(m: MaterialComponent): string = 
+    if not isNil(m):
+        &"diffuse:{m.diffuseColor} specular:{m.specularColor}"
+    else:
+        &"nil"

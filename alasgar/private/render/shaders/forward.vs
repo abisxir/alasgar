@@ -1,4 +1,4 @@
-#version 300 es
+$SHADER_PROFILE$
 precision highp float;
 
 layout(location = 0) in vec3 in_position;

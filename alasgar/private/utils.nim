@@ -1,6 +1,9 @@
 import random
 import math
 import strformat
+import strutils
+import sequtils
+import re
 
 import chroma
 
@@ -12,13 +15,12 @@ import math/vec4
 import math/quat
 import logger
 
-export logger, helpers, quat, mat4, vec2, vec3, vec4, strformat, chroma
+export logger, helpers, quat, mat4, vec2, vec3, vec4, strformat, chroma, strutils, sequtils
 
 # General funcs
 proc halt*(message: string) = 
     logi message
     quit message
-
 
 # Numeric utils
 proc randRange*(mi, mx: float32): float32 = rand(1'f32) * (mx - mi) + mi
@@ -49,3 +51,10 @@ let COLOR_GREEN*: Color = color(0, 1, 0)
 let COLOR_BLUE*: Color = color(0, 0, 1)
 let COLOR_YELLOW*: Color = color(1, 1, 0)
 
+proc clear*[T](t: var seq[T]) = setLen[T](t, 0)
+func isFilename*(fullpath: string): bool = not isEmptyOrWhitespace(fullpath) and match(fullpath, re"^[\w,\s-]+\.[A-Za-z]{3,4}$")
+
+template findIt*[T](s: openArray[T], pred: untyped): T = 
+    for it {.inject.}  in s:
+        if pred:
+            return it

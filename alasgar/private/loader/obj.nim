@@ -6,6 +6,7 @@ import tables
 import ../core
 import ../assets
 import ../utils
+import ../container
 
 
 var cache = initTable[string, Mesh]()

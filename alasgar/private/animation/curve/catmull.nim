@@ -52,14 +52,14 @@ func push*(c: var CatMull, p: Vec3) =
 
 func reset*(c: var CatMull) =
     var points = c.points
-    setLen(c.points, 0)
-    setLen(c.nodes, 0)
+    clear(c.points)
+    clear(c.nodes)
     for p in points:
         push(c, p)
 
 func clear*(c: var CatMull) =
-    setLen(c.points, 0)
-    setLen(c.nodes, 0)
+    clear(c.points)
+    clear(c.nodes)
 
 func replace*(c: var CatMull, i: int, p: Vec3) =
     c.points[i] = p

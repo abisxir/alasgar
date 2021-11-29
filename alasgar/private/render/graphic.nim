@@ -53,12 +53,24 @@ type
 proc `totalObjects`*(g: Graphic): int = g.totalObjects
 proc `drawCalls`*(g: Graphic): int = g.drawCalls
 
-proc initGLES(g: Graphic, maxBatchSize, maxPointLights, maxDirectLights, multiSample: int) =
+proc initOpenGL(g: Graphic, maxBatchSize, maxPointLights, maxDirectLights, multiSample: int) =
     # Initialize opengl context
     discard glSetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1)
-    discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES)
-    discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3)
-    discard glSetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0)
+    when defined(macosx):
+        discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE)
+        discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4)
+        discard glSetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1)
+        discard glSetAttribute(SDL_GL_RED_SIZE, 8)
+        discard glSetAttribute(SDL_GL_GREEN_SIZE, 8)
+        discard glSetAttribute(SDL_GL_BLUE_SIZE, 8)
+        discard glSetAttribute(SDL_GL_ALPHA_SIZE, 8)
+        discard glSetAttribute(SDL_GL_STENCIL_SIZE, 8)
+        #discard glSetAttribute(SDL_GL_DEPTH_SIZE, 32)
+    else:
+        discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES)
+        discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3)
+        discard glSetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0)
+    
     discard glSetAttribute(SDL_GL_DOUBLEBUFFER, 1)
     #discard glSetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1)
     #discard glSetAttribute(SDL_GL_MULTISAMPLESAMPLES, multiSample)
@@ -103,11 +115,11 @@ proc newGraphic*(window: WindowPtr,
     result.screenSize = screenSize
     result.windowSize = windowSize
 
-    echo "* Initializing opengl es..."
+    echo "* Initializing OpenGL..."
 
-    initGLES(result, maxBatchSize, maxPointLights, maxDirectLights, multiSample)
+    initOpenGL(result, maxBatchSize, maxPointLights, maxDirectLights, multiSample)
 
-    echo "* Opengl es initialized!"
+    echo "* OpenGL initialized!"
 
     if deferred:
         result.shader = newShader(deferred_vert.source, deferred_frag.source, [])
@@ -124,7 +136,7 @@ proc newGraphic*(window: WindowPtr,
 
 
 proc clear*(g: Graphic) =
-    setLen(g.shaders, 0)
+    clear(g.shaders)
     add(g.shaders, g.shader)
     add(g.shaders, g.depthBuffer.shader)
 
