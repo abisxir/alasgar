@@ -34,9 +34,14 @@ proc destroyModel*(r: Resource) =
     clear(mr.materials)
     clear(mr.nodes)
 
+proc getMeshCount*(r: ModelResource): int = len(r.meshes)
 proc hasMesh*(r: ModelResource, name: string): bool = anyIt(r.nodes, it.name == name)
 proc getMesh*(r: ModelResource, name: string): Mesh = r.meshes[name]
+iterator meshes*(r: ModelResource): (string, Mesh) = 
+    for k, v in pairs(r.meshes):
+        yield (k, v)
 proc addMesh*(r: ModelResource, name: string, vertices: var seq[Vertex]): Mesh = 
+    echo &"Mesh [{name}] is creating..."
     result = newMesh(vertices)
     r.meshes[name] = result
 
@@ -62,7 +67,7 @@ proc addTexture*(r: ModelResource, texture: Texture) =
     if not anyIt(r.textures, it == texture):
         add(r.textures, texture)    
 
-proc toEntity*(r: Resource, scene: Scene): seq[Entity] =
+proc toEntity*(r: Resource, scene: Scene): Entity =
     var mr = cast[ModelResource](r)
     var entities = newSeq[Entity]()
     echo &"Converting [{len(mr.nodes)}] models to enitites."
@@ -103,14 +108,24 @@ proc toEntity*(r: Resource, scene: Scene): seq[Entity] =
         else:
             echo &"Error: could not find parent node [{parent}] for [{child}]."
 
+    var results = newSeq[Entity]()
     for node in mr.nodes:
         if not isEmptyOrWhitespace(node.parent):
             echo &"Adding model[{node.name}] as child of [{node.parent}]..."
             addNode(node.name, node.parent)
         else:
-            add(result, findNode(node.name))
+            add(results, findNode(node.name))
 
-    for e in result:
+    for e in results:
         let mesh = getComponent[MeshComponent](e)
         if isNil(mesh):
             echo &"[{e}] Has no mesh :/"
+
+    if len(results) == 1:
+        result = results[0]
+    else:
+        result = newEntity(scene, "Model")
+        for c in results:
+            addChild(result, c)
+
+

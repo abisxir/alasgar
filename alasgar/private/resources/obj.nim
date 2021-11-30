@@ -36,7 +36,7 @@ proc readFloat2(buf: string): (float32, float32) =
 
 proc readFloat3(buf: string): (float32, float32, float32) =
     let vs = filterIt(buf.split(" "), not isEmptyOrWhitespace(it))
-    result = (parseFloat(vs[1]).float32, parseFloat(vs[2]).float32, parseFloat(vs[2]).float32)
+    result = (parseFloat(vs[1]).float32, parseFloat(vs[2]).float32, parseFloat(vs[3]).float32)
 
 proc readColor(buf: string): Color = 
     let (r, g, b) = readFloat3(buf)
@@ -57,29 +57,29 @@ proc loadTexture(modelFileName, buf: string, mr: ModelResource): Texture =
     addTexture(mr, result)
 
 proc loadMaterials(modelFileName: string, materialFileName: string, mr: ModelResource) =
-    let 
-        filename = makeFileName(modelFileName, materialFileName)
-        file = openObjFile(filename)
-    var 
-        buf = ""
-        materialName = ""
-    while readLine(file, buf):
-        if startsWith(buf, "newmtl"):
-            materialName = extractName(buf)
-            if not isEmptyOrWhitespace(materialName):
-                discard addMaterial(mr, materialName)
-        elif not isEmptyOrWhitespace(materialName):
-            let material = getMaterial(mr, materialName)
-            if startsWith(buf, "Kd"):
-                material.diffuseColor = readColor(buf)
-            elif startsWith(buf, "Ks"):
-                material.specularColor = readColor(buf)
-            elif startsWith(buf, "map_Kd"):
-                material.diffuseTexture = loadTexture(modelFileName, buf, mr)
-            elif startsWith(buf, "bump") or startsWith(buf, "map_bump"):
-                material.normalTexture = loadTexture(modelFileName, buf, mr)
+    let filename = makeFileName(modelFileName, materialFileName)
+    if exists(filename):
+        var 
+            buf = ""
+            materialName = ""
+            file = openObjFile(filename)
+        while readLine(file, buf):
+            if startsWith(buf, "newmtl"):
+                materialName = extractName(buf)
+                if not isEmptyOrWhitespace(materialName):
+                    discard addMaterial(mr, materialName)
+            elif not isEmptyOrWhitespace(materialName):
+                let material = getMaterial(mr, materialName)
+                if startsWith(buf, "Kd"):
+                    material.diffuseColor = readColor(buf)
+                elif startsWith(buf, "Ks"):
+                    material.specularColor = readColor(buf)
+                elif startsWith(buf, "map_Kd"):
+                    material.diffuseTexture = loadTexture(modelFileName, buf, mr)
+                elif startsWith(buf, "bump") or startsWith(buf, "map_bump"):
+                    material.normalTexture = loadTexture(modelFileName, buf, mr)
 
-proc loadObj*(filename: string): Resource =
+proc loadObj(filename: string): Resource =
     var 
         fileStream = openObjFile(filename) 
         buf = ""
@@ -110,9 +110,6 @@ proc loadObj*(filename: string): Resource =
             if len(vertices) > 0 and not isEmptyOrWhitespace(modelName):
                 discard addMesh(modelResource, modelName, vertices)
                 vertices = newSeq[Vertex]()
-                #clear(verticesCache)
-                #clear(normalsCache)
-                #clear(uvCache)
             modelName = extractName(buf)
             echo &"Model[{modelName}] is loading..."
             let node = addNode(modelResource, name=modelName, parent="", position=VEC3_ZERO, rotation=VEC3_ZERO, scale=VEC3_ONE)
@@ -123,12 +120,12 @@ proc loadObj*(filename: string): Resource =
                 node.material = extractName(buf)
                 echo &"Setting material[{node.material}] to model[{modelName}]."
             elif buf.startsWith("v "):
-                verticesCache.add(readVec3(buf))
+                let v = readVec3(buf)
+                verticesCache.add(v)
             elif buf.startsWith("vt"):
                 uvCache.add(readVec2(buf))
             elif buf.startsWith("vn"):
-                let normal = readVec3(buf)
-                normalsCache.add(normal)
+                normalsCache.add(readVec3(buf))
             elif buf.startsWith("f "):
                 let fs = buf.split(" ")
                 let v0 = makeFromCache(fs[1].split("/"))

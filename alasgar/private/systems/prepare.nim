@@ -138,7 +138,7 @@ method process*(sys: PrepareSystem, scene: Scene, input: Input,
         for i in low(scene.drawables)..high(scene.drawables):
             var drawable = addr(scene.drawables[i])
             drawable.visible =
-                drawable.transform.entity.visible and drawable.transform.entity.attached and (drawable.material == nil or drawable.transform.entity.opacity > 0)
+                drawable.transform.entity.visible and drawable.transform.entity.attached and drawable.transform.entity.opacity > 0
 
         # Sorts using the custom compare function
         sort(scene.drawables, cmp)

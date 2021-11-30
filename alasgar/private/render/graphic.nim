@@ -152,7 +152,7 @@ proc renderDepthBuffer(g: Graphic, drawables: var seq[Drawable]) =
         var count = min(drawables[i].count, g.maxBatchSize)
 
         for ix in 0..count - 1:
-            if drawables[i + ix].material.castShadow:
+            if drawables[i + ix].material != nil and drawables[i + ix].material.castShadow:
                 # Renders count amount of instances
                 render(mesh, caddr(drawables[i + ix].world), caddr(drawables[i + ix].extra), 1)
 

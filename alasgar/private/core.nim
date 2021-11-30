@@ -105,7 +105,7 @@ proc `dirty`*(t: TransformComponent): bool
 proc findEntityByTag*(scene: Scene, tag: string): seq[Entity]
 #proc newComponentId(): int
 func getComponent*[T: Component](e: Entity): T
-
+proc `inc`(c: Component)
 proc newAlasgarError*(message: string): ref AlasgarError = newException(AlasgarError, message)
 
 # Entity implmentation
@@ -225,6 +225,8 @@ proc rebase*(e: Entity, parent: Mat4, parentIsDirty: bool): var Mat4 =
     if parentIsDirty or e.transform.dirty:
         e.transform.world = parent * e.transform.model
         e.transform.valid = true
+        inc(e.transform)
+
     result = e.transform.world
 
 
