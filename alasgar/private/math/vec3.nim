@@ -214,3 +214,4 @@ let VEC3_FORWARD* = vec3(0, 0, -1)
 let VEC3_BACK* = vec3(0, 0, 1)
 
 func caddr*(v: var Vec3): ptr float32 = v.x.addr
+func caddr*(v: var Vec2): ptr float32 = v.x.addr

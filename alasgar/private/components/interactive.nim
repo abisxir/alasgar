@@ -72,8 +72,7 @@ func newInteractiveSystem*(): InteractiveSystem =
     result.name = "Interactive System"
 
 
-method process*(sys: InteractiveSystem, scene: Scene, input: Input,
-        delta: float32) =
+method process*(sys: InteractiveSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
     let activeCamera = scene.activeCamera
     if activeCamera != nil:
         let worldCoords = screenToWorldCoord(

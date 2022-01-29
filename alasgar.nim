@@ -119,3 +119,9 @@ proc screenToWorldCoord*(pos: Vec2): Vec4 = screenToWorldCoord(
     mainEngine.activeCamera
 )
 
+proc newShaderComponent*(vertexSource, fragmentSource: string): ShaderComponent =
+    var instance = newSpatialShader(mainEngine.graphic, vertexSource, fragmentSource)
+    result = newShaderComponent(instance)
+
+proc newVertexShaderComponent*(source: string): ShaderComponent = newShaderComponent(vertexSource=source, fragmentSource="")
+proc newFragmentShaderComponent*(source: string): ShaderComponent = newShaderComponent(vertexSource="", fragmentSource=source)

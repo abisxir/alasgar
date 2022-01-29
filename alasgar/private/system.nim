@@ -11,6 +11,6 @@ type
 
 
 method init*(sys: System, g: Graphic) {.base, locks: "unknown".} = sys.graphic = g
-method process*(sys: System, scene: Scene, input: Input, delta: float32) {.base, locks: "unknown".} = discard
+method process*(sys: System, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) {.base, locks: "unknown".} = discard
 method cleanup*(sys: System) {.base, locks: "unknown".} = discard
 

@@ -14,17 +14,18 @@ export utils, input, mesh, texture
 
 type
     Drawable* = object
-        visible*: bool
+        modelPack*: Mat4
+        materialPack*: array[4, uint32]
+        spritePack*: Vec4
         transform*: TransformComponent
         mesh*: MeshComponent
         material*: MaterialComponent
         shader*: ShaderComponent
-        meshVersion*: int8
-        materialVersion*: int8
-        transformVersion*: int8
         count*: int32
-        extra*: Mat4
-        world*: Mat4
+        visible*: bool
+        meshVersion*: int16
+        materialVersion*: int16
+        transformVersion*: int16
 
     Scene* = ref object
         entities: seq[Entity]
@@ -35,8 +36,8 @@ type
 
     Entity* = ref object
         name*: string
-        layer*: int32
         tag*: string
+        layer*: int32
         opacity*: float32
         scene: Scene
         transform: TransformComponent
@@ -45,18 +46,12 @@ type
         components: seq[(Component, ContainerBase)]
         visible: bool
         attached: bool
-
-        setup: proc(e: Entity)
-        destroy: proc(e: Entity)
-        update: proc(e: Entity, input: Input, delta: float32)
+        wasted: bool
 
     Component* {.inheritable.} = ref object
         #id*: int
-        version*: int8
+        version*: int16
         entity: Entity
-
-        setup: proc(c: Component)
-        destroy: proc(c: Component)
 
     ContainerBase = ref object of RootObj
         entities: seq[Entity]
@@ -74,12 +69,28 @@ type
         valid: bool
         localIsUpdated: bool
 
+    MaterialMapEnum = enum
+        albedoMaterialMap =    0b000001
+        normalMaterialMap =    0b000010
+        metallicMaterialMap =  0b000100
+        roughnessMaterialMap = 0b001000
+        aoMaterialMap =        0b010000
+
     MaterialComponent* = ref object of Component
-        diffuseColor: Color
-        specularColor: Color
-        texture: Texture
-        normal: Texture
-        shininess: float32
+        baseColor: Color
+        emmisiveColor: Color
+        metallic: float32
+        roughness: float32
+        reflectance: float32
+        ao: float32
+        
+        albedoMap: Texture
+        normalMap: Texture
+        metallicMap: Texture
+        roughnessMap: Texture
+        aoMap: Texture
+        availableMaps: uint32
+
         vframes: int32
         hframes: int32
         frame: int32
@@ -92,7 +103,7 @@ type
 
     SpriteComponent* = ref object of MeshComponent
     ShaderComponent* = ref object of Component
-        instance*: Shader
+        instance: Shader
 
     AlasgarError* = object of Defect 
 
@@ -107,6 +118,12 @@ proc findEntityByTag*(scene: Scene, tag: string): seq[Entity]
 func getComponent*[T: Component](e: Entity): T
 proc `inc`(c: Component)
 proc newAlasgarError*(message: string): ref AlasgarError = newException(AlasgarError, message)
+
+# Shader implementation
+proc `instance`*(shader: ShaderComponent): Shader = shader.instance
+proc newShaderComponent*(instance: Shader): ShaderComponent =
+    new(result)
+    result.instance = instance
 
 # Entity implmentation
 proc findDrawable(scene: Scene, mesh: MeshComponent): ptr Drawable =
@@ -128,8 +145,8 @@ proc updateDrawable(e: Entity, c: Component) =
                 mesh: mesh,
                 material: material,
                 shader: shader,
-                transformVersion: -1,
-                materialVersion: -1
+                transformVersion: -1.int16,
+                materialVersion: -1.int16
             ))
     elif c of MaterialComponent:
         let material = cast[MaterialComponent](c)
@@ -211,7 +228,9 @@ proc removeComponents*(e: Entity) =
         delete(container.components, component)
         component.entity = nil
 
-proc destroy*(e: Entity) =
+proc destroy*(e: Entity) = e.wasted = true
+
+proc cleanup(e: Entity) =
     if e.parent != nil:
         removeChild(e.parent, e)
     if e.scene != nil:
@@ -219,7 +238,7 @@ proc destroy*(e: Entity) =
         removeComponents(e)
         e.scene = nil
         while len(e.children) > 0:
-            destroy(e.children[0])
+            cleanup(e.children[0])
 
 proc rebase*(e: Entity, parent: Mat4, parentIsDirty: bool): var Mat4 =
     if parentIsDirty or e.transform.dirty:
@@ -317,7 +336,7 @@ proc `visible`*(e: Entity): bool =
     if e.parent != nil:
         e.parent.visible and e.visible
     else:
-        e.visible
+        e.visible and not e.wasted
 
 func getComponent*[T: Component](e: Entity): T = getComponent(e, result)
 func getChildrenCount*(n: Entity): int = n.children.len
@@ -334,7 +353,7 @@ template `attached`*(n: Entity): bool = n.attached
 #var componentId = 1
 #proc newComponentId(): int = inc(componentId)
 
-proc `inc`(c: Component) = c.version = if c.version == high(int8): 0 else: c.version + 1
+proc `inc`(c: Component) = c.version = if c.version == high(int16): 0.int16 else: c.version + 1.int16
 func `transform`*(c: Component): TransformComponent = c.entity[].transform
 func `entity`*(c: Component): Entity = c.entity
 func `scene`*(c: Component): Scene = c.entity.scene
@@ -360,6 +379,7 @@ proc newEntity*(scene: Scene, name: string, tag: string = "",
     result.scene = scene
     result.visible = true
     result.attached = false
+    result.wasted = false
     result.opacity = 1
     add(scene.entities, result)
     result.transform = newTransform()
@@ -399,7 +419,12 @@ iterator iterateComponents*[T: Component](scene: Scene): T =
         if t.entity.attached:
             yield t
 
-proc getComponentsCount*[T: Component](scene: Scene): int =
+func first*[T: Component](scene: Scene): T =
+    var container: Container[T] = ensureContainer[T](scene)
+    if len(container.components) > 0:
+        result = cast[T](container.components[0])
+
+func getComponentsCount*[T: Component](scene: Scene): int =
     var container: Container[T] = ensureContainer[T](scene)
     result = len(container.components)
 
@@ -407,6 +432,7 @@ proc findEntityByTag*(scene: Scene, tag: string): seq[Entity] =
     if hasKey(scene.tags, tag):
         result = scene.tags[tag]
 
+func hasComponent*[T: Component](scene: Scene): bool = getComponentsCount[T](scene) > 0
 proc size*(scene: Scene): int = len(scene.entities)
 
 proc destroy*(scene: Scene) =
@@ -430,6 +456,11 @@ proc destroy*(scene: Scene) =
         clear(scene.containers)
         clear(scene.tags)
         scene.root = nil
+
+proc cleanup*(scene: Scene) =
+    var wasteds = filterIt(scene.entities, it.wasted)
+    for e in wasteds:
+        cleanup(e)
 
 # Transform implementation
 proc newTransform*(): TransformComponent =
@@ -604,54 +635,114 @@ func newMeshComponent*(instance: Mesh): MeshComponent =
 func hash*(m: MeshComponent): Hash = hash(cast[pointer](m))
 
 # Material implementaion
-func newMaterialComponent*(diffuseColor, specularColor: Color = COLOR_WHITE,
-        texture, normal: Texture = nil, 
-        shininess: float32 = 1,
+func updateAvailableMaps(m: MaterialComponent) =
+    m.availableMaps = 0
+    if not isNil(m.albedoMap):
+        m.availableMaps = m.availableMaps or albedoMaterialMap.uint32
+    if not isNil(m.metallicMap):
+        m.availableMaps = m.availableMaps or metallicMaterialMap.uint32
+    if not isNil(m.roughnessMap):
+        m.availableMaps = m.availableMaps or roughnessMaterialMap.uint32
+    if not isNil(m.normalMap):
+        m.availableMaps = m.availableMaps or normalMaterialMap.uint32
+    if not isNil(m.aoMap):
+        m.availableMaps = m.availableMaps or aoMaterialMap.uint32
+
+func newMaterialComponent*(baseColor: Color=COLOR_WHITE, 
+        emmisiveColor: Color=COLOR_BLACK,
+        albedoMap, normalMap, metallicMap, roughnessMap, aoMap: Texture = nil, 
+        metallic: float32 = 0.0,
+        roughness: float32 = 1.0,
+        reflectance: float32 = 1.0,
+        ao: float32 = 1,
         frame: int32=0,
         vframes: int32=1,
         hframes: int32=1,
         castShadow: bool=false): MaterialComponent =
     new(result)
-    result.diffuseColor = diffuseColor
-    result.specularColor = specularColor
-    result.texture = texture
-    result.normal = normal
-    result.shininess = shininess
+    result.baseColor = baseColor
+    result.emmisiveColor = emmisiveColor
+    result.metallic = metallic
+    result.roughness = roughness
+    result.reflectance = reflectance
+    result.ao = ao
+    result.albedoMap = albedoMap
+    result.normalMap = normalMap
+    result.metallicMap = metallicMap
+    result.roughnessMap = roughnessMap
+    result.aoMap = aoMap
     result.frame = max(0, frame)
     result.vframes = max(1, vframes)
     result.hframes = max(1, hframes)
     result.frameSize = vec2(1, 1)
     result.frameOffset = vec2(0, 0)
     result.castShadow = castShadow
+    updateAvailableMaps(result)
 
-func `diffuseColor=`*(m: MaterialComponent, diffuseColor: Color) =
-    m.diffuseColor = diffuseColor
+func `baseColor=`*(m: MaterialComponent, baseColor: Color) =
+    m.baseColor = baseColor
     inc(m)
 
-func `specularColor=`*(m: MaterialComponent, specularColor: Color) =
-    m.specularColor = specularColor
+func `emmisiveColor=`*(m: MaterialComponent, emmisiveColor: Color) =
+    m.emmisiveColor = emmisiveColor
     inc(m)
 
-func `shininess=`*(m: MaterialComponent, value: float32) =
-    m.shininess = value
+func `roughness=`*(m: MaterialComponent, value: float32) =
+    m.roughness = value
     inc(m)
 
-func `texture=`*(m: MaterialComponent, value: Texture) =
-    m.texture = value
+func `metallic=`*(m: MaterialComponent, value: float32) =
+    m.metallic = value
     inc(m)
 
-func `normal=`*(m: MaterialComponent, value: Texture) =
-    m.normal = value
+func `reflectance=`*(m: MaterialComponent, value: float32) =
+    m.reflectance = value
     inc(m)
 
-template `texture`*(m: MaterialComponent): Texture = m.texture
-template `normal`*(m: MaterialComponent): Texture = m.normal
-template `diffuseColor`*(m: MaterialComponent): Color = m.diffuseColor
-template `specularColor`*(m: MaterialComponent): Color = m.specularColor
-template `shininess`*(m: MaterialComponent): float32 = m.shininess
+func `ao=`*(m: MaterialComponent, value: float32) =
+    m.ao = value
+    inc(m)
+
+func `albedoMap=`*(m: MaterialComponent, value: Texture) =
+    m.albedoMap = value
+    inc(m)
+    updateAvailableMaps(m)
+
+func `normalMap=`*(m: MaterialComponent, value: Texture) =
+    m.normalMap = value
+    inc(m)
+    updateAvailableMaps(m)
+
+func `metallicMap=`*(m: MaterialComponent, value: Texture) =
+    m.metallicMap = value
+    inc(m)
+    updateAvailableMaps(m)
+
+func `roughnessMap=`*(m: MaterialComponent, value: Texture) =
+    m.roughnessMap = value
+    inc(m)
+    updateAvailableMaps(m)
+
+func `aoMap=`*(m: MaterialComponent, value: Texture) =
+    m.aoMap = value
+    inc(m)
+    updateAvailableMaps(m)
+
+template `albedoMap`*(m: MaterialComponent): Texture = m.albedoMap
+template `normalMap`*(m: MaterialComponent): Texture = m.normalMap
+template `metallicMap`*(m: MaterialComponent): Texture = m.metallicMap
+template `roughnessMap`*(m: MaterialComponent): Texture = m.roughnessMap
+template `aoMap`*(m: MaterialComponent): Texture = m.aoMap
+template `baseColor`*(m: MaterialComponent): Color = m.baseColor
+template `emmisiveColor`*(m: MaterialComponent): Color = m.emmisiveColor
+template `roughness`*(m: MaterialComponent): float32 = m.roughness
+template `metallic`*(m: MaterialComponent): float32 = m.metallic
+template `reflectance`*(m: MaterialComponent): float32 = m.reflectance
+template `ao`*(m: MaterialComponent): float32 = m.ao
 template `frame`*(material: MaterialComponent): int = material.frame
 template `vframes`*(material: MaterialComponent): int = material.vframes
 template `hframes`*(material: MaterialComponent): int = material.hframes
+template `availableMaps`*(material: MaterialComponent): uint32 = material.availableMaps
 
 func update(material: MaterialComponent) =
     if material.hframes > 0 and material.vframes > 0:
@@ -684,6 +775,6 @@ template `frameOffset`*(material: MaterialComponent): Vec2 = material.frameOffse
 
 proc `$`*(m: MaterialComponent): string = 
     if not isNil(m):
-        &"diffuse:{m.diffuseColor} specular:{m.specularColor}"
+        &"base:{m.baseColor} emmisive:{m.emmisiveColor}"
     else:
         &"nil"

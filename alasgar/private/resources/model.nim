@@ -88,10 +88,10 @@ proc toEntity*(r: Resource, scene: Scene): Entity =
             else:
                 let material = getMaterial(mr, node.material)
                 addComponent(e, newMaterialComponent(
-                    diffuseColor=material.diffuseColor,
-                    specularColor=material.specularColor,
-                    texture=material.diffuseTexture,
-                    normal=material.normalTexture
+                    baseColor=material.diffuseColor,
+                    emmisiveColor=material.specularColor,
+                    albedoMap=material.diffuseTexture,
+                    normalMap=material.normalTexture
                 ))
 
     proc findNode(name: string): Entity =

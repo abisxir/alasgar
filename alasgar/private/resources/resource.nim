@@ -1,5 +1,6 @@
 import tables
 import strutils
+import ../utils
 
 type
     ResourceLoadFunc* = proc(url: string): Resource
@@ -11,6 +12,9 @@ type
     Resource* {.inheritable.} = ref object 
         url: string
         kind: string
+
+func `url`*(r: Resource): string = r.url
+func `kind`*(r: Resource): string = r.kind
 
 var managers = initTable[string, ResourceManager]()
 var caches = initTable[string, Resource]()
@@ -34,15 +38,17 @@ proc load*(url: string): Resource =
 
 
 proc destroy(r: Resource, deleteFromCache: bool) =
+    echo &"Destroying resource[{r.url}]..."
     let destroy = managers[r.kind].destroy
     if deleteFromCache:
         del(caches, r.url)
     destroy(r)
 
 proc destroy*(r: Resource) = destroy(r, true)
-
 proc cleanupResources*() =
-    for r in values(caches):
-        destroy(r, false)
-    clear(caches)
+    if len(caches) > 0:
+        echo &"Cleaning up [{len(caches)}] resources..."
+        for r in values(caches):
+            destroy(r, false)
+        clear(caches)
 

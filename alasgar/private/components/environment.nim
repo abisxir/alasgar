@@ -2,6 +2,9 @@ import ../core
 import ../utils
 import ../shader
 import ../system
+import ../texture
+
+const cubemapCS = staticRead("shaders/environment-cubemap.cs")
 
 type
     EnvironmentComponent* = ref object of Component
@@ -11,6 +14,10 @@ type
         fogDensity*: float32
         fogGradient*: float32
         fogEnabled*: bool
+        skybox*: Texture
+        #lutMap*: Texture
+        #diffuseMap*: Texture
+        #specularMap*: Texture
 
     EnvironmentSystem* = ref object of System
 
@@ -30,6 +37,16 @@ func enableFog*(e: EnvironmentComponent, color: Color, density, gradient: float3
 func setBackground*(env: EnvironmentComponent, c: Color) =
     env.backgroundColor = c
 
+#proc setSkybox*(env: EnvironmentComponent, url: string, size: Vec2) =
+#    let texture = newTexture(url)
+#    let output = newTexture(size.x, size.y)
+#    let shader = newShader(cubemapCS)
+#    use(shader)
+#    use(texture, 0)
+
+
+proc setSkybox*(env: EnvironmentComponent, px, nx, py, ny, pz, nz: string) =
+    env.skybox = newCubeTexture(px, nx, py, ny, pz, nz)
 
 # System implementation
 proc newEnvironmentSystem*(): EnvironmentSystem =
@@ -37,23 +54,31 @@ proc newEnvironmentSystem*(): EnvironmentSystem =
     result.name = "Environment System"
 
 
-method process*(sys: EnvironmentSystem, scene: Scene, input: Input,
-        delta: float32) =
-    if scene.root != nil:
+method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
+    if scene.root != nil and hasComponent[EnvironmentComponent](scene):
         for shader in sys.graphic.shaders:
             use(shader)
+            let env = first[EnvironmentComponent](scene)
 
-            for c in iterateComponents[EnvironmentComponent](scene):
-                sys.graphic.clearColor = c.backgroundColor
-                shader[&"u_ambient_color"] = c.ambientColor.vec3
-                if c.fogEnabled:
-                    shader[&"u_fog_enabled"] = 1
-                    shader[&"u_fog_color"] = c.fogColor
-                    shader[&"u_fog_density"] = c.fogDensity
-                    shader[&"u_fog_gradient"] = c.fogGradient
-                else:
-                    shader[&"u_fog_enabled"] = 0
+            # Sets scene clear color
+            sys.graphic.clearColor = env.backgroundColor
+            shader["env.clear_color"] = env.ambientColor.vec3
 
-                break
+            # Sets scene ambient color
+            shader["env.ambient_color"] = env.ambientColor.vec3
+
+            # Sets environment maps
+            #use(env.lutMap, 6)
+            #use(env.diffuseMap, 7)
+            #use(env.specularMap, 8)
+            use(env.skybox, 8)
+
+            if env.fogEnabled:
+                shader["env.fog_enabled"] = 1
+                shader["env.fog_color"] = env.fogColor
+                shader["env.fog_density"] = env.fogDensity
+                shader["env.fog_gradient"] = env.fogGradient
+            else:
+                shader["env.fog_enabled"] = 0
 
 

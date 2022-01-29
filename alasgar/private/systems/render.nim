@@ -4,6 +4,8 @@ import hashes
 
 import ../core
 import ../system
+import ../components/camera
+import ../components/environment
 import ../render/graphic
 
 type
@@ -13,11 +15,25 @@ proc newRenderSystem*(): RenderSystem =
     new(result)
     result.name = "Render System"
 
-method process*(sys: RenderSystem, scene: Scene, input: Input, delta: float32) =
-       
-    # Sends data to GPU
-    render(sys.graphic, scene.drawables)
+method process*(sys: RenderSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =  
+    if not isNil(scene):
+        let 
+            # Gets active camera, it is needed for getting view and projection matrix
+            camera = scene.activeCamera
+            # Gets environment component
+            env = first[EnvironmentComponent](scene)
+            # Gets cubemap if there is env
+            skybox = if not isNil(env): env.skybox else: nil
 
-    # Swaps buffers
-    swap(sys.graphic)
+        # Sends data to GPU
+        render(
+            sys.graphic, 
+            camera.view, 
+            camera.projection, 
+            skybox,
+            scene.drawables
+        )
+
+        # Swaps buffers
+        swap(sys.graphic)
 

@@ -36,3 +36,5 @@ proc has*[T](c: CachedContainer[T], key: string): bool = hasKey(c.cache, key)
 proc get*[T](c: CachedContainer[T], key: string): T = c.cache[key]
 proc add*[T](c: CachedContainer[T], key: string, value: T) = c.cache[key] = value
 proc add*[T](c: CachedContainer[T], value: T) = add(c.container, value)
+proc len*[T](c: CachedContainer[T]): int = 
+    result = len(c.container)

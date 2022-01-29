@@ -1,13 +1,14 @@
 $SHADER_PROFILE$
 precision highp float;
-precision highp int;
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec2 in_uv;
-layout(location = 3) in mat4 in_model;
-layout(location = 7) in uvec4 in_material;
-layout(location = 8) in vec4 in_sprite;
+layout(location = 3) in vec3 in_tangent;
+layout(location = 4) in vec3 in_binormal;
+layout(location = 5) in mat4 in_model;
+layout(location = 9) in uvec4 in_material;
+layout(location = 10) in vec4 in_sprite;
 
 
 // Camera
@@ -16,7 +17,6 @@ uniform struct Camera {
     mat4 view;
     mat4 projection;
     float exposure;
-    float gamma;
 } camera;
 
 uniform struct Environment {
@@ -44,7 +44,9 @@ uniform struct Frame {
 
 out struct Surface {
     vec4 position;
+    vec4 projected_position;
     vec4 shadow_light_position;
+    vec3 direction_to_view;
     float visibilty;
     vec3 normal;
     vec2 uv;
@@ -77,7 +79,7 @@ float has_flag(uint value, uint flag) {
     return r == flag ? 1.0 : 0.0;
 }
 
-void extract_material_data() {
+void main() {
     material.base_color = unpackUnorm4x8(in_material.x);
     material.emmisive_color = unpackUnorm4x8(in_material.y);
     
@@ -92,10 +94,6 @@ void extract_material_data() {
     material.has_metallic_map = has_flag(in_material.w, METALLIC_MAP_FLAG);
     material.has_roughness_map = has_flag(in_material.w, ROUGHNESS_MAP_FLAG);
     material.has_ao_map = has_flag(in_material.w, AO_MAP_FLAG);
-}
-
-void main() {
-    extract_material_data();
 
     vec2 frame_size = in_sprite.xy; 
     vec2 frame_offset = in_sprite.zw;
@@ -106,6 +104,7 @@ void main() {
     surface.position = in_model * position;
     surface.normal = mat3(normal_matrix) * in_normal;
     surface.shadow_light_position = env.shadow_mvp * surface.position;
+    surface.direction_to_view = normalize(camera.position - surface.position.xyz);
 
     if(frame_size.x > 0.0) {
         surface.uv = (in_uv * frame_size) + frame_offset;
@@ -122,6 +121,8 @@ void main() {
         surface.visibilty = -1.0;
     }
   
+    surface.projected_position = camera.projection * position_related_to_view;
+
     $MAIN_FUNCTION_CALL$
-    gl_Position = camera.projection * position_related_to_view;;
+    gl_Position = surface.projected_position;
 }

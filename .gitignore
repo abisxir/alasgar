@@ -41,6 +41,7 @@ htmldocs/
 
 # Local files
 res/
+Makefile
 main.nim
 main
 shadow

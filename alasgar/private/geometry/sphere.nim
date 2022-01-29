@@ -10,8 +10,8 @@ proc createSphereMesh(): Mesh =
     var 
         x, y, z, xy, nx, ny, nz, uvx, uvy, sectorAngle, stackAngle: float32
 
-    const sectorCount = 16
-    const stackCount = 16
+    const sectorCount = 32
+    const stackCount = 32
     const radius = 1.0    
     const lengthInv = 1.0.float32 / radius
     

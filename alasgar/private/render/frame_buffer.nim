@@ -1,43 +1,46 @@
 import ../ports/opengl
 import ../utils
-import ../texture
 import ../shader
-import shaders/deferred_shading_frag
-import shaders/deferred_shading_vert
 
 
 const forwardPostV = staticRead("shaders/forward-post.vs")
 const forwardPostF = staticRead("shaders/forward-post.fs")
 
-
 type
-    FrameBufferObj = object
-        deferred: bool
+    FrameBuffer* = ref object
         fbo: GLuint
         rbo: GLuint
         quadVAO: GLuint
         quadVBO: GLuint
         size: Vec2
         shader: Shader
+        texture: GLuint
 
-        positionBuffer*: GLuint
-        normalBuffer*: GLuint
-        albedoBuffer*: GLuint
-        shadowBuffer*: GLuint
 
-    FrameBuffer* = ref FrameBufferObj
+proc newCanvasShader*(source: string): Shader =
+    var 
+        vsource = forwardPostV
+        fsource = forwardPostF
+            
+    if isEmptyOrWhitespace(source):
+        fsource = fsource
+            .replace("$MAIN_FUNCTION$", "")
+            .replace("$MAIN_FUNCTION_CALL$", "")
+    else:
+        fsource = fsource
+            .replace("$MAIN_FUNCTION$", source)
+            .replace("$MAIN_FUNCTION_CALL$", """
+    iColor = out_fragment_color;
+    mainImage(out_fragment_color, v_uv);
+""")
+    result = newShader(vsource, fsource, [])
 
-proc `=destroy`*(fb: var FrameBufferObj) =
+
+proc destroy*(fb: FrameBuffer) =
     # Clear g buffers
-    if fb.albedoBuffer != 0:
-        glDeleteTextures(1, addr(fb.albedoBuffer))
-        fb.albedoBuffer = 0
-    if fb.positionBuffer != 0:
-        glDeleteTextures(1, addr(fb.positionBuffer))
-        fb.positionBuffer = 0
-    if fb.normalBuffer != 0:
-        glDeleteTextures(1, addr(fb.normalBuffer))
-        fb.normalBuffer = 0
+    if fb.texture != 0:
+        glDeleteTextures(1, addr(fb.texture))
+        fb.texture = 0
 
     if fb.quadVBO != 0:
         glDeleteBuffers(1, addr(fb.quadVBO))
@@ -52,49 +55,26 @@ proc `=destroy`*(fb: var FrameBufferObj) =
         glDeleteFramebuffers(1, addr(fb.fbo))
         fb.fbo = 0
 
-proc createPassBuffer(size: Vec2, index: int, internalFormat: GLenum, format: GLenum, dataType: GLenum): GLuint =
-    glGenTextures(1, addr(result))
-    glBindTexture(GL_TEXTURE_2D, result)
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat.GLint, size.x.GLsizei, size.y.GLsizei, 0.GLint, format, dataType, nil)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST.GLint)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST.GLint)
-    glFramebufferTexture2D(GL_FRAMEBUFFER, (GL_COLOR_ATTACHMENT0.int + index).GLenum, GL_TEXTURE_2D, result, 0)
-
 proc newFrameBuffer*(size: Vec2, deferred: bool=false, multiSample: int=4): FrameBuffer =
     new(result)
 
     # Sets size and clear color
     result.size = size
-    result.deferred = deferred
 
     # Attaches shaders
-    if deferred:
-        result.shader = newShader(deferred_shading_vert.source, deferred_shading_frag.source, [])
-    else:
-        result.shader = newShader(forwardPostV, forwardPostF, [])
+    result.shader = newCanvasShader("")
 
     # Creates frame buffer object
     glGenFramebuffers(1, addr(result.fbo))
     glBindFramebuffer(GL_FRAMEBUFFER, result.fbo)
 
-    # If it is deferred, then it creates G buffer
-    if deferred:
-        # Creates pass buffers
-        result.albedoBuffer = createPassBuffer(size, 2, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE)
-        result.positionBuffer = createPassBuffer(size, 0, GL_RGB16F, GL_RGB, cGL_FLOAT)
-        result.normalBuffer = createPassBuffer(size, 1, GL_RGBA16F, GL_RGBA, cGL_FLOAT)
-        var attachments = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3]
-        glDrawBuffers(3, addr(attachments[0]))
-    else:
-        # Creates pass buffers
-        result.albedoBuffer = createPassBuffer(size, 2, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE)
-        glGenTextures(1, addr(result.albedoBuffer))
-        glBindTexture(GL_TEXTURE_2D, result.albedoBuffer)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA.GLint, size.x.GLsizei, size.y.GLsizei, 0.GLint, GL_RGBA, GL_UNSIGNED_BYTE, nil)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST.GLint)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST.GLint)
-        #glRenderbufferStorageMultisample(GL_RENDERBUFFER, multiSample, GL_DEPTH_COMPONENT16, textureSize, textureSize)
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, result.albedoBuffer, 0)
+    # Creates pass buffers
+    glGenTextures(1, addr(result.texture))
+    glBindTexture(GL_TEXTURE_2D, result.texture)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA.GLint, size.x.GLsizei, size.y.GLsizei, 0.GLint, GL_RGBA, GL_UNSIGNED_BYTE, nil)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST.GLint)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST.GLint)
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, result.texture, 0)
 
     glGenRenderbuffers(1, addr(result.rbo))
     glBindRenderbuffer(GL_RENDERBUFFER, result.rbo)
@@ -103,6 +83,7 @@ proc newFrameBuffer*(size: Vec2, deferred: bool=false, multiSample: int=4): Fram
 
     if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
         quit("ERROR::FRAMEBUFFER:: Framebuffer is not complete!")
+        
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
     var quadVertices= [
@@ -127,6 +108,7 @@ proc newFrameBuffer*(size: Vec2, deferred: bool=false, multiSample: int=4): Fram
     glBindVertexArray(0)
     glBindBuffer(GL_ARRAY_BUFFER, 0)    
 
+
 proc use*(f: FrameBuffer, clearColor: Color) =
     glBindFramebuffer(GL_FRAMEBUFFER, f.fbo)
     glViewport(0, 0, f.size.iWidth, f.size.iHeight)
@@ -149,36 +131,8 @@ proc blit*(f: FrameBuffer) =
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
     glDisable(GL_DEPTH_TEST)
     glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
-
-    use(f.shader)
-
-    glBindVertexArray(f.quadVAO)
-
-    if f.deferred:
-        glActiveTexture(GL_TEXTURE0)
-        glBindTexture(GL_TEXTURE_2D, f.positionBuffer)
-        glActiveTexture(GL_TEXTURE1)
-        glBindTexture(GL_TEXTURE_2D, f.normalBuffer)
-        glActiveTexture(GL_TEXTURE2)
-        glBindTexture(GL_TEXTURE_2D, f.albedoBuffer)
-    else:
-        glActiveTexture(GL_TEXTURE0)
-        glBindTexture(GL_TEXTURE_2D, f.albedoBuffer)
-
-    #use(texture, 0)
-    glDrawArrays(GL_TRIANGLES, 0, 6)
-
-
-proc blit*(f: FrameBuffer, texture: GLuint) =
-    glBindFramebuffer(GL_FRAMEBUFFER, 0)
-    glDisable(GL_DEPTH_TEST)
-
     use(f.shader)
     glBindVertexArray(f.quadVAO)
-
     glActiveTexture(GL_TEXTURE0)
-    glBindTexture(GL_TEXTURE_2D, texture)
-
-    #use(texture, 0)
+    glBindTexture(GL_TEXTURE_2D, f.texture)
     glDrawArrays(GL_TRIANGLES, 0, 6)
-

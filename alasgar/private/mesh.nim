@@ -3,6 +3,7 @@ import hashes
 
 import ports/opengl
 import utils
+import container
 
 
 type
@@ -11,11 +12,12 @@ type
         normal*: Vec3
         uv*: Vec2
 
-    MeshObject* = object
+    Mesh* = ref object
         vertexArrayObject: GLuint
         vertexBufferObject: GLuint
         modelBufferObject: GLuint
-        extraBufferObject: GLuint
+        materialBufferObject: GLuint
+        spriteBufferObject: GLuint
         count*: GLsizei
         vMin*: Vec3
         vMax*: Vec3
@@ -24,44 +26,29 @@ type
         bufferMode: GLenum
         indices: seq[uint32]
 
-    Mesh* = ref MeshObject
-
-#const MATRIX_SIZE_BYTES = 16 * 4
-const VECTOR4F_SIZE_BYTES = 4 * 4
-var bufferSizeOf = 0 #MATRIX_SIZE_BYTES
-
-proc setBufferSizeOf*(size: int) = bufferSizeOf = size
-
-func caddr*(v: var Vertex): ptr float32 = v.position.caddr
-
-func `$`*(v: Mesh): string =
-    result = &"Vertices: [{v.count / 3}] triangles"
-
-proc `=destroy`*(mesh: var MeshObject) =
-    if mesh.vertexBufferObject != 0:
-        glDeleteBuffers(1, mesh.extraBufferObject.addr)
-        glDeleteBuffers(1, mesh.modelBufferObject.addr)
-        glDeleteVertexArrays(1, mesh.vertexArrayObject.addr)
-        glDeleteBuffers(1, mesh.vertexBufferObject.addr)
-
-        mesh.extraBufferObject = 0
-        mesh.modelBufferObject = 0
-        mesh.vertexArrayObject = 0
-        mesh.vertexBufferObject = 0
-
-
-proc destroy*(mesh: Mesh) =
+proc destroyMesh(mesh: Mesh) =
     if mesh.vertexBufferObject != 0:
         echo &"Destroying mesh[{mesh.vertexBufferObject}]..."
-        glDeleteBuffers(1, mesh.extraBufferObject.addr)
+        glDeleteBuffers(1, mesh.spriteBufferObject.addr)
+        glDeleteBuffers(1, mesh.materialBufferObject.addr)
         glDeleteBuffers(1, mesh.modelBufferObject.addr)
         glDeleteVertexArrays(1, mesh.vertexArrayObject.addr)
         glDeleteBuffers(1, mesh.vertexBufferObject.addr)
 
-        mesh.extraBufferObject = 0
+        mesh.spriteBufferObject = 0
+        mesh.materialBufferObject = 0
         mesh.modelBufferObject = 0
         mesh.vertexArrayObject = 0
         mesh.vertexBufferObject = 0
+
+var cache = newCachedContainer[Mesh](destroyMesh)
+
+const VECTOR4F_SIZE_BYTES = 4 * sizeof(float32)
+var bufferSizeOf: int = 0 # Drawable size as stride
+
+proc setBufferSizeOf*(size: int) = bufferSizeOf = size
+func caddr*(v: var Vertex): ptr float32 = v.position.caddr
+func `$`*(v: Mesh): string = &"Vertices: [{v.count / 3}] triangles"
 
 proc newMesh*(data: var openArray[Vertex], indices: openArray[uint32], drawMode: GLenum = GL_TRIANGLES, bufferMode: GLenum = GL_STATIC_DRAW): Mesh =
     new(result)
@@ -111,50 +98,66 @@ proc newMesh*(data: var openArray[Vertex], indices: openArray[uint32], drawMode:
     glVertexAttribPointer(2.GLuint, 2, cGL_FLOAT, false, stride, cast[pointer](offset))
     offset += 2 * sizeof(float32)
 
-    glEnableVertexAttribArray(3.GLuint)
-    glVertexAttribPointer(3.GLuint, 3, cGL_FLOAT, false, stride, cast[pointer](offset))
-    offset += 3 * sizeof(float32)
+    #glEnableVertexAttribArray(3.GLuint)
+    #glVertexAttribPointer(3.GLuint, 3, cGL_FLOAT, false, stride, cast[pointer](offset))
+    #offset += 3 * sizeof(float32)
 
-    glEnableVertexAttribArray(4.GLuint)
-    glVertexAttribPointer(4.GLuint, 3, cGL_FLOAT, false, stride, cast[pointer](offset))
+    #glEnableVertexAttribArray(4.GLuint)
+    #glVertexAttribPointer(4.GLuint, 3, cGL_FLOAT, false, stride, cast[pointer](offset))
 
     # Streams data
     if len(data) > 0:
-        glBufferData(GL_ARRAY_BUFFER, sizeof(data[0]) * data.len, data[0].caddr, bufferMode)
+        let size: GLsizeiptr = (sizeof(data[0]) * data.len).GLsizeiptr
+        #glBufferData(GL_ARRAY_BUFFER, size, cast[pointer](data[0].caddr), bufferMode)
 
     glGenBuffers(1, result.modelBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.modelBufferObject)
-    for start in 5..8:
+    for start in 3..6:
         glVertexAttribPointer(
             start.GLuint,
             4,
             cGL_FLOAT,
             false,
             bufferSizeOf.GLsizei,
-            cast[pointer]((start - 5) * VECTOR4F_SIZE_BYTES)
+            cast[pointer]((start - 3) * VECTOR4F_SIZE_BYTES)
         );
         glVertexAttribDivisor(start.GLuint, 1);
         glEnableVertexAttribArray(start.GLuint);
 
-    glGenBuffers(1, result.extraBufferObject.addr)
-    glBindBuffer(GL_ARRAY_BUFFER, result.extraBufferObject)
-    for start in 9..12:
-        glVertexAttribPointer(
-            start.GLuint,
-            4,
-            cGL_FLOAT,
-            false,
-            bufferSizeOf.GLsizei,
-            cast[pointer]((start - 9) * VECTOR4F_SIZE_BYTES)
-        );
-        glVertexAttribDivisor(start.GLuint, 1);
-        glEnableVertexAttribArray(start.GLuint);
+    glGenBuffers(1, result.materialBufferObject.addr)
+    glBindBuffer(GL_ARRAY_BUFFER, result.materialBufferObject)
+    glVertexAttribPointer(
+        7.GLuint,
+        4,
+        cGL_FLOAT,
+        false,
+        bufferSizeOf.GLsizei,
+        cast[pointer](0)
+    );
+    glVertexAttribDivisor(7.GLuint, 1);
+    glEnableVertexAttribArray(7.GLuint);
 
+    glGenBuffers(1, result.spriteBufferObject.addr)
+    glBindBuffer(GL_ARRAY_BUFFER, result.spriteBufferObject)
+    glVertexAttribPointer(
+        8.GLuint,
+        4,
+        cGL_FLOAT,
+        false,
+        bufferSizeOf.GLsizei,
+        cast[pointer](0)
+    );
+    glVertexAttribDivisor(8.GLuint, 1);
+    glEnableVertexAttribArray(8.GLuint);
+
+    # Releases the bound vertex array
     glBindVertexArray(0)
     glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     result.count = data.len.GLsizei
     echo &"Mesh with [{result.count / 3}] faces created."
+
+    add(cache, result)
 
 proc newMesh*(vertices: var openArray[float32], 
               normals: var openArray[float32], 
@@ -201,14 +204,17 @@ proc update*(o: Mesh, data: var openArray[Vertex]) =
     glBufferData(GL_ARRAY_BUFFER, sizeof(data[0]) * len(data), data[0].caddr, o.bufferMode)
 
 
-proc render*(mesh: Mesh, model: ptr float32, material: ptr float32, count: int) =
+proc render*(mesh: Mesh, model: ptr float32, material: ptr uint32, sprite: ptr float32, count: int) =
     glBindVertexArray(mesh.vertexArrayObject)
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh.modelBufferObject)
     glBufferData(GL_ARRAY_BUFFER, count * bufferSizeOf, model, GL_DYNAMIC_DRAW)
 
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.extraBufferObject)
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.materialBufferObject)
     glBufferData(GL_ARRAY_BUFFER, count * bufferSizeOf, material, GL_DYNAMIC_DRAW)
+
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.spriteBufferObject)
+    glBufferData(GL_ARRAY_BUFFER, count * bufferSizeOf, sprite, GL_DYNAMIC_DRAW)
 
     if len(mesh.indices) > 0:
         if count > 1:
@@ -222,3 +228,9 @@ proc render*(mesh: Mesh, model: ptr float32, material: ptr float32, count: int) 
             glDrawArrays(mesh.drawMode, 0, mesh.count)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+proc destroy*(mesh: Mesh) = remove(cache, mesh)
+proc cleanupMeshes*() =
+    if len(cache) > 0:
+        echo &"Cleaning up [{len(cache)}] meshes..."
+        clear(cache)

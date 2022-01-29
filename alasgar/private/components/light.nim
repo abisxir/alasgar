@@ -7,7 +7,7 @@ import ../shader
 type
     DirectLightComponent* = ref object of Component
         direction*: Vec3
-        color*: Color
+        intensity*: float32
 
     PointLightComponent* = ref object of Component
         color*: Color
@@ -28,8 +28,8 @@ type
 
 proc newPointLightComponent*(color: Color=COLOR_MILK, 
                              constant: float32=1, 
-                             linear: float32=0.09, 
-                             quadratic: float32=0.032,
+                             linear: float32=0.0, 
+                             quadratic: float32=0.0,
                              intensity: float32=1.0): PointLightComponent =
     new(result)
     result.color = color
@@ -39,11 +39,11 @@ proc newPointLightComponent*(color: Color=COLOR_MILK,
     result.intensity = intensity
 
 
-proc newDirectLightComponent*(direction: Vec3, color: Color=COLOR_WHITE, shadow: bool=false): DirectLightComponent =
+proc newDirectLightComponent*(direction: Vec3, intensity: float32=110000): DirectLightComponent =
     new(result)
 
     result.direction = direction
-    result.color = color
+    result.intensity = intensity
 
 
 proc newSpotPointLightComponent*(direction: Vec3,
@@ -73,11 +73,10 @@ proc newLightSystem*(): LightSystem =
     result.name = "Light System"
 
 
-method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32) =
+method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
     if scene.root != nil:
         # Sets shadow to false
         sys.graphic.shadow.enabled = false
-
         # Makes a loop on all of shaders
         for shader in sys.graphic.shaders:
             use(shader)
@@ -88,44 +87,42 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32) =
                 # Checks that entity is visible
                 if c.entity.visible and directLightCount < sys.graphic.maxDirectLights:
                     # Set shader params
-                    shader[&"u_direct_lights[{directLightCount}].direction"] = c.direction
-                    shader[&"u_direct_lights[{directLightCount}].color"] = c.color.vec3
+                    shader[&"direct_lights[{directLightCount}].direction"] = c.direction
+                    shader[&"direct_lights[{directLightCount}].intensity"] = c.intensity
 
                     # Increments direct light count
                     inc(directLightCount)
 
             # Sets direct light amount
-            shader["u_direct_lights_count"] = directLightCount
+            shader["env.direct_lights_count"] = directLightCount
 
             # Keeps track of available point lights
             var pointLightCount = 0
             for c in iterateComponents[PointLightComponent](scene):
                 # Checks that entity is visible
                 if c.entity.visible and pointLightCount < sys.graphic.maxPointLights:
-                    shader[&"u_point_lights[{pointLightCount}].position"] = c.transform.globalPosition
-                    shader[&"u_point_lights[{pointLightCount}].color"] = c.color.vec3
-                    shader[&"u_point_lights[{pointLightCount}].constant"] = c.constant
-                    shader[&"u_point_lights[{pointLightCount}].linear"] = c.linear
-                    shader[&"u_point_lights[{pointLightCount}].quadratic"] = c.quadratic
-                    shader[&"u_point_lights[{pointLightCount}].intensity"] = c.intensity 
+                    shader[&"point_lights[{pointLightCount}].position"] = c.transform.globalPosition
+                    shader[&"point_lights[{pointLightCount}].color"] = c.color.vec3
+                    shader[&"point_lights[{pointLightCount}].attenuation"] = vec3(c.constant, c.linear, c.quadratic)
+                    shader[&"point_lights[{pointLightCount}].intensity"] = c.intensity 
                     
                     inc(pointLightCount)
 
-            shader["u_point_lights_count"] = pointLightCount
+            shader["env.point_lights_count"] = pointLightCount
 
             # Disables shadow
-            shader["u_shadow_enabled"] = 0
+            shader["env.shadow_enabled"] = 0
 
             # Keeps track of available sopt point lights
             var spotPointLightCount = 0
             for c in iterateComponents[SpotPointLightComponent](scene):
                 # Checks that entity is visible
                 if c.entity.visible and spotPointLightCount < sys.graphic.maxPointLights:
-                    shader[&"u_spotpoint_lights[{spotPointLightCount}].position"] = c.transform.globalPosition
-                    shader[&"u_spotpoint_lights[{spotPointLightCount}].color"] = c.color.vec3
-                    shader[&"u_spotpoint_lights[{spotPointLightCount}].direction"] = c.direction
-                    shader[&"u_spotpoint_lights[{spotPointLightCount}].inner_limit"] = c.innerLimit
-                    shader[&"u_spotpoint_lights[{spotPointLightCount}].outer_limit"] = c.outerLimit
+                    shader[&"spotpoint_lights[{spotPointLightCount}].position"] = c.transform.globalPosition
+                    shader[&"spotpoint_lights[{spotPointLightCount}].color"] = c.color.vec3
+                    shader[&"spotpoint_lights[{spotPointLightCount}].direction"] = c.direction
+                    shader[&"spotpoint_lights[{spotPointLightCount}].inner_limit"] = c.innerLimit
+                    shader[&"spotpoint_lights[{spotPointLightCount}].outer_limit"] = c.outerLimit
                     
                     # Take care of shadow
                     if c.shadow:
@@ -135,12 +132,12 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32) =
                         sys.graphic.shadow.enabled = true
 
                         # Enables shadow and updates matrices
-                        shader["u_shadow_enabled"] = 1
-                        shader["u_shadow_mvp"] = c.projection * c.view * identity()
+                        shader["env.shadow_enabled"] = 1
+                        shader["env.shadow_mvp"] = c.projection * c.view * identity()
                         #shader["u_shadow_view_matrix"] = c.view
                         #shader["u_shadow_projection_matrix"] = c.projection
                         #shader["u_shadow_position"] = c.transform.globalPosition
 
                     inc(spotPointLightCount)
 
-            shader["u_spotpoint_lights_count"] = spotPointLightCount
+            shader["env.spotpoint_lights_count"] = spotPointLightCount

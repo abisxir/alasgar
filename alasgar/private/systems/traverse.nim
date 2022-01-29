@@ -29,8 +29,7 @@ proc traverse(e: Entity, world: Mat4, dirty: bool) =
 #    result
 
 
-method process*(sys: TraverseSystem, scene: Scene, input: Input,
-        delta: float32) =
+method process*(sys: TraverseSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
     if scene.root != nil:
         let world = identity()
         traverse(scene.root, world, false)

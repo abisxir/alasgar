@@ -8,15 +8,13 @@ const forwardDepthF = staticRead("shaders/forward-depth.fs")
 
 
 type
-    DepthBufferObj = object
+    DepthBuffer* = ref object
         fbo: GLuint
         texture*: GLuint
         size: Vec2
         shader*: Shader
 
-    DepthBuffer* = ref DepthBufferObj
-
-proc `=destroy`*(fb: var DepthBufferObj) =
+proc destroy*(fb: DepthBuffer) =
     if fb.fbo != 0:
         glDeleteFramebuffers(1, addr(fb.fbo))
         fb.fbo = 0
@@ -70,7 +68,8 @@ proc use*(f: DepthBuffer) =
     glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
     use(f.shader)
 
-proc attach*(f: DepthBuffer) =
+proc attach*(f: DepthBuffer, shader: Shader) =
+    shader["u_depth_map"] = 0
     glActiveTexture(GL_TEXTURE0)
     glBindTexture(GL_TEXTURE_2D, f.texture)
 

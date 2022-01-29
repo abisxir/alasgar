@@ -27,6 +27,6 @@ proc updateScript(script: ScriptComponent, i: Input, d: float32) =
         script.update(script, i, d)
 
 
-method process*(sys: ScriptSystem, scene: Scene, input: Input, delta: float32) =
+method process*(sys: ScriptSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
     forEachComponent(scene, input, delta, updateScript)
 

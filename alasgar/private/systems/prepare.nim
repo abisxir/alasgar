@@ -23,23 +23,23 @@ func cmp(a, b: MaterialComponent): int =
     if a == b:
         result = 0
     elif a == nil:
-        if b.texture == nil and b.normal == nil:
+        if b.albedoMap == nil and b.normalMap == nil:
             result = 0
         else:
             result = -1
     elif b == nil:
-        if a.texture == nil and a.normal == nil:
+        if a.albedoMap == nil and a.normalMap == nil:
             result = 0
         else:
             result = 1
     else:
-        if a.texture == b.texture:
-            if a.normal == b.normal:
+        if a.albedoMap == b.albedoMap:
+            if a.normalMap == b.normalMap:
                 result = 0
             else:
-                result = cmp(a.normal, b.normal)
+                result = cmp(a.normalMap, b.normalMap)
         else:
-            result = cmp(a.texture, b.texture)
+            result = cmp(a.albedoMap, b.albedoMap)
 
 proc cmp(a, b: Drawable): int =
     if a.visible != b.visible:
@@ -71,72 +71,54 @@ proc isInSight*(planes: openArray[Plane], drawable: Drawable): bool =
             return true
     return false 
 
-
 proc isInSight*(viewCenter: Vec3, viewRadiusSqrt: float32, drawable: Drawable): bool =
     let meshCenter = drawable.transform.globalPosition
     let meshRadius = drawable.mesh.instance.vRadius
     return lengthSq(meshCenter - viewCenter) - (meshRadius * meshRadius) < viewRadiusSqrt
 
-
-proc pack*(m: MaterialComponent, packed: ptr Mat4) =
-    if false:
-        packed[][0] = m.diffuseColor.r
-        packed[][1] = m.diffuseColor.g
-        packed[][2] = m.diffuseColor.b
-        packed[][3] = m.entity.opacity
-        packed[][4] = m.specularColor.r
-        packed[][5] = m.specularColor.g
-        packed[][6] = m.specularColor.b
-        packed[][7] = m.shininess
-        packed[][8] = if m.texture != nil: 1.0 else: 0.0
-        packed[][9] = if m.normal != nil: 1.0 else: 0.0
+proc packMaterial*(drawable: ptr Drawable) =
+    # Handle material
+    if drawable.material == nil:
+        if drawable.materialVersion != 0: 
+            drawable.materialVersion = 0
+            drawable.materialPack[0] = packUnorm4x8(1, 1, 1, 1)
+            drawable.materialPack[1] = packUnorm4x8(1, 1, 1, 1)
+            drawable.materialPack[2] = packUnorm4x8(1.0, 1.0, 0.1, 1.0)
+            drawable.materialPack[3] = 0
+            drawable.spritePack = vec4(0, 0, 0, 0)
     else:
-        var o: Mat4
-        o[0] = m.diffuseColor.r
-        o[1] = m.diffuseColor.g
-        o[2] = m.diffuseColor.b
-        o[3] = m.entity.opacity
-        o[4] = m.specularColor.r
-        o[5] = m.specularColor.g
-        o[6] = m.specularColor.b
-        o[7] = m.shininess
-        o[8] = if m.texture != nil: 1.0 else: 0.0
-        o[9] = if m.normal != nil: 1.0 else: 0.0
-        packed[] = o
+        let material = drawable.material
+        if drawable.materialVersion != drawable.material.version:
+            drawable.materialVersion = material.version
+            drawable.materialPack[0] = packUnorm4x8(material.baseColor.r, material.baseColor.g, material.baseColor.b, material.entity.opacity)
+            drawable.materialPack[1] = packUnorm4x8(material.emmisiveColor.r, material.emmisiveColor.g, material.emmisiveColor.b, material.emmisiveColor.a)
+            drawable.materialPack[2] = packUnorm4x8(material.metallic, material.roughness, material.reflectance, material.ao)
+            drawable.materialPack[3] = material.availableMaps
+            drawable.spritePack = vec4(material.frameSize.x, material.frameSize.y, material.frameOffset.x, material.frameOffset.y) 
 
+        if material.albedoMap != nil and drawable.mesh.version != drawable.meshVersion and drawable.mesh of SpriteComponent:
+            drawable.meshVersion = drawable.mesh.version
+            #drawable.extra[6] = packSnorm2x16(material.albedoMap.ratio)
 
 func getNormalHash(d: ptr Drawable): Hash =
     result = 0
-    if d.material != nil and d.material.normal != nil:
-        result = hash(d.material.normal)
+    if d.material != nil and d.material.normalMap != nil:
+        result = hash(d.material.normalMap)
 
 func getTextureHash(d: ptr Drawable): Hash =
     result = 0
-    if d.material != nil and d.material.texture != nil:
-        result = hash(d.material.texture)
+    if d.material != nil and d.material.albedoMap != nil:
+        result = hash(d.material.albedoMap)
 
-
-method process*(sys: PrepareSystem, scene: Scene, input: Input,
-        delta: float32) =
+method process*(sys: PrepareSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
     if scene.root != nil:
         # Considers all the lines
         for c in iterateComponents[LineComponent](scene):
             if c.entity.visible:
                 updatePoints(c)
 
-        #var planes: array[6, Plane]
-        #extractFrustumPlanes(scene.activeCamera, planes)
-        #var 
-        #    viewCenter: Vec3
-        #    viewRadius: float32
-        #    viewRadiusSqrt: float32
-        
-        #calculateViewCenter(scene.activeCamera, viewCenter, viewRadius)
-        #viewRadiusSqrt = viewRadius * viewRadius
-
         # Marks invisible items
-        for i in low(scene.drawables)..high(scene.drawables):
-            var drawable = addr(scene.drawables[i])
+        for drawable in mitems(scene.drawables):
             drawable.visible =
                 drawable.transform.entity.visible and drawable.transform.entity.attached and drawable.transform.entity.opacity > 0
 
@@ -173,51 +155,11 @@ method process*(sys: PrepareSystem, scene: Scene, input: Input,
             # Handle transfer
             if drawable.transformVersion != drawable.transform.version:
                 drawable.transformVersion = drawable.transform.version
-                drawable.world = drawable.transform.world
+                drawable.modelPack = drawable.transform.world
 
             # Handle material
-            if drawable.material == nil:
-                if drawable.materialVersion != 0: 
-                    drawable.materialVersion = 0
-                    drawable.extra[0] = 1
-                    drawable.extra[1] = 1
-                    drawable.extra[2] = 1
-                    drawable.extra[3] = 1
-                    drawable.extra[4] = 1
-                    drawable.extra[5] = 1
-                    drawable.extra[6] = 1
-                    drawable.extra[7] = 1
-                    drawable.extra[8] = 0.0
-                    drawable.extra[9] = 0.0
-                    drawable.extra[10] = 0 
-                    drawable.extra[11] = 0
-                    drawable.extra[12] = 0 
-                    drawable.extra[13] = 0
-                    drawable.extra[14] = 1
-                    drawable.extra[15] = 1
-            else:
-                if drawable.materialVersion != drawable.material.version:
-                    drawable.materialVersion = drawable.material.version
-                    drawable.extra[0] = drawable.material.diffuseColor.r
-                    drawable.extra[1] = drawable.material.diffuseColor.g
-                    drawable.extra[2] = drawable.material.diffuseColor.b
-                    drawable.extra[3] = drawable.material.entity.opacity
-                    drawable.extra[4] = drawable.material.specularColor.r
-                    drawable.extra[5] = drawable.material.specularColor.g
-                    drawable.extra[6] = drawable.material.specularColor.b
-                    drawable.extra[7] = drawable.material.shininess
-                    drawable.extra[8] = if drawable.material.texture != nil: 1.0 else: 0.0
-                    drawable.extra[9] = if drawable.material.normal != nil: 1.0 else: 0.0
-                    drawable.extra[10] = drawable.material.frameSize.x
-                    drawable.extra[11] = drawable.material.frameSize.y
-                    drawable.extra[12] = drawable.material.frameOffset.x
-                    drawable.extra[13] = drawable.material.frameOffset.y
+            packMaterial(drawable)
 
-                if drawable.material.texture != nil and drawable.mesh.version != drawable.meshVersion and drawable.mesh of SpriteComponent:
-                    drawable.meshVersion = drawable.mesh.version
-                    drawable.extra[14] = drawable.material.texture.ratio.x
-                    drawable.extra[15] = drawable.material.texture.ratio.y
- 
 
                 
                 

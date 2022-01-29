@@ -5,21 +5,38 @@ import tables
 import ports/opengl
 
 import utils
-
+import container
 
 type
-    ShaderObject* = object
+    Shader* = ref object
         program*: GLuint
         map: Table[string, GLint]
+        params: Table[string, ShaderParam]
 
-    Shader* = ref ShaderObject
+    ShaderParam = ref object of RootObj
+        key: string  
+    ShaderParamInt = ref object of ShaderParam
+        value: int32
+    ShaderParamFloat = ref object of ShaderParam
+        value: float32
+    ShaderParamVec2 = ref object of ShaderParam
+        value: Vec2
+    ShaderParamVec3 = ref object of ShaderParam
+        value: Vec3
+    ShaderParamVec4 = ref object of ShaderParam
+        value: Vec4
+    ShaderParamMat4 = ref object of ShaderParam
+        value: Mat4
 
-
-proc `=destroy`*(shader: var ShaderObject) =
+proc destroyShader(shader: Shader) =
     if shader.program != 0:
+        echo &"Destroying shader[{shader.program}]..."
         glDeleteProgram(shader.program)
         shader.program = 0
 
+var cache = newCachedContainer[Shader](destroyShader)
+
+method update(p: ShaderParam, shader: Shader) = discard
 
 proc hash*(o: Shader): Hash = 
     if o != nil:
@@ -110,26 +127,48 @@ proc createProgram*(vs, fs: string,
         halt &"Could not link: {programInfoLog(result)}"
 
 
+proc createProgram*(cs: string): GLuint =
+    result = glCreateProgram()
+    if result == 0:
+        halt &"Could not create program: {glGetError().int}" 
+    let csShader = loadShaderSource(cs, GL_COMPUTE_SHADER)
+    if csShader == 0:
+        glDeleteProgram(result)
+        halt &"Could not create compute shader: {glGetError().int}" 
+
+    glAttachShader(result, csShader)
+
+    glLinkProgram(result)
+    glDeleteShader(csShader)
+
+    let linked = isProgramLinked(result)
+    if not linked:
+        halt &"Could not link: {programInfoLog(result)}"
+
 proc newShader*(vs, fs: string, attributes: openarray[tuple[index: GLuint, name: string]]): Shader =
     new(result)
     when defined(macosx):
         let shaderProfile = "#version 410"
     else:
-        let shaderProfile = "#version 300 es"
+        let shaderProfile = "#version 310 es"
     
     result.program = createProgram(
         vs.replace("$SHADER_PROFILE$", shaderProfile), 
         fs.replace("$SHADER_PROFILE$", shaderProfile), attributes)
 
+    add(cache, result)
+    
 
-proc destroy*(shader: Shader) =
-    if shader.program != 0:
-        glDeleteProgram(shader.program)
-        shader.program = 0
+proc newShader*(cs: string): Shader =
+    new(result)
+    when defined(macosx):
+        let shaderProfile = "#version 410"
+    else:
+        let shaderProfile = "#version 310 es"
+    
+    result.program = createProgram(cs.replace("$SHADER_PROFILE$", shaderProfile))
 
-
-proc use*(s: Shader) =
-    glUseProgram(s.program)
+    add(cache, result)
 
 
 proc getKeyLocation(s: Shader, key: string): GLint =
@@ -138,11 +177,15 @@ proc getKeyLocation(s: Shader, key: string): GLint =
     result = s.map[key]
 
 
+proc `[]=`*(s: Shader; key: string; value: Vec2) =
+    var location = s.getKeyLocation key
+    var data = value
+    glUniform2fv location, 1, data.caddr
+
 proc `[]=`*(s: Shader; key: string; value: Vec3) =
     var location = s.getKeyLocation key
     var data = value
     glUniform3fv location, 1, data.caddr
-
 
 proc `[]=`*(s: Shader; key: string; value: Vec4) =
     var location = s.getKeyLocation key
@@ -172,8 +215,83 @@ proc `[]=`*(s: Shader; key: string; value: ptr Mat4) =
     var location = s.getKeyLocation key
     glUniformMatrix4fv location, 1, false, value[].caddr
 
-
 proc `[]=`*(s: Shader; key: string; value: Mat4) =
-    var location = s.getKeyLocation key
     var matrix = value
-    glUniformMatrix4fv location, 1, false, matrix.caddr
+    s[key] = matrix
+
+method update(p: ShaderParamInt, shader: Shader) = shader[p.key] = p.value
+method update(p: ShaderParamFloat, shader: Shader) = shader[p.key] = p.value
+method update(p: ShaderParamVec2, shader: Shader) = shader[p.key] = p.value
+method update(p: ShaderParamVec3, shader: Shader) = shader[p.key] = p.value
+method update(p: ShaderParamVec4, shader: Shader) = shader[p.key] = p.value
+method update(p: ShaderParamMat4, shader: Shader) = shader[p.key] = p.value
+
+proc set*(shader: Shader, key: string, value: int32) =
+    let param = new(ShaderParamInt)
+    param.key = key
+    param.value = value
+    shader.params[key] = param
+
+proc get_int*(shader: Shader, key: string): int32 =
+    let param = shader.params[key]
+    result = cast[ShaderParamInt](param).value
+
+proc set*(shader: Shader, key: string, value: float32) =
+    let param = new(ShaderParamFloat)
+    param.key = key
+    param.value = value
+    shader.params[key] = param
+
+proc get_float*(shader: Shader, key: string): float32 =
+    let param = shader.params[key]
+    result = cast[ShaderParamFloat](param).value
+
+proc set*(shader: Shader, key: string, value: Vec2) =
+    let param = new(ShaderParamVec2)
+    param.key = key
+    param.value = value
+    shader.params[key] = param
+
+proc get_vec2*(shader: Shader, key: string): Vec2 =
+    let param = shader.params[key]
+    result = cast[ShaderParamVec2](param).value
+
+proc set*(shader: Shader, key: string, value: Vec3) =
+    let param = new(ShaderParamVec3)
+    param.key = key
+    param.value = value
+    shader.params[key] = param
+
+proc get_vec3*(shader: Shader, key: string): Vec3 =
+    let param = shader.params[key]
+    result = cast[ShaderParamVec3](param).value
+
+proc set*(shader: Shader, key: string, value: Vec4) =
+    let param = new(ShaderParamVec4)
+    param.key = key
+    param.value = value
+    shader.params[key] = param
+
+proc get_vec4*(shader: Shader, key: string): Vec4 =
+    let param = shader.params[key]
+    result = cast[ShaderParamVec4](param).value
+
+proc set*(shader: Shader, key: string, value: Mat4) =
+    let param = new(ShaderParamMat4)
+    param.key = key
+    param.value = value
+    shader.params[key] = param
+
+proc get_mat4*(shader: Shader, key: string): Mat4 =
+    let param = shader.params[key]
+    result = cast[ShaderParamMat4](param).value
+
+proc use*(shader: Shader) =
+    glUseProgram(shader.program)
+    for param in values(shader.params):
+        update(param, shader)
+
+proc destroy*(shader: Shader) = remove(cache, shader)
+proc cleanupShaders*() =
+    echo &"Cleaning up [{len(cache)}] shaders..."
+    clear(cache)

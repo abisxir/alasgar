@@ -143,13 +143,25 @@ proc `activeCamera`*(scene: Scene): CameraComponent =
             result = c
 
  
-method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32) =
+method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
     var active = scene.activeCamera
     if active != nil:
+        let today = now()
+        let timestamp = getTime()
+        let mouseXY = getMousePosition(input)
+        let mouseZW = if getMouseButtonDown(input, mouseButtonLeft): mouseXY else: -1 * mouseXY
         for shader in sys.graphic.shaders:
             use(shader)
-            shader["u_projection_matrix"] = active.projection
-            shader["u_view_matrix"] = active.view
-            shader["u_view_position"] = active.transform.globalPosition
+            shader["camera.projection"] = active.projection
+            shader["camera.view"] = active.view
+            shader["camera.position"] = active.transform.globalPosition
+            
+            shader["frame.resolution"] = vec3(sys.graphic.screenSize.x, sys.graphic.screenSize.y, 0)
+            shader["frame.time"] = age
+            shader["frame.time_delta"] = delta
+            shader["frame.frame"] = frames
+            shader["frame.mouse"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
+            shader["frame.date"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
+
 
 

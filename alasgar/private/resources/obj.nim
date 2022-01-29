@@ -106,7 +106,7 @@ proc loadObj(filename: string): Resource =
         if startsWith(buf, "mtllib "):
             let materialFileName = extractFilename(buf)
             loadMaterials(filename, materialFileName, modelResource)
-        elif startsWith(buf, "o "):
+        elif startsWith(buf, "o ") or startsWith(buf, "g "):
             if len(vertices) > 0 and not isEmptyOrWhitespace(modelName):
                 discard addMesh(modelResource, modelName, vertices)
                 vertices = newSeq[Vertex]()

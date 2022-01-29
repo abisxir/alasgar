@@ -99,7 +99,7 @@ method init*(sys: SoundSystem, g: Graphic) =
     if openAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0:
         raise newAlasgarError("Could not open audio!")
 
-method process*(sys: SoundSystem, scene: Scene, input: Input, delta: float32) = 
+method process*(sys: SoundSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) = 
     var activeCamera = scene.activeCamera 
     if activeCamera != nil:
         var pos = activeCamera.transform.globalPosition

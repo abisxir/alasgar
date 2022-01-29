@@ -21,7 +21,7 @@ import components/light
 import components/interactive
 import components/environment
 import resources/resource
-#import components/sound
+import shader
 
 
 when defined(android) or defined(ios):
@@ -35,7 +35,8 @@ type
         primary*: Scene
         scenes*: seq[Scene]
         age: float32
-        fps: float32 
+        fps: float32
+        frames: float32 
         systems: seq[System]
         ratio: float32
         frameLimit: float32 
@@ -220,6 +221,10 @@ proc loop*(engine: Engine) =
 
     engine.runGame = true
     while engine.runGame:
+        if not isNil(engine.primary):
+            # Cleans up the scene, removes dangling entities
+            cleanup(engine.primary)
+
         # Calculates delta time between current frame and the last drawn frame
         var 
             input: Input
@@ -229,15 +234,18 @@ proc loop*(engine: Engine) =
 
         if delta > 0 and delta < engine.frameLimit:
             sleepTime = engine.frameLimit - delta 
-            sleep(int(sleepTime * 1000))
-            now = epochTime()
-            delta = now - lastTicks
+            while sleepTime > 0 and delta < engine.frameLimit:
+                sleep(1)
+                sleepTime -= 1
+                now = epochTime()
+                delta = now - lastTicks
        
         # Updates last tick with the current time
         lastTicks = now
 
         # Calculates FPS
         engine.fps = 1.float32 / delta
+        engine.frames += 1
 
         # Keeps age of running system
         engine.age += delta
@@ -298,18 +306,17 @@ proc loop*(engine: Engine) =
             if engine.primary != nil:
                 for system in engine.systems:
                     let start = epochTime()
-                    process(system, engine.primary, input, delta)
+                    process(system, engine.primary, input, delta, engine.frames, engine.age)
                     systemBenchmark[system.name] = epochTime() - start
         else:
             destroy(engine.primary)
             engine.primary = engine.newPrimary
             engine.newPrimary = nil
 
-    echo "Cleaning up resources..."
     cleanupResources()
-    echo "Cleaning up textures..."
     cleanupTextures()
-
+    cleanupShaders()
+    cleanupMeshes()
 
 proc render*(engine: Engine, scene: Scene) =
     if engine.primary != scene:
