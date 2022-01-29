@@ -108,7 +108,7 @@ proc newMesh*(data: var openArray[Vertex], indices: openArray[uint32], drawMode:
     # Streams data
     if len(data) > 0:
         let size: GLsizeiptr = (sizeof(data[0]) * data.len).GLsizeiptr
-        #glBufferData(GL_ARRAY_BUFFER, size, cast[pointer](data[0].caddr), bufferMode)
+        glBufferData(GL_ARRAY_BUFFER, size, cast[pointer](data[0].caddr), bufferMode)
 
     glGenBuffers(1, result.modelBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.modelBufferObject)
