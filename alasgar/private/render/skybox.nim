@@ -64,7 +64,7 @@ proc newSkybox*(): Skybox =
     glGenBuffers(1, addr(result.cubeVAO))
     glBindVertexArray(result.cubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, result.cubeVAO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), addr(vertices[0]), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices).GLsizeiptr, addr(vertices[0]).pointer, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0)
     glVertexAttribPointer(0, 3, cGL_FLOAT, false, (3 * sizeof(float32)).GLsizei, cast[pointer](0))
     glBindVertexArray(0)

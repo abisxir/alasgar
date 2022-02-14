@@ -4,7 +4,7 @@ import ../shader
 import ../system
 import ../texture
 
-const cubemapCS = staticRead("shaders/environment-cubemap.cs")
+const cubemapCS = staticRead("../render/shaders/environment-cubemap.cs")
 
 type
     EnvironmentComponent* = ref object of Component

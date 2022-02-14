@@ -100,7 +100,7 @@ proc newFrameBuffer*(size: Vec2, deferred: bool=false, multiSample: int=4): Fram
     glGenBuffers(1, addr(result.quadVBO))
     glBindVertexArray(result.quadVAO);
     glBindBuffer(GL_ARRAY_BUFFER, result.quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), addr(quadVertices[0]), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices).GLsizeiptr, addr(quadVertices[0]).pointer, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0)
     glVertexAttribPointer(0, 2, cGL_FLOAT, false, (4 * sizeof(float32)).GLsizei, cast[pointer](0))
     glEnableVertexAttribArray(1)

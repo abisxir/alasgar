@@ -47,7 +47,7 @@ const VECTOR4F_SIZE_BYTES = 4 * sizeof(float32)
 var bufferSizeOf: int = 0 # Drawable size as stride
 
 proc setBufferSizeOf*(size: int) = bufferSizeOf = size
-func caddr*(v: var Vertex): ptr float32 = v.position.caddr
+func caddr*(v: var Vertex): pointer = v.position.caddr
 func `$`*(v: Mesh): string = &"Vertices: [{v.count / 3}] triangles"
 
 proc newMesh*(data: var openArray[Vertex], indices: openArray[uint32], drawMode: GLenum = GL_TRIANGLES, bufferMode: GLenum = GL_STATIC_DRAW): Mesh =
@@ -201,20 +201,20 @@ proc update*(o: Mesh, data: var openArray[Vertex]) =
 
     o.count = len(data).GLsizei
     glBindBuffer(GL_ARRAY_BUFFER, o.vertexBufferObject)
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data[0]) * len(data), data[0].caddr, o.bufferMode)
+    glBufferData(GL_ARRAY_BUFFER, (sizeof(data[0]) * len(data)).GLsizeiptr, data[0].caddr, o.bufferMode)
 
 
 proc render*(mesh: Mesh, model: ptr float32, material: ptr uint32, sprite: ptr float32, count: int) =
     glBindVertexArray(mesh.vertexArrayObject)
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh.modelBufferObject)
-    glBufferData(GL_ARRAY_BUFFER, count * bufferSizeOf, model, GL_DYNAMIC_DRAW)
+    glBufferData(GL_ARRAY_BUFFER, (count * bufferSizeOf).GLsizeiptr, model.pointer, GL_DYNAMIC_DRAW)
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh.materialBufferObject)
-    glBufferData(GL_ARRAY_BUFFER, count * bufferSizeOf, material, GL_DYNAMIC_DRAW)
+    glBufferData(GL_ARRAY_BUFFER, (count * bufferSizeOf).GLsizeiptr, material.pointer, GL_DYNAMIC_DRAW)
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh.spriteBufferObject)
-    glBufferData(GL_ARRAY_BUFFER, count * bufferSizeOf, sprite, GL_DYNAMIC_DRAW)
+    glBufferData(GL_ARRAY_BUFFER, (count * bufferSizeOf).GLsizeiptr, sprite.pointer, GL_DYNAMIC_DRAW)
 
     if len(mesh.indices) > 0:
         if count > 1:
