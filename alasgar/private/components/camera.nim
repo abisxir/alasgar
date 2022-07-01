@@ -150,7 +150,7 @@ method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, f
         let timestamp = getTime()
         let mouseXY = getMousePosition(input)
         let mouseZW = if getMouseButtonDown(input, mouseButtonLeft): mouseXY else: -1 * mouseXY
-        for shader in sys.graphic.shaders:
+        for shader in sys.graphic.context.shaders:
             use(shader)
             shader["camera.projection"] = active.projection
             shader["camera.view"] = active.view

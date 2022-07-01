@@ -14,9 +14,11 @@ import math/vec2
 import math/vec3
 import math/vec4
 import math/quat
+import ports/opengl
 import logger
+import error
 
-export logger, helpers, quat, mat4, vec2, vec3, vec4, strformat, chroma, strutils, sequtils
+export logger, helpers, quat, mat4, vec2, vec3, vec4, strformat, chroma, strutils, sequtils, opengl, error
 
 # General funcs
 proc halt*(message: string) = 

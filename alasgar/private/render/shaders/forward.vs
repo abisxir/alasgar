@@ -4,10 +4,11 @@ precision highp int;
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec2 in_uv;
-layout(location = 3) in mat4 in_model;
-layout(location = 7) in uvec4 in_material;
-layout(location = 8) in vec4 in_sprite;
+layout(location = 2) in vec4 in_tangent;
+layout(location = 3) in vec4 in_uv;
+layout(location = 4) in mat4 in_model;
+layout(location = 8) in uvec4 in_material;
+layout(location = 9) in vec4 in_sprite;
 
 
 // Camera
@@ -25,9 +26,8 @@ uniform struct Environment {
     float fog_density;
     float fog_gradient;
     vec4 fog_color;
-    int direct_lights_count;
-    int spotpoint_lights_count;
-    int point_lights_count;
+    int lights_count;
+    float mip_count;
     int shadow_enabled;
     vec3 shadow_position;
     mat4 shadow_mvp;
@@ -51,17 +51,29 @@ out struct Surface {
 } surface;
 
 out struct Material {
-    vec4 base_color;
-    vec4 emmisive_color;
+    vec3 base_color;
+    vec3 specular_color;
+    vec3 emissive_color;
+    float opacity;
+
     float metallic;
     float roughness;
     float reflectance;
     float ao;
+
     float has_albedo_map;
     float has_normal_map;
     float has_metallic_map;
     float has_roughness_map;
     float has_ao_map;
+    float has_emissive_map;
+
+    float albedo_map_uv_channel;
+    float normal_map_uv_channel;
+    float metallic_map_uv_channel;
+    float roughness_map_uv_channel;
+    float ao_map_uv_channel;
+    float emissive_map_uv_channel;
 } material;
 
 $MAIN_FUNCTION$
@@ -71,6 +83,7 @@ $MAIN_FUNCTION$
 #define METALLIC_MAP_FLAG   4u
 #define ROUGHNESS_MAP_FLAG  8u
 #define AO_MAP_FLAG         16u
+#define EMISSIVE_MAP_FLAG   32u
 
 float has_flag(uint value, uint flag) {
     uint r = value & flag;
@@ -78,20 +91,34 @@ float has_flag(uint value, uint flag) {
 }
 
 void extract_material_data() {
-    material.base_color = unpackUnorm4x8(in_material.x);
-    material.emmisive_color = unpackUnorm4x8(in_material.y);
+    vec4 base_color = unpackUnorm4x8(in_material.x);
+    material.base_color = base_color.rgb;
+    material.opacity = base_color.a;
+    vec4 specular_color = unpackUnorm4x8(in_material.y);
+    material.specular_color = specular_color.rgb;
+    vec4 emissive_color = unpackUnorm4x8(in_material.z);
+    uint flags = uint(round(emissive_color.a * 63.0));
+    uint uv_channels = uint(round(specular_color.a * 63.0));
+    material.emissive_color = emissive_color.rgb;
     
-    vec4 unpacked_factors = unpackUnorm4x8(in_material.z);
+    vec4 unpacked_factors = unpackUnorm4x8(in_material.w);
     material.metallic = unpacked_factors.x;
     material.roughness = unpacked_factors.y;
     material.reflectance = unpacked_factors.z;
     material.ao = unpacked_factors.w;
 
-    material.has_albedo_map = has_flag(in_material.w, ALBEDO_MAP_FLAG);
-    material.has_normal_map = has_flag(in_material.w, NORMAL_MAP_FLAG);
-    material.has_metallic_map = has_flag(in_material.w, METALLIC_MAP_FLAG);
-    material.has_roughness_map = has_flag(in_material.w, ROUGHNESS_MAP_FLAG);
-    material.has_ao_map = has_flag(in_material.w, AO_MAP_FLAG);
+    material.has_albedo_map = has_flag(flags, ALBEDO_MAP_FLAG);
+    material.albedo_map_uv_channel = has_flag(uv_channels, ALBEDO_MAP_FLAG);
+    material.has_normal_map = has_flag(flags, NORMAL_MAP_FLAG);
+    material.normal_map_uv_channel = has_flag(uv_channels, NORMAL_MAP_FLAG);
+    material.has_metallic_map = has_flag(flags, METALLIC_MAP_FLAG);
+    material.metallic_map_uv_channel = has_flag(uv_channels, METALLIC_MAP_FLAG);
+    material.has_roughness_map = has_flag(flags, ROUGHNESS_MAP_FLAG);
+    material.roughness_map_uv_channel = has_flag(uv_channels, ROUGHNESS_MAP_FLAG);
+    material.has_ao_map = has_flag(flags, AO_MAP_FLAG);
+    material.ao_map_uv_channel = has_flag(uv_channels, AO_MAP_FLAG);
+    material.has_emissive_map = has_flag(flags, EMISSIVE_MAP_FLAG);
+    material.emissive_map_uv_channel = has_flag(uv_channels, EMISSIVE_MAP_FLAG);
 }
 
 void main() {
@@ -104,13 +131,14 @@ void main() {
     mat4 normal_matrix = transpose(inverse(in_model));
 
     surface.position = in_model * position;
-    surface.normal = mat3(normal_matrix) * in_normal;
+    //surface.normal = (normal_matrix * vec4(in_normal, 0.0)).xyz;
+    surface.normal = (in_model * vec4(in_normal, 0.0)).xyz;
     surface.shadow_light_position = env.shadow_mvp * surface.position;
 
     if(frame_size.x > 0.0) {
-        surface.uv = (in_uv * frame_size) + frame_offset;
+        surface.uv = (in_uv.xy * frame_size) + frame_offset;
     } else {
-        surface.uv = in_uv;
+        surface.uv = in_uv.xy;
     }
 
     vec4 position_related_to_view = camera.view * surface.position;

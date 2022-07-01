@@ -11,6 +11,7 @@ type
         height*: int
         channels*: int
         pixels*: seq[byte]
+        hdr*: bool
 
 
 proc loadImage*(filename: string): Image =
@@ -22,6 +23,7 @@ proc loadImage*(filename: string): Image =
     var buffer = readAll(stream)
     var byteSeq = cast[seq[byte]](buffer)
     result.pixels = stbi.loadFromMemory(byteSeq, result.width, result.height, result.channels, stbi.Default)
+    result.hdr = filename.endsWith(".hdr")
 
 
 proc caddr*(t: Image): pointer =

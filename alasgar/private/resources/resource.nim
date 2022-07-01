@@ -23,8 +23,12 @@ proc registerResourceManager*(kind: string, load: ResourceLoadFunc, destroy: Res
     managers[kind] = ResourceManager(load: load, destroy: destroy)
 
 proc extractKind(url: string): string =
-    let words = url.split(".")
-    result = words[^1]
+    if startsWith(url, "data:image/") and find(url, "base64") > 0:
+        let short = replace(url[..24], "data:image/", "")
+        result = split(short, ";")[0]
+    else:
+        let words = url.split(".")
+        result = words[^1]
     
 proc load*(url: string): Resource =
     if not caches.hasKey(url):
@@ -36,9 +40,14 @@ proc load*(url: string): Resource =
         caches[url] = resource
     result = caches[url]
 
+func shorten(text: string): string = 
+    if len(text) > 64: 
+        text[..64] 
+    else: 
+        text
 
 proc destroy(r: Resource, deleteFromCache: bool) =
-    echo &"Destroying resource[{r.url}]..."
+    echo &"Destroying resource[{shorten(r.url)}]..."
     let destroy = managers[r.kind].destroy
     if deleteFromCache:
         del(caches, r.url)

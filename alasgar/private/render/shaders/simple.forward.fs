@@ -75,6 +75,8 @@ layout(binding = 2) uniform sampler2D u_normal_map;
 layout(binding = 3) uniform sampler2D u_metallic_map;
 layout(binding = 4) uniform sampler2D u_roughness_map;
 layout(binding = 5) uniform sampler2D u_ao_map;
+layout(binding = 6) uniform sampler2D u_emissive_map;
+layout(binding = 7) uniform samplerCube u_environment_map;
 
 in struct Surface {
     vec4 position;
@@ -85,9 +87,11 @@ in struct Surface {
 } surface;
 
 in struct Material {
-    vec4 base_color;
-    vec4 emmisive_color;
-    
+    vec3 base_color;
+    vec3 specular_color;
+    vec3 emissive_color;
+    float opacity;
+
     float metallic;
     float roughness;
     float reflectance;
@@ -98,6 +102,14 @@ in struct Material {
     float has_metallic_map;
     float has_roughness_map;
     float has_ao_map;
+    float has_emissive_map;
+
+    float albedo_map_uv_channel;
+    float normal_map_uv_channel;
+    float metallic_map_uv_channel;
+    float roughness_map_uv_channel;
+    float ao_map_uv_channel;
+    float emissive_map_uv_channel;
 } material;
 
 float pow5(float x) {
@@ -160,23 +172,26 @@ float simple_shadow_map(vec4 light_space_position, vec3 surface_normal) {
     return 1.0;
 }
 
-vec3 get_normal() {
+vec3 get_normal(vec3 V) {
+    vec3 N = normalize(surface.normal);
     if(material.has_normal_map > 0.0) {
-        vec3 pos_dx = dFdx(surface.position.xyz);
-        vec3 pos_dy = dFdy(surface.position.xyz);
-        vec2 tex_dx = dFdx(surface.uv);
-        vec2 tex_dy = dFdy(surface.uv);
-        
-        vec3 t = normalize(pos_dx * tex_dy.t - pos_dy * tex_dx.t);
-        vec3 b = normalize(-pos_dx * tex_dy.s + pos_dy * tex_dx.s);
+        vec3 dp1 = dFdx(surface.position.xyz);
+        vec3 dp2 = dFdy(surface.position.xyz);
+        vec2 duv1 = dFdx(surface.uv);
+        vec2 duv2 = dFdy(surface.uv);
 
-        mat3 tbn = mat3(t, b, normalize(surface.normal));
-        vec3 normal = texture(u_normal_map, surface.uv).rgb * 2.0 - 1.0;
+        vec3 dp2perp = cross( dp2, N );
+        vec3 dp1perp = cross( N, dp1 );
+        vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+        vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
 
-        return (vec4(normal, 0.0) * camera.view).xyz;
-    } else {
-        return normalize(surface.normal);
-    }
+        /* construct a scale-invariant frame */
+        float invmax = inversesqrt(max(dot(T,T), dot(B,B)));
+        mat3 TBN = mat3(T * invmax, B * invmax, N);
+        vec3 map = normalize(texture(u_normal_map, surface.uv).rgb * 2.007874 - 1.007874);
+        return normalize(TBN * map);
+    } 
+    return N;
 }
 
 float D_GGX(float linearRoughness, float NoH, const vec3 h) {
@@ -241,11 +256,7 @@ vec2 PrefilteredDFG_Karis(float roughness, float NoV) {
     return vec2(-1.04, 1.04) * a004 + r.zw;
 }
 
-//------------------------------------------------------------------------------
-// Tone mapping and transfer functions
-//------------------------------------------------------------------------------
-
-vec3 Tonemap_ACES(const vec3 x) {
+vec3 tonemap_aces(const vec3 x) {
     // Narkowicz 2015, "ACES Filmic Tone Mapping Curve"
     const float a = 2.51;
     const float b = 0.03;
@@ -259,30 +270,33 @@ vec3 calculate_specular_indirect(vec3 V, vec3 N, float roughness) {
     float mip_count = 9.0;
     float lod = roughness * mip_count;
     vec3 reflection = -normalize(reflect(V, N));
-    return vec3(0.0);
+    vec3 specular = textureLod(u_environment_map, reflection, lod).rgb;
+    return specular;
 }
 
 $MAIN_FUNCTION$
 
 void main() {
-    out_color = material.base_color;
-    if(material.has_albedo_map > 0.0) {
-        out_color *= texture(u_albedo_map, surface.uv);
-    }
-
-    float alpha = out_color.a;
-    if(alpha < 0.01) {
+    if(material.opacity < 0.01) {
         discard;
+    } 
+
+    vec3 V = normalize(camera.position - surface.position.xyz);
+    out_color = vec4(material.base_color, material.opacity);
+    //out_color.rgb = get_normal(V);
+    //return;
+    if(material.has_albedo_map > 0.0) {
+        out_color = out_color * texture(u_albedo_map, surface.uv);
     }
 
     float metallic = material.metallic;
     if(material.has_metallic_map > 0.0) {
-        metallic *= texture(u_metallic_map, surface.uv).r;
+        metallic *= texture(u_metallic_map, surface.uv).g;
     }
 
     float roughness = material.roughness;
     if(material.has_roughness_map > 0.0) {
-        roughness *= texture(u_roughness_map, surface.uv).r;
+        roughness *= texture(u_roughness_map, surface.uv).b;
     }
 
     float ao = material.ao;
@@ -291,13 +305,12 @@ void main() {
     }
 
     vec3 albedo = (1.0 - metallic) * out_color.rgb;
-    //vec3 f0 = 0.04 * (1.0 - metallic) + out_color.rgb * metallic;
-    vec3 f0 = 0.16 * material.reflectance * material.reflectance * (1.0 - metallic) + out_color.rgb * metallic;
+    vec3 f0 = 0.04 * (1.0 - metallic) + out_color.rgb * metallic;
+    //vec3 f0 = 0.16 * material.reflectance * material.reflectance * (1.0 - metallic) + out_color.rgb * metallic;
 
     float linearRoughness = roughness * roughness;
     float a2 = linearRoughness * linearRoughness;
-    vec3 N = get_normal();
-    vec3 V = normalize(camera.position - surface.position.xyz);
+    vec3 N = get_normal(V);
     float NoV = abs(dot(N, V)) + 1e-5;
     float ggx_factor_const = sqrt((NoV - a2 * NoV) * NoV + a2);
     float indirectIntensity = 0.64;
@@ -323,7 +336,7 @@ void main() {
         vec3 Fr = (D * V) * F;
 
         // diffuse BRDF
-        vec3 Fd = albedo * Fd_Burley(linearRoughness, NoV, NoL, LoH);
+        vec3 Fd = albedo * Fd_Lambert(); //Fd_Burley(linearRoughness, NoV, NoL, LoH);
 
         lights_effect += (Fd + Fr) * (point_lights[i].intensity * attenuation * NoL) * point_lights[i].color;
     }
@@ -331,8 +344,8 @@ void main() {
     // Calculates indirect lights
     vec3 indirectDiffuse = Irradiance_SphericalHarmonics(N) * Fd_Lambert();
     vec2 dfg = PrefilteredDFG_Karis(roughness, NoV);
-    vec3 specularColor = f0 * dfg.x + dfg.y;
-    vec3 indirectSpecular = vec3(0.2);
+    vec3 specularColor = f0 * material.specular_color * dfg.x + dfg.y;
+    vec3 indirectSpecular = calculate_specular_indirect(V, N, roughness);
     vec3 ibl = albedo * indirectDiffuse + indirectSpecular * specularColor;
 
     // Adds IBL
@@ -340,10 +353,15 @@ void main() {
 
     // Mixes with ambient occlusion map
     lights_effect = mix(lights_effect, lights_effect * ao, 1.0);
-    // Adds emmisive color
-    lights_effect += material.emmisive_color.rgb;
 
-    out_color = vec4(Tonemap_ACES(lights_effect), alpha);
+    // Adds emissive color
+    if(material.has_emissive_map > 0.0) {
+        lights_effect += texture(u_emissive_map, surface.uv).rgb;
+    } else {
+        lights_effect += material.emissive_color;
+    }
+
+    out_color = vec4(tonemap_aces(lights_effect), out_color.a);
 }
 
 /*
@@ -390,7 +408,7 @@ void main()
                 float distance = length(light_direction);
                 specular_factor = pow(dot(surface_normal, half_vector), v_shininess);
                 float attenuation = point_lights[i].intensity / (point_lights[i].constant + point_lights[i].linear * distance + point_lights[i].quadratic * (distance * distance));
-                light_color += attenuation * specular_factor * material.emmisive_color.rgb + attenuation * lambert_factor * point_lights[i].color;
+                light_color += attenuation * specular_factor * material.emissive_color.rgb + attenuation * lambert_factor * point_lights[i].color;
             }
         }
 

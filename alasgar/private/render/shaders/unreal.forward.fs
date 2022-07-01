@@ -87,7 +87,7 @@ in struct Surface {
 
 in struct Material {
     vec4 base_color;
-    vec4 emmisive_color;
+    vec4 emissive_color;
     
     float metallic;
     float roughness;
@@ -384,8 +384,8 @@ void main() {
 
     // Mixes with ambient occlusion map
     lights_effect = mix(lights_effect, lights_effect * ao, 1.0);
-    // Adds emmisive color
-    lights_effect += material.emmisive_color.rgb;
+    // Adds emissive color
+    lights_effect += material.emissive_color.rgb;
 
     out_color = vec4(lights_effect, alpha);
     out_color.rgb += ibl * iblIntesity;
@@ -435,7 +435,7 @@ void main()
                 float distance = length(light_direction);
                 specular_factor = pow(dot(surface_normal, half_vector), v_shininess);
                 float attenuation = point_lights[i].intensity / (point_lights[i].constant + point_lights[i].linear * distance + point_lights[i].quadratic * (distance * distance));
-                light_color += attenuation * specular_factor * material.emmisive_color.rgb + attenuation * lambert_factor * point_lights[i].color;
+                light_color += attenuation * specular_factor * material.emissive_color.rgb + attenuation * lambert_factor * point_lights[i].color;
             }
         }
 

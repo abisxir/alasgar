@@ -75,10 +75,12 @@ type
         metallicMaterialMap =  0b000100
         roughnessMaterialMap = 0b001000
         aoMaterialMap =        0b010000
+        emissiveMaterialMap =  0b100000
 
     MaterialComponent* = ref object of Component
-        baseColor: Color
-        emmisiveColor: Color
+        diffuseColor: Color
+        specularColor: Color
+        emissiveColor: Color
         metallic: float32
         roughness: float32
         reflectance: float32
@@ -89,7 +91,9 @@ type
         metallicMap: Texture
         roughnessMap: Texture
         aoMap: Texture
+        emissiveMap: Texture
         availableMaps: uint32
+        uvChannels: uint32
 
         vframes: int32
         hframes: int32
@@ -105,7 +109,6 @@ type
     ShaderComponent* = ref object of Component
         instance: Shader
 
-    AlasgarError* = object of Defect 
 
 # Forward declarations
 proc ensureContainer[T](scene: Scene): Container[T]
@@ -117,7 +120,6 @@ proc findEntityByTag*(scene: Scene, tag: string): seq[Entity]
 #proc newComponentId(): int
 func getComponent*[T: Component](e: Entity): T
 proc `inc`(c: Component)
-proc newAlasgarError*(message: string): ref AlasgarError = newException(AlasgarError, message)
 
 # Shader implementation
 proc `instance`*(shader: ShaderComponent): Shader = shader.instance
@@ -498,6 +500,12 @@ proc `model`*(t: TransformComponent): var Mat4 =
         inc(t)
     result = t.local
 
+proc `model=`*(t: TransformComponent, model: Mat4) =
+    t.position = pos(model)
+    t.rotation = quat(model)
+    t.scale = scale(model)
+    markDirty(t)
+
 proc `position=`*(t: TransformComponent, position: Vec3) =
     t.position = position
     markDirty(t)
@@ -637,20 +645,36 @@ func hash*(m: MeshComponent): Hash = hash(cast[pointer](m))
 # Material implementaion
 func updateAvailableMaps(m: MaterialComponent) =
     m.availableMaps = 0
+    m.uvChannels = 0
     if not isNil(m.albedoMap):
         m.availableMaps = m.availableMaps or albedoMaterialMap.uint32
+        if m.albedoMap.uvChannel == 1:
+            m.uvChannels = m.uvChannels or albedoMaterialMap.uint32
     if not isNil(m.metallicMap):
         m.availableMaps = m.availableMaps or metallicMaterialMap.uint32
+        if m.metallicMap.uvChannel == 1:
+            m.uvChannels = m.uvChannels or metallicMaterialMap.uint32
     if not isNil(m.roughnessMap):
         m.availableMaps = m.availableMaps or roughnessMaterialMap.uint32
+        if m.roughnessMap.uvChannel == 1:
+            m.uvChannels = m.uvChannels or roughnessMaterialMap.uint32
     if not isNil(m.normalMap):
         m.availableMaps = m.availableMaps or normalMaterialMap.uint32
+        if m.normalMap.uvChannel == 1:
+            m.uvChannels = m.uvChannels or normalMaterialMap.uint32
     if not isNil(m.aoMap):
         m.availableMaps = m.availableMaps or aoMaterialMap.uint32
+        if m.aoMap.uvChannel == 1:
+            m.uvChannels = m.uvChannels or aoMaterialMap.uint32
+    if not isNil(m.emissiveMap):
+        m.availableMaps = m.availableMaps or emissiveMaterialMap.uint32
+        if m.emissiveMap.uvChannel == 1:
+            m.uvChannels = m.uvChannels or emissiveMaterialMap.uint32
 
-func newMaterialComponent*(baseColor: Color=COLOR_WHITE, 
-        emmisiveColor: Color=COLOR_BLACK,
-        albedoMap, normalMap, metallicMap, roughnessMap, aoMap: Texture = nil, 
+func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
+        specularColor: Color=COLOR_WHITE, 
+        emissiveColor: Color=COLOR_BLACK,
+        albedoMap, normalMap, metallicMap, roughnessMap, aoMap, emissiveMap: Texture = nil, 
         metallic: float32 = 0.0,
         roughness: float32 = 1.0,
         reflectance: float32 = 1.0,
@@ -660,8 +684,9 @@ func newMaterialComponent*(baseColor: Color=COLOR_WHITE,
         hframes: int32=1,
         castShadow: bool=false): MaterialComponent =
     new(result)
-    result.baseColor = baseColor
-    result.emmisiveColor = emmisiveColor
+    result.diffuseColor = diffuseColor
+    result.specularColor = specularColor
+    result.emissiveColor = emissiveColor
     result.metallic = metallic
     result.roughness = roughness
     result.reflectance = reflectance
@@ -671,6 +696,7 @@ func newMaterialComponent*(baseColor: Color=COLOR_WHITE,
     result.metallicMap = metallicMap
     result.roughnessMap = roughnessMap
     result.aoMap = aoMap
+    result.emissiveMap = emissiveMap
     result.frame = max(0, frame)
     result.vframes = max(1, vframes)
     result.hframes = max(1, hframes)
@@ -679,12 +705,16 @@ func newMaterialComponent*(baseColor: Color=COLOR_WHITE,
     result.castShadow = castShadow
     updateAvailableMaps(result)
 
-func `baseColor=`*(m: MaterialComponent, baseColor: Color) =
-    m.baseColor = baseColor
+func `diffuseColor=`*(m: MaterialComponent, value: Color) =
+    m.diffuseColor = value
     inc(m)
 
-func `emmisiveColor=`*(m: MaterialComponent, emmisiveColor: Color) =
-    m.emmisiveColor = emmisiveColor
+func `specularColor=`*(m: MaterialComponent, value: Color) =
+    m.specularColor = value
+    inc(m)
+
+func `emissiveColor=`*(m: MaterialComponent, emissiveColor: Color) =
+    m.emissiveColor = emissiveColor
     inc(m)
 
 func `roughness=`*(m: MaterialComponent, value: float32) =
@@ -728,13 +758,20 @@ func `aoMap=`*(m: MaterialComponent, value: Texture) =
     inc(m)
     updateAvailableMaps(m)
 
+func `emissiveMap=`*(m: MaterialComponent, value: Texture) =
+    m.emissiveMap = value
+    inc(m)
+    updateAvailableMaps(m)
+
 template `albedoMap`*(m: MaterialComponent): Texture = m.albedoMap
 template `normalMap`*(m: MaterialComponent): Texture = m.normalMap
 template `metallicMap`*(m: MaterialComponent): Texture = m.metallicMap
 template `roughnessMap`*(m: MaterialComponent): Texture = m.roughnessMap
 template `aoMap`*(m: MaterialComponent): Texture = m.aoMap
-template `baseColor`*(m: MaterialComponent): Color = m.baseColor
-template `emmisiveColor`*(m: MaterialComponent): Color = m.emmisiveColor
+template `emissiveMap`*(m: MaterialComponent): Texture = m.emissiveMap
+template `diffuseColor`*(m: MaterialComponent): Color = m.diffuseColor
+template `specularColor`*(m: MaterialComponent): Color = m.specularColor
+template `emissiveColor`*(m: MaterialComponent): Color = m.emissiveColor
 template `roughness`*(m: MaterialComponent): float32 = m.roughness
 template `metallic`*(m: MaterialComponent): float32 = m.metallic
 template `reflectance`*(m: MaterialComponent): float32 = m.reflectance
@@ -743,6 +780,7 @@ template `frame`*(material: MaterialComponent): int = material.frame
 template `vframes`*(material: MaterialComponent): int = material.vframes
 template `hframes`*(material: MaterialComponent): int = material.hframes
 template `availableMaps`*(material: MaterialComponent): uint32 = material.availableMaps
+template `uvChannels`*(material: MaterialComponent): uint32 = material.uvChannels
 
 func update(material: MaterialComponent) =
     if material.hframes > 0 and material.vframes > 0:
@@ -775,6 +813,6 @@ template `frameOffset`*(material: MaterialComponent): Vec2 = material.frameOffse
 
 proc `$`*(m: MaterialComponent): string = 
     if not isNil(m):
-        &"base:{m.baseColor} emmisive:{m.emmisiveColor}"
+        &"base:{m.diffuseColor} emissive:{m.emissiveColor}"
     else:
         &"nil"

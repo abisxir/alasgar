@@ -95,8 +95,7 @@ proc newEngine*(windowWidth: int,
                 resizeable: bool = false,
                 frameLimit: int = 0,
                 maxBatchSize: int = 16 * 1024,
-                maxPointLights: int = 8,
-                maxDirectLights: int = 8,
+                maxLights: int = 8,
                 multiSample: int = 4,
                 verbose: bool=false,
                 depthMapSize: Vec2=vec2(1024, 1024)): Engine =
@@ -153,8 +152,7 @@ proc newEngine*(windowWidth: int,
         ),
         vsync=false,
         maxBatchSize=maxBatchSize,
-        maxPointLights=maxPointLights,
-        maxDirectLights=maxDirectLights,
+        maxLights=maxLights,
         multiSample=multiSample,
         depthMapSize=depthMapSize
     )
@@ -235,8 +233,7 @@ proc loop*(engine: Engine) =
         if delta > 0 and delta < engine.frameLimit:
             sleepTime = engine.frameLimit - delta 
             while sleepTime > 0 and delta < engine.frameLimit:
-                sleep(1)
-                sleepTime -= 1
+                sleep(0)
                 now = epochTime()
                 delta = now - lastTicks
        

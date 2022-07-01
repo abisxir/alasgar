@@ -1,4 +1,5 @@
 import strformat
+import base64
 
 import stb_image/read as stbi
 
@@ -13,15 +14,26 @@ type
         width*: int
         height*: int
         channels*: int
+        hdr*: bool
         pixels*: seq[byte]
+        bits*: int
 
 proc loadImage(url: string): Resource =
-    var r = new(ImageResource)
-    setFlipVerticallyOnLoad(true)
-    var stream = openAssetStream(url)
-    if stream == nil:
-        halt &"Could not open [{url}]."
-    var buffer = readAll(stream)
+    var 
+        r = new(ImageResource)
+        buffer: string
+    setFlipVerticallyOnLoad(false)
+    if startsWith(url, "data:image/"):
+        let data = split(url, "base64,")
+        buffer = decode(data[1])
+    else:
+        r.hdr = url.endsWith(".hdr")
+        var stream = openAssetStream(url)
+        defer: close(stream)
+        if stream == nil:
+            halt &"Could not open [{url}]."
+        buffer = readAll(stream)
+    
     var byteSeq = cast[seq[byte]](buffer)
     r.pixels = loadFromMemory(
         byteSeq, 
@@ -30,6 +42,11 @@ proc loadImage(url: string): Resource =
         r.channels, 
         stbi.Default
     )
+    r.bits = 8 * (len(r.pixels) / (r.width * r.height * r.channels)).int
+    if not startsWith(url, "data:image/"):
+        echo &"Image [{url}] loaded with image with size [{r.width}x{r.height}] in [{r.channels}] channels and [{r.bits}]bpp."
+    else:
+        echo &"Image [{url[..16]}...] loaded with image with size [{r.width}x{r.height}] in [{r.channels}] channels and [{r.bits}]bpp."
     result = r
 
 
@@ -43,6 +60,7 @@ proc destroyImage(r: Resource) =
 proc caddr*(t: ImageResource): pointer =
     result = t.pixels[0].addr
 
+registerResourceManager("hdr", loadImage, destroyImage)
 registerResourceManager("png", loadImage, destroyImage)
 registerResourceManager("jpg", loadImage, destroyImage)
 registerResourceManager("jpeg", loadImage, destroyImage)

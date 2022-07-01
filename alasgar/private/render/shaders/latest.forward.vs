@@ -54,7 +54,7 @@ out struct Surface {
 
 out struct Material {
     vec4 base_color;
-    vec4 emmisive_color;
+    vec4 emissive_color;
     float metallic;
     float roughness;
     float reflectance;
@@ -81,7 +81,7 @@ float has_flag(uint value, uint flag) {
 
 void main() {
     material.base_color = unpackUnorm4x8(in_material.x);
-    material.emmisive_color = unpackUnorm4x8(in_material.y);
+    material.emissive_color = unpackUnorm4x8(in_material.y);
     
     vec4 unpacked_factors = unpackUnorm4x8(in_material.z);
     material.metallic = unpacked_factors.x;

@@ -36,7 +36,7 @@ in struct Surface {
 
 in struct Material {
     vec4 base_color;
-    vec4 emmisive_color;
+    vec4 emissive_color;
     
     float metallic;
     float roughness;
@@ -335,8 +335,8 @@ void main() {
     // Multiply occlusion
     Lo = mix(Lo, Lo * ao, 1.0);
 
-    // Adds emmisive color
-    Lo += material.emmisive_color.rgb;
+    // Adds emissive color
+    Lo += material.emissive_color.rgb;
 
     // Convert to sRGB to display
     out_color.rgb = Lo;//linearToSRGB(color);
@@ -361,8 +361,8 @@ void main() {
 
     // Mixes with ambient occlusion map
     lights_effect = mix(lights_effect, lights_effect * ao, 1.0);
-    // Adds emmisive color
-    lights_effect += material.emmisive_color.rgb;
+    // Adds emissive color
+    lights_effect += material.emissive_color.rgb;
 
     out_color.rgb *= lights_effect;
     */

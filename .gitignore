@@ -68,3 +68,4 @@ nakefile
 # Build and res direcory
 build/
 art/
+.history

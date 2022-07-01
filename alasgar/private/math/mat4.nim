@@ -284,41 +284,6 @@ func dist*(a, b: Mat4): float32 =
     z = a[14] - b[14]
   sqrt(x*x + y*y + z*z)
 
-#[
-func translate*(a: Mat4, v: Vec3): Mat4 =
-  var
-    a00 = a[0]
-    a01 = a[1]
-    a02 = a[2]
-    a03 = a[3]
-    a10 = a[4]
-    a11 = a[5]
-    a12 = a[6]
-    a13 = a[7]
-    a20 = a[8]
-    a21 = a[9]
-    a22 = a[10]
-    a23 = a[11]
-
-  result[0] = a00
-  result[1] = a01
-  result[2] = a02
-  result[3] = a03
-  result[4] = a10
-  result[5] = a11
-  result[6] = a12
-  result[7] = a13
-  result[8] = a20
-  result[9] = a21
-  result[10] = a22
-  result[11] = a23
-
-  result[12] = a00*v.x + a10*v.y + a20*v.z + a[12]
-  result[13] = a01*v.x + a11*v.y + a21*v.z + a[13]
-  result[14] = a02*v.x + a12*v.y + a22*v.z + a[14]
-  result[15] = a03*v.x + a13*v.y + a23*v.z + a[15]
-]#
-
 func translate*(v: Vec3): Mat4 =
   result[0] = 1
   result[5] = 1
@@ -485,6 +450,28 @@ func lookAt*(eye, center, up: Vec3): Mat4 =
   result[14] = -(z0*eyex + z1*eyey + z2*eyez)
   result[15] = 1
 
+func scale*(b: Mat4): Vec3 = 
+  let
+    b00 = b[0]
+    b01 = b[1]
+    b02 = b[2]
+    b03 = b[3]
+    b10 = b[4]
+    b11 = b[5]
+    b12 = b[6]
+    b13 = b[7]
+    b20 = b[8]
+    b21 = b[9]
+    b22 = b[10]
+    b23 = b[11]
+    xs: float32 = if sign(b00 * b01 * b02 * b03) < 0: -1 else: 1
+    ys: float32 = if sign(b10 * b11 * b12 * b13) < 0: -1 else: 1
+    zs: float32 = if sign(b20 * b21 * b22 * b23) < 0: -1 else: 1
+
+  result.x = xs * sqrt(b00 * b00 + b01 * b01 + b02 * b02)
+  result.y = ys * sqrt(b10 * b10 + b11 * b11 + b12 * b12)
+  result.z = zs * sqrt(b20 * b20 + b21 * b21 + b22 * b22)
+
 func `$`*(a: Mat4): string =
   &"""[{a[0]:.5f}, {a[1]:.5f}, {a[2]:.5f}, {a[3]:.5f},
 {a[4]:.5f}, {a[5]:.5f}, {a[6]:.5f}, {a[7]:.5f},
@@ -492,3 +479,4 @@ func `$`*(a: Mat4): string =
 {a[12]:.5f}, {a[13]:.5f}, {a[14]:.5f}, {a[15]:.5f}]"""
 
 func caddr*(m: var Mat4): ptr float32 = m[0].addr
+

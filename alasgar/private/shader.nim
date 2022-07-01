@@ -91,7 +91,7 @@ proc loadShaderSource(src: cstring, kind: GLenum): GLuint =
     let info = shaderInfoLog(result)
     if not compiled:
         logi "Shader compile error: ", info
-        logi "The shader: ", src
+        #logi "The shader: ", src
         glDeleteShader(result)
     elif info.len > 0:
         logi "Shader compile log: ", info
@@ -159,7 +159,7 @@ proc newShader*(vs, fs: string, attributes: openarray[tuple[index: GLuint, name:
     add(cache, result)
     
 
-proc newShader*(cs: string): Shader =
+proc newComputeShader*(cs: string): Shader =
     new(result)
     when defined(macosx):
         let shaderProfile = "#version 410"
@@ -170,6 +170,12 @@ proc newShader*(cs: string): Shader =
 
     add(cache, result)
 
+proc compute*(xGroups, yGroups, zGroups: int) =
+    glDispatchCompute(xGroups.GLuint, yGroups.GLuint, zGroups.GLuint)
+    let error = glGetError() != GL_NO_ERROR.GLenum
+    if error:
+        echo "error -> ", glGetError().int
+    glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT or GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
 
 proc getKeyLocation(s: Shader, key: string): GLint =
     if not s.map.hasKey(key):

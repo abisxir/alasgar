@@ -23,7 +23,7 @@ method process*(sys: RenderSystem, scene: Scene, input: Input, delta: float32, f
             # Gets environment component
             env = first[EnvironmentComponent](scene)
             # Gets cubemap if there is env
-            skybox = if not isNil(env): env.skybox else: nil
+            skybox = if not isNil(env): env.environmentMap else: nil
 
         # Sends data to GPU
         render(

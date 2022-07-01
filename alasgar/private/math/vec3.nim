@@ -19,6 +19,11 @@ func vec3*(a: float32): Vec3 =
     result.y = a
     result.z = a
 
+func vec3*(a: array[3, float32]): Vec3 =
+    result.x = a[0]
+    result.y = a[1]
+    result.z = a[2]
+
 const X_DIR* = vec3(1.0, 0.0, 0.0)
 const Y_DIR* = vec3(0.0, 1.0, 0.0)
 const Z_DIR* = vec3(0.0, 0.0, 1.0)

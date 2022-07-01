@@ -24,7 +24,7 @@ proc updatePoints*(line: LineComponent) =
 
 proc newLineComponent*(points: openArray[Vec3], strip: bool): LineComponent =
     new(result)
-    add(result.empty, Vertex(position: vec3(0)))
+    add(result.empty, newVertex(VEC3_ZERO))
     add(result.points, points)
     updateVertices(result)
     result.instance = newLinesMesh(result.vertices, dynamic=true, strip=strip)

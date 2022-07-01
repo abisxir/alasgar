@@ -13,38 +13,29 @@ import ../core
 import frame_buffer
 import depth_buffer
 import skybox
+import context
 
 export opengl
 
 const forwardV = staticRead("shaders/forward.vs")
-const forwardF = staticRead("shaders/simple.forward.fs")
+const forwardF = staticRead("shaders/forward.fs")
 
 type
     Graphic* = ref object
-        vsync: bool
-        clearColor*: chroma.Color
         screenSize*, windowSize*: Vec2
+        maxBatchSize*: int
+        maxLights*: int
+        multiSample*: int
+        shader: Shader
+        vsync: bool
         window: WindowPtr
         glContext: GlContextPtr
-        shader*: Shader
-        maxBatchSize*: int
-        maxPointLights*: int
-        maxDirectLights*: int
-        multiSample*: int
         totalObjects: int
         totalBatches: int
         drawCalls: int
         frameBuffer: FrameBuffer
-        depthBuffer: DepthBuffer
         skybox: Skybox
-        depthMapSize: Vec2
-        shaders*: seq[Shader]
-        shadow*: tuple[
-            view: Mat4,
-            projection: Mat4,
-            mvp: Mat4, 
-            enabled: bool
-        ]
+        context*: GraphicContext
 
 proc `totalObjects`*(g: Graphic): int = g.totalObjects
 proc `drawCalls`*(g: Graphic): int = g.drawCalls
@@ -52,10 +43,7 @@ proc `drawCalls`*(g: Graphic): int = g.drawCalls
 proc newSpatialShader*(g: Graphic, vertexSource: string="", fragmentSource: string=""): Shader =
     var 
         vsource: string
-        fsource = forwardF
-            .replace("$MAX_SPOTPOINT_LIGHTS$", &"{g.maxPointLights}")
-            .replace("$MAX_POINT_LIGHTS$", &"{g.maxPointLights}")
-            .replace("$MAX_DIRECT_LIGHTS$", &"{g.maxDirectLights}")
+        fsource = forwardF.replace("$MAX_LIGHTS$", &"{g.maxLights}")
             
     if isEmptyOrWhitespace(fragmentSource):
         fsource = fsource
@@ -77,7 +65,7 @@ proc newSpatialShader*(g: Graphic, vertexSource: string="", fragmentSource: stri
 
     result = newShader(vsource, fsource, [])
 
-proc initOpenGL(g: Graphic, maxBatchSize, maxPointLights, maxDirectLights, multiSample: int) =
+proc initOpenGL(g: Graphic, maxBatchSize, maxLights, multiSample: int) =
     # Initialize opengl context
     discard glSetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1)
     when defined(macosx):
@@ -120,8 +108,7 @@ proc initOpenGL(g: Graphic, maxBatchSize, maxPointLights, maxDirectLights, multi
 
     # Sets batch size
     g.maxBatchSize = maxBatchSize
-    g.maxPointLights = maxPointLights
-    g.maxDirectLights = maxDirectLights
+    g.maxLights = maxLights
     g.multiSample = multiSample
 
     glEnable(GL_DEPTH_TEST)
@@ -129,9 +116,8 @@ proc initOpenGL(g: Graphic, maxBatchSize, maxPointLights, maxDirectLights, multi
 proc newGraphic*(window: WindowPtr,
                  screenSize, windowSize: Vec2,
                  vsync: bool,
-                 maxBatchSize, maxPointLights, maxDirectLights, multiSample: int,
-                 deferred: bool=false,
-                 depthMapSize: Vec2=vec2(1024, 1024)): Graphic =
+                 maxBatchSize, maxLights, multiSample: int,
+                 deferred: bool=false): Graphic =
     new(result)
 
     result.window = window
@@ -141,23 +127,21 @@ proc newGraphic*(window: WindowPtr,
 
     echo "* Initializing OpenGL..."
 
-    initOpenGL(result, maxBatchSize, maxPointLights, maxDirectLights, multiSample)
+    initOpenGL(result, maxBatchSize, maxLights, multiSample)
 
     echo "* OpenGL initialized!"
 
     result.shader = newSpatialShader(result)
     result.frameBuffer = newFrameBuffer(result.screenSize, deferred)
-    result.depthBuffer = newDepthBuffer(depthMapSize)
     result.skybox = newSkybox()
 
-
 proc clear*(g: Graphic) =
-    clear(g.shaders)
-    add(g.shaders, g.shader)
-    add(g.shaders, g.depthBuffer.shader)
+    clear(g.context.shaders)
+    add(g.context.shaders, g.shader)
+    #add(g.shaders, g.depthBuffer.shader)
 
 proc renderDepthBuffer(g: Graphic, drawables: var seq[Drawable]) =
-    use(g.depthBuffer)
+    #use(g.depthBuffer)
 
     var i = 0
     while i < len(drawables) and drawables[i].visible:
@@ -176,36 +160,43 @@ proc renderDepthBuffer(g: Graphic, drawables: var seq[Drawable]) =
         inc(i, count)
 
 
-proc renderFrameBuffer(g: Graphic, drawables: var seq[Drawable]) =
-    use(g.frameBuffer, g.clearColor)
+proc renderFrameBuffer(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
+    use(g.frameBuffer, g.context.clearColor)
+
+    if not isNil(cubemap):
+        render(g.skybox, cubemap, view, projection, g.context.environmentIntensity)
 
     # Resets render info
     g.totalObjects = 0
     g.totalBatches = 0
     g.drawCalls = 0
 
-    var lastShader: Shader = nil
-    var lastAlbedo: Texture = nil
-    var lastNormal: Texture = nil
-    var lastMetallic: Texture = nil
-    var lastRoughness: Texture = nil
-    var lastAoMap: Texture = nil
+    var 
+        lastShader: Shader = nil
+        lastAlbedo: Texture = nil
+        lastNormal: Texture = nil
+        lastMetallic: Texture = nil
+        lastRoughness: Texture = nil
+        lastAoMap: Texture = nil
+        lastEmissiveMap: Texture = nil
 
     var i = 0
     while i < len(drawables) and drawables[i].visible:
-        var shader = if drawables[i].shader == nil: g.shader else: drawables[i].shader.instance
-        var albedo = if drawables[i].material != nil: drawables[i].material.albedoMap else: nil
-        var normal = if drawables[i].material != nil: drawables[i].material.normalMap else: nil
-        var metallic = if drawables[i].material != nil: drawables[i].material.metallicMap else: nil
-        var roughness = if drawables[i].material != nil: drawables[i].material.roughnessMap else: nil
-        var ao = if drawables[i].material != nil: drawables[i].material.aoMap else: nil
-        var mesh = drawables[i].mesh.instance
+        var 
+            shader = if drawables[i].shader == nil: g.shader else: drawables[i].shader.instance
+            albedo = if drawables[i].material != nil: drawables[i].material.albedoMap else: nil
+            normal = if drawables[i].material != nil: drawables[i].material.normalMap else: nil
+            metallic = if drawables[i].material != nil: drawables[i].material.metallicMap else: nil
+            roughness = if drawables[i].material != nil: drawables[i].material.roughnessMap else: nil
+            ao = if drawables[i].material != nil: drawables[i].material.aoMap else: nil
+            emissive = if drawables[i].material != nil: drawables[i].material.emissiveMap else: nil
+            mesh = drawables[i].mesh.instance
 
         if shader != lastShader:
             lastShader = shader
             use(lastShader)
-            if g.shadow.enabled:
-                attach(g.depthBuffer, lastShader)
+            #if g.shadow.enabled:
+            #    attach(g.depthBuffer, lastShader)
 
         if albedo != lastAlbedo:
             lastAlbedo = albedo
@@ -232,6 +223,11 @@ proc renderFrameBuffer(g: Graphic, drawables: var seq[Drawable]) =
             #lastShader["u_ao_map"] = 5
             use(lastAoMap, 5)
 
+        if emissive != lastEmissiveMap:
+            lastEmissiveMap = emissive
+            #lastShader["u_emissive_map"] = 6
+            use(lastEmissiveMap, 6)
+
         # Limits instance count by max batch size
         var count = min(drawables[i].count, g.maxBatchSize)
 
@@ -245,15 +241,11 @@ proc renderFrameBuffer(g: Graphic, drawables: var seq[Drawable]) =
 
 proc render*(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
     # Renders shadow map if it is available
-    if g.shadow.enabled:
-        renderDepthBuffer(g, drawables)
+    #if g.shadow.enabled:
+    #    renderDepthBuffer(g, drawables)
 
     # Renders objects to framebuffer
-    renderFrameBuffer(g, drawables)
-
-    # Renders skybox to framebuffer
-    if not isNil(cubemap):
-        render(g.skybox, cubemap, view, projection)
+    renderFrameBuffer(g, view, projection, cubemap, drawables)
 
 proc swap*(g: Graphic) =
     glViewport(0, 0, g.windowSize.iWidth, g.windowSize.iHeight)
@@ -270,9 +262,9 @@ proc destroy*(g: Graphic) =
         destroy(g.frameBuffer)
         g.frameBuffer = nil
 
-    if g.depthBuffer != nil:
-        destroy(g.depthBuffer)
-        g.depthBuffer = nil
+    #if g.depthBuffer != nil:
+    #    destroy(g.depthBuffer)
+    #    g.depthBuffer = nil
 
     if g.glContext != nil:
         glDeleteContext(g.glContext)
@@ -282,7 +274,4 @@ proc destroy*(g: Graphic) =
         destroy(g.window)
         g.window = nil
 
-proc addShader*(g: Graphic, shader: Shader) =
-    if shader != nil and not g.shaders.contains(shader):
-        g.shaders.add(shader)
 

@@ -36,7 +36,7 @@ proc createSphereMesh(): Mesh =
             uvx = (float32)j / sectorCount
             uvy = (float32)i / stackCount
 
-            vertexes.add(Vertex(position: vec3(x, y, z), normal: vec3(nx, ny, nz), uv: vec2(uvx, uvy)))
+            vertexes.add(newVertex(position=vec3(x, y, z), normal=vec3(nx, ny, nz), uv0=vec2(uvx, uvy)))
 
     var drawVertexes = newSeq[Vertex]()
     for i in 0..stackCount - 1:

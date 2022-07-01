@@ -46,7 +46,7 @@ in struct Surface {
 
 in struct Material {
     vec4 base_color;
-    vec4 emmisive_color;
+    vec4 emissive_color;
     
     float metallic;
     float roughness;

@@ -6,6 +6,7 @@ import strutils
 import alasgar/private/core
 import alasgar/private/resources/image
 import alasgar/private/resources/obj
+import alasgar/private/resources/gltf
 import alasgar/private/components/camera
 import alasgar/private/components/interactive
 import alasgar/private/components/collision
@@ -21,6 +22,7 @@ import alasgar/private/geometry/grid
 import alasgar/private/geometry/sphere
 import alasgar/private/geometry/plane
 import alasgar/private/engine
+import alasgar/private/shader
 import alasgar/private/logger
 import alasgar/private/utils
 import alasgar/private/system
@@ -70,7 +72,8 @@ export core,
        catmull,
        sugar,
        sequtils,
-       strutils
+       strutils,
+       shader
 
 var mainEngine: Engine
 var screenWidth = 0

@@ -125,6 +125,12 @@ proc randVec2*(): Vec2 =
 func `$`*(a: Vec2): string =
     &"({a.x:.4f}, {a.y:.4f})"
 
+let VEC2_ZERO* = vec2(0, 0)
+let VEC2_ONE* = vec2(1, 1)
+let VEC2_RIGHT* = vec2(1, 0)
+let VEC2_LEFT* = vec2(-1, 0)
+let VEC2_UP* = vec2(0, 1)
+let VEC2_DOWN* = vec2(0, -1)
 
 func `iWidth`*(a: Vec2): int32 = a.x.int32
 func `iHeight`*(a: Vec2): int32 = a.y.int32

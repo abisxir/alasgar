@@ -4,6 +4,8 @@ import logger
 import strformat
 import os
 
+import error
+
 export streams
 
 when defined(android):
@@ -20,6 +22,8 @@ proc normalize(url: string): string =
         result = url.replace("res://", "")
     else:
         result = url.replace("res://", "res/")
+    
+    result = replace(result, "%20", " ")
 
 proc openAssetStream*(url: string): Stream =
     let filename = normalize(url)
@@ -30,11 +34,17 @@ proc openAssetStream*(url: string): Stream =
         result = am.streamForReading(filename)
         if result == nil:
             logi &"Could not open [{filename}]."
+            raise newAlasgarError(&"Could not open [{filename}].")
         else:
             logi &"File [{filename}] opened."
     else:
         logi &"Loading [{filename}] for linux ..."
         result = newFileStream(filename, fmRead)
+
+proc readAsset*(url: string): string =
+    let stream = openAssetStream(url)
+    defer: close(stream)
+    result = readAll(stream)
 
 proc exists*(url: string): bool =
     when defined(android):
@@ -45,3 +55,4 @@ proc exists*(url: string): bool =
     else:
         let filename = normalize(url)
         result = fileExists(filename)
+

@@ -100,7 +100,7 @@ proc newFrameBuffer*(size: Vec2, deferred: bool=false, multiSample: int=4): Fram
     glGenBuffers(1, addr(result.quadVBO))
     glBindVertexArray(result.quadVAO);
     glBindBuffer(GL_ARRAY_BUFFER, result.quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), addr(quadVertices[0]), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, (sizeof(quadVertices)).GLsizeiptr, addr(quadVertices[0]), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0)
     glVertexAttribPointer(0, 2, cGL_FLOAT, false, (4 * sizeof(float32)).GLsizei, cast[pointer](0))
     glEnableVertexAttribArray(1)
@@ -113,19 +113,14 @@ proc use*(f: FrameBuffer, clearColor: Color) =
     glBindFramebuffer(GL_FRAMEBUFFER, f.fbo)
     glViewport(0, 0, f.size.iWidth, f.size.iHeight)
 
-    glEnable(GL_DEPTH_TEST)
     glDisable(GL_CULL_FACE)
-    #glEnable(GL_CULL_FACE)
-    #glCullFace(GL_BACK)
+    glEnable(GL_DEPTH_TEST)
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glDepthFunc(GL_LESS)
 
     glClearColor(clearColor.r, clearColor.g, clearColor.b, 1)
-    #glClear(GL_COLOR_BUFFER_BIT or GL_STENCIL_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-    glStencilMask(0xFF) # Android requires setting stencil mask to clear
     glClear(GL_COLOR_BUFFER_BIT or GL_STENCIL_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-    glStencilMask(0x00)
-
 
 proc blit*(f: FrameBuffer) =
     glBindFramebuffer(GL_FRAMEBUFFER, 0)

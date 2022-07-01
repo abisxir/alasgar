@@ -75,9 +75,9 @@ proc loadMaterials(modelFileName: string, materialFileName: string, mr: ModelRes
                 elif startsWith(buf, "Ks"):
                     material.specularColor = readColor(buf)
                 elif startsWith(buf, "map_Kd"):
-                    material.diffuseTexture = loadTexture(modelFileName, buf, mr)
+                    material.albedoMap = loadTexture(modelFileName, buf, mr)
                 elif startsWith(buf, "bump") or startsWith(buf, "map_bump"):
-                    material.normalTexture = loadTexture(modelFileName, buf, mr)
+                    material.normalMap = loadTexture(modelFileName, buf, mr)
 
 proc loadObj(filename: string): Resource =
     var 
@@ -97,7 +97,7 @@ proc loadObj(filename: string): Resource =
         result.position = verticesCache[vi]
 
         let ti = parseInt(vtx[1]) - 1
-        result.uv = uvCache[ti]
+        result.uv0 = uvCache[ti]
 
         let ni = parseInt(vtx[2]) - 1
         result.normal = normalsCache[ni]
@@ -112,7 +112,7 @@ proc loadObj(filename: string): Resource =
                 vertices = newSeq[Vertex]()
             modelName = extractName(buf)
             echo &"Model[{modelName}] is loading..."
-            let node = addNode(modelResource, name=modelName, parent="", position=VEC3_ZERO, rotation=VEC3_ZERO, scale=VEC3_ONE)
+            let node = addNode(modelResource, name=modelName, parent="", position=VEC3_ZERO, rotation=quat(), scale=VEC3_ONE)
             node.mesh = modelName
         else:
             if startsWith(buf, "usemtl ") and hasNode(modelResource, modelName):

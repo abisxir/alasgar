@@ -2,7 +2,9 @@ import ../core
 import ../utils
 import ../system
 import ../render/graphic
+import ../shader
 
+export newComputeShader, compute
 
 type
     ShaderSystem* = ref object of System
