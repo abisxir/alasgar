@@ -75,7 +75,7 @@ proc addTexture*(r: ModelResource, texture: Texture) =
     if not anyIt(r.textures, it == texture):
         add(r.textures, texture)    
 
-proc toEntity*(r: Resource, scene: Scene): Entity =
+proc toEntity*(r: Resource, scene: Scene, castShadow=false): Entity =
     var mr = cast[ModelResource](r)
     var entities = newSeq[Entity]()
     echo &"Converting [{len(mr.nodes)}] models to enitites."
@@ -97,7 +97,10 @@ proc toEntity*(r: Resource, scene: Scene): Entity =
             elif not hasMaterial(mr, node.material):
                 echo &"Error: could not find material [{node.material}]."
             else:
-                addComponent(e, getMaterial(mr, node.material))
+                let material = getMaterial(mr, node.material)
+                if castShadow:
+                    material.castShadow = true
+                addComponent(e, material)
 
     proc findNode(name: string): Entity =
         for e in entities:

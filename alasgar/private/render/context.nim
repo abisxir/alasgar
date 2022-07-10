@@ -9,25 +9,32 @@ import ../shader
 import ../texture
 import ../mesh
 import ../core
-import depth_buffer
 
 export opengl
 
 type
     ShadowCaster* = object
-        view: Mat4
-        projection: Mat4
-        mvp: Mat4
-        map: DepthBuffer
+        view*: Mat4
+        projection*: Mat4
+        position*: Vec3
+        direct*: bool
+        point*: bool
+        size*: Vec2
     GraphicContext* = object
+        maxBatchSize*: int
         environmentIntensity*: float32
         clearColor*: chroma.Color
         defaultShader*: Shader
         shaders*: seq[Shader]
         shadowCasters*: seq[ShadowCaster]
+        shaderParams*: seq[ShaderParam]
+        fxaaEnabled*: bool
+        fxaaSpanMax*: float
+        fxaaReduceMul*: float
+        fxaaReduceMin*: float
 
 proc addShader*(g: var GraphicContext, shader: Shader) =
-    if shader != nil and not g.shaders.contains(shader):
+    if shader != nil and not contains(g.shaders, shader):
         add(g.shaders, shader)
 
 

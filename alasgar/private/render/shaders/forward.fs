@@ -6,6 +6,22 @@ out vec4 out_color;
 
 #define MAX_LIGHTS $MAX_LIGHTS$
 
+layout(binding =  0) uniform sampler2D u_albedo_map;
+layout(binding =  1) uniform sampler2D u_normal_map;
+layout(binding =  2) uniform sampler2D u_metallic_map;
+layout(binding =  3) uniform sampler2D u_roughness_map;
+layout(binding =  4) uniform sampler2D u_ao_map;
+layout(binding =  5) uniform sampler2D u_emissive_map;
+layout(binding =  6) uniform samplerCube u_ggx_map;
+layout(binding =  7) uniform sampler2D u_depth_maps_0;
+layout(binding =  8) uniform sampler2D u_depth_maps_1;
+layout(binding =  9) uniform sampler2D u_depth_maps_2;
+layout(binding = 10) uniform sampler2D u_depth_maps_3;
+layout(binding = 11) uniform samplerCube u_cube_depth_maps_0;
+layout(binding = 12) uniform samplerCube u_cube_depth_maps_1;
+layout(binding = 13) uniform samplerCube u_cube_depth_maps_2;
+layout(binding = 14) uniform samplerCube u_cube_depth_maps_3;
+
 uniform struct Camera {
     highp vec3 position;
     highp mat4 view;
@@ -22,9 +38,6 @@ uniform struct Environment {
     highp vec4 fog_color;
     highp int lights_count;
     highp float mip_count;
-    highp int shadow_enabled;
-    highp vec3 shadow_position;
-    highp mat4 shadow_mvp;
 } env;
 
 uniform struct Frame {
@@ -40,17 +53,6 @@ uniform struct Frame {
 #define LIGHT_TYPE_POINT        1
 #define LIGHT_TYPE_SPOT         2
 
-layout(binding = 0) uniform sampler2D u_depth_map;
-layout(binding = 1) uniform sampler2D u_albedo_map;
-layout(binding = 2) uniform sampler2D u_normal_map;
-layout(binding = 3) uniform sampler2D u_metallic_map;
-layout(binding = 4) uniform sampler2D u_roughness_map;
-layout(binding = 5) uniform sampler2D u_ao_map;
-layout(binding = 6) uniform sampler2D u_emissive_map;
-layout(binding = 7) uniform samplerCube u_environment_map;
-layout(binding = 8) uniform samplerCube u_ggx_map;
-layout(binding = 9) uniform sampler2D u_lut_map;
-
 uniform struct Light {
     vec3 color;
     float intensity;
@@ -60,12 +62,12 @@ uniform struct Light {
     float inner_cone_cos;
     float outer_cone_cos;
     int type;
-    sampler2D depth_map;
+    int depth_map;
+    mat4 shadow_mvp;
 } lights[MAX_LIGHTS + 1];
 
 in struct Surface {
     vec4 position;
-    vec4 shadow_light_position;
     float visibilty;
     vec3 normal;
     vec2 uv;
@@ -101,6 +103,7 @@ in struct Material {
 #define HALF_PI             1.570796327
 #define ONE_OVER_PI         0.3183098861837697
 #define SHADOW_BIAS         0.00001
+#define MIN_SHADOW_BIAS     0.000001
 #define MEDIUMP_FLT_MAX     65504.0
 #define saturate_mediump(x) min(x, MEDIUMP_FLT_MAX)
 #define saturate(x)         clamp(x, 0.00001, 1.0)
@@ -118,6 +121,96 @@ const float SPECULAR_WEIGHT = 0.6;
 float pow5(float x) {
     float x2 = x * x;
     return x2 * x2 * x;
+}
+
+float g_MinVariance = 0.00001;
+
+float chebyshev_upperBound(vec2 moments, float t) {   
+    // One-tailed inequality valid if t > Moments.x    
+    float p = t <= moments.x ? 1.0 : 0.0;  
+    // Compute variance.    
+    float variance = moments.y - sq(moments.x);   
+    variance = max(variance, g_MinVariance);   
+    // Compute probabilistic upper bound.    
+    float d = t - moments.x;   
+    float p_max = variance / (variance + d * d);   
+    return max(p, p_max); 
+} 
+
+float shadow_contribution(sampler2D depth_map, vec2 coord, float distance_to_light) {   
+    // Read the moments from the variance shadow map.    
+    vec2 moments = texture(depth_map, coord).xy;   
+    // Compute the Chebyshev upper bound.    
+    return chebyshev_upperBound(moments, distance_to_light); 
+} 
+
+float linstep(float min, float max, float v) {   
+    return clamp((v - min) / (max - min), 0.0, 1.0); 
+} 
+
+float reduce_light_bleeding(float p_max, float Amount) {   
+    // Remove the [0, Amount] tail and linearly rescale (Amount, 1].    
+    return linstep(Amount, 1.0, p_max); 
+} 
+
+// Where to split the value. 8 bits works well for most situations.    
+const float DISTRIBUTE_FACTOR = 256.0;
+const float DISTRIBUTE_FACTOR_INV = 1.0 / DISTRIBUTE_FACTOR;   
+
+vec4 distribute_precision(vec2 Value, vec2 Moments) {      
+    // Split precision    
+    vec2 IntPart;   
+    vec2 FracPart = modf(Value * DISTRIBUTE_FACTOR, IntPart);   
+    // Compose outputs to make reconstruction cheap.    
+    return vec4(IntPart * DISTRIBUTE_FACTOR_INV, FracPart); 
+} 
+
+vec2 recombine_precision(vec4 Value) {   
+    return (Value.zw * DISTRIBUTE_FACTOR_INV + Value.xy); 
+} 
+
+float sample_shadow(Light light, vec3 N, sampler2D depth_map) {
+    vec4 shadow_position = light.shadow_mvp * surface.position;
+    vec3 shadow_direction = normalize(light.position - surface.position.xyz);
+    vec4 light_space_position = shadow_position / shadow_position.w;
+    light_space_position = light_space_position * 0.5 + 0.5;
+    float bias = max(SHADOW_BIAS * (1.0 - dot(N, shadow_direction)), MIN_SHADOW_BIAS);
+
+    bool out_of_shadow = shadow_position.w <= 0.0 
+        || (light_space_position.x < 0.0 || light_space_position.y < 0.0) 
+        || (light_space_position.x >= 1.0 || light_space_position.y >= 1.0);
+
+    if(!out_of_shadow) {
+        //float shadow_factor = texture(u_depth_texture, v_shadow_light_position.xyz);
+        //light_color *= shadow_factor;
+        return shadow_contribution(depth_map, light_space_position.xy, light_space_position.z);
+
+        float shadow_depth = texture(depth_map, light_space_position.xy).r;
+        float model_depth = light_space_position.z - bias;
+        if (model_depth < shadow_depth) {
+            return 1.0;
+        }
+        return 0.1;
+    }    
+    return 1.0;
+}
+
+float sample_shadow(Light light, vec3 N) {
+    if(light.depth_map >= 0) {
+        if(light.depth_map == 0) {
+            return sample_shadow(light, N, u_depth_maps_0);
+        }
+        if(light.depth_map == 1) {
+            return sample_shadow(light, N, u_depth_maps_1);
+        }
+        if(light.depth_map == 2) {
+            return sample_shadow(light, N, u_depth_maps_2);
+        }
+        if(light.depth_map == 3) {
+            return sample_shadow(light, N, u_depth_maps_3);
+        }
+    }
+    return 1.0;
 }
 
 float get_range_attenuation(float range, float distance)
@@ -161,27 +254,6 @@ vec3 get_light_intensity(Light light, vec3 point_to_light, float distance)
     return range_attenuation * spot_attenuation * light.intensity * light.color;
 }
 
-vec3 get_ibl_radiance_ggx(vec3 N, vec3 V, float NoV, float roughness, vec3 f0, float SPECULAR_WEIGHT)
-{
-    float lod = roughness * (env.mip_count - 1.0);
-    vec3 reflection = normalize(reflect(-V, N));
-
-    vec2 brdf_sample_point = clamp(vec2(NoV, roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
-    vec2 f_ab = texture(u_lut_map, brdf_sample_point).rg;
-    // TODO: provide env.intensity
-    vec4 specular_sample = textureLod(u_ggx_map, reflection, lod);// * env.intensity;
-
-    vec3 specular_light = specular_sample.rgb;
-
-    // see https://bruop.github.io/ibl/#single_scattering_results at Single Scattering Results
-    // Roughness dependent fresnel, from Fdez-Aguera
-    vec3 Fr = max(vec3(1.0 - roughness), f0) - f0;
-    vec3 k_S = f0 + Fr * pow5(1.0 - NoV);
-    vec3 FssEss = k_S * f_ab.x + f_ab.y;
-
-    return SPECULAR_WEIGHT * specular_light * FssEss;
-}
-
 vec3 calculate_irradiance_spherical_harmonics(const vec3 n) {
     // Irradiance from "Ditch River" IBL (http://www.hdrlabs.com/sibl/archive.html)
     return max(
@@ -190,30 +262,6 @@ vec3 calculate_irradiance_spherical_harmonics(const vec3 n) {
         + vec3( 0.308152705331738,  0.366796330467391,  0.466698181299906) * (n.z)
         + vec3(-0.188884931542396, -0.277402551592231, -0.377844212327557) * (n.x)
         , 0.0);
-}
-
-vec3 get_ibl_radiance_lambertian(vec3 n, vec3 v, float NoV, float roughness, vec3 diffuse_color, vec3 f0, float SPECULAR_WEIGHT)
-{
-    vec2 brdf_sample_point = clamp(vec2(NoV, roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
-    vec2 f_ab = texture(u_lut_map, brdf_sample_point).rg;
-
-    //vec3 irradiance = get_diffuse_light(n);
-    vec3 irradiance = calculate_irradiance_spherical_harmonics(n);
-
-    // see https://bruop.github.io/ibl/#single_scattering_results at Single Scattering Results
-    // Roughness dependent fresnel, from Fdez-Aguera
-
-    vec3 Fr = max(vec3(1.0 - roughness), f0) - f0;
-    vec3 k_S = f0 + Fr * pow(1.0 - NoV, 5.0);
-    vec3 FssEss = SPECULAR_WEIGHT * k_S * f_ab.x + f_ab.y; // <--- GGX / specular light contribution (scale it down if the specularWeight is low)
-
-    // Multiple scattering, from Fdez-Aguera
-    float Ems = (1.0 - (f_ab.x + f_ab.y));
-    vec3 F_avg = SPECULAR_WEIGHT * (f0 + (1.0 - f0) / 21.0);
-    vec3 FmsEms = Ems * FssEss * F_avg / (1.0 - F_avg * Ems);
-    vec3 k_D = diffuse_color * (1.0 - FssEss + FmsEms); // we use +FmsEms as indicated by the formula in the blog post (might be a typo in the implementation)
-
-    return (FmsEms + k_D) * irradiance;
 }
 
 vec3 get_normal() {
@@ -400,6 +448,8 @@ void light_pbr(vec3 N, vec3 V, vec3 base_color, float metallic, float roughness,
         //float attenuation = lights[i].intensity / dot(lights[i].attenuation, vec3(1.0, distance, distance * distance));
         vec3 intensity = get_light_intensity(lights[i], point_to_light, distance);
         
+        intensity *= sample_shadow(lights[i], N);
+
         f_diffuse += intensity * NoL * calculare_lambertian_brdf(f0, albedo, SPECULAR_WEIGHT, VoH);
 		f_specular += intensity * NoL * calculate_specular_brdf(f0, alpha_roughness, a2, SPECULAR_WEIGHT, VoH, NoL, NoV, NoH, ggx_factor_const);
     }
@@ -454,7 +504,7 @@ void main() {
         f_emissive = texture(u_emissive_map, surface.uv).rgb;
     } 
 
-    out_color.rgb =  linearTosRGB(tonemap_aces(f_emissive + f_diffuse + f_specular));
+    out_color.rgb = linearTosRGB(tonemap_aces(f_emissive + f_diffuse + f_specular));
     out_color.a = base_color.a;
 }
 

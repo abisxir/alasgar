@@ -2,15 +2,15 @@ import ../core
 import ../utils
 import ../system
 import ../shader
-import ../render/depth_buffer
+import ../render/context
 
 
 type
     LightComponent* = ref object of Component
         color*: Color
         intensity*: float32
-        shadow*: bool
-        depthBuffer*: DepthBuffer
+        shadow: bool
+        shadowMapSize: Vec2
 
     DirectLightComponent* = ref object of LightComponent
         direction*: Vec3
@@ -30,7 +30,6 @@ type
         lightTypePoint = 1
         lightTypeSpot = 2
 
-
     LightSystem* = ref object of System
 
 proc newPointLightComponent*(color: Color=COLOR_MILK, 
@@ -46,37 +45,47 @@ proc newPointLightComponent*(color: Color=COLOR_MILK,
     result.linear = linear
     result.quadratic = quadratic
     result.intensity = intensity
+    result.shadowMapSize = shadowMapSize
     result.shadow = shadow
-    if result.shadow:
-        result.depthBuffer = newDepthBuffer(shadowMapSize)
 
-
-proc newDirectLightComponent*(direction: Vec3, color: Color=COLOR_MILK, intensity: float32=1.0, shadow: bool=false): DirectLightComponent =
+proc newDirectLightComponent*(direction: Vec3, 
+                              color: Color=COLOR_MILK, 
+                              intensity: float32=1.0, 
+                              shadow: bool=false,
+                              shadowMapSize: Vec2=vec2(1024, 1024)): DirectLightComponent =
     new(result)
     result.color = color
     result.intensity = intensity
     result.direction = direction
-
+    result.shadowMapSize = shadowMapSize
+    result.shadow = shadow
 
 proc newSpotPointLightComponent*(direction: Vec3,
                                  color: Color=COLOR_MILK, 
                                  intensity: float32=1.0,
                                  innerLimit: float32=30, 
                                  outerLimit: float32=45,
-                                 shadow: bool=false): SpotPointLightComponent =
+                                 shadow: bool=false,
+                                 shadowMapSize: Vec2=vec2(1024, 1024)): SpotPointLightComponent =
     new(result)
     result.color = color
     result.intensity = intensity
     result.direction = direction
     result.innerLimit = innerLimit
     result.outerLimit = outerLimit
+    result.shadowMapSize = shadowMapSize
     result.shadow = shadow
 
 
-proc `view`*(light: SpotPointLightComponent): Mat4 = 
-    result = lookAt(light.transform.globalPosition, light.transform.globalPosition + light.direction, VEC3_UP)
+proc `view`*(light: LightComponent): Mat4 = 
+    if light of SpotPointLightComponent:
+        let spot = cast[SpotPointLightComponent](light)
+        result = lookAt(spot.transform.globalPosition, spot.transform.globalPosition + spot.direction, VEC3_UP)
+    elif light of DirectLightComponent:
+        let direct = cast[DirectLightComponent](light)
+        result = lookAt(direct.direction * 1000 , direct.direction, VEC3_UP)
 
-proc `projection`*(light: SpotPointLightComponent): Mat4 = 
+proc `projection`*(light: LightComponent): Mat4 = 
     #result = perspective(light.outerLimit, 1, 1, 100)
     result = perspective(90, 1, 1, 100)
 
@@ -85,6 +94,22 @@ proc `projection`*(light: SpotPointLightComponent): Mat4 =
 proc newLightSystem*(): LightSystem =
     new(result)
     result.name = "Light System"
+
+proc prepareShadow(g: Graphic, shader: Shader, light: LightComponent, index: int) =
+    if light.shadow:
+        shader[&"lights[{index}].shadow_mvp"] = light.projection * light.view * identity()
+        shader[&"lights[{index}].depth_map"] = len(g.context.shadowCasters)
+        add(
+            g.context.shadowCasters,
+            ShadowCaster(
+                view: light.view,
+                projection: light.projection,
+                position: light.transform.globalPosition,
+                direct: light of DirectLightComponent,
+                point: light of PointLightComponent,
+                size: light.shadowMapSize,
+            )
+        )
 
 
 method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
@@ -95,6 +120,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
 
             # Keeps track of available point lights
             var lightCount = 0
+
             for c in iterateComponents[DirectLightComponent](scene):
                 # Checks that entity is visible
                 if c.entity.visible and lightCount < sys.graphic.maxLights:
@@ -103,6 +129,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
                     shader[&"lights[{lightCount}].intensity"] = c.intensity
                     shader[&"lights[{lightCount}].direction"] = c.direction
                     shader[&"lights[{lightCount}].type"] = lightTypeDirectional.int
+                    shader[&"lights[{lightCount}].depth_map"] = -1
 
                     # Increments direct light count
                     inc(lightCount)
@@ -114,6 +141,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
                     shader[&"lights[{lightCount}].intensity"] = c.intensity 
                     shader[&"lights[{lightCount}].position"] = c.transform.globalPosition
                     shader[&"lights[{lightCount}].attenuation"] = vec3(c.constant, c.linear, c.quadratic)
+                    shader[&"lights[{lightCount}].depth_map"] = -1
                     
                     inc(lightCount)
 
@@ -126,20 +154,10 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
                     shader[&"lights[{lightCount}].direction"] = c.direction
                     shader[&"lights[{lightCount}].inner_cone_cos"] = c.innerLimit
                     shader[&"lights[{lightCount}].outer_cone_cos"] = c.outerLimit
+                    shader[&"lights[{lightCount}].depth_map"] = -1
                     
-                    # Take care of shadow
-                    if c.shadow:
-                        sys.graphic.shadow.view = c.view
-                        sys.graphic.shadow.projection = c.projection
-                        sys.graphic.shadow.mvp = c.projection * c.view * identity()
-                        sys.graphic.shadow.enabled = true
-
-                        # Enables shadow and updates matrices
-                        shader["env.shadow_enabled"] = 1
-                        shader["env.shadow_mvp"] = c.projection * c.view * identity()
-                        #shader["u_shadow_view_matrix"] = c.view
-                        #shader["u_shadow_projection_matrix"] = c.projection
-                        #shader["u_shadow_position"] = c.transform.globalPosition
+                    # Takes care of shadow
+                    prepareShadow(sys.graphic, shader, c, lightCount)
 
                     inc(lightCount)
 

@@ -1,7 +1,9 @@
+import stb_image/write as stbi
+
 import ../ports/opengl
 import ../utils
 import ../shader
-
+import context
 
 const forwardPostV = staticRead("shaders/forward-post.vs")
 const forwardPostF = staticRead("shaders/forward-post.fs")
@@ -122,12 +124,37 @@ proc use*(f: FrameBuffer, clearColor: Color) =
     glClearColor(clearColor.r, clearColor.g, clearColor.b, 1)
     glClear(GL_COLOR_BUFFER_BIT or GL_STENCIL_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
-proc blit*(f: FrameBuffer) =
+proc blit*(f: FrameBuffer, context: GraphicContext) =
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
     glDisable(GL_DEPTH_TEST)
     glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
+    
     use(f.shader)
+
+    f.shader["iResolution"] = vec3(f.size.x, f.size.y, 1.0);
+    f.shader["u_fxaa"] = if context.fxaaEnabled: 1 else: 0
+    f.shader["u_fxaa_span_max"] = context.fxaaSpanMax
+    f.shader["u_fxaa_reduce_mul"] = context.fxaaReduceMul
+    f.shader["u_fxaa_reduce_min"] = context.fxaaReduceMin
+    
     glBindVertexArray(f.quadVAO)
     glActiveTexture(GL_TEXTURE0)
     glBindTexture(GL_TEXTURE_2D, f.texture)
     glDrawArrays(GL_TRIANGLES, 0, 6)
+
+proc saveImage*() =
+    let 
+        width = 1024.GLsizei
+        height = 1024.GLsizei
+        nrChannels = 3.GLsizei
+    var stride = nrChannels * width
+    if stride mod 4 != 0: 
+        stride += (4 - stride mod 4)
+    var 
+        bufferSize = stride * height
+        buffer = newSeq[byte](bufferSize)
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 4)
+    glReadBuffer(GL_FRONT)
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, addr buffer[0])
+    stbi.writePNG("/tmp/depth.png", width.int, height.int, nrChannels.int, buffer, stride.int)

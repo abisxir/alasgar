@@ -11,11 +11,11 @@ import ../texture
 import ../mesh
 import ../core
 import frame_buffer
-import depth_buffer
+import shadow
 import skybox
 import context
 
-export opengl
+export opengl, context
 
 const forwardV = staticRead("shaders/forward.vs")
 const forwardF = staticRead("shaders/forward.fs")
@@ -35,6 +35,7 @@ type
         drawCalls: int
         frameBuffer: FrameBuffer
         skybox: Skybox
+        shadow: Shadow
         context*: GraphicContext
 
 proc `totalObjects`*(g: Graphic): int = g.totalObjects
@@ -134,31 +135,13 @@ proc newGraphic*(window: WindowPtr,
     result.shader = newSpatialShader(result)
     result.frameBuffer = newFrameBuffer(result.screenSize, deferred)
     result.skybox = newSkybox()
+    result.shadow = newShadow()
 
 proc clear*(g: Graphic) =
+    g.context.maxBatchSize = g.maxBatchSize
     clear(g.context.shaders)
+    clear(g.context.shadowCasters)
     add(g.context.shaders, g.shader)
-    #add(g.shaders, g.depthBuffer.shader)
-
-proc renderDepthBuffer(g: Graphic, drawables: var seq[Drawable]) =
-    #use(g.depthBuffer)
-
-    var i = 0
-    while i < len(drawables) and drawables[i].visible:
-        # Selects mesh
-        var mesh = drawables[i].mesh.instance
-
-        # Limits instance count by max batch size
-        var count = min(drawables[i].count, g.maxBatchSize)
-
-        for ix in 0..count - 1:
-            if drawables[i + ix].material != nil and drawables[i + ix].material.castShadow:
-                # Renders count amount of instances
-                render(mesh, caddr(drawables[i + ix].modelPack), addr(drawables[i + ix].materialPack[0]), caddr(drawables[i + ix].spritePack), 1)
-
-        # Moves to next chunk
-        inc(i, count)
-
 
 proc renderFrameBuffer(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
     use(g.frameBuffer, g.context.clearColor)
@@ -201,32 +184,32 @@ proc renderFrameBuffer(g: Graphic, view, projection: Mat4, cubemap: Texture, dra
         if albedo != lastAlbedo:
             lastAlbedo = albedo
             #lastShader["u_albedo_map"] = 3
-            use(lastAlbedo, 1)
+            use(lastAlbedo, 0)
 
         if normal != lastNormal:
             lastNormal = normal
             #lastShader["u_normal_map"] = 2
-            use(lastNormal, 2)
+            use(lastNormal, 1)
 
         if metallic != lastMetallic:
             lastMetallic = metallic
             #lastShader["u_metallic_map"] = 1
-            use(lastMetallic, 3)
+            use(lastMetallic, 2)
 
         if roughness != lastRoughness:
             lastRoughness = roughness
             #lastShader["u_roughness_map"] = 4
-            use(lastRoughness, 4)
+            use(lastRoughness, 3)
 
         if ao != lastAoMap:
             lastAoMap = ao
             #lastShader["u_ao_map"] = 5
-            use(lastAoMap, 5)
+            use(lastAoMap, 4)
 
         if emissive != lastEmissiveMap:
             lastEmissiveMap = emissive
             #lastShader["u_emissive_map"] = 6
-            use(lastEmissiveMap, 6)
+            use(lastEmissiveMap, 5)
 
         # Limits instance count by max batch size
         var count = min(drawables[i].count, g.maxBatchSize)
@@ -240,18 +223,17 @@ proc renderFrameBuffer(g: Graphic, view, projection: Mat4, cubemap: Texture, dra
 
 
 proc render*(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
-    # Renders shadow map if it is available
-    #if g.shadow.enabled:
-    #    renderDepthBuffer(g, drawables)
+    # If there is shadow casters processes them
+    if len(g.context.shadowCasters) > 0:
+        process(g.shadow, g.context, drawables)
 
     # Renders objects to framebuffer
     renderFrameBuffer(g, view, projection, cubemap, drawables)
 
 proc swap*(g: Graphic) =
     glViewport(0, 0, g.windowSize.iWidth, g.windowSize.iHeight)
-    blit(g.frameBuffer)
+    blit(g.frameBuffer, g.context)
     glSwapWindow(g.window)
-
 
 proc destroy*(g: Graphic) =
     if g.skybox != nil:

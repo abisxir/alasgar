@@ -13,20 +13,22 @@ type
         map: Table[string, GLint]
         params: Table[string, ShaderParam]
 
-    ShaderParam = ref object of RootObj
+    ShaderParam* = ref object of RootObj
         key: string  
-    ShaderParamInt = ref object of ShaderParam
+    ShaderParamInt* = ref object of ShaderParam
         value: int32
-    ShaderParamFloat = ref object of ShaderParam
+    ShaderParamFloat* = ref object of ShaderParam
         value: float32
-    ShaderParamVec2 = ref object of ShaderParam
+    ShaderParamVec2* = ref object of ShaderParam
         value: Vec2
-    ShaderParamVec3 = ref object of ShaderParam
+    ShaderParamVec3* = ref object of ShaderParam
         value: Vec3
-    ShaderParamVec4 = ref object of ShaderParam
+    ShaderParamVec4* = ref object of ShaderParam
         value: Vec4
-    ShaderParamMat4 = ref object of ShaderParam
+    ShaderParamMat4* = ref object of ShaderParam
         value: Mat4
+
+method update(p: ShaderParam, shader: Shader){.base.} = discard
 
 proc destroyShader(shader: Shader) =
     if shader.program != 0:
@@ -35,8 +37,6 @@ proc destroyShader(shader: Shader) =
         shader.program = 0
 
 var cache = newCachedContainer[Shader](destroyShader)
-
-method update(p: ShaderParam, shader: Shader) = discard
 
 proc hash*(o: Shader): Hash = 
     if o != nil:

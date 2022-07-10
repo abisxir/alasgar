@@ -28,9 +28,6 @@ uniform struct Environment {
     vec4 fog_color;
     int lights_count;
     float mip_count;
-    int shadow_enabled;
-    vec3 shadow_position;
-    mat4 shadow_mvp;
 } env;
 
 uniform struct Frame {
@@ -44,7 +41,6 @@ uniform struct Frame {
 
 out struct Surface {
     vec4 position;
-    vec4 shadow_light_position;
     float visibilty;
     vec3 normal;
     vec2 uv;
@@ -133,7 +129,6 @@ void main() {
     surface.position = in_model * position;
     //surface.normal = (normal_matrix * vec4(in_normal, 0.0)).xyz;
     surface.normal = (in_model * vec4(in_normal, 0.0)).xyz;
-    surface.shadow_light_position = env.shadow_mvp * surface.position;
 
     if(frame_size.x > 0.0) {
         surface.uv = (in_uv.xy * frame_size) + frame_offset;

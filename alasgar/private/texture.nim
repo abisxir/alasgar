@@ -398,7 +398,7 @@ proc use*(t: Texture, slot: int) =
     if t != nil:
         glBindTexture(t.target, t.buffer)
     else:
-        glBindTexture(t.target, 0)
+        glBindTexture(GL_TEXTURE_2D, 0)
 
 proc useForOutput*(t: Texture, slot: int, levels: int, layered=false) = 
     glBindImageTexture(

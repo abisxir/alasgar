@@ -10,6 +10,10 @@ const fullscreenVS = staticRead("../render/shaders/fullscreen.vs")
 const panaromaToCubemapFS = staticRead("../render/shaders/panaroma-to-cube-map.fs")
 const iblFilterFS = staticRead("../render/shaders/ibl-filter.fs")
 
+const fxaaReduceMinDefault: float32 = 1.0 / 128.0
+const fxaaReduceMulDefault: float32 = 1.0 / 8.0
+const fxaaSpanMaxDefault: float32 = 8.0
+
 type
     EnvironmentComponent* = ref object of Component
         backgroundColor*: Color
@@ -22,11 +26,12 @@ type
         environmentMap*: Texture
         environmentIntensity*: float32
         ggxMap*: Texture
-        #diffuseMap*: Texture
-        #specularMap*: Texture
+        fxaaEnabled*: bool
+        fxaaSpanMax*: float
+        fxaaReduceMul*: float
+        fxaaReduceMin*: float
 
     EnvironmentSystem* = ref object of System
-
 
 func newEnvironmentComponent*(): EnvironmentComponent =
     new(result)
@@ -40,6 +45,15 @@ func enableFog*(e: EnvironmentComponent, color: Color, density, gradient: float3
     e.fogColor = color
     e.fogDensity = density
     e.fogGradient = gradient
+
+func enableFXAA*(e: EnvironmentComponent, 
+                 fxaaSpanMax=fxaaSpanMaxDefault,
+                 fxaaReduceMul=fxaaReduceMulDefault,
+                 fxaaReduceMin=fxaaReduceMinDefault) =
+    e.fxaaEnabled = true
+    e.fxaaSpanMax = fxaaSpanMax
+    e.fxaaReduceMul = fxaaReduceMul
+    e.fxaaReduceMin = fxaaReduceMin
 
 func setBackground*(env: EnvironmentComponent, c: Color) =
     env.backgroundColor = c
@@ -241,26 +255,26 @@ proc newEnvironmentSystem*(): EnvironmentSystem =
 method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
     if scene.root != nil and hasComponent[EnvironmentComponent](scene):
         let env = first[EnvironmentComponent](scene)
-        sys.graphic.environmentIntensity = env.environmentIntensity
-        for shader in sys.graphic.shaders:
+        
+        sys.graphic.context.environmentIntensity = env.environmentIntensity
+        sys.graphic.context.fxaaEnabled = env.fxaaEnabled
+        sys.graphic.context.fxaaSpanMax = env.fxaaSpanMax
+        sys.graphic.context.fxaaReduceMin = env.fxaaReduceMin
+        sys.graphic.context.fxaaReduceMul = env.fxaaReduceMul
+
+        for shader in sys.graphic.context.shaders:
             use(shader)
 
             # Sets scene clear color
-            sys.graphic.clearColor = env.backgroundColor
+            sys.graphic.context.clearColor = env.backgroundColor
             shader["env.clear_color"] = env.ambientColor.vec3
 
             # Sets scene ambient color
             shader["env.ambient_color"] = env.ambientColor.vec3
 
             # Sets environment maps
-            #use(env.lutMap, 6)
-            #use(env.diffuseMap, 7)
-            #use(env.specularMap, 8)
-            #use(env.skybox, 8)
             if not isNil(env.environmentMap):
-                use(env.environmentMap, 7)
-                use(env.ggxMap, 8)
-                use(env.lutMap, 9)
+                use(env.ggxMap, 6)
                 shader["env.mip_count"] = env.environmentMap.levels.float32
 
             if env.fogEnabled:

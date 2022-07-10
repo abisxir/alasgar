@@ -154,7 +154,6 @@ proc newEngine*(windowWidth: int,
         maxBatchSize=maxBatchSize,
         maxLights=maxLights,
         multiSample=multiSample,
-        depthMapSize=depthMapSize
     )
 
     echo "* Graphic engine initialized!"
@@ -170,9 +169,9 @@ proc newEngine*(windowWidth: int,
     addSystem(result, newTraverseSystem())
     addSystem(result, newPrepareSystem())
     addSystem(result, newCameraSystem())
-    addSystem(result, newLightSystem())
     addSystem(result, newEnvironmentSystem())
     #addSystem(result, newSoundSystem())
+    addSystem(result, newLightSystem())
     addSystem(result, newRenderSystem())
 
     for e in result.systems:

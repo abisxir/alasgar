@@ -69,3 +69,6 @@ nakefile
 build/
 art/
 .history
+*.avi
+*.mp4
+*.flv
