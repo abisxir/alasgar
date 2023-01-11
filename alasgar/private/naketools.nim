@@ -1127,6 +1127,7 @@ task "droid", "Build for android and install on the connected device":
 task "droid-debug", "Start application on Android device and connect with debugger":
     let b = newBuilder("android")
     b.configure()
+    echo "Configuration is done!"
     withDir b.buildRoot / b.javaPackageId:
         if not fileExists("libs/gdb.setup"):
             for arch in ["armeabi", "armeabi-v7a", "x86"]:

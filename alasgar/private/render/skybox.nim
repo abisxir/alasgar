@@ -69,12 +69,13 @@ proc newSkybox*(): Skybox =
     glVertexAttribPointer(0, 3, cGL_FLOAT, false, (3 * sizeof(float32)).GLsizei, cast[pointer](0))
 
 proc destroy*(skybox: Skybox) =
-    if skybox.cubeVBO != 0:
-        glDeleteBuffers(1, addr(skybox.cubeVBO))
-        skybox.cubeVBO = 0
-    if skybox.cubeVAO != 0:
-        glDeleteVertexArrays(1, addr(skybox.cubeVAO))
-        skybox.cubeVAO = 0
+    if skybox != nil:
+        if skybox.cubeVBO != 0:
+            glDeleteBuffers(1, addr(skybox.cubeVBO))
+            skybox.cubeVBO = 0
+        if skybox.cubeVAO != 0:
+            glDeleteVertexArrays(1, addr(skybox.cubeVAO))
+            skybox.cubeVAO = 0
 
 proc render*(skybox: Skybox, cubemap: Texture, view, projection: Mat4, intensity: float32) = 
     use(skybox.shader)

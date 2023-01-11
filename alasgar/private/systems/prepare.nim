@@ -99,6 +99,10 @@ proc packMaterial*(drawable: ptr Drawable) =
         if material.albedoMap != nil and drawable.mesh.version != drawable.meshVersion and drawable.mesh of SpriteComponent:
             drawable.meshVersion = drawable.mesh.version
             #drawable.extra[6] = packSnorm2x16(material.albedoMap.ratio)
+    if drawable.skin != nil:
+        drawable.skinPack = vec4(drawable.skin.count.float32, drawable.skin.offset.float32, 0, 0)
+    else:
+        drawable.skinPack = vec4(0, 0, 0, 0)
 
 func getNormalHash(d: ptr Drawable): Hash =
     result = 0

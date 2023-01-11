@@ -1,14 +1,8 @@
-import strutils
-import strformat
-
 import chroma
-import ../ports/opengl
 
+import ../ports/opengl
 import ../utils
 import ../shader
-import ../texture
-import ../mesh
-import ../core
 
 export opengl
 
@@ -21,11 +15,11 @@ type
         point*: bool
         size*: Vec2
     GraphicContext* = object
-        maxBatchSize*: int
         environmentIntensity*: float32
         clearColor*: chroma.Color
         defaultShader*: Shader
         shaders*: seq[Shader]
+        effects*: seq[Shader]
         shadowCasters*: seq[ShadowCaster]
         shaderParams*: seq[ShaderParam]
         fxaaEnabled*: bool

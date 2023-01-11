@@ -21,11 +21,13 @@ type
         aspect*: float32
 
         # Orthographic
-        left, right, bottom, top: float32
+        left*, right*, bottom*, top*: float32
         
         near*: float32
         far*: float32
         timestamp*: float
+
+        effects: seq[(string, Shader)]
 
     CameraSystem* = ref object of System
 
@@ -59,7 +61,6 @@ proc newOrthographicCamera*(left, right, bottom, top, near, far: float32, direct
     result.far = far
     result.direction = direction
     result.up = up
-
 
 proc `projection`*(camera: CameraComponent): Mat4 = 
     if camera.kind == perspectiveCamera:
@@ -129,39 +130,54 @@ proc calculateViewCenter*(camera: CameraComponent, vOut: var Vec3, rOut: var flo
     let farLeft = far + (VEC3_LEFT * opposite)
     rOut = length(farLeft - vOut)
 
+proc removeEffect*(camera: CameraComponent, name: string) = 
+    for it in camera.effects:
+        if it[0] == name:
+            destroy(it[1])
+    keepItIf(camera.effects, it[0] != name)
+
+proc addEffect*(camera: CameraComponent, name: string, source: string) =
+    removeEffect(camera, name)
+    let shader = newCanvasShader(source)
+    add(camera.effects, (name, shader))
 
 # System implementation
 proc newCameraSystem*(): CameraSystem =
     new(result)
     result.name = "Camera System"
 
-
 proc `activeCamera`*(scene: Scene): CameraComponent =
     result = nil
     for c in iterateComponents[CameraComponent](scene):
         if result == nil or c.timestamp > result.timestamp:
             result = c
-
  
 method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
-    var active = scene.activeCamera
-    if active != nil:
-        let today = now()
-        let timestamp = getTime()
-        let mouseXY = getMousePosition(input)
-        let mouseZW = if getMouseButtonDown(input, mouseButtonLeft): mouseXY else: -1 * mouseXY
-        for shader in sys.graphic.context.shaders:
-            use(shader)
-            shader["camera.projection"] = active.projection
-            shader["camera.view"] = active.view
-            shader["camera.position"] = active.transform.globalPosition
-            
-            shader["frame.resolution"] = vec3(sys.graphic.screenSize.x, sys.graphic.screenSize.y, 0)
-            shader["frame.time"] = age
-            shader["frame.time_delta"] = delta
-            shader["frame.frame"] = frames
-            shader["frame.mouse"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
-            shader["frame.date"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
+    let 
+        active = scene.activeCamera
+        today = now()
+        timestamp = getTime()
+        mouseXY = getMousePosition(input)
+        mouseZW = if getMouseButtonDown(input, mouseButtonLeft): mouseXY else: -1 * mouseXY
 
+    for shader in sys.graphic.context.shaders:
+        use(shader)
+        shader["camera.projection"] = active.projection
+        shader["camera.view"] = active.view
+        shader["camera.position"] = active.transform.globalPosition
+        
+        shader["frame.iResolution"] = vec3(sys.graphic.screenSize.x, sys.graphic.screenSize.y, 0)
+        shader["frame.iTime"] = age
+        shader["frame.iTimeDelta"] = delta
+        shader["frame.iFrame"] = frames
+        shader["frame.iMouse"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
+        shader["frame.iDate"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
 
-
+    for (name, shader) in active.effects:
+        shader["iResolution"] = vec3(sys.graphic.screenSize.x, sys.graphic.screenSize.y, 0)
+        shader["iTime"] = age
+        shader["iTimeDelta"] = delta
+        shader["iFrame"] = frames
+        shader["iMouse"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
+        shader["iDate"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
+        add(sys.graphic.context.effects, shader)

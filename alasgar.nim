@@ -1,4 +1,3 @@
-import streams
 import sugar
 import sequtils
 import strutils
@@ -15,7 +14,7 @@ import alasgar/private/components/light
 import alasgar/private/components/environment
 import alasgar/private/components/script
 import alasgar/private/components/sprite
-when defined(linux):
+when not defined(android):
     import alasgar/private/components/sound
 import alasgar/private/geometry/cube
 import alasgar/private/geometry/grid
@@ -75,23 +74,28 @@ export core,
        strutils,
        shader
 
-var mainEngine: Engine
-var screenWidth = 0
-var screenHeight = 0
-var frameLimit = 60
-var batchSize = 16 * 1024
-var multiSample = 4
-var verboseFlag = false
-var depthMapSize = vec2(1024, 1024)
+type 
+    Runtime = ref object
+        engine: Engine
+
+var 
+    runtime* = Runtime.new
+    screenWidth = 0
+    screenHeight = 0
+    frameLimit = 60
+    batchSize = 16 * 1024
+    verboseFlag = false
+    depthMapSize = vec2(1024)
+
 
 proc screen*(width, height: int) =
-    if mainEngine != nil:
+    if runtime.engine != nil:
         quit("Cannot set screen after create window!", -1)
     screenWidth = width
     screenHeight = height
 
 proc window*(title: string, width, height: int, fullscreen: bool=false, resizeable: bool=false) =
-    mainEngine = newEngine(
+    runtime.engine = newEngine(
         width,
         height,
         screenWidth,
@@ -108,23 +112,23 @@ proc window*(title: string, width, height: int, fullscreen: bool=false, resizeab
 proc verbose*() = verboseFlag = true
 proc limitFrames*(value: int) = frameLimit = value
 proc setDepthMapSize*(width, height: int) = depthMapSize = vec2(width.float32, height.float32)
-proc setMultiSample*(value: int) = multiSample = value
-proc render*(scene: Scene) = render(mainEngine, scene)
-proc loop*() = loop(mainEngine)
-proc stopLoop*() = quit(mainEngine)
+proc render*(scene: Scene) = render(runtime.engine, scene)
+proc loop*() = loop(runtime.engine)
+proc stopLoop*() = quit(runtime.engine)
 proc setMaxBatchSize*(value: int) = batchSize = value
-template `screenRatio`*: float32 = mainEngine.ratio
-template `engine`*: Engine = mainEngine
-template `maxBatchSize`*: int = batchSize
 proc screenToWorldCoord*(pos: Vec2): Vec4 = screenToWorldCoord(
     pos,
-    mainEngine.graphic.windowSize, 
-    mainEngine.activeCamera
+    runtime.engine.graphic.windowSize, 
+    runtime.engine.activeCamera
 )
 
 proc newShaderComponent*(vertexSource, fragmentSource: string): ShaderComponent =
-    var instance = newSpatialShader(mainEngine.graphic, vertexSource, fragmentSource)
+    var instance = newSpatialShader(vertexSource, fragmentSource)
     result = newShaderComponent(instance)
 
 proc newVertexShaderComponent*(source: string): ShaderComponent = newShaderComponent(vertexSource=source, fragmentSource="")
 proc newFragmentShaderComponent*(source: string): ShaderComponent = newShaderComponent(vertexSource="", fragmentSource=source)
+
+template `engine`*(r: Runtime): Engine = r.engine
+template `age`*(r: Runtime): float32 = r.engine.age
+template `ratio`*(r: Runtime): float32 = r.engine.ratio

@@ -20,6 +20,10 @@ import error
 
 export logger, helpers, quat, mat4, vec2, vec3, vec4, strformat, chroma, strutils, sequtils, opengl, error
 
+# Extracts data out of the given pointer
+template offsetOf*[T](p: ptr T, o: int): T = cast[ptr T](cast[ByteAddress](p) + (o * sizeof(T)))
+
+
 # General funcs
 proc halt*(message: string) = 
     logi message

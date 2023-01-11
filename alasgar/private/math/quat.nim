@@ -145,7 +145,7 @@ func lengthSq*(quat: Quat): float32 =
 func length*(quat: Quat): float32 =
     sqrt(lengthSq(quat))
 
-func normalize(quat: Quat): Quat =
+func normalize*(quat: Quat): Quat =
     let lengthSq = quat.x * quat.x + quat.y * quat.y + quat.z * quat.z + quat.w * quat.w
     if lengthSq != 0:
         let invLen = 1.0'f32 / sqrt(lengthSq)
@@ -292,6 +292,16 @@ func quat*(m: Mat4): Quat =
     up = cross(forward, right)
 
     result = lookAt(forward, up)
+
+
+func quat*(p: ptr float32, offset: int=0): Quat =
+    let 
+        address = cast[ByteAddress](p)
+        x = cast[ptr float32](address + offset * sizeof(float32))
+        y = cast[ptr float32](address + (offset + 1) * sizeof(float32))
+        z = cast[ptr float32](address + (offset + 2) * sizeof(float32))
+        w = cast[ptr float32](address + (offset + 3) * sizeof(float32))
+    result = quat(x[], y[], z[], w[])    
 
 #[
 func euler*(m: var Mat4): Vec3 = 

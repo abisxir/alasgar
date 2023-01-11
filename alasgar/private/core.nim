@@ -3,29 +3,28 @@ import sequtils
 import sugar
 import strutils
 import tables
+import typetraits
 
+import config
 import utils
 import input
 import mesh
 import texture
 import shader
 
-export utils, input, mesh, texture
+export utils, input, mesh, texture, config
 
 type
-    Drawable* = object
-        modelPack*: Mat4
-        materialPack*: array[4, uint32]
-        spritePack*: Vec4
-        transform*: TransformComponent
-        mesh*: MeshComponent
-        material*: MaterialComponent
-        shader*: ShaderComponent
-        count*: int32
-        visible*: bool
-        meshVersion*: int16
-        materialVersion*: int16
-        transformVersion*: int16
+    Component* = ref object of RootObj
+        version*: int16
+        entity: Entity
+
+    ContainerBase = ref object of RootObj
+        entities: seq[Entity]
+        components: seq[Component]
+
+    Container[T] = ref object of ContainerBase
+        head: T
 
     Scene* = ref object
         entities: seq[Entity]
@@ -35,6 +34,7 @@ type
         drawables*: seq[Drawable]
 
     Entity* = ref object
+        id: int
         name*: string
         tag*: string
         layer*: int32
@@ -47,18 +47,6 @@ type
         visible: bool
         attached: bool
         wasted: bool
-
-    Component* {.inheritable.} = ref object
-        #id*: int
-        version*: int16
-        entity: Entity
-
-    ContainerBase = ref object of RootObj
-        entities: seq[Entity]
-        components: seq[Component]
-
-    Container[T] = ref object of ContainerBase
-        head: T
 
     TransformComponent* = ref object of Component
         local: Mat4
@@ -105,9 +93,35 @@ type
     MeshComponent* = ref object of Component
         instance*: Mesh
 
+    SkinComponent* = ref object of Component
+        joints*: seq[JointComponent]
+        texture*: Texture
+        offset*: int
+        count*: int
+
+    JointComponent* = ref object of Component
+        inverseMatrix*: Mat4
+        model*: Mat4
+
     SpriteComponent* = ref object of MeshComponent
     ShaderComponent* = ref object of Component
         instance: Shader
+
+    Drawable* = object
+        modelPack*: Mat4
+        materialPack*: array[4, uint32]
+        spritePack*: Vec4
+        skinPack*: Vec4
+        transform*: TransformComponent
+        mesh*: MeshComponent
+        material*: MaterialComponent
+        shader*: ShaderComponent
+        skin*: SkinComponent
+        count*: int32
+        visible*: bool
+        meshVersion*: int16
+        materialVersion*: int16
+        transformVersion*: int16
 
 
 # Forward declarations
@@ -117,7 +131,6 @@ proc newTransform*(): TransformComponent
 proc `model`*(t: TransformComponent): var Mat4
 proc `dirty`*(t: TransformComponent): bool
 proc findEntityByTag*(scene: Scene, tag: string): seq[Entity]
-#proc newComponentId(): int
 func getComponent*[T: Component](e: Entity): T
 proc `inc`(c: Component)
 
@@ -128,6 +141,7 @@ proc newShaderComponent*(instance: Shader): ShaderComponent =
     result.instance = instance
 
 # Entity implmentation
+proc `$`*(e: Entity): string = &"{e.id}:{e.name}"
 proc findDrawable(scene: Scene, mesh: MeshComponent): ptr Drawable =
     result = nil
     for i, item in mpairs(scene.drawables):
@@ -140,12 +154,14 @@ proc updateDrawable(e: Entity, c: Component) =
     if c of MeshComponent:
         let mesh = cast[MeshComponent](c)
         let material = getComponent[MaterialComponent](e)
+        let skin = getComponent[SkinComponent](e)
         let shader = getComponent[ShaderComponent](e)
         add(e.scene.drawables,
             Drawable(
                 transform: e.transform,
                 mesh: mesh,
                 material: material,
+                skin: skin,
                 shader: shader,
                 transformVersion: -1.int16,
                 materialVersion: -1.int16
@@ -157,6 +173,13 @@ proc updateDrawable(e: Entity, c: Component) =
             var drawable = findDrawable(e.scene, mesh)
             if drawable != nil:
                 drawable.material = material
+    elif c of SkinComponent:
+        let skin = cast[SkinComponent](c)
+        let mesh = getComponent[MeshComponent](e)
+        if mesh != nil:
+            var drawable = findDrawable(e.scene, mesh)
+            if drawable != nil:
+                drawable.skin = skin
     elif c of ShaderComponent:
         let shader = cast[ShaderComponent](c)
         let mesh = getComponent[MeshComponent](e)
@@ -177,12 +200,17 @@ proc removeDrawable(scene: Scene, mesh: MeshComponent) =
     if found:
         del(scene.drawables, i)
 
+iterator iterateComponents*[T: Component](scene: Scene): T =
+    var 
+        container: Container[T] = ensureContainer[T](scene)
+    for c in container.components:
+        if c.entity.attached:
+            yield cast[T](c)
 
 proc addComponent*[T](e: Entity, c: T) =
-    # Creates a unique id for component
     var container: Container[T] = ensureContainer[T](e.scene)
-    add(container.components, c)
     c.entity = e
+    add(container.components, c)
     add(e.components, (c, container))
 
     # Updates drawable
@@ -251,11 +279,6 @@ proc rebase*(e: Entity, parent: Mat4, parentIsDirty: bool): var Mat4 =
     result = e.transform.world
 
 
-proc head(n: Entity): Entity =
-    if n.parent == nil:
-        result = n
-    else:
-        result = n.parent.head
 
 proc setAttach(e: Entity, flag: bool) =
     if not isEmptyOrWhitespace(e.tag):
@@ -273,11 +296,12 @@ proc setAttach(e: Entity, flag: bool) =
         setAttach(c, flag)
 
 proc addChild*(n: Entity, child: Entity) =
+    #echo &"Adding [{child}] to [{n}]"
     if child.parent == nil:
-        n.children.add(child)
+        add(n.children, child)
         child.parent = n
         child.scene = n.scene
-        setAttach(child, true)
+        setAttach(child, n.attached)
 
 proc removeChild*(n: Entity, child: Entity) =
     let count = n.children.len()
@@ -297,28 +321,6 @@ proc getChild*(n: Entity, name: string): Entity =
             result = child
             break
 
-proc findEntity(n: Entity, names: openArray[string]): Entity =
-    if names.len > 1:
-        var child = getChild(n, names[0])
-        if child != nil:
-            result = findEntity(child, names[1..names.high])
-    elif names.len == 1:
-        result = getChild(n, names[0])
-
-proc findEntity*(n: Entity, path: string): Entity =
-    var names = path.split '/'
-    if names.len > 0:
-        if startsWith(path, "/"):
-            result = findEntity(head(n), names[1..names.high])
-        elif startsWith(path, "../") and n.parent != nil:
-            result = findEntity(n.parent, names[1..names.high])
-        elif startsWith(path, "./"):
-            result = findEntity(n, names[1..names.high])
-        else:
-            result = n.findEntity names
-
-proc findEntityByTag*(n: Entity, tag: string): seq[Entity] = findEntityByTag(
-        n.scene, tag)
 
 iterator `children`*(n: Entity): Entity =
     for child in n.children:
@@ -341,26 +343,55 @@ proc `visible`*(e: Entity): bool =
         e.visible and not e.wasted
 
 func getComponent*[T: Component](e: Entity): T = getComponent(e, result)
+func `[]`*[T](e: Entity, row: typedesc[T]): T = getComponent[T](e)
 func getChildrenCount*(n: Entity): int = n.children.len
 func getChild*(n: Entity, i: int): Entity = n.children[i]
 func hasChild*(n: Entity, name: string): bool = getChild(n, name) != nil
 func `$`*(n: Entity): string = n.name
+proc `head`(n: Entity): Entity = result = if isNil(n.parent): n else: n.parent.head
 template `transform`*(e: Entity): TransformComponent = e.transform
 template `root`*(n: Entity): Entity = head n
 template `parent`*(n: Entity): Entity = n.parent
 template `scene`*(n: Entity): Scene = n.scene
 template `attached`*(n: Entity): bool = n.attached
+iterator `components`*(n: Entity): Component =
+    for c in n.components:
+        yield c[0]
+func hash*(e: Entity): Hash = hash(cast[pointer](e))
+func `id`*(e: Entity): int = e.id
+
+proc findEntity(n: Entity, names: openArray[string]): Entity =
+    if names.len > 1:
+        var child = getChild(n, names[0])
+        if child != nil:
+            result = findEntity(child, names[1..names.high])
+    elif names.len == 1:
+        result = getChild(n, names[0])
+
+proc findEntity*(n: Entity, path: string): Entity =
+    var names = path.split '/'
+    if names.len > 0:
+        if startsWith(path, "/"):
+            result = findEntity(n.head, names[1..names.high])
+        elif startsWith(path, "../") and n.parent != nil:
+            result = findEntity(n.parent, names[1..names.high])
+        elif startsWith(path, "./"):
+            result = findEntity(n, names[1..names.high])
+        else:
+            result = n.findEntity names
+
+proc findEntityByTag*(n: Entity, tag: string): seq[Entity] = findEntityByTag(
+        n.scene, tag)
 
 # Component implementation
-#var componentId = 1
-#proc newComponentId(): int = inc(componentId)
-
 proc `inc`(c: Component) = c.version = if c.version == high(int16): 0.int16 else: c.version + 1.int16
 func `transform`*(c: Component): TransformComponent = c.entity[].transform
 func `entity`*(c: Component): Entity = c.entity
 func `scene`*(c: Component): Scene = c.entity.scene
 func getComponent*[T: Component](c: Component): T = getComponent(c.entity, result)
-#func hash*(c: Component): Hash = c.id
+func `[]`[T](c: Component, row: typedesc): T = getComponent(c.entity, result)
+func hash*(c: Component): Hash = hash(unsafeAddr(c))
+method cleanup*(c: Component) {.base.} = discard
 
 
 # Scene implementation
@@ -373,9 +404,13 @@ proc ensureContainer[T](scene: Scene): Container[T] =
         result = new(Container[T])
         add(scene.containers, result)
 
+
 proc newEntity*(scene: Scene, name: string, tag: string = "",
         parent: Entity = nil): Entity =
+    var lastEntityId {.global.} = 0
+    inc(lastEntityId)
     result = Entity.new
+    result.id = lastEntityId
     result.name = name
     result.tag = tag
     result.scene = scene
@@ -384,6 +419,7 @@ proc newEntity*(scene: Scene, name: string, tag: string = "",
     result.wasted = false
     result.opacity = 1
     add(scene.entities, result)
+    echo &"Entity [{result.id}] with name [{result.name}] created!"
     result.transform = newTransform()
     addComponent(result, result.transform)
     if parent != nil:
@@ -413,14 +449,6 @@ proc forEachComponent*[T: Component](scene: Scene, input: Input, delta: float32,
         if c.entity.attached:
             fn(c, input, delta)
 
-iterator iterateComponents*[T: Component](scene: Scene): T =
-    var t: T
-    var container: Container[T] = ensureContainer[T](scene)
-    for i in low(container.components)..high(container.components):
-        t = cast[T](container.components[i])
-        if t.entity.attached:
-            yield t
-
 func first*[T: Component](scene: Scene): T =
     var container: Container[T] = ensureContainer[T](scene)
     if len(container.components) > 0:
@@ -435,7 +463,7 @@ proc findEntityByTag*(scene: Scene, tag: string): seq[Entity] =
         result = scene.tags[tag]
 
 func hasComponent*[T: Component](scene: Scene): bool = getComponentsCount[T](scene) > 0
-proc size*(scene: Scene): int = len(scene.entities)
+func size*(scene: Scene): int = len(scene.entities)
 
 proc destroy*(scene: Scene) =
     if not isNil(scene):
@@ -452,6 +480,7 @@ proc destroy*(scene: Scene) =
             e.parent = nil
             clear(e.children)
             for c in e.components:
+                cleanup(c[0])
                 c[0].entity = nil
             clear(e.components)
 
@@ -671,11 +700,11 @@ func updateAvailableMaps(m: MaterialComponent) =
         if m.emissiveMap.uvChannel == 1:
             m.uvChannels = m.uvChannels or emissiveMaterialMap.uint32
 
-func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
+func newPBRMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
         specularColor: Color=COLOR_WHITE, 
         emissiveColor: Color=COLOR_BLACK,
         albedoMap, normalMap, metallicMap, roughnessMap, aoMap, emissiveMap: Texture = nil, 
-        metallic: float32 = 0.0,
+        metallic: float32 = 1.0,
         roughness: float32 = 1.0,
         reflectance: float32 = 1.0,
         ao: float32 = 1,
@@ -704,6 +733,31 @@ func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE,
     result.frameOffset = vec2(0, 0)
     result.castShadow = castShadow
     updateAvailableMaps(result)
+
+
+proc newMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
+        specularColor: Color=COLOR_WHITE, 
+        emissiveColor: Color=COLOR_BLACK,
+        albedoMap: Texture=nil, 
+        normalMap: Texture=nil, 
+        shininess: float32 = 150.0 / 255.0,
+        frame: int32=0,
+        vframes: int32=1,
+        hframes: int32=1,
+        castShadow: bool=false): MaterialComponent =
+    result = newPBRMaterialComponent(
+        diffuseColor=diffuseColor,
+        specularColor=specularColor,
+        albedoMap=albedoMap,
+        normalMap=normalMap,
+        frame=frame,
+        vframes=vframes,
+        hframes=hframes,
+        castShadow=castShadow,
+        metallic=0.0,
+        roughness=shininess,
+    )
+    result.roughness = clamp(result.roughness, 0.0, 255.0)
 
 func `diffuseColor=`*(m: MaterialComponent, value: Color) =
     m.diffuseColor = value
@@ -773,6 +827,7 @@ template `diffuseColor`*(m: MaterialComponent): Color = m.diffuseColor
 template `specularColor`*(m: MaterialComponent): Color = m.specularColor
 template `emissiveColor`*(m: MaterialComponent): Color = m.emissiveColor
 template `roughness`*(m: MaterialComponent): float32 = m.roughness
+template `shininess`*(m: MaterialComponent): float32 = m.roughness
 template `metallic`*(m: MaterialComponent): float32 = m.metallic
 template `reflectance`*(m: MaterialComponent): float32 = m.reflectance
 template `ao`*(m: MaterialComponent): float32 = m.ao
@@ -816,3 +871,26 @@ proc `$`*(m: MaterialComponent): string =
         &"base:{m.diffuseColor} emissive:{m.emissiveColor}"
     else:
         &"nil"
+
+proc clone*(m: MaterialComponent): MaterialComponent =
+    new(result)
+    result.diffuseColor = m.diffuseColor
+    result.specularColor = m.specularColor
+    result.emissiveColor = m.emissiveColor
+    result.metallic = m.metallic
+    result.roughness = m.roughness
+    result.reflectance = m.reflectance
+    result.ao = m.ao
+    result.albedoMap = m.albedoMap
+    result.normalMap = m.normalMap
+    result.metallicMap = m.metallicMap
+    result.roughnessMap = m.roughnessMap
+    result.aoMap = m.aoMap
+    result.emissiveMap = m.emissiveMap
+    result.frame = m.frame
+    result.vframes = m.vframes
+    result.hframes = m.hframes
+    result.frameSize = m.frameSize
+    result.frameOffset = m.frameOffset
+    result.castShadow = m.castShadow
+    updateAvailableMaps(result)    

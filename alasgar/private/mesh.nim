@@ -7,13 +7,14 @@ import container
 
 
 type
-    Vertex* = array[14, float32]
+    Vertex* = array[18, float32]
     Mesh* = ref object
         vertexArrayObject: GLuint
         vertexBufferObject: GLuint
         modelBufferObject: GLuint
         materialBufferObject: GLuint
         spriteBufferObject: GLuint
+        skinBufferObject: GLuint
         count*: GLsizei
         vMin*: Vec3
         vMax*: Vec3
@@ -25,12 +26,14 @@ type
 proc destroyMesh(mesh: Mesh) =
     if mesh.vertexBufferObject != 0:
         echo &"Destroying mesh[{mesh.vertexBufferObject}]..."
+        glDeleteBuffers(1, mesh.skinBufferObject.addr)
         glDeleteBuffers(1, mesh.spriteBufferObject.addr)
         glDeleteBuffers(1, mesh.materialBufferObject.addr)
         glDeleteBuffers(1, mesh.modelBufferObject.addr)
         glDeleteVertexArrays(1, mesh.vertexArrayObject.addr)
         glDeleteBuffers(1, mesh.vertexBufferObject.addr)
 
+        mesh.skinBufferObject = 0
         mesh.spriteBufferObject = 0
         mesh.materialBufferObject = 0
         mesh.modelBufferObject = 0
@@ -39,16 +42,22 @@ proc destroyMesh(mesh: Mesh) =
 
 var cache = newCachedContainer[Mesh](destroyMesh)
 
-const VECTOR4F_SIZE_BYTES = 4 * sizeof(float32)
 var bufferSizeOf: int = 0 # Drawable size as stride
 
 proc setBufferSizeOf*(size: int) = bufferSizeOf = size
 
+template loadData(v: var Vertex, buffer: openArray[float32], index: var int, offset, count: int) = 
+    if len(buffer) > 0:
+        for i in 0..count - 1:
+            v[offset + i] = buffer[index]
+            inc(index)
+
 template `position`*(v: Vertex): Vec3 = vec3(v[0], v[1], v[2])
 template `normal`*(v: Vertex): Vec3 = vec3(v[3], v[4], v[5])
-template `tangent`*(v: Vertex): Vec4 = vec4(v[6], v[7], v[8], v[9])
-template `uv0`*(v: Vertex): Vec2 = vec2(v[10], v[11])
-template `uv1`*(v: Vertex): Vec2 = vec2(v[12], v[13])
+template `uv0`*(v: Vertex): Vec2 = vec2(v[6], v[7])
+template `uv1`*(v: Vertex): Vec2 = vec2(v[8], v[9])
+template `joint`*(v: Vertex): Vec4 = vec4(v[10], v[11], v[12], v[13])
+template `weight`*(v: Vertex): Vec4 = vec4(v[14], v[15], v[16], v[17])
 
 template `position=`*(v: var Vertex, value: Vec3) = 
     v[0] = value.x
@@ -60,19 +69,34 @@ template `normal=`*(v: var Vertex, value: Vec3) =
     v[4] = value.y
     v[5] = value.z
 
-template `tangent=`*(v: var Vertex, value: Vec4) = 
-    v[6] = value.x
-    v[7] = value.y
-    v[8] = value.z
-    v[9] = value.w
 
 template `uv0=`*(v: var Vertex, value: Vec2) = 
-    v[10] = value.x
-    v[11] = value.y
+    v[6] = value.x
+    v[7] = value.y
 
 template `uv1=`*(v: var Vertex, value: Vec2) = 
-    v[12] = value.x
-    v[13] = value.y
+    v[8] = value.x
+    v[9] = value.y
+
+
+template `joint=`*(v: var Vertex, value: Vec4) = 
+    v[10] = value.x
+    v[11] = value.y
+    v[12] = value.z
+    v[13] = value.w
+
+template `weight=`*(v: var Vertex, value: Vec4) = 
+    v[14] = value.x
+    v[15] = value.y
+    v[16] = value.z
+    v[17] = value.w
+
+proc loadPosition(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 0, 3)
+proc loadNormal(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 3, 3)
+proc loadUv0(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 6, 2)
+proc loadUv1(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 8, 2)
+proc loadJoint(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 10, 4)
+proc loadWeight(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 14, 4)
 
 func newVertex*(position:Vec3): Vertex =
     result.position = position
@@ -85,7 +109,23 @@ func newVertex*(position: Vec3, normal:Vec3, uv0: Vec2): Vertex =
 func caddr*(v: var Vertex): ptr float32 = v[0].addr
 func `$`*(v: Mesh): string = &"Vertices: [{v.count / 3}] triangles"
 
-proc newMesh*(data: var openArray[Vertex], indices: openArray[uint32], drawMode: GLenum = GL_TRIANGLES, bufferMode: GLenum = GL_STATIC_DRAW): Mesh =
+proc createAttribute[T](index, offset: var int, dataType: GLenum, count: int) =
+    const stride = sizeof(Vertex).GLsizei
+    glEnableVertexAttribArray(index.GLuint)
+    glVertexAttribPointer(index.GLuint, count.GLint, dataType, false, stride.GLsizei, cast[pointer](offset))
+    offset += count * sizeof(T)
+    inc(index)
+
+proc createPointerAttribute[T](index: var int, offset: int, dataType: GLenum, count, stride: int) =
+    glVertexAttribPointer(index.GLuint, count.GLint, dataType, false, stride.GLsizei, cast[pointer](offset * count * sizeof(T)));
+    glVertexAttribDivisor(index.GLuint, 1);
+    glEnableVertexAttribArray(index.GLuint);    
+    inc(index)
+
+proc newMesh*(data: var openArray[Vertex], 
+              indices: openArray[uint32], 
+              drawMode: GLenum = GL_TRIANGLES, 
+              bufferMode: GLenum = GL_STATIC_DRAW): Mesh =
     new(result)
     result.drawMode = drawMode
     result.bufferMode = bufferMode
@@ -118,23 +158,15 @@ proc newMesh*(data: var openArray[Vertex], indices: openArray[uint32], drawMode:
     glBindBuffer(GL_ARRAY_BUFFER, result.vertexBufferObject)
 
     # Marks data chunks and index them, it determines where the data is located in buffer
-    var offset = 0
-    var stride = sizeof(Vertex).GLsizei
+    var 
+        offset = 0
+        index = 0
 
-    glEnableVertexAttribArray(0.GLuint)
-    glVertexAttribPointer(0.GLuint, 3, cGL_FLOAT, false, stride, cast[pointer](0))
-    offset += 3 * sizeof(float32)
-
-    glEnableVertexAttribArray(1.GLuint)
-    glVertexAttribPointer(1.GLuint, 3, cGL_FLOAT, false, stride, cast[pointer](offset))
-    offset += 3 * sizeof(float32)
-
-    glEnableVertexAttribArray(2.GLuint)
-    glVertexAttribPointer(2.GLuint, 4, cGL_FLOAT, false, stride, cast[pointer](offset))
-    offset += 4 * sizeof(float32)
-
-    glEnableVertexAttribArray(3.GLuint)
-    glVertexAttribPointer(3.GLuint, 4, cGL_FLOAT, false, stride, cast[pointer](offset))
+    createAttribute[float32](index, offset, cGL_FLOAT, 3)
+    createAttribute[float32](index, offset, cGL_FLOAT, 3)
+    createAttribute[float32](index, offset, cGL_FLOAT, 4)
+    createAttribute[float32](index, offset, cGL_FLOAT, 4)
+    createAttribute[float32](index, offset, cGL_FLOAT, 4)
 
     # Streams data
     if len(data) > 0:
@@ -143,43 +175,22 @@ proc newMesh*(data: var openArray[Vertex], indices: openArray[uint32], drawMode:
 
     glGenBuffers(1, result.modelBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.modelBufferObject)
-    for start in 4..7:
-        glVertexAttribPointer(
-            start.GLuint,
-            4,
-            cGL_FLOAT,
-            false,
-            bufferSizeOf.GLsizei,
-            cast[pointer]((start - 4) * VECTOR4F_SIZE_BYTES)
-        );
-        glVertexAttribDivisor(start.GLuint, 1);
-        glEnableVertexAttribArray(start.GLuint);
+    createPointerAttribute[float32](index, 0, cGL_FLOAT, 4, bufferSizeOf)
+    createPointerAttribute[float32](index, 1, cGL_FLOAT, 4, bufferSizeOf)
+    createPointerAttribute[float32](index, 2, cGL_FLOAT, 4, bufferSizeOf)
+    createPointerAttribute[float32](index, 3, cGL_FLOAT, 4, bufferSizeOf)
 
     glGenBuffers(1, result.materialBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.materialBufferObject)
-    glVertexAttribPointer(
-        8.GLuint,
-        4,
-        cGL_FLOAT,
-        false,
-        bufferSizeOf.GLsizei,
-        cast[pointer](0)
-    );
-    glVertexAttribDivisor(8.GLuint, 1);
-    glEnableVertexAttribArray(8.GLuint);
+    createPointerAttribute[float32](index, 0, cGL_FLOAT, 4, bufferSizeOf)
 
     glGenBuffers(1, result.spriteBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.spriteBufferObject)
-    glVertexAttribPointer(
-        9.GLuint,
-        4,
-        cGL_FLOAT,
-        false,
-        bufferSizeOf.GLsizei,
-        cast[pointer](0)
-    );
-    glVertexAttribDivisor(9.GLuint, 1);
-    glEnableVertexAttribArray(9.GLuint);
+    createPointerAttribute[float32](index, 0, cGL_FLOAT, 4, bufferSizeOf)
+
+    glGenBuffers(1, result.skinBufferObject.addr)
+    glBindBuffer(GL_ARRAY_BUFFER, result.skinBufferObject)
+    createPointerAttribute[float32](index, 0, cGL_FLOAT, 4, bufferSizeOf)
 
     # Releases the bound vertex array
     glBindVertexArray(0)
@@ -204,85 +215,84 @@ proc recalculateNormals*(vertices: var openArray[Vertex]) =
             vertices[i + 2].normal = n
             inc(i, 3)
 
-proc recalculateTangents(vertices: var openArray[Vertex]) =
-    discard
-
-proc newMesh*(vertices: openArray[float32], 
-              normals: openArray[float32], 
-              tangents: openArray[float32],
-              uvs0: openArray[float32], 
-              uvs1: openArray[float32], 
+proc newMesh*(vertices,
+              normals, 
+              uvs0,
+              uvs1,
+              joints,
+              weights: var openArray[float32], 
               indices: openArray[uint32], 
               drawMode: GLenum = GL_TRIANGLES, 
               bufferMode: GLenum = GL_STATIC_DRAW): Mesh =
-    var data = newSeq[Vertex](vertices.len div 3)
-    var index = 0
-    var vIndex = 0
-    var uIndex0 = 0
-    var uIndex1 = 0
-    var tIndex = 0
+    var 
+        data = newSeq[Vertex](vertices.len div 3)
+        index = 0
+        vIndex = 0
+        nIndex = 0
+        uIndex0 = 0
+        uIndex1 = 0
+        jIndex = 0
+        wIndex = 0
     while vIndex < len(vertices):
-        data[index][0] = vertices[vIndex]
-        data[index][1] = vertices[vIndex + 1]
-        data[index][2] = vertices[vIndex + 2]
-
-        if len(normals) > 0:
-            data[index][3] = normals[vIndex]
-            data[index][4] = normals[vIndex + 1]
-            data[index][5] = normals[vIndex + 2]
-
-        if len(tangents) > 0:
-            data[index][6] = tangents[tIndex]
-            data[index][7] = tangents[tIndex + 1]
-            data[index][8] = tangents[tIndex + 2]
-            data[index][9] = tangents[tIndex + 3]
-
-        if len(uvs0) > 0:
-            data[index][10] = uvs0[uIndex0]
-            data[index][11] = uvs0[uIndex0 + 1]
-
-        if len(uvs1) > 0:
-            data[index][12] = uvs0[uIndex1]
-            data[index][13] = uvs0[uIndex1 + 1]
-
+        loadPosition(data[index], vertices, vIndex)
+        loadNormal(data[index], normals, nIndex)
+        loadUv0(data[index], uvs0, uIndex0)
+        loadUv1(data[index], uvs1, uIndex1)
+        loadJoint(data[index], joints, jIndex)
+        loadWeight(data[index], weights, wIndex)
         inc(index)
-        inc(uIndex0, 2)
-        inc(uIndex1, 2)
-        inc(vIndex, 3)
-        inc(tIndex, 4)
 
     if drawMode == GL_TRIANGLES and len(normals) == 0:
         recalculateNormals(data)
 
     result = newMesh(data, indices, drawMode, bufferMode)
 
-proc newMesh*(vertices: var openArray[float32], 
-              normals: var openArray[float32], 
-              uvs: var openArray[float32], 
+proc newMesh*(vertices,
+              normals, 
+              uvs,
+              joints,
+              weights: var openArray[float32],
               indices: openArray[uint32], 
               drawMode: GLenum = GL_TRIANGLES, 
               bufferMode: GLenum = GL_STATIC_DRAW): Mesh =
-    var data = newSeq[Vertex](vertices.len div 3)
-    var index = 0
-    var vIndex = 0
-    var uIndex = 0
+    var 
+        data = newSeq[Vertex](vertices.len div 3)
+        index = 0
+        vIndex = 0
+        nIndex = 0
+        uIndex = 0
+        jIndex = 0
+        wIndex = 0
     while vIndex < len(vertices):
-        data[index][0] = vertices[vIndex]
-        data[index][1] = vertices[vIndex + 1]
-        data[index][2] = vertices[vIndex + 2]
-
-        if len(normals) > 0:
-            data[index][3] = normals[vIndex]
-            data[index][4] = normals[vIndex + 1]
-            data[index][5] = normals[vIndex + 2]
-
-        if len(uvs) > 0:
-            data[index][10] = uvs[uIndex]
-            data[index][11] = uvs[uIndex + 1]
-
+        loadPosition(data[index], vertices, vIndex)
+        loadNormal(data[index], normals, nIndex)
+        loadUv0(data[index], uvs, uIndex)
+        loadJoint(data[index], joints, jIndex)
+        loadWeight(data[index], weights, wIndex)
         inc(index)
-        inc(uIndex, 2)
-        inc(vIndex, 3)
+
+    if drawMode == GL_TRIANGLES and len(normals) == 0:
+        recalculateNormals(data)
+
+    result = newMesh(data, indices, drawMode, bufferMode)
+
+proc newMesh*(vertices,
+              normals, 
+              uvs: openArray[float32],
+              indices: openArray[uint32], 
+              drawMode: GLenum = GL_TRIANGLES, 
+              bufferMode: GLenum = GL_STATIC_DRAW): Mesh =
+    var 
+        data = newSeq[Vertex](vertices.len div 3)
+        index = 0
+        vIndex = 0
+        nIndex = 0
+        uIndex = 0
+    while vIndex < len(vertices):
+        loadPosition(data[index], vertices, vIndex)
+        loadNormal(data[index], normals, nIndex)
+        loadUv0(data[index], uvs, uIndex)
+        inc(index)
 
     if drawMode == GL_TRIANGLES and len(normals) == 0:
         recalculateNormals(data)
@@ -314,7 +324,7 @@ proc update*(o: Mesh, data: var openArray[Vertex]) =
     glBindBuffer(GL_ARRAY_BUFFER, o.vertexBufferObject)
     glBufferData(GL_ARRAY_BUFFER, size, pData, o.bufferMode)
 
-proc render*(mesh: Mesh, model: ptr float32, material: ptr uint32, sprite: ptr float32, count: int) =
+proc render*(mesh: Mesh, model: ptr float32, material: ptr uint32, sprite: ptr float32, skin: ptr float32, count: int) =
     glBindVertexArray(mesh.vertexArrayObject)
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh.modelBufferObject)
@@ -325,6 +335,9 @@ proc render*(mesh: Mesh, model: ptr float32, material: ptr uint32, sprite: ptr f
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh.spriteBufferObject)
     glBufferData(GL_ARRAY_BUFFER, (count * bufferSizeOf).GLsizeiptr, sprite, GL_DYNAMIC_DRAW)
+
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.skinBufferObject)
+    glBufferData(GL_ARRAY_BUFFER, (count * bufferSizeOf).GLsizeiptr, skin, GL_DYNAMIC_DRAW)
 
     if len(mesh.indices) > 0:
         if count > 1:

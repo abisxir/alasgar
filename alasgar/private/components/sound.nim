@@ -101,13 +101,10 @@ method init*(sys: SoundSystem, g: Graphic) =
 
 method process*(sys: SoundSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) = 
     var activeCamera = scene.activeCamera 
-    if activeCamera != nil:
-        var pos = activeCamera.transform.globalPosition
-        for c in iterateComponents[SoundEffectComponent](scene):
-            if isPlaying(c):
-                adjustBy(c, pos)
-
-
+    var pos = activeCamera.transform.globalPosition
+    for c in iterateComponents[SoundEffectComponent](scene):
+        if isPlaying(c):
+            adjustBy(c, pos)
 
 method cleanup*(sys: SoundSystem) = 
     for music in values(musicCache):

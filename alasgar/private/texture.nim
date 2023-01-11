@@ -68,10 +68,10 @@ proc createTexture(target: GLenum,
 
     add(cache, result)
 
-proc setPixels(t: Texture,
-               format: GLenum,
-               dataType: GLenum,
-               pixels: pointer) =
+proc setPixels*(t: Texture,
+                format: GLenum,
+                dataType: GLenum,
+                pixels: pointer) =
     glTexImage2D(
         t.target, 
         0.GLint, 
@@ -109,6 +109,13 @@ proc allocate*(t: Texture) =
         t.width.GLsizei, 
         t.height.GLsizei
     )
+
+proc copy*(t: Texture, data: ptr float32, format=GL_RGBA, width=0, height=0) =
+    let 
+        w = if width > 0: width else: t.width
+        h = if height > 0: height else: t.height
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w.GLsizei, h.GLsizei, format, cGL_FLOAT, data)
+
 
 proc getTextureParamText(p: GLenum): string =
     case p:
@@ -392,6 +399,10 @@ proc mipmap*(t: Texture) =
 
 proc params*(t: Texture, param: GLenum, value: GLenum) =
     glTexParameteri(t.target, param, value.GLint)
+
+proc attach*(t: Texture) = 
+    if t != nil:
+        glBindTexture(t.target, t.buffer)
 
 proc use*(t: Texture, slot: int) = 
     glActiveTexture((GL_TEXTURE0.int + slot).GLenum)

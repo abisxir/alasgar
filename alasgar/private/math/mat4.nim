@@ -24,8 +24,11 @@ func mat4*(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13,
   result[14] = v14
   result[15] = v15
 
-func mat4*(a: Mat4): Mat4 =
-  a
+func mat4*(a: Mat4): Mat4 = a
+
+func mat4*(p: ptr float32): Mat4 =
+  var pm = cast[ptr Mat4](p)
+  result = pm[]
 
 func identity*(): Mat4 =
   result[0] = 1

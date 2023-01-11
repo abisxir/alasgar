@@ -17,4 +17,3 @@ func sign*(v: float32): float32 =
 func inverseLerp*(a, b, v: float32): float32 = (v - a) / (b - a)
 func lerp*(a, b, v: float32): float32 = a * (1.0 - v) + b * v
 func map*(x, A, B, C, D: float32): float32 = (x - A) / (B - A) * (D - C) + C
-

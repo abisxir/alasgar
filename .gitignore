@@ -46,24 +46,6 @@ main.nim
 main
 shadow
 nakefile
-*.avi
-./ecs.nim
-./fog.nim
-./main.nim
-./Makefile
-./alasgar.keystore
-./profile_*
-./release.keystore
-./shadow.nim
-./shadow
-./test-release.sh
-/example/hello
-/example/normal
-/example/main
-/example/nakefile
-/example/interactive
-/example/build
-/example/shadow
 
 # Build and res direcory
 build/

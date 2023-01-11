@@ -16,7 +16,8 @@ proc traverse(e: Entity, world: Mat4, dirty: bool) =
 
     if e.getChildrenCount() > 0:
         for child in e.children:
-            traverse(child, model, isEntityDirty)
+            if child.attached:
+                traverse(child, model, isEntityDirty)
                 
 
 

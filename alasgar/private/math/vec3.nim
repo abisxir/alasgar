@@ -220,3 +220,11 @@ let VEC3_BACK* = vec3(0, 0, 1)
 
 func caddr*(v: var Vec3): ptr float32 = v.x.addr
 func caddr*(v: var Vec2): ptr float32 = v.x.addr
+
+func vec3*(p: ptr float32, offset: int=0): Vec3 =
+    let 
+        address = cast[ByteAddress](p)
+        x = cast[ptr float32](address + offset * sizeof(float32))
+        y = cast[ptr float32](address + (offset + 1) * sizeof(float32))
+        z = cast[ptr float32](address + (offset + 2) * sizeof(float32))
+    result = vec3(x[], y[], z[]) 

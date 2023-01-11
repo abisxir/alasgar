@@ -1,10 +1,11 @@
+import times
+
 import ../core
 import ../utils
 import ../shader
 import ../system
 import ../texture
-import ../framebuffer
-import times
+import ../render/fb
 
 const fullscreenVS = staticRead("../render/shaders/fullscreen.vs")
 const panaromaToCubemapFS = staticRead("../render/shaders/panaroma-to-cube-map.fs")
@@ -32,6 +33,14 @@ type
         fxaaReduceMin*: float
 
     EnvironmentSystem* = ref object of System
+
+#proc attach(fb: FrameBuffer, texture: Texture, unit: int, size: int, level: int) =
+#    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, unit.GLenum, texture.id, level.GLint)
+#    attach(texture)
+#    glViewport(0, 0, size.GLsizei, size.GLsizei)
+#    #glClearColor(1, 0, 0, 0)
+#    glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+
 
 func newEnvironmentComponent*(): EnvironmentComponent =
     new(result)
@@ -67,19 +76,14 @@ proc filter(cubemap: Texture,
             distribution: int,
             sampleCount: int,
             lodBias: float32) =
-    let shader = newShader(fullscreenVS, iblFilterFS, [])
-    let roughness = level.float32 / (target.levels.float32 - 1.0)
-    let size = cubemap.width
-    let currentTextureSize = size shr level
+    let 
+        shader = newShader(fullscreenVS, iblFilterFS, [])
+        roughness = level.float32 / (target.levels.float32 - 1.0)
+        size = cubemap.width
+        currentTextureSize = size shr level
     
     for i in 0..5:
-        use(fb)
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, (GL_TEXTURE_CUBE_MAP_POSITIVE_X.int + i).GLenum, target.id, level.GLint)
-        glBindTexture(GL_TEXTURE_CUBE_MAP, target.id)        
-        glViewport(0, 0, currentTextureSize.GLsizei, currentTextureSize.GLsizei)
-        glClearColor(1, 0, 0, 0)
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-        
+        use(fb, target, GL_TEXTURE_CUBE_MAP_POSITIVE_X.int + i, level, currentTextureSize, currentTextureSize)       
         use(shader)
         use(cubemap, 0)
 
@@ -91,47 +95,48 @@ proc filter(cubemap: Texture,
         shader["u_current_face"] = i
         shader["u_is_generating_lut"] = 0.int
 
-        glDrawArrays(GL_TRIANGLES, 0, 3)
+        draw(fb)
 
     destroy(shader)
 
 proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
-    let fb = newFramebuffer()
-    let shader = newShader(fullscreenVS, panaromaToCubemapFS, [])
-    result = newCubeTexture(size, size, minFilter=GL_LINEAR, magFilter=GL_LINEAR, levels=calculateMipMap(size))
+    let 
+        fb = newFramebuffer()
+        shader = newShader(fullscreenVS, panaromaToCubemapFS, [])
+        texture = newCubeTexture(size, size, minFilter=GL_LINEAR, magFilter=GL_LINEAR, levels=calculateMipMap(size))
+
     use(shader)
     for i in 0..5:
-        use(fb)
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, (GL_TEXTURE_CUBE_MAP_POSITIVE_X.int + i).GLenum, result.id, 0)
-        glBindTexture(GL_TEXTURE_CUBE_MAP, result.id)        
-        glViewport(0, 0, size.GLsizei, size.GLsizei)
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+        use(fb, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X.int + i, 0, size, size)
         use(inTexture, 0)
         shader["u_current_face"] = i
-        glDrawArrays(GL_TRIANGLES, 0, 3)
+        draw(fb)
     
-    mipmap(result)
+    mipmap(texture)
     destroy(shader)
     destroy(fb)
 
+    return texture
+
 proc generateGGX(cubemap: Texture): Texture =
-    let fb = newFramebuffer()
-    let size: int = cubemap.width
+    let 
+        fb = newFrameBuffer()
+        size: int = cubemap.width
+        texture = newCubeTexture(
+            size, 
+            size, 
+            minFilter=GL_LINEAR, 
+            magFilter=GL_LINEAR, 
+            levels=calculateMipMap(size)
+        )
 
-    result = newCubeTexture(
-        size, 
-        size, 
-        minFilter=GL_LINEAR, 
-        magFilter=GL_LINEAR, 
-        levels=calculateMipMap(size)
-    )
-    mipmap(result)
+    mipmap(texture)
 
-    for level in 0..result.levels - 1:
+    for level in 0..texture.levels - 1:
         filter(
             cubemap=cubemap, 
             fb=fb, 
-            target=result, 
+            target=texture, 
             level=level, 
             distribution=1, 
             sampleCount=1024, 
@@ -140,26 +145,22 @@ proc generateGGX(cubemap: Texture): Texture =
 
     destroy(fb)
 
+    result = texture
+
 proc generateLUT(cubemap: Texture): Texture =
-    let shader = newShader(fullscreenVS, iblFilterFS, [])
-    let fb = newFramebuffer()
+    let 
+        shader = newShader(fullscreenVS, iblFilterFS, [])
+        fb = newFrameBuffer()
+        texture = newTexture2D(
+            cubemap.width, 
+            cubemap.height,
+            minFilter=GL_LINEAR, 
+            magFilter=GL_LINEAR,
+            levels=1
+        )
 
-    result = newTexture2D(
-        cubemap.width, 
-        cubemap.height,
-        minFilter=GL_LINEAR, 
-        magFilter=GL_LINEAR,
-        levels=1
-    )
-    allocate(result)
-
-    use(fb)
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, result.id, 0.GLint)
-    glBindTexture(GL_TEXTURE_2D, result.id)        
-    glViewport(0, 0, cubemap.width.GLsizei, cubemap.height.GLsizei)
-    glClearColor(1, 0, 0, 0)
-    glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-    
+    allocate(texture)
+    use(fb, texture, GL_TEXTURE_2D.int, 0, cubemap.width, cubemap.height)
     use(shader)
     use(cubemap, 0)
 
@@ -171,10 +172,12 @@ proc generateLUT(cubemap: Texture): Texture =
     shader["u_current_face"] = 0
     shader["u_is_generating_lut"] = 1.int
 
-    glDrawArrays(GL_TRIANGLES, 0, 3)
+    draw(fb)
 
     destroy(shader)
     destroy(fb)
+
+    result = texture
 
 
 proc setSkybox*(env: EnvironmentComponent, cubemap: Texture, size: int) =
@@ -203,49 +206,17 @@ proc setSkybox*(env: EnvironmentComponent, px, nx, py, ny, pz, nz: string, size:
     )
 
 proc setSkybox*(env: EnvironmentComponent, url: string, size: int) = 
-    # Loads the given panaroma into a texture
-    let inTexture = newTexture(url)
-
-    # Converts panaroma texture to cubemap
-    let cubemap = panoramaToCubemap(inTexture, size)
+    let 
+        # Loads the given panaroma into a texture
+        inTexture = newTexture(url)
+        # Converts panaroma texture to cubemap
+        cubemap = panoramaToCubemap(inTexture, size)
 
     # Destroys the given texture
     destroy(inTexture)
 
     # Sets cubemap as skybox
     setSkybox(env, cubemap, size)
-
-#[
-    let specularMapShader = newComputeShader(specularMapCS)
-    let filteredTexture = newTexture(
-        target=GL_TEXTURE_CUBE_MAP,
-        width=size, 
-        height=size, 
-        internalFormat=GL_RGBA16F,
-        format=GL_RGBA,
-        dataType=cGL_FLOAT,
-        levels=1
-    )
-    copy(rawTexture, filteredTexture)
-
-    use(specularMapShader)
-    use(rawTexture, 0)
-
-    let deltaRoughness: float32 = 1.0 / max(float32(filteredTexture.levels - 1), 1.0)
-    var step = size / 2
-    for level in 1..filteredTexture.levels:
-        let numGroups = max(1, step / 32)
-        useForOutput(filteredTexture, 0, level)
-        specularMapShader["roughness"] = level.float32 * deltaRoughness
-        compute(numGroups.int, numGroups.int, 6)
-        step = step / 2
-
-    destroy(rawTexture)
-    destroy(specularMapShader)
-
-    env.skybox = filteredTexture
-    let elapsed = between(start, now())
-]#
 
 # System implementation
 proc newEnvironmentSystem*(): EnvironmentSystem =
@@ -267,7 +238,7 @@ method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float
 
             # Sets scene clear color
             sys.graphic.context.clearColor = env.backgroundColor
-            shader["env.clear_color"] = env.ambientColor.vec3
+            shader["env.clear_color"] = env.backgroundColor
 
             # Sets scene ambient color
             shader["env.ambient_color"] = env.ambientColor.vec3

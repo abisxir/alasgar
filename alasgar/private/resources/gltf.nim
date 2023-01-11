@@ -7,9 +7,7 @@ import base64
 import os
 import tables
 
-import ../core
 import ../assets
-import ../utils
 import model
 import resource
 
@@ -17,6 +15,7 @@ export resource, model
 
 type
     NormalizeFunction[T] = proc(o: T): T
+    ConvertFunction[T] = proc(data: ptr float32, offset: int): T
     FilterType = enum
         filterTypeNearst = 9728
         filterTypeLinear = 9729
@@ -73,11 +72,13 @@ type
         scale: Option[array[3, float32]]
         mesh: Option[int]
         name: Option[string]
+        skin: Option[int]
     Attributes = object
         POSITION: Option[int]
         NORMAL: Option[int]
         TANGENT: Option[int]
         TEXCOORD_0: Option[int]
+        TEXCOORD_1: Option[int]
         COLOR_0: Option[int]
         JOINTS_0: Option[int]
         WEIGHTS_0: Option[int]
@@ -90,6 +91,11 @@ type
     MeshDef = object
         name: Option[string]
         primitives: seq[Primitive]
+    Skin = object
+        inverseBindMatrices: int
+        skeleton: Option[int]
+        joints: seq[int]
+        name: Option[string]
     SamplerProps = object
         magFilter: Option[int]
         minFilter: Option[int]
@@ -119,6 +125,20 @@ type
         uri: Option[string]
         mimeType: Option[string]
         bufferView: Option[int]
+    AnimationChannelTarget = object
+        node: Option[int]
+        path: string
+    AnimationChannel = object
+        sampler: int
+        target: AnimationChannelTarget
+    AnimationSampler = object
+        input: int
+        interpolation: Option[string]
+        output: int
+    AnimationDef = object
+        channels: seq[AnimationChannel]
+        samplers: seq[AnimationSampler]
+        name: Option[string]
     Document = object
         asset: Option[Asset]
         scene: Option[int]
@@ -126,18 +146,24 @@ type
         buffers: seq[Buffer]
         bufferViews: seq[BufferView]
         meshes: seq[MeshDef]
-        nodes: seq[Node]
+        nodes: Option[seq[Node]]
         accessors: seq[Accessor]
         extensionsRequired: Option[seq[string]]
         materials: Option[seq[Material]]
         textures: Option[seq[TextureDef]]
         images: Option[seq[ImageDef]]
         samplers: Option[seq[SamplerProps]]
+        skins: Option[seq[Skin]]
+        animations: Option[seq[AnimationDef]]
         filename: Option[string]
 
 proc `path`(document: Document): string = splitFile(document.filename.get).dir
 proc toColor(v: array[4, float32]): Color = color(v[0], v[1], v[2], v[3])
 proc toColor(v: array[3, float32]): Color = color(v[0], v[1], v[2], 1)
+proc getNode(document: Document, index: int): Node =
+    result = document.nodes.get[index]
+    let name = if result.name.isSome: result.name.get else: &"node-{index}"
+    result.name = some(name)
         
 proc toTextureParams(document: Document, sampler: Option[int]): (GLenum, GLenum, GLenum, GLenum, GLenum) =
     var 
@@ -219,13 +245,13 @@ func getComponentCount(name: string): int =
         of "MAT4": 16
         else: 0
 
-func getComponentSize(t: int): int =
-    case t.ComponentType:
-        of typeI8: 1
-        of typeUI8: 1
-        of typeI16: 2
-        of typeUI16: 2
-        else: 4
+#func getComponentSize(t: int): int =
+#    case t.ComponentType:
+#        of typeI8: 1
+#        of typeUI8: 1
+#        of typeI16: 2
+#        of typeUI16: 2
+#        else: 4
 
 func toGLDrawMode(mode: DrawMode): GLenum =
     result = case mode:
@@ -275,9 +301,13 @@ proc copy[R, O](accessor: Accessor, bufferView: BufferView, buffer: var Buffer, 
     while index < count:
         for i in 0..componentCount - 1:
             let r: ptr R = cast[ptr R](addr data[element + i * sizeof(R)])
-            output[index] = if isNil(normalize): r[].O else: normalize(r[].O)
+            output[index] = r[].O
             inc(index)
         element += stride
+
+    if not isNil(normalize):
+        for i in 0..len(output) - 1:
+            output[i] = normalize(output[i])
 
 proc getAccessor(document: Document, index: Option[int]): Option[Accessor] =
     if index.isSome:
@@ -300,12 +330,13 @@ proc loadAccessor(document: Document, aIndex: int, output: var seq[float32]) =
                 output
             )
         elif document.accessors[aIndex].componentType == typeUI16.int:
+            echo "It is uint16."
             copy[uint16, float32](
                 accessor, 
                 bufferView, 
                 buffer, 
                 output,
-                normalize=proc(c: float32): float32 = c / 65535.0
+                #normalize=proc(c: float32): float32 = c / 65535.0
             )
         elif document.accessors[aIndex].componentType == typeI16.int:
             copy[int16, float32](
@@ -335,7 +366,7 @@ proc loadAccessor(document: Document, aIndex: int, output: var seq[float32]) =
 proc loadPrimitive(document: Document, primitive: Primitive): Mesh = 
     var
         indices: seq[uint32]
-        positions, normals, uvs, joints, weights: seq[float32]
+        positions, normals, uvs0, uvs1, joints0, weights0: seq[float32]
 
     let indicesAccessor = getAccessor(document, primitive.indices)
     if indicesAccessor.isSome:
@@ -358,10 +389,27 @@ proc loadPrimitive(document: Document, primitive: Primitive): Mesh =
         loadAccessor(document, aIndex, normals)
     if isSome(primitive.attributes.TEXCOORD_0):
         let aIndex: int = primitive.attributes.TEXCOORD_0.get
-        loadAccessor(document, aIndex, uvs)
+        loadAccessor(document, aIndex, uvs0)
+    if isSome(primitive.attributes.TEXCOORD_1):
+        let aIndex: int = primitive.attributes.TEXCOORD_1.get
+        loadAccessor(document, aIndex, uvs1)
+    if isSome(primitive.attributes.JOINTS_0):
+        let aIndex: int = primitive.attributes.JOINTS_0.get
+        loadAccessor(document, aIndex, joints0)
+    if isSome(primitive.attributes.WEIGHTS_0):
+        let aIndex: int = primitive.attributes.WEIGHTS_0.get
+        loadAccessor(document, aIndex, weights0)
 
     let drawMode = if primitive.mode.isSome: primitive.mode.get.DrawMode else: drawModeTriangles
-    result = newMesh(positions, normals, uvs, indices, drawMode=toGLDrawMode(drawMode))
+    result = newMesh(
+        vertices=positions, 
+        normals=normals, 
+        uvs=uvs0, 
+        joints=joints0,
+        weights=weights0,
+        indices=indices, 
+        drawMode=toGLDrawMode(drawMode)
+    )
 
 proc needsDraco(document: Document): bool = document.extensionsRequired.isSome and contains(document.extensionsRequired.get, "KHR_draco_mesh_compression")
 
@@ -378,7 +426,7 @@ proc loadTexture(document: Document, sampler: Option[Sampler]): Texture =
     if sampler.isSome and document.textures.isSome:
         if sampler.get.texCoord.isSome and sampler.get.texCoord.get != 0:
             # TODO: check texcoord
-            echo "Warning: two texCoord is not supported!"
+            echo "Warning: texCoord1 is not supported!"
         let t = document.textures.get[sampler.get.index]
         if t.source.isSome:
             let 
@@ -411,6 +459,92 @@ proc loadMaterials(document: Document, model: ModelResource) =
                 material.roughness = if m.pbrMetallicRoughness.get.roughnessFactor.isSome: m.pbrMetallicRoughness.get.roughnessFactor.get else: 1
                 material.emissiveColor = if m.emissiveFactor.isSome: toColor(m.emissiveFactor.get) else: COLOR_BLACK                
 
+proc loadJoints(document: Document, node: Node, skinName: string, model: ModelResource) =
+    var 
+        skinDesc = document.skins.get[node.skin.get]
+        matrices = newSeq[float32]()
+    loadAccessor(document, skinDesc.inverseBindMatrices, matrices)
+    for i, jointNodeIndex in pairs(skinDesc.joints):
+        let 
+            jointNode = getNode(document, jointNodeIndex)
+            offset = i * 16
+            matrix = mat4(addr(matrices[offset]))
+        addJoint(model, jointNode.name.get, skinName, matrix)
+
+proc createAnimationTrack[T](document: Document, 
+                             channel: AnimationChannel, 
+                             sampler: AnimationSampler, 
+                             stride: int,
+                             convert: ConvertFunction[T]): AnimationTrack[T] =
+    var
+        timelines = newSeq[float32]()
+        values = newSeq[float32]()
+
+    loadAccessor(document, sampler.input , timelines)
+    loadAccessor(document, sampler.output , values)
+
+    if sampler.interpolation.isSome and sampler.interpolation.get == "LINEAR":
+        result.interpolation = imLinear
+    elif sampler.interpolation.isSome and sampler.interpolation.get == "CUBICSPLINE":
+        result.interpolation = imCubic
+    else:
+        result.interpolation = imStep
+
+    setLen(result.frames, len(timelines))
+
+    var
+        offset = 0
+        p = addr(values[0])
+        isCubic = sampler.interpolation.get == "CUBICSPLINE"
+    for i, frame in mpairs(result.frames):
+        frame.time = timelines[i]
+        if isCubic:
+            frame.dataIn = convert(p, offset)
+            offset += stride
+        frame.value = convert(p, offset)
+        offset += stride
+        if isCubic:
+            frame.dataOut = convert(p, offset)
+            offset += stride
+
+proc addAnimation(document: Document, 
+                  animation: AnimationDef, 
+                  animationName: string,
+                  model: ModelResource) =
+    var 
+        firstModelName: string
+    for channel in animation.channels:
+        if channel.target.node.isSome:
+            var 
+                sampler = animation.samplers[channel.sampler]
+                node = getNode(document, channel.target.node.get)
+                component: AnimationChannelComponent
+            
+            if isEmptyOrWhitespace(firstModelName):
+                firstModelName = node.name.get
+
+            if channel.target.path == "rotation":
+                component = newAnimationChannelComponent()
+                component.rotation = createAnimationTrack[Quat](document, channel, sampler, 4, quat)
+            elif channel.target.path == "scale":
+                component = newAnimationChannelComponent()
+                component.scale = createAnimationTrack[Vec3](document, channel, sampler, 3, vec3)
+            elif channel.target.path == "translation":
+                component = newAnimationChannelComponent()
+                component.translation = createAnimationTrack[Vec3](document, channel, sampler, 3, vec3)
+                
+            if component != nil:
+                addAnimationChannel(model, node.name.get, animationName, component)
+    
+    if not isEmptyOrWhitespace(firstModelName):
+        addAnimationClip(model, firstModelName, animationName)
+            
+
+iterator iterateNodeAnimation(document: Document): (AnimationDef, string) =
+    if document.animations.isSome:
+        for i, animation in pairs(document.animations.get):
+            let name = if animation.name.isSome: animation.name.get else: &"anim-{i + 1}"
+            yield (animation, name)
 
 proc loadGLTF*(filename: string): Resource =
     var 
@@ -439,27 +573,35 @@ proc loadGLTF*(filename: string): Resource =
     # Loads all meshes
     loadMeshes(document, model)
 
+    # Load all animations
+    for animation, animationName in iterateNodeAnimation(document):
+        addAnimation(document, animation, animationName, model)
+
     proc addChildren(parent: string, child: int) =
         let 
-            node = document.nodes[child]
-            name = if node.name.isSome: node.name.get else: &"node-{child}"
-            main = addNode(model, name, parent, node.position, node.quat, getScale(node))
+            node = getNode(document, child)
+            main = addNode(model, node.name.get, parent, node.position, node.quat, getScale(node))
+
+        if node.skin.isSome:
+            addSkin(model, node.name.get)
+            loadJoints(document, node, node.name.get, model)
+
         if node.mesh.isSome:
             let mesh = document.meshes[node.mesh.get]
             if len(mesh.primitives) > 1:
                 for p in mesh.primitives:
-                    let child = addNode(model, p.name.get, name, VEC3_ZERO, quat(), VEC3_ONE)
+                    let child = addNode(model, p.name.get, node.name.get, VEC3_ZERO, quat(), VEC3_ONE)
                     child.mesh = p.name.get
                     if p.material.isSome:
                         child.material = &"{p.material.get}"
             else:
                 main.mesh = mesh.primitives[0].name.get
                 if mesh.primitives[0].material.isSome:
-                    main.material = &"{mesh.primitives[0].material.get}"
+                    main.material = &"{mesh.primitives[0].material.get}"            
 
         if node.children.isSome:
             for c in node.children.get:
-                addChildren(name, c)
+                addChildren(node.name.get, c)
 
     for i, scene in pairs(document.scenes):
         let name = &"scene-{i}"

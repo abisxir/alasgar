@@ -2,10 +2,16 @@ import hashes
 import strformat
 import strutils
 import tables
-import ports/opengl
 
+import config
+import ports/opengl
 import utils
 import container
+
+const forwardV = staticRead("render/shaders/forward.vs")
+const forwardF = staticRead("render/shaders/forward.fs")
+const forwardPostV = staticRead("render/shaders/effect.vs")
+const forwardPostF = staticRead("render/shaders/effect.fs")
 
 type
     Shader* = ref object
@@ -27,8 +33,6 @@ type
         value: Vec4
     ShaderParamMat4* = ref object of ShaderParam
         value: Mat4
-
-method update(p: ShaderParam, shader: Shader){.base.} = discard
 
 proc destroyShader(shader: Shader) =
     if shader.program != 0:
@@ -91,7 +95,7 @@ proc loadShaderSource(src: cstring, kind: GLenum): GLuint =
     let info = shaderInfoLog(result)
     if not compiled:
         logi "Shader compile error: ", info
-        #logi "The shader: ", src
+        logi "The shader: ", src
         glDeleteShader(result)
     elif info.len > 0:
         logi "Shader compile log: ", info
@@ -116,7 +120,7 @@ proc createProgram*(vs, fs: string,
     glAttachShader(result, fShader)
 
     for a in attributes:
-        glBindAttribLocation(result, a.index, a.name)
+        glBindAttribLocation(result, a.index, a.name.cstring)
 
     glLinkProgram(result)
     glDeleteShader(vShader)
@@ -225,6 +229,7 @@ proc `[]=`*(s: Shader; key: string; value: Mat4) =
     var matrix = value
     s[key] = matrix
 
+method update(p: ShaderParam, shader: Shader) {.base.} = discard
 method update(p: ShaderParamInt, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamFloat, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamVec2, shader: Shader) = shader[p.key] = p.value
@@ -301,3 +306,52 @@ proc destroy*(shader: Shader) = remove(cache, shader)
 proc cleanupShaders*() =
     echo &"Cleaning up [{len(cache)}] shaders..."
     clear(cache)
+
+proc newSpatialShader*(vertexSource: string="", fragmentSource: string=""): Shader =
+    var 
+        vsource: string
+        fsource = forwardF.replace("$MAX_LIGHTS$", &"{maxLights}")
+            
+    if isEmptyOrWhitespace(fragmentSource):
+        fsource = fsource
+            .replace("$MAIN_FUNCTION$", "")
+            .replace("$MAIN_FUNCTION_CALL$", "")
+    else:
+        fsource = fsource
+            .replace("$MAIN_FUNCTION$", fragmentSource)
+            .replace("$MAIN_FUNCTION_CALL$", "fragment();")
+
+    if isEmptyOrWhitespace(vertexSource):
+        vsource = forwardV
+            .replace("$MAIN_FUNCTION$", "")
+            .replace("$MAIN_FUNCTION_CALL$", "")
+    else:
+        vsource = forwardV
+            .replace("$MAIN_FUNCTION$", vertexSource)
+            .replace("$MAIN_FUNCTION_CALL$", "vertex();")
+
+    result = newShader(vsource, fsource, [])
+
+proc newCanvasShader*(vertexSource, fragmentSource: string): Shader =
+    var fsource, vsource: string
+    if isEmptyOrWhitespace(fragmentSource):
+        fsource = forwardPostF
+            .replace("$MAIN_FUNCTION$", "")
+            .replace("$MAIN_FUNCTION_CALL$", "")
+    else:
+        fsource = forwardPostF
+            .replace("$MAIN_FUNCTION$", fragmentSource)
+            .replace("$MAIN_FUNCTION_CALL$", "fragment();")
+
+    if isEmptyOrWhitespace(vertexSource):
+        vsource = forwardPostV
+            .replace("$MAIN_FUNCTION$", "")
+            .replace("$MAIN_FUNCTION_CALL$", "")
+    else:
+        vsource = forwardPostV
+            .replace("$MAIN_FUNCTION$", vertexSource)
+            .replace("$MAIN_FUNCTION_CALL$", "vertex();")
+
+    result = newShader(vsource, fsource, [])
+
+proc newCanvasShader*(source: string=""): Shader = newCanvasShader(vertexSource="", fragmentSource=source)

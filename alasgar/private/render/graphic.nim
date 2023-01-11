@@ -1,8 +1,5 @@
-import strutils
-import strformat
 
 import sdl2
-import chroma
 import ../ports/opengl
 
 import ../utils
@@ -10,63 +7,38 @@ import ../shader
 import ../texture
 import ../mesh
 import ../core
-import frame_buffer
+import fb
 import shadow
 import skybox
 import context
 
 export opengl, context
 
-const forwardV = staticRead("shaders/forward.vs")
-const forwardF = staticRead("shaders/forward.fs")
-
 type
     Graphic* = ref object
         screenSize*, windowSize*: Vec2
-        maxBatchSize*: int
-        maxLights*: int
-        multiSample*: int
         shader: Shader
+        blitShader: Shader
         vsync: bool
         window: WindowPtr
         glContext: GlContextPtr
         totalObjects: int
         totalBatches: int
         drawCalls: int
-        frameBuffer: FrameBuffer
+        fb: FrameBuffer
         skybox: Skybox
         shadow: Shadow
+        effectsFrameBuffer: FrameBuffer
+        effectsTexture: Texture 
         context*: GraphicContext
+
+var
+    maxBatchSize = 2048
 
 proc `totalObjects`*(g: Graphic): int = g.totalObjects
 proc `drawCalls`*(g: Graphic): int = g.drawCalls
 
-proc newSpatialShader*(g: Graphic, vertexSource: string="", fragmentSource: string=""): Shader =
-    var 
-        vsource: string
-        fsource = forwardF.replace("$MAX_LIGHTS$", &"{g.maxLights}")
-            
-    if isEmptyOrWhitespace(fragmentSource):
-        fsource = fsource
-            .replace("$MAIN_FUNCTION$", "")
-            .replace("$MAIN_FUNCTION_CALL$", "")
-    else:
-        fsource = fsource
-            .replace("$MAIN_FUNCTION$", fragmentSource)
-            .replace("$MAIN_FUNCTION_CALL$", "fragment();")
-
-    if isEmptyOrWhitespace(vertexSource):
-        vsource = forwardV
-            .replace("$MAIN_FUNCTION$", "")
-            .replace("$MAIN_FUNCTION_CALL$", "")
-    else:
-        vsource = forwardV
-            .replace("$MAIN_FUNCTION$", vertexSource)
-            .replace("$MAIN_FUNCTION_CALL$", "vertex();")
-
-    result = newShader(vsource, fsource, [])
-
-proc initOpenGL(g: Graphic, maxBatchSize, maxLights, multiSample: int) =
+proc initOpenGL(g: Graphic) =
     # Initialize opengl context
     discard glSetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1)
     when defined(macosx):
@@ -78,17 +50,12 @@ proc initOpenGL(g: Graphic, maxBatchSize, maxLights, multiSample: int) =
         discard glSetAttribute(SDL_GL_BLUE_SIZE, 8)
         discard glSetAttribute(SDL_GL_ALPHA_SIZE, 8)
         discard glSetAttribute(SDL_GL_STENCIL_SIZE, 8)
-        #discard glSetAttribute(SDL_GL_DEPTH_SIZE, 32)
     else:
         discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES)
         discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3)
         discard glSetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1)
     
     discard glSetAttribute(SDL_GL_DOUBLEBUFFER, 1)
-    #discard glSetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1)
-    #discard glSetAttribute(SDL_GL_MULTISAMPLESAMPLES, multiSample)
-    
-    #discard glSetAttribute(SDL_GL_DEPTH_SIZE, 24)
 
     # Creates opengl context
     g.glContext = glCreateContext(g.window)
@@ -107,18 +74,11 @@ proc initOpenGL(g: Graphic, maxBatchSize, maxLights, multiSample: int) =
     # Loads opengl es
     discard gladLoadGLES2(glGetProcAddress)
 
-    # Sets batch size
-    g.maxBatchSize = maxBatchSize
-    g.maxLights = maxLights
-    g.multiSample = multiSample
-
     glEnable(GL_DEPTH_TEST)
 
 proc newGraphic*(window: WindowPtr,
                  screenSize, windowSize: Vec2,
-                 vsync: bool,
-                 maxBatchSize, maxLights, multiSample: int,
-                 deferred: bool=false): Graphic =
+                 vsync: bool): Graphic =
     new(result)
 
     result.window = window
@@ -128,23 +88,24 @@ proc newGraphic*(window: WindowPtr,
 
     echo "* Initializing OpenGL..."
 
-    initOpenGL(result, maxBatchSize, maxLights, multiSample)
+    initOpenGL(result)
 
     echo "* OpenGL initialized!"
 
-    result.shader = newSpatialShader(result)
-    result.frameBuffer = newFrameBuffer(result.screenSize, deferred)
+    result.shader = newSpatialShader()
+    result.blitShader = newCanvasShader()
+    result.fb = newRenderBuffer(result.screenSize)
     result.skybox = newSkybox()
     result.shadow = newShadow()
 
 proc clear*(g: Graphic) =
-    g.context.maxBatchSize = g.maxBatchSize
     clear(g.context.shaders)
     clear(g.context.shadowCasters)
+    clear(g.context.effects)
     add(g.context.shaders, g.shader)
 
-proc renderFrameBuffer(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
-    use(g.frameBuffer, g.context.clearColor)
+proc renderToFrameBuffer(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
+    use(g.fb, g.context.clearColor)
 
     if not isNil(cubemap):
         render(g.skybox, cubemap, view, projection, g.context.environmentIntensity)
@@ -212,10 +173,17 @@ proc renderFrameBuffer(g: Graphic, view, projection: Mat4, cubemap: Texture, dra
             use(lastEmissiveMap, 5)
 
         # Limits instance count by max batch size
-        var count = min(drawables[i].count, g.maxBatchSize)
+        var count = min(drawables[i].count, maxBatchSize)
 
         # Renders count amount of instances
-        render(mesh, caddr(drawables[i].modelPack), addr(drawables[i].materialPack[0]), caddr(drawables[i].spritePack), count)
+        render(
+            mesh, 
+            caddr(drawables[i].modelPack), 
+            addr(drawables[i].materialPack[0]), 
+            caddr(drawables[i].spritePack), 
+            caddr(drawables[i].skinPack), 
+            count
+        )
 
         inc(g.totalObjects, count)
         inc(g.drawCalls)
@@ -228,25 +196,51 @@ proc render*(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: va
         process(g.shadow, g.context, drawables)
 
     # Renders objects to framebuffer
-    renderFrameBuffer(g, view, projection, cubemap, drawables)
+    renderToFrameBuffer(g, view, projection, cubemap, drawables)
+
+proc applyEffects(g: Graphic): Texture =
+    if len(g.context.effects) > 0:
+        if isNil(g.effectsFrameBuffer):
+            g.effectsFrameBuffer = newFrameBuffer()
+            g.effectsTexture = newTexture2D(g.screenSize.iWidth, g.screenSize.iHeight, levels=1)
+            allocate(g.effectsTexture)
+        var 
+            target = g.effectsTexture
+            source = g.fb.texture
+        for shader in g.context.effects:
+            #swap(source, target)
+            use(g.effectsFrameBuffer, target, GL_TEXTURE_2D.int, 0, g.screenSize.iWidth, g.screenSize.iHeight)
+            use(shader)
+            use(source, 0)
+            draw(g.effectsFrameBuffer)
+        result = target
+    else:
+        result = g.fb.texture            
+
 
 proc swap*(g: Graphic) =
+    let blitTexture = applyEffects(g)
+    glBindRenderbuffer(GL_RENDERBUFFER, 0)
+    glBindFramebuffer(GL_FRAMEBUFFER, 0)
     glViewport(0, 0, g.windowSize.iWidth, g.windowSize.iHeight)
-    blit(g.frameBuffer, g.context)
+    glDisable(GL_DEPTH_TEST)
+    glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
+
+    use(g.blitShader)
+    use(blitTexture, 0)
+    glDrawArrays(GL_TRIANGLES, 0, 3)
+   
     glSwapWindow(g.window)
 
 proc destroy*(g: Graphic) =
-    if g.skybox != nil:
-        destroy(g.skybox)
-        g.skybox = nil
+    destroy(g.skybox)
+    g.skybox = nil
 
-    if g.frameBuffer != nil:
-        destroy(g.frameBuffer)
-        g.frameBuffer = nil
+    destroy(g.fb)
+    g.fb = nil
 
-    #if g.depthBuffer != nil:
-    #    destroy(g.depthBuffer)
-    #    g.depthBuffer = nil
+    destroy(g.shadow)
+    g.shadow = nil
 
     if g.glContext != nil:
         glDeleteContext(g.glContext)

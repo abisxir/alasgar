@@ -157,12 +157,19 @@ proc process*(shadow: Shadow,
             var mesh = drawables[i].mesh.instance
 
             # Limits instance count by max batch size
-            var count = min(drawables[i].count, context.maxBatchSize)
+            var count = min(drawables[i].count, maxBatchSize)
 
             for ix in 0..count - 1:
                 if drawables[i + ix].material != nil and drawables[i + ix].material.castShadow:
                     # Renders count amount of instances
-                    render(mesh, caddr(drawables[i + ix].modelPack), addr(drawables[i + ix].materialPack[0]), caddr(drawables[i + ix].spritePack), 1)
+                    render(
+                        mesh, 
+                        caddr(drawables[i + ix].modelPack), 
+                        addr(drawables[i + ix].materialPack[0]), 
+                        caddr(drawables[i + ix].spritePack), 
+                        caddr(drawables[i + ix].skinPack), 
+                        1
+                    )
 
             # Moves to next chunk
             inc(i, count)
@@ -177,6 +184,9 @@ proc process*(shadow: Shadow,
     shadow.buffers = buffers
 
 proc destroy*(shadow: Shadow) =
-    destroy(shadow.shader)
-    for buffer in shadow.buffers:
-        destroy(buffer)
+    if shadow != nil:
+        if shadow.shader != nil:
+            shadow.shader = nil
+            destroy(shadow.shader)
+            for buffer in shadow.buffers:
+                destroy(buffer)

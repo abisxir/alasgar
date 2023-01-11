@@ -46,7 +46,8 @@ proc loadImage(url: string): Resource =
     if not startsWith(url, "data:image/"):
         echo &"Image [{url}] loaded with image with size [{r.width}x{r.height}] in [{r.channels}] channels and [{r.bits}]bpp."
     else:
-        echo &"Image [{url[..16]}...] loaded with image with size [{r.width}x{r.height}] in [{r.channels}] channels and [{r.bits}]bpp."
+        let t = url[0..16]
+        echo &"Image [{t}...] loaded with image with size [{r.width}x{r.height}] in [{r.channels}] channels and [{r.bits}]bpp."
     result = r
 
 

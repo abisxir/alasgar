@@ -4,7 +4,6 @@ import times
 import os
 
 import sdl2
-import chroma
 
 import logger
 import render/graphic
@@ -20,6 +19,9 @@ import components/camera
 import components/light
 import components/interactive
 import components/environment
+import components/skin
+import components/animation
+import components/effect
 import resources/resource
 import shader
 
@@ -95,8 +97,6 @@ proc newEngine*(windowWidth: int,
                 resizeable: bool = false,
                 frameLimit: int = 0,
                 maxBatchSize: int = 16 * 1024,
-                maxLights: int = 8,
-                multiSample: int = 4,
                 verbose: bool=false,
                 depthMapSize: Vec2=vec2(1024, 1024)): Engine =
 
@@ -125,7 +125,7 @@ proc newEngine*(windowWidth: int,
 
     # Initialize SDL windows
     let window = createWindow(
-        result.title,
+        result.title.cstring,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         windowWidth.cint,
@@ -151,9 +151,6 @@ proc newEngine*(windowWidth: int,
             actualSize.y.float32
         ),
         vsync=false,
-        maxBatchSize=maxBatchSize,
-        maxLights=maxLights,
-        multiSample=multiSample,
     )
 
     echo "* Graphic engine initialized!"
@@ -166,10 +163,14 @@ proc newEngine*(windowWidth: int,
     # Create systems
     addSystem(result, newScriptSystem())
     addSystem(result, newInteractiveSystem())
+    addSystem(result, newAnimationSystem())
     addSystem(result, newTraverseSystem())
+    addSystem(result, newJointSystem())
+    addSystem(result, newSkinSystem())
     addSystem(result, newPrepareSystem())
     addSystem(result, newCameraSystem())
     addSystem(result, newEnvironmentSystem())
+    addSystem(result, newPostProcessingSystem())
     #addSystem(result, newSoundSystem())
     addSystem(result, newLightSystem())
     addSystem(result, newRenderSystem())
@@ -299,7 +300,7 @@ proc loop*(engine: Engine) =
             # Clear scene
             clear(engine.graphic)
 
-            if engine.primary != nil:
+            if engine.primary != nil and engine.primary.activeCamera != nil:
                 for system in engine.systems:
                     let start = epochTime()
                     process(system, engine.primary, input, delta, engine.frames, engine.age)

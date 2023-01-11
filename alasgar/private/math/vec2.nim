@@ -7,6 +7,8 @@ func vec2*(x, y: float32): Vec2 =
     result.x = x
     result.y = y
 
+func vec2*(x: float32): Vec2 = vec2(x, x)
+    
 func vec2*(a: Vec2): Vec2 =
     result.x = a.x
     result.y = a.y

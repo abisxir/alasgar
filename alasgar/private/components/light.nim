@@ -8,6 +8,7 @@ import ../render/context
 type
     LightComponent* = ref object of Component
         color*: Color
+        luminance*: float32
         intensity*: float32
         shadow: bool
         shadowMapSize: Vec2
@@ -16,35 +17,27 @@ type
         direction*: Vec3
 
     PointLightComponent* = ref object of LightComponent
-        constant*: float32
-        linear*: float32
-        quadratic*: float32
 
     SpotPointLightComponent* = ref object of LightComponent
         direction*: Vec3
-        innerLimit*: float32
-        outerLimit*: float32
+        innerCutoff*: float32
+        outerCutoff*: float32
 
     LightType* = enum
-        lightTypeDirectional = 0
-        lightTypePoint = 1
-        lightTypeSpot = 2
+        ltDirectional = 0
+        ltPoint = 1
+        ltSpot = 2
 
     LightSystem* = ref object of System
 
 proc newPointLightComponent*(color: Color=COLOR_MILK, 
-                             intensity: float32=1.0,
-                             constant: float32=1, 
-                             linear: float32=0.0, 
-                             quadratic: float32=0.0,
+                             luminance=1000.0,
                              shadow: bool=false,
                              shadowMapSize: Vec2=vec2(1024, 1024)): PointLightComponent =
     new(result)
     result.color = color
-    result.constant = constant
-    result.linear = linear
-    result.quadratic = quadratic
-    result.intensity = intensity
+    result.luminance = luminance
+    result.intensity = 1.0
     result.shadowMapSize = shadowMapSize
     result.shadow = shadow
 
@@ -62,17 +55,18 @@ proc newDirectLightComponent*(direction: Vec3,
 
 proc newSpotPointLightComponent*(direction: Vec3,
                                  color: Color=COLOR_MILK, 
-                                 intensity: float32=1.0,
-                                 innerLimit: float32=30, 
-                                 outerLimit: float32=45,
+                                 luminance: float32=1000.0,
+                                 innerCutoff: float32=30, 
+                                 outerCutoff: float32=45,
                                  shadow: bool=false,
                                  shadowMapSize: Vec2=vec2(1024, 1024)): SpotPointLightComponent =
     new(result)
     result.color = color
-    result.intensity = intensity
+    result.luminance = luminance
+    result.intensity = 1.0
     result.direction = direction
-    result.innerLimit = innerLimit
-    result.outerLimit = outerLimit
+    result.innerCutoff = innerCutoff
+    result.outerCutoff = outerCutoff
     result.shadowMapSize = shadowMapSize
     result.shadow = shadow
 
@@ -123,12 +117,12 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
 
             for c in iterateComponents[DirectLightComponent](scene):
                 # Checks that entity is visible
-                if c.entity.visible and lightCount < sys.graphic.maxLights:
+                if c.entity.visible and lightCount < maxLights:
                     # Set shader params
-                    shader[&"lights[{lightCount}].color"] = c.color
+                    shader[&"lights[{lightCount}].type"] = ltDirectional.int
+                    shader[&"lights[{lightCount}].color"] = c.color.vec3
                     shader[&"lights[{lightCount}].intensity"] = c.intensity
                     shader[&"lights[{lightCount}].direction"] = c.direction
-                    shader[&"lights[{lightCount}].type"] = lightTypeDirectional.int
                     shader[&"lights[{lightCount}].depth_map"] = -1
 
                     # Increments direct light count
@@ -136,24 +130,27 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
 
             for c in iterateComponents[PointLightComponent](scene):
                 # Checks that entity is visible
-                if c.entity.visible and lightCount < sys.graphic.maxLights:
+                if c.entity.visible and lightCount < maxLights:
+                    shader[&"lights[{lightCount}].type"] = ltPoint.int
                     shader[&"lights[{lightCount}].color"] = c.color.vec3
                     shader[&"lights[{lightCount}].intensity"] = c.intensity 
                     shader[&"lights[{lightCount}].position"] = c.transform.globalPosition
-                    shader[&"lights[{lightCount}].attenuation"] = vec3(c.constant, c.linear, c.quadratic)
+                    shader[&"lights[{lightCount}].luminance"] = c.luminance
                     shader[&"lights[{lightCount}].depth_map"] = -1
                     
                     inc(lightCount)
 
             for c in iterateComponents[SpotPointLightComponent](scene):
                 # Checks that entity is visible
-                if c.entity.visible and lightCount < sys.graphic.maxLights:
+                if c.entity.visible and lightCount < maxLights:
+                    shader[&"lights[{lightCount}].type"] = ltSpot.int
                     shader[&"lights[{lightCount}].color"] = c.color.vec3
                     shader[&"lights[{lightCount}].intensity"] = c.intensity 
+                    shader[&"lights[{lightCount}].luminance"] = c.intensity 
                     shader[&"lights[{lightCount}].position"] = c.transform.globalPosition
                     shader[&"lights[{lightCount}].direction"] = c.direction
-                    shader[&"lights[{lightCount}].inner_cone_cos"] = c.innerLimit
-                    shader[&"lights[{lightCount}].outer_cone_cos"] = c.outerLimit
+                    shader[&"lights[{lightCount}].inner_cutoff_cos"] = cos(c.innerCutoff)
+                    shader[&"lights[{lightCount}].outer_cutoff_cos"] = cos(c.outerCutoff)
                     shader[&"lights[{lightCount}].depth_map"] = -1
                     
                     # Takes care of shadow

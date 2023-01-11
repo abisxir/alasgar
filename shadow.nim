@@ -1,7 +1,26 @@
 import alasgar
 
+proc layout*(e: Entity, level=0) =
+    echo spaces(level), "+ ", e.name
+    for c in e.components:
+        if c of AnimationClipComponent:
+            let a = cast[AnimationClipComponent](c)
+            echo spaces(level), "  - ", "AnimationClipComponent", a
+        elif c of AnimationChannelComponent:
+            echo spaces(level), "  - ", "AnimationChannelComponent"
+        elif c of SkinComponent:
+            echo spaces(level), "  - ", "SkinComponent"
+        elif c of JointComponent:
+            echo spaces(level), "  - ", "JointComponent"
+        elif c of MeshComponent:
+            echo spaces(level), "  - ", "MeshComponent"
+        else:
+            echo spaces(level), "  - ", type(c)
+    for child in e.children:
+        layout(child, level + 1)
+
 # Creates a window named Hello
-screen(640, 360)
+screen(1920, 1080)
 window("Hello", 1920, 1080)
    
 # Creates a new scene
@@ -32,7 +51,7 @@ addComponent(
     cameraEntity, 
     newPerspectiveCamera(
         75, 
-        engine.ratio, 
+        runtime.ratio, 
         0.1, 
         100.0, 
         vec3(0) - cameraEntity.transform.position
@@ -41,23 +60,24 @@ addComponent(
 # Makes the camera entity child of scene
 addChild(scene, cameraEntity)
 
-# Creates platform entity, by default position is (0, 0, 0)
-var platformEntity = newEntity(scene, "Platform")
-# Set scale to 20
-platformEntity.transform.scale = vec3(20)
-platformEntity.transform.euler = vec3(0, 0, -PI / 2)
-# Add a cube mesh component to entity
-addComponent(platformEntity, newPlaneMesh(1, 1))
-# Adds a material to cube
-addComponent(
-    platformEntity, 
-    newMaterialComponent(
-        diffuseColor=parseHtmlName("grey"),
-        #texture=newTexture("res://stone-texture.png"),
-    )
-)
-# Makes the cube enity child of scene
-addChild(scene, platformEntity)
+let rFloor = load("res://floor/scene.gltf")
+proc addFloor(position: Vec3) =
+    let mFloor = toEntity(rFloor, scene)
+    mFloor.transform.euler = vec3(0, 0, -PI / 2)
+    mFloor.transform.scale = vec3(2.0)
+    mFloor.transform.position = position
+    addChild(scene, mFloor)
+
+addFloor(vec3(0, -2, 0))
+addFloor(vec3(8, -2, 0))
+addFloor(vec3(-8, -2, 0))
+addFloor(vec3(0, -2, 8))
+addFloor(vec3(0, -2, -8))
+addFloor(vec3(8, -2, 8))
+addFloor(vec3(-8, -2, -8))
+addFloor(vec3(8, -2, -8))
+addFloor(vec3(-8, -2, 8))
+
 
 proc createCube(name: string, position: Vec3) =
     # Creates cube entity
@@ -70,9 +90,9 @@ proc createCube(name: string, position: Vec3) =
     addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
         # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
         script.transform.euler = vec3(
-            engine.age * 0.1, 
-            engine.age * 0.3, 
-            engine.age * 0.2,
+            runtime.age * 0.1, 
+            runtime.age * 0.3, 
+            runtime.age * 0.2,
         )
     ))
     # Adds a material to cube

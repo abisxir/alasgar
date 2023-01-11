@@ -9,8 +9,16 @@ type
         name*: string
         graphic*: Graphic
 
+var systems = newSeq[System]()
 
-method init*(sys: System, g: Graphic) {.base, locks: "unknown".} = sys.graphic = g
-method process*(sys: System, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) {.base, locks: "unknown".} = discard
-method cleanup*(sys: System) {.base, locks: "unknown".} = discard
+method process*(sys: System, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) {.base.} = discard
+method cleanup*(sys: System) {.base.} = discard
+method init*(sys: System, g: Graphic) {.base.} = 
+    sys.graphic = g
+    add(systems, sys)
+
+proc getSystem*[T](): T = 
+    for sys in systems:
+        if sys of T:
+            return cast[T](sys)
 
