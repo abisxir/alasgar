@@ -15,7 +15,7 @@ addComponent(
     cameraEntity, 
     newPerspectiveCamera(
         75, 
-        engine.ratio, 
+        runtime.engine.ratio, 
         0.1, 
         100.0, 
         vec3(0) - cameraEntity.transform.position
@@ -37,8 +37,8 @@ addComponent(
 addComponent(lightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
     const r = 5 
     # Change position on transform
-    script.transform.positionX = r * sin(engine.age) 
-    script.transform.positionZ = r * cos(engine.age)
+    script.transform.positionX = r * sin(runtime.engine.age) 
+    script.transform.positionZ = r * cos(runtime.engine.age)
 ))
 # Makes the light entity child of the scene
 addChild(scene, lightEntity)
@@ -53,15 +53,15 @@ addComponent(cubeEntity, newCubeMesh())
 addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
     # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
     script.transform.euler = vec3(
-        sin(engine.age) * sin(engine.age), 
-        cos(engine.age), 
-        sin(engine.age)
+        sin(runtime.engine.age) * sin(runtime.engine.age), 
+        cos(runtime.engine.age), 
+        sin(runtime.engine.age)
     )
 ))
 # Adds a material to cube
 addComponent(cubeEntity, newMaterialComponent(
     diffuseColor=parseHtmlName("white"),
-    texture=newTexture("res://stone-texture.png")
+    albedoMap=newTexture("res://stone-texture.png")
     )
 )
 # Makes the cube enity child of scene
@@ -77,8 +77,8 @@ addComponent(spotLightEntity, newSpotPointLightComponent(
     vec3(0) - spotLightEntity.transform.position, # Light direction
     color=parseHtmlName("aqua"),                            # Light color
     shadow=false,                                 # Casts shadow or not
-    innerLimit=30,                                # Inner circle of light
-    outerLimit=90                                 # Outer circle of light
+    innerCutoff=30,                                # Inner circle of light
+    outerCutoff=90                                 # Outer circle of light
     )
 )
 # Adds a script component to spot point light entity
@@ -87,9 +87,9 @@ addComponent(spotLightEntity, newScriptComponent(proc(script: ScriptComponent, i
     let light = getComponent[SpotPointLightComponent](script)
     # Changes light color
     light.color = color(
-        abs(sin(engine.age)), 
-        abs(cos(engine.age)), 
-        abs(sin(engine.age) * sin(engine.age))
+        abs(sin(runtime.engine.age)), 
+        abs(cos(runtime.engine.age)), 
+        abs(sin(runtime.engine.age) * sin(runtime.engine.age))
     )
 ))
 # Makes the new light child of the scene

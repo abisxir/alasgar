@@ -15,7 +15,7 @@ addComponent(
     cameraEntity, 
     newPerspectiveCamera(
         75, 
-        engine.ratio, 
+        runtime.engine.ratio, 
         0.1, 
         100.0, 
         vec3(0) - cameraEntity.transform.position
@@ -57,7 +57,7 @@ addComponent(cubeEntity, newCubeMesh())
 addComponent(cubeEntity, 
     newMaterialComponent(
         diffuseColor=parseHtmlName("green"),
-        texture=newTexture("res://stone-texture.png")
+        albedoMap=newTexture("res://stone-texture.png")
     )
 )
 # Adds a collision compnent to cube entity
@@ -76,15 +76,16 @@ addChild(scene, cubeEntity)
 
 # Creats spot point light entity
 var spotLightEntity = newEntity(scene, "SpotLight")
-# Sets position to (-6, 6, 6)
-spotLightEntity.transform.position = vec3(6, 6, 6)
+# Sets position to (10, 10, 10)
+spotLightEntity.transform.position = vec3(10)
 # Adds a spot point light component
 addComponent(spotLightEntity, newSpotPointLightComponent(
     vec3(0) - spotLightEntity.transform.position, # Light direction
-    color=parseHtmlName("aqua"),                            # Light color
+    color=parseHtmlName("aqua"),                  # Light color
+    luminance=10,                                  # Light power
     shadow=false,                                 # Casts shadow or not
-    innerLimit=30,                                # Inner circle of light
-    outerLimit=90                                 # Outer circle of light
+    innerCutoff=10,                               # Inner circle of light
+    outerCutoff=45                                # Outer circle of light
     )
 )
 # Makes the new light child of the scene

@@ -7,6 +7,7 @@ import config
 import ports/opengl
 import utils
 import container
+import texture
 
 const forwardV = staticRead("render/shaders/forward.vs")
 const forwardF = staticRead("render/shaders/forward.fs")
@@ -33,6 +34,9 @@ type
         value: Vec4
     ShaderParamMat4* = ref object of ShaderParam
         value: Mat4
+    ShaderParamTexture* = ref object of ShaderParam
+        value: Texture
+        slot: int
 
 proc destroyShader(shader: Shader) =
     if shader.program != 0:
@@ -78,6 +82,18 @@ proc programInfoLog(s: GLuint): string =
         result = $infoLog
         dealloc(infoLog)
 
+proc extractLineNo(line: string): int =
+    result = -1
+    let step1 = split(line, "(")
+    if len(step1) > 1:
+        let step2 = split(step1[0], ":")
+        if len(step2) > 1:
+            result = parseInt(step2[1])
+
+proc safeOutput(lines: openarray[string], lineNo: int) =
+    if lineNo < len(lines):
+        echo lines[lineNo]
+
 proc loadShaderSource(src: cstring, kind: GLenum): GLuint =
     result = glCreateShader(kind)
     if result == 0:
@@ -94,8 +110,13 @@ proc loadShaderSource(src: cstring, kind: GLenum): GLuint =
     let compiled = isShaderCompiled(result)
     let info = shaderInfoLog(result)
     if not compiled:
-        logi "Shader compile error: ", info
+        let 
+            lineNo = extractLineNo(info)
+            lines = split(&"{$src}", "\n")
         logi "The shader: ", src
+        logi "Shader compile error: ", info
+        if lineNo > 0 and lineNo < len(lines):
+            logi "-> ", lines[lineNo - 1], "\n"
         glDeleteShader(result)
     elif info.len > 0:
         logi "Shader compile log: ", info
@@ -236,12 +257,15 @@ method update(p: ShaderParamVec2, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamVec3, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamVec4, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamMat4, shader: Shader) = shader[p.key] = p.value
+method update(p: ShaderParamTexture, shader: Shader) = use(p.value, p.slot)
 
 proc set*(shader: Shader, key: string, value: int32) =
     let param = new(ShaderParamInt)
     param.key = key
     param.value = value
     shader.params[key] = param
+
+proc set*(shader: Shader, key: string, value: int) = set(shader, key, value.int32)
 
 proc get_int*(shader: Shader, key: string): int32 =
     let param = shader.params[key]
@@ -296,6 +320,14 @@ proc set*(shader: Shader, key: string, value: Mat4) =
 proc get_mat4*(shader: Shader, key: string): Mat4 =
     let param = shader.params[key]
     result = cast[ShaderParamMat4](param).value
+
+proc set*(shader: Shader, key: string, value: Texture, slot: int) =
+    let param = new(ShaderParamTexture)
+    param.key = key
+    param.value = value
+    param.slot = slot
+    shader.params[key] = param
+
 
 proc use*(shader: Shader) =
     glUseProgram(shader.program)

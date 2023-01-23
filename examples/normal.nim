@@ -31,7 +31,7 @@ addComponent(
     cameraEntity, 
     newPerspectiveCamera(
         75, 
-        engine.ratio, 
+        runtime.engine.ratio, 
         0.1, 
         100.0, 
         vec3(0) - cameraEntity.transform.position
@@ -63,7 +63,7 @@ addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input:
     # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
     script.transform.euler = vec3(
         0, 
-        sin(engine.age * 0.1), 
+        sin(runtime.engine.age * 0.1), 
         0
     )
 ))
@@ -72,8 +72,8 @@ addComponent(
     cubeEntity, 
     newMaterialComponent(
         diffuseColor=parseHtmlName("white"),
-        texture=newTexture("res://stone-texture.png"),
-        normal=newTexture("res://stone-texture-normal.png")
+        albedoMap=newTexture("res://stone-texture.png"),
+        normalMap=newTexture("res://stone-texture-normal.png")
     )
 )
 # Makes the cube enity child of scene

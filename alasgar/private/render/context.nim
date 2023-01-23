@@ -22,10 +22,6 @@ type
         effects*: seq[Shader]
         shadowCasters*: seq[ShadowCaster]
         shaderParams*: seq[ShaderParam]
-        fxaaEnabled*: bool
-        fxaaSpanMax*: float
-        fxaaReduceMul*: float
-        fxaaReduceMin*: float
 
 proc addShader*(g: var GraphicContext, shader: Shader) =
     if shader != nil and not contains(g.shaders, shader):

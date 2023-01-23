@@ -2,8 +2,6 @@ $SHADER_PROFILE$
 precision mediump float;
 precision mediump sampler2DShadow;
 
-out vec4 out_color;
-
 #define MAX_LIGHTS $MAX_LIGHTS$
 
 layout(binding = 0) uniform sampler2D u_albedo_map;
@@ -29,6 +27,8 @@ uniform struct Camera {
   highp mat4 projection;
   highp float exposure;
   highp float gamma;
+  highp float near;
+  highp float far;
 } camera;
 
 uniform struct Environment {
@@ -60,6 +60,7 @@ uniform struct Light {
   vec3 color;
   vec3 position;
   vec3 direction;
+  vec3 normalized_direction;
   float luminance;
   float range;
   float intensity;
@@ -258,19 +259,11 @@ float sample_shadow(Light light, vec3 N) {
 vec3 get_light_intensity(Light light, vec3 N, vec3 point_to_light, float distance) {
   float intensity = 0.0;
   if(light.type == LIGHT_TYPE_DIRECTIONAL) {
-    intensity = dot(N, -normalize(light.direction)) * light.intensity;
+    intensity = dot(N, -light.normalized_direction) * light.intensity;
   } else if (light.type == LIGHT_TYPE_SPOT){
-    float angle = dot(light.direction, normalize(point_to_light));
-    // Check if the angle is within the outer cutoff angle
-    if (angle < light.outer_cutoff_cos) {
-      intensity = 0.0;
-    } else {
-      intensity = light.luminance / (distance * distance);
-      if(angle < light.inner_cutoff_cos) {
-        float t = (angle - light.outer_cutoff_cos) / (light.inner_cutoff_cos - light.outer_cutoff_cos);
-        return mix(vec3(0.0), intensity * light.color, t);
-      }
-    }
+    float angle = dot(normalize(point_to_light), -light.normalized_direction);
+    float luma = light.luminance / (distance * distance);
+    intensity = luma * smoothstep(light.outer_cutoff_cos, light.inner_cutoff_cos, angle);
   } else {
     intensity = light.luminance / (distance * distance);
   }
@@ -308,7 +301,7 @@ vec3 get_normal() {
     float invmax = inversesqrt(max(dot(T, T), dot(B, B)));
     mat3 TBN = mat3(T * invmax, B * invmax, N);
     vec3 map = texture(u_normal_map, surface.uv).rgb * 2.007874 - 1.007874;
-    return normalize(TBN * map);
+    N = normalize(TBN * map);
   }
   return N;
 }
@@ -493,19 +486,21 @@ void light_normal(vec3 N, vec3 V, float shininess, out vec3 f_specular, out vec3
     vec3 point_to_light = lights[i].position - surface.position.xyz;
     float distance = length(point_to_light);
     vec3 L = normalize(point_to_light);
-    vec3 R = normalize(reflect(-L, N));
-    vec3 H = normalize(V + L);
+    //vec3 H = normalize(V + L);
     //float NoV = abs(dot(N, V)) + 1e-5;
     float NoL = saturate(dot(N, L));
-    float NoH = saturate(dot(N, H));
+    
+    //float NoH = saturate(dot(N, H));
     //float LoH = saturate(dot(L, H));
     //float VoH = saturate(dot(V, H));
 
     vec3 intensity = get_light_intensity(lights[i], N, point_to_light, distance);
     intensity *= sample_shadow(lights[i], N);
     if(lights[i].type != LIGHT_TYPE_DIRECTIONAL) {
+      vec3 R = normalize(reflect(-L, N));
+      float RoV = dot(R, V);
       f_diffuse += intensity * NoL;
-      float coefficient = pow(max(dot(R, V), 0.0), shininess);
+      float coefficient = pow(max(RoV, 0.0), shininess);
       f_specular += intensity * coefficient;
     } else {
       f_diffuse += intensity;
@@ -513,13 +508,14 @@ void light_normal(vec3 N, vec3 V, float shininess, out vec3 f_specular, out vec3
   }
 }
 
+vec4 out_color;
+
 $MAIN_FUNCTION$
 
-void main() {
-  //out_color.rgb = env.ambient_color;
-  //out_color.a = 1.;
-  //return;
+layout(location = 0) out vec4 OUT_COLOR;
+layout(location = 1) out vec3 OUT_NORMAL;
 
+void main() {
   if (material.opacity < 0.01) {
     discard;
   }
@@ -570,8 +566,9 @@ void main() {
     out_color.rgb = base_color.rgb * (f_emissive + f_diffuse + f_specular);
   }
 
-  out_color.a = base_color.a;
-
   $MAIN_FUNCTION_CALL$
+
+  OUT_COLOR = out_color;
+  OUT_NORMAL = N.xyz;
 }
 

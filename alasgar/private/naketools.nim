@@ -253,7 +253,7 @@ proc newBuilder*(platform: string): Builder =
     b.mainFile = "main"
 
     b.runAfterBuild = true
-    b.targetArchitectures = @["armeabi-v7a"]#, "x86", "x86_64"]
+    b.targetArchitectures = @["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
     b.androidPermissions = @[]
     b.androidStaticLibraries = @[]
     b.additionalAndroidResources = @[]

@@ -136,11 +136,6 @@ proc newTexture*(target: GLenum,
                  levels: int=1,
                  internalFormat: GLenum=GL_RGBA8,
                  wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture =
-    echo "wrapS:", getTextureParamText(wrapS)
-    echo "wrapT:", getTextureParamText(wrapT)
-    echo "wrapR:", getTextureParamText(wrapR)
-    echo "minFilter:", getTextureParamText(minFilter)
-    echo "magFilter:", getTextureParamText(magFilter)
     result = createTexture(
         target,
         width, 
@@ -266,7 +261,6 @@ proc newCubeTexture*(width,
         minFilter=minFilter,
         magFilter=magFilter
     )
-    echo &"* {width}x{height}"
     setFaces(result, format, dataType, faces)
 
 proc newCubeTexture*(width, 

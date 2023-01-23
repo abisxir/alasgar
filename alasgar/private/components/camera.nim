@@ -27,7 +27,7 @@ type
         far*: float32
         timestamp*: float
 
-        effects: seq[(string, Shader)]
+        effects: seq[(string, Shader, bool)]
 
     CameraSystem* = ref object of System
 
@@ -130,16 +130,39 @@ proc calculateViewCenter*(camera: CameraComponent, vOut: var Vec3, rOut: var flo
     let farLeft = far + (VEC3_LEFT * opposite)
     rOut = length(farLeft - vOut)
 
+proc hasEffect*(camera: CameraComponent, name: string): bool =
+    for it in camera.effects:
+        if it[0] == name:
+            return true
+    return false
+
 proc removeEffect*(camera: CameraComponent, name: string) = 
     for it in camera.effects:
         if it[0] == name:
             destroy(it[1])
     keepItIf(camera.effects, it[0] != name)
 
-proc addEffect*(camera: CameraComponent, name: string, source: string) =
+proc addEffect*(camera: CameraComponent, name: string, shader: Shader) =
     removeEffect(camera, name)
-    let shader = newCanvasShader(source)
-    add(camera.effects, (name, shader))
+    add(camera.effects, (name, shader, true))
+
+proc addEffect*(camera: CameraComponent, name: string, source: string) = addEffect(camera, name, newCanvasShader(source))
+proc addEffect*(camera: CameraComponent, name: string, vsource, fsource: string) = addEffect(camera, name, newCanvasShader(vsource, fsource))
+proc getEffect*(camera: CameraComponent, name: string): Shader =
+    for (key, shader, enable) in camera.effects:
+        if key == name and enable:
+            return shader
+
+proc disableEffect*(camera: CameraComponent, name: string) =
+    for it in mitems(camera.effects):
+        if it[0] == name:
+            it[2] = false
+
+proc enableEffect*(camera: CameraComponent, name: string) =
+    for it in mitems(camera.effects):
+        if it[0] == name:
+            it[2] = true
+
 
 # System implementation
 proc newCameraSystem*(): CameraSystem =
@@ -165,19 +188,31 @@ method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, f
         shader["camera.projection"] = active.projection
         shader["camera.view"] = active.view
         shader["camera.position"] = active.transform.globalPosition
-        
-        shader["frame.iResolution"] = vec3(sys.graphic.screenSize.x, sys.graphic.screenSize.y, 0)
-        shader["frame.iTime"] = age
-        shader["frame.iTimeDelta"] = delta
-        shader["frame.iFrame"] = frames
-        shader["frame.iMouse"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
-        shader["frame.iDate"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
+        shader["camera.near"] = active.near
+        shader["camera.far"] = active.far
 
-    for (name, shader) in active.effects:
-        shader["iResolution"] = vec3(sys.graphic.screenSize.x, sys.graphic.screenSize.y, 0)
-        shader["iTime"] = age
-        shader["iTimeDelta"] = delta
-        shader["iFrame"] = frames
-        shader["iMouse"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
-        shader["iDate"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
-        add(sys.graphic.context.effects, shader)
+        shader["frame.resolution"] = vec3(sys.graphic.screenSize.x, sys.graphic.screenSize.y, 0)
+        shader["frame.time"] = age
+        shader["frame.time_delta"] = delta
+        shader["frame.frame"] = frames
+        shader["frame.mouse"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
+        shader["frame.date"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
+
+    for (name, shader, enable) in active.effects:
+        if enable:
+            use(shader)
+
+            shader["camera.projection"] = active.projection
+            shader["camera.view"] = active.view
+            shader["camera.position"] = active.transform.globalPosition
+            shader["camera.near"] = active.near
+            shader["camera.far"] = active.far
+
+            shader["frame.resolution"] = vec3(sys.graphic.screenSize.x, sys.graphic.screenSize.y, 0)
+            shader["frame.time"] = age
+            shader["frame.time_delta"] = delta
+            shader["frame.frame"] = frames
+            shader["frame.mouse"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
+            shader["frame.date"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
+
+            add(sys.graphic.context.effects, shader)

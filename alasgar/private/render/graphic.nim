@@ -105,8 +105,6 @@ proc clear*(g: Graphic) =
     add(g.context.shaders, g.shader)
 
 proc renderToFrameBuffer(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
-    use(g.fb, g.context.clearColor)
-
     if not isNil(cubemap):
         render(g.skybox, cubemap, view, projection, g.context.environmentIntensity)
 
@@ -188,6 +186,7 @@ proc renderToFrameBuffer(g: Graphic, view, projection: Mat4, cubemap: Texture, d
         inc(g.totalObjects, count)
         inc(g.drawCalls)
         inc(i, count)
+    
 
 
 proc render*(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
@@ -195,8 +194,14 @@ proc render*(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: va
     if len(g.context.shadowCasters) > 0:
         process(g.shadow, g.context, drawables)
 
+    # Binds to framebuffer
+    use(g.fb, g.context.clearColor)
+
     # Renders objects to framebuffer
     renderToFrameBuffer(g, view, projection, cubemap, drawables)
+
+    # Detachs from framebuffer
+    detach(g.fb)
 
 proc applyEffects(g: Graphic): Texture =
     if len(g.context.effects) > 0:
@@ -205,17 +210,19 @@ proc applyEffects(g: Graphic): Texture =
             g.effectsTexture = newTexture2D(g.screenSize.iWidth, g.screenSize.iHeight, levels=1)
             allocate(g.effectsTexture)
         var 
-            target = g.effectsTexture
-            source = g.fb.texture
+            source = g.effectsTexture
+            target = g.fb.color
         for shader in g.context.effects:
-            #swap(source, target)
+            swap(source, target)
             use(g.effectsFrameBuffer, target, GL_TEXTURE_2D.int, 0, g.screenSize.iWidth, g.screenSize.iHeight)
             use(shader)
-            use(source, 0)
+            use(source, 4)
+            use(g.fb.normal, 5)
+            use(g.fb.depth, 6)
             draw(g.effectsFrameBuffer)
         result = target
     else:
-        result = g.fb.texture            
+        result = g.fb.color            
 
 
 proc swap*(g: Graphic) =
@@ -223,11 +230,15 @@ proc swap*(g: Graphic) =
     glBindRenderbuffer(GL_RENDERBUFFER, 0)
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
     glViewport(0, 0, g.windowSize.iWidth, g.windowSize.iHeight)
+    #glEnable(GL_BLEND)
+    #glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glDisable(GL_DEPTH_TEST)
     glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
 
     use(g.blitShader)
-    use(blitTexture, 0)
+    use(blitTexture, 4)
+    use(g.fb.normal, 5)
+    use(g.fb.normal, 6)
     glDrawArrays(GL_TRIANGLES, 0, 3)
    
     glSwapWindow(g.window)

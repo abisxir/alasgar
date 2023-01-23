@@ -24,7 +24,7 @@ addComponent(
     cameraEntity, 
     newPerspectiveCamera(
         75, 
-        engine.ratio, 
+        runtime.engine.ratio, 
         0.1, 
         100.0, 
         vec3(0) - cameraEntity.transform.position
@@ -62,9 +62,9 @@ proc createCube(name: string, position: Vec3) =
     addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
         # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
         script.transform.euler = vec3(
-            engine.age * 0.1, 
-            engine.age * 0.3, 
-            engine.age * 0.2,
+            runtime.engine.age * 0.1, 
+            runtime.engine.age * 0.3, 
+            runtime.engine.age * 0.2,
         )
     ))
     # Adds a material to cube
@@ -90,8 +90,8 @@ addComponent(spotLightEntity, newSpotPointLightComponent(
     vec3(0) - spotLightEntity.transform.position, # Light direction
     color=parseHtmlName("LemonChiffon"),          # Light color
     shadow=true,                                  # Enables shadow
-    innerLimit=30,                                # Inner circle of light
-    outerLimit=90                                 # Outer circle of light
+    innerCutoff=30,                                # Inner circle of light
+    outerCutoff=90                                 # Outer circle of light
     )
 )
 # Makes the new light child of the scene

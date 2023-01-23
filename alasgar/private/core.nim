@@ -389,7 +389,7 @@ func `transform`*(c: Component): TransformComponent = c.entity[].transform
 func `entity`*(c: Component): Entity = c.entity
 func `scene`*(c: Component): Scene = c.entity.scene
 func getComponent*[T: Component](c: Component): T = getComponent(c.entity, result)
-func `[]`[T](c: Component, row: typedesc): T = getComponent(c.entity, result)
+func `[]`*[T](c: Component, row: typedesc[T]): T = getComponent[T](c.entity)
 func hash*(c: Component): Hash = hash(unsafeAddr(c))
 method cleanup*(c: Component) {.base.} = discard
 

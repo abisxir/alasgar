@@ -11,10 +11,6 @@ const fullscreenVS = staticRead("../render/shaders/fullscreen.vs")
 const panaromaToCubemapFS = staticRead("../render/shaders/panaroma-to-cube-map.fs")
 const iblFilterFS = staticRead("../render/shaders/ibl-filter.fs")
 
-const fxaaReduceMinDefault: float32 = 1.0 / 128.0
-const fxaaReduceMulDefault: float32 = 1.0 / 8.0
-const fxaaSpanMaxDefault: float32 = 8.0
-
 type
     EnvironmentComponent* = ref object of Component
         backgroundColor*: Color
@@ -27,10 +23,6 @@ type
         environmentMap*: Texture
         environmentIntensity*: float32
         ggxMap*: Texture
-        fxaaEnabled*: bool
-        fxaaSpanMax*: float
-        fxaaReduceMul*: float
-        fxaaReduceMin*: float
 
     EnvironmentSystem* = ref object of System
 
@@ -54,15 +46,6 @@ func enableFog*(e: EnvironmentComponent, color: Color, density, gradient: float3
     e.fogColor = color
     e.fogDensity = density
     e.fogGradient = gradient
-
-func enableFXAA*(e: EnvironmentComponent, 
-                 fxaaSpanMax=fxaaSpanMaxDefault,
-                 fxaaReduceMul=fxaaReduceMulDefault,
-                 fxaaReduceMin=fxaaReduceMinDefault) =
-    e.fxaaEnabled = true
-    e.fxaaSpanMax = fxaaSpanMax
-    e.fxaaReduceMul = fxaaReduceMul
-    e.fxaaReduceMin = fxaaReduceMin
 
 func setBackground*(env: EnvironmentComponent, c: Color) =
     env.backgroundColor = c
@@ -228,10 +211,6 @@ method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float
         let env = first[EnvironmentComponent](scene)
         
         sys.graphic.context.environmentIntensity = env.environmentIntensity
-        sys.graphic.context.fxaaEnabled = env.fxaaEnabled
-        sys.graphic.context.fxaaSpanMax = env.fxaaSpanMax
-        sys.graphic.context.fxaaReduceMin = env.fxaaReduceMin
-        sys.graphic.context.fxaaReduceMul = env.fxaaReduceMul
 
         for shader in sys.graphic.context.shaders:
             use(shader)

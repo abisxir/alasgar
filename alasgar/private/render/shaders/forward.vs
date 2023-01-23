@@ -21,6 +21,8 @@ uniform struct Camera {
   mat4 projection;
   float exposure;
   float gamma;
+  float near;
+  float far;
 } camera;
 
 uniform struct Environment {

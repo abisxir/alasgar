@@ -31,13 +31,14 @@ type
     LightSystem* = ref object of System
 
 proc newPointLightComponent*(color: Color=COLOR_MILK, 
-                             luminance=1000.0,
+                             luminance=100.0,
+                             intensity=1.0,
                              shadow: bool=false,
                              shadowMapSize: Vec2=vec2(1024, 1024)): PointLightComponent =
     new(result)
     result.color = color
     result.luminance = luminance
-    result.intensity = 1.0
+    result.intensity = intensity
     result.shadowMapSize = shadowMapSize
     result.shadow = shadow
 
@@ -55,7 +56,8 @@ proc newDirectLightComponent*(direction: Vec3,
 
 proc newSpotPointLightComponent*(direction: Vec3,
                                  color: Color=COLOR_MILK, 
-                                 luminance: float32=1000.0,
+                                 luminance: float32=50.0,
+                                 intensity: float32=1.0, 
                                  innerCutoff: float32=30, 
                                  outerCutoff: float32=45,
                                  shadow: bool=false,
@@ -63,7 +65,7 @@ proc newSpotPointLightComponent*(direction: Vec3,
     new(result)
     result.color = color
     result.luminance = luminance
-    result.intensity = 1.0
+    result.intensity = intensity
     result.direction = direction
     result.innerCutoff = innerCutoff
     result.outerCutoff = outerCutoff
@@ -123,6 +125,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
                     shader[&"lights[{lightCount}].color"] = c.color.vec3
                     shader[&"lights[{lightCount}].intensity"] = c.intensity
                     shader[&"lights[{lightCount}].direction"] = c.direction
+                    shader[&"lights[{lightCount}].normalized_direction"] = normalize(c.direction)
                     shader[&"lights[{lightCount}].depth_map"] = -1
 
                     # Increments direct light count
@@ -146,11 +149,12 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
                     shader[&"lights[{lightCount}].type"] = ltSpot.int
                     shader[&"lights[{lightCount}].color"] = c.color.vec3
                     shader[&"lights[{lightCount}].intensity"] = c.intensity 
-                    shader[&"lights[{lightCount}].luminance"] = c.intensity 
+                    shader[&"lights[{lightCount}].luminance"] = c.luminance 
                     shader[&"lights[{lightCount}].position"] = c.transform.globalPosition
                     shader[&"lights[{lightCount}].direction"] = c.direction
-                    shader[&"lights[{lightCount}].inner_cutoff_cos"] = cos(c.innerCutoff)
-                    shader[&"lights[{lightCount}].outer_cutoff_cos"] = cos(c.outerCutoff)
+                    shader[&"lights[{lightCount}].normalized_direction"] = normalize(c.direction)
+                    shader[&"lights[{lightCount}].inner_cutoff_cos"] = cos(degToRad(c.innerCutoff))
+                    shader[&"lights[{lightCount}].outer_cutoff_cos"] = cos(degToRad(c.outerCutoff))
                     shader[&"lights[{lightCount}].depth_map"] = -1
                     
                     # Takes care of shadow
