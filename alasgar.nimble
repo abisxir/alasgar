@@ -17,5 +17,8 @@ requires "sdl2"
 requires "chroma"
 requires "stbimage"
 requires "jnim" # For android target
+requires "closure_compiler"
+requires "plists"
+requires "https://github.com/tormund/nester"
 requires "https://github.com/yglukhov/android"
 requires "https://github.com/yglukhov/darwin"
