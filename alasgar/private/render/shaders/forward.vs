@@ -18,7 +18,9 @@ layout(binding = 15) uniform sampler2D u_skin_map_0;
 uniform struct Camera {
   vec3 position;
   mat4 view;
+  mat4 view_inversed;
   mat4 projection;
+  mat4 projection_inversed;
   float exposure;
   float gamma;
   float near;
@@ -26,13 +28,12 @@ uniform struct Camera {
 } camera;
 
 uniform struct Environment {
+  vec4 background_color;
   vec3 ambient_color;
-  int fog_enabled;
   float fog_density;
   float fog_gradient;
-  vec4 fog_color;
-  int lights_count;
   float mip_count;
+  int lights_count;
   int skin_sampler_width;
 } env;
 
@@ -40,14 +41,15 @@ uniform struct Frame {
   vec3 resolution;
   float time;
   float time_delta;
-  float frame;
+  int count;
   vec4 mouse;
   vec4 date;
 } frame;
 
 out struct Surface {
   vec4 position;
-  float visibilty;
+  vec4 position_related_to_view;
+  vec4 position_projected;
   vec3 normal;
   vec2 uv;
   vec4 debug;
@@ -182,16 +184,10 @@ void main() {
     surface.uv = in_uv.xy;
   }
 
-  vec4 position_related_to_view = camera.view * surface.position;
-  if (env.fog_enabled > 0) {
-    float distance = length(position_related_to_view);
-    float fog_factor = exp(-pow(distance * env.fog_density, env.fog_gradient));
-    surface.visibilty = clamp(fog_factor, 0.0, 1.0);
-  } else {
-    surface.visibilty = -1.0;
-  }
+  surface.position_related_to_view = camera.view * surface.position;
+  surface.position_projected = camera.projection * surface.position_related_to_view;
 
   $MAIN_FUNCTION_CALL$
-  gl_Position = camera.projection * position_related_to_view;
-  ;
+
+  gl_Position = surface.position_projected;
 }

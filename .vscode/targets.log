@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed Jan 11 09:35:01 2023
+# Make data base, printed on Sun Feb 12 14:29:08 2023
 
 # Variables
 
@@ -19,9 +19,9 @@ LC_ALL = C
 # environment
 NO_AT_BRIDGE = 1
 # environment
-STARSHIP_SESSION_KEY = 2331964231703919
+STARSHIP_SESSION_KEY = 1233318997170632
 # environment
-I3SOCK = /run/user/1000/i3/ipc-socket.1086
+I3SOCK = /run/user/1000/i3/ipc-socket.1119
 # environment
 VSCODE_CWD = /home/abi
 # default
@@ -79,7 +79,7 @@ MAKEFILE_LIST := Makefile
 # environment
 ZSH = /home/abi/.oh-my-zsh
 # environment
-VSCODE_PID = 8752
+VSCODE_PID = 6156
 # environment
 XDG_SESSION_TYPE = tty
 # automatic
@@ -113,7 +113,7 @@ MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = /home/abi/.cargo/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/opt/android-sdk/platform-tools:/home/abi/.dotnet/tools:/usr/lib/emscripten:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/opt/android-sdk/platform-tools:/usr/lib/emscripten:/usr/lib/jvm/default/bin:/home/abi/.local/bin:/home/abi/.nimble/bin:/usr/lib/emscripten:/home/abi/.nimble/bin
+PATH = /home/abi/.cargo/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/opt/android-sdk/platform-tools:/home/abi/.dotnet/tools:/usr/lib/emscripten:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/opt/android-sdk/platform-tools:/usr/lib/emscripten:/home/abi/.local/bin:/home/abi/.nimble/bin:/usr/lib/emscripten:/home/abi/.nimble/bin
 # default
 MAKEFILES := 
 # environment
@@ -205,9 +205,9 @@ DOTNET_ROOT = /usr/share/dotnet
 
 # Directories
 
-# . (device 66305, inode 3435472): 27 files, no impossibilities.
+# . (device 66305, inode 3435472): 30 files, no impossibilities.
 
-# 27 files, no impossibilities in 1 directories.
+# 30 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -219,21 +219,21 @@ shadow: clean
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 7):
+#  recipe to execute (from 'Makefile', line 6):
 	nim c --threads:on -d:debug -r shadow.nim
 
 debug:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 9):
+#  recipe to execute (from 'Makefile', line 10):
 	nim c --threads:on -d:debug -r main.nim
 
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
 #  File is secondary (prerequisite of .SECONDARY).
-#  Last modified 2023-01-04 10:06:46.751821798
+#  Last modified 2023-02-07 17:16:58.112751655
 #  File has been updated.
 #  Successfully updated.
 
@@ -242,8 +242,7 @@ clean:
 #  Modification time never checked.
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 4):
-	rm -rf main
-	rm -rf shadow
+	rm -rf main shadow orto
 
 # Not a target:
 .DEFAULT:
@@ -269,24 +268,31 @@ build: clean
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 11):
+#  recipe to execute (from 'Makefile', line 12):
 	nim c --threads:on
 
+orto: clean
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 8):
+	nim c --threads:on -d:debug -r orto.nim
+ 
+
 # files hash-table stats:
-# Load=9/1024=1%, Rehash=0, Collisions=0/24=0%
+# Load=10/1024=1%, Rehash=0, Collisions=0/26=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 36 / storage = 323 B / avg = 8 B
-# current buf: size = 8162 B / used = 323 B / count = 36 / avg = 8 B
- 
+# strcache buffers: 1 (0) / strings = 40 / storage = 349 B / avg = 8 B
+# current buf: size = 8162 B / used = 349 B / count = 40 / avg = 8 B
 
-# strcache performance: lookups = 50 / hit rate = 28%
+# strcache performance: lookups = 56 / hit rate = 28%
 # hash-table stats:
-# Load=36/8192=0%, Rehash=0, Collisions=0/50=0%
-# Finished Make data base on Wed Jan 11 09:35:01 2023
+# Load=40/8192=0%, Rehash=0, Collisions=0/56=0%
+# Finished Make data base on Sun Feb 12 14:29:08 2023
 
  

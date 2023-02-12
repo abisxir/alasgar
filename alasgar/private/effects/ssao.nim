@@ -76,11 +76,7 @@ float SSAO2(vec2 uv)
 }
 
 void fragment() {
-    if(UV.x <= 0.5) {
-        float ao = SSAO2(UV);
-        //COLOR.rgb *= ao;
-        COLOR = vec4(ao, ao, ao, 1.0);
-    } 
+    COLOR.rgb *= SSAO2(UV);
 }
 """
 

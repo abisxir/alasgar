@@ -194,7 +194,7 @@ method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, f
         shader["frame.resolution"] = vec3(sys.graphic.screenSize.x, sys.graphic.screenSize.y, 0)
         shader["frame.time"] = age
         shader["frame.time_delta"] = delta
-        shader["frame.frame"] = frames
+        shader["frame.count"] = frames.int32
         shader["frame.mouse"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
         shader["frame.date"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
 
@@ -203,7 +203,9 @@ method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, f
             use(shader)
 
             shader["camera.projection"] = active.projection
+            shader["camera.projection_inversed"] = inverse(active.projection)
             shader["camera.view"] = active.view
+            shader["camera.view_inversed"] = inverse(active.view)
             shader["camera.position"] = active.transform.globalPosition
             shader["camera.near"] = active.near
             shader["camera.far"] = active.far
@@ -211,7 +213,7 @@ method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, f
             shader["frame.resolution"] = vec3(sys.graphic.screenSize.x, sys.graphic.screenSize.y, 0)
             shader["frame.time"] = age
             shader["frame.time_delta"] = delta
-            shader["frame.frame"] = frames
+            shader["frame.count"] = frames.int32
             shader["frame.mouse"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
             shader["frame.date"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
 

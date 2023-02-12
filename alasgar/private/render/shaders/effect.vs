@@ -4,7 +4,9 @@ precision highp float;
 uniform struct Camera {
   vec3 position;
   mat4 view;
+  mat4 view_inversed;
   mat4 projection;
+  mat4 projection_inversed;
   float exposure;
   float gamma;
   float near;
@@ -15,7 +17,7 @@ uniform struct Frame {
   vec3 resolution;
   float time;
   float time_delta;
-  float frame;
+  highp int count;
   vec4 mouse;
   vec4 date;
 } frame;

@@ -37,9 +37,7 @@ float HBAO(vec2 uv) {
 
 void fragment() {
     if(UV.x > 0.5) {
-        float ao = HBAO(UV);
-        //COLOR.rgb *= ao;
-        COLOR = vec4(ao, ao, ao, 1.0);
+        COLOR.rgb *= HBAO(UV);
     }
 }
 """

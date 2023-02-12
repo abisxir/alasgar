@@ -8,11 +8,14 @@ layout(binding = 3) uniform sampler2D channel3;
 layout(binding = 4) uniform sampler2D color_channel;
 layout(binding = 5) uniform sampler2D normal_channel;
 layout(binding = 6) uniform sampler2D depth_channel;
+layout(binding = 7) uniform sampler2D reserved_channel;
 
 uniform struct Camera {
   vec3 position;
   mat4 view;
+  mat4 view_inversed;
   mat4 projection;
+  mat4 projection_inversed;
   float exposure;
   float gamma;
   float near;
@@ -23,13 +26,10 @@ uniform struct Frame {
   vec3 resolution;
   float time;
   float time_delta;
-  float frame;
+  highp int count;
   vec4 mouse;
   vec4 date;
 } frame;
-
-vec3 NORMAL;
-float DEPTH;
 
 in vec2 UV;
 out vec4 COLOR;
@@ -83,6 +83,10 @@ float get_depth() {
   return get_depth(UV);
 }
 
+vec4 get_color(vec2 uv) {
+  return texture(color_channel, uv);
+}
+
 vec4 position_from_depth(vec2 coord)
 {
     // Get the depth value for this pixel
@@ -93,7 +97,7 @@ vec4 position_from_depth(vec2 coord)
     vec4 projected_pos = vec4(x, y, z, 1.);
 
     // Transform by the inverse projection matrix
-    vec4 position_in_view_space = inverse(camera.projection) * projected_pos;
+    vec4 position_in_view_space = camera.projection_inversed * projected_pos;
 
     // Divide by w to get the view-space position
     return position_in_view_space / position_in_view_space.w;  
@@ -101,7 +105,7 @@ vec4 position_from_depth(vec2 coord)
 
 
 vec3 get_position(vec2 uv) {
-  vec4 pos = inverse(camera.view) * position_from_depth(uv);
+  vec4 pos = camera.view_inversed * position_from_depth(uv);
   return pos.xyz;
 }
 

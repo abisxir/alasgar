@@ -36,6 +36,15 @@ htmldocs/
 *.apk
 *.wasm
 
+# Log files
+*.log
+*.history
+
+# Big files
+*.avi
+*.mp4
+*.flv
+
 # Debug files
 *.dSYM/
 
@@ -45,12 +54,11 @@ Makefile
 main.nim
 main
 shadow
+shadow.nim
+light.nim
 nakefile
 
 # Build and res direcory
 build/
 art/
-.history
-*.avi
-*.mp4
-*.flv
+

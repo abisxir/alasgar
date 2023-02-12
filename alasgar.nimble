@@ -11,7 +11,6 @@ installFiles = @["alasgar.nim"]
 
 
 # Dependencies
-
 requires "nake"
 requires "sdl2"
 requires "chroma"

@@ -35,6 +35,10 @@ import alasgar/private/math/vec4
 import alasgar/private/math/quat
 import alasgar/private/animation/easing
 import alasgar/private/animation/curve/catmull
+import alasgar/private/effects/fxaa
+import alasgar/private/effects/ssao
+import alasgar/private/effects/hbao
+import alasgar/private/effects/bloom
 
 
 export core,
@@ -72,7 +76,11 @@ export core,
        sugar,
        sequtils,
        strutils,
-       shader
+       shader,
+       fxaa,
+       bloom,
+       ssao,
+       hbao
 
 type 
     Runtime = ref object
@@ -132,3 +140,4 @@ proc newFragmentShaderComponent*(source: string): ShaderComponent = newShaderCom
 template `engine`*(r: Runtime): Engine = r.engine
 template `age`*(r: Runtime): float32 = r.engine.age
 template `ratio`*(r: Runtime): float32 = r.engine.ratio
+template `window`*(r: Runtime): Vec2 = r.engine.graphic.windowSize

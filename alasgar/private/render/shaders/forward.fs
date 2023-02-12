@@ -24,7 +24,9 @@ layout(binding = 15) uniform sampler2D u_skin_map_0;
 uniform struct Camera {
   highp vec3 position;
   highp mat4 view;
+  highp mat4 view_inversed;
   highp mat4 projection;
+  highp mat4 projection_inversed;
   highp float exposure;
   highp float gamma;
   highp float near;
@@ -32,13 +34,12 @@ uniform struct Camera {
 } camera;
 
 uniform struct Environment {
+  highp vec4 background_color;
   highp vec3 ambient_color;
-  highp int fog_enabled;
   highp float fog_density;
   highp float fog_gradient;
-  highp vec4 fog_color;
-  highp int lights_count;
   highp float mip_count;
+  highp int lights_count;
   highp int skin_sampler_width;
 } env;
 
@@ -46,7 +47,7 @@ uniform struct Frame {
   highp vec3 resolution;
   highp float time;
   highp float time_delta;
-  highp float frame;
+  highp int count;
   highp vec4 mouse;
   highp vec4 date;
 } frame;
@@ -72,7 +73,8 @@ uniform struct Light {
 
 in struct Surface {
   vec4 position;
-  float visibilty;
+  vec4 position_related_to_view;
+  vec4 position_projected;
   vec3 normal;
   vec2 uv;
   vec4 debug;
@@ -108,6 +110,7 @@ in struct Material {
 #define PI 3.14159265359
 #define HALF_PI 1.570796327
 #define ONE_OVER_PI 0.3183098861837697
+#define LOG2 1.442695
 #define SHADOW_BIAS 0.00001
 #define MIN_SHADOW_BIAS 0.000001
 #define MEDIUMP_FLT_MAX 65504.0
@@ -180,6 +183,13 @@ float shadow_contribution(sampler2D depth_map, vec2 coord,
   vec2 moments = texture(depth_map, coord).xy;
   // Compute the Chebyshev upper bound.
   return chebyshev_upperBound(moments, distance_to_light);
+}
+
+vec4 fog(vec4 color, float fogDensity, vec4 fogColor, float fogStart, float fogEnd) {
+    float fragmentDepth = gl_FragCoord.z;
+    float fog = (fragmentDepth - fogStart) / (fogEnd - fogStart);
+    fog = clamp(fog, 0.0, 1.0);
+    return mix(fogColor, color, fog);
 }
 
 /*
@@ -508,7 +518,7 @@ void light_normal(vec3 N, vec3 V, float shininess, out vec3 f_specular, out vec3
   }
 }
 
-vec4 out_color;
+vec4 COLOR;
 
 $MAIN_FUNCTION$
 
@@ -520,55 +530,80 @@ void main() {
     discard;
   }
 
-  vec4 base_color = vec4(material.base_color, material.opacity);
+  COLOR = vec4(material.base_color, material.opacity);
   if (material.has_albedo_map > 0.0) {
-    base_color = base_color * texture(u_albedo_map, surface.uv);
+    COLOR = COLOR * texture(u_albedo_map, surface.uv);
   }
 
-  if (base_color.a < 0.01) {
-    discard;
+  float fog_amount = 0.0;
+  if(env.fog_density > 0.0) {
+    float distance = length(surface.position_related_to_view);
+    fog_amount = exp2(-env.fog_density * env.fog_density * distance * distance * LOG2);
+    fog_amount = clamp(fog_amount, 0., 1.);
   }
 
-  float metallic = material.metallic;
-  if (material.has_metallic_map > 0.0) {
-    metallic *= texture(u_metallic_map, surface.uv).b;
-  }
+  vec3 N;
 
-  float roughness = material.roughness;
-  if (material.has_roughness_map > 0.0) {
-    roughness *= texture(u_roughness_map, surface.uv).g;
-  }
+  if(0. < 1.0) {
+    if (COLOR.a < 0.01) {
+      discard;
+    }
 
-  float ao = material.ao;
-  if (material.has_ao_map > 0.0) {
-    ao *= texture(u_ao_map, surface.uv).r;
-  }
+    float metallic = material.metallic;
+    if (material.has_metallic_map > 0.0) {
+      metallic *= texture(u_metallic_map, surface.uv).b;
+    }
 
-  vec3 V = normalize(camera.position - surface.position.xyz);
-  vec3 N = get_normal();
+    float roughness = material.roughness;
+    if (material.has_roughness_map > 0.0) {
+      roughness *= texture(u_roughness_map, surface.uv).g;
+    }
 
-  // Adds emissive color
-  vec3 f_emissive = material.emissive_color;
-  if (material.has_emissive_map > 0.0) {
-    f_emissive = texture(u_emissive_map, surface.uv).rgb;
-  }
+    float ao = material.ao;
+    if (material.has_ao_map > 0.0) {
+      ao *= texture(u_ao_map, surface.uv).r;
+    }
 
-  vec3 f_specular = vec3(0.0);
-  vec3 f_diffuse = vec3(0.0);
+    vec3 V = normalize(camera.position - surface.position.xyz);
+    N = get_normal();
 
-  if (roughness > 0.0 && metallic > 0.0) {
-    light_pbr(N, V, sRGBToLinear(base_color.rgb), metallic, roughness, ao,
-              f_specular, f_diffuse);
-    out_color.rgb =
-        linearTosRGB(tonemap_aces(f_emissive + f_diffuse + f_specular));
-  } else {
-    light_normal(N, V, roughness * 255.0, f_specular, f_diffuse);
-    out_color.rgb = base_color.rgb * (f_emissive + f_diffuse + f_specular);
+    // Adds emissive color
+    vec3 f_emissive = material.emissive_color;
+    if (material.has_emissive_map > 0.0) {
+      f_emissive = texture(u_emissive_map, surface.uv).rgb;
+    }
+
+    vec3 f_specular = vec3(0.0);
+    vec3 f_diffuse = vec3(0.0);
+
+    if (roughness > 0.0 || metallic > 0.0) {
+      light_pbr(
+        N, 
+        V, 
+        sRGBToLinear(COLOR.rgb), 
+        metallic, 
+        roughness, 
+        ao,
+        f_specular, 
+        f_diffuse
+      );
+      COLOR.rgb = f_emissive + f_diffuse + f_specular;  
+      COLOR.rgb = tonemap_aces(f_emissive + f_diffuse + f_specular);
+      //COLOR.rgb =
+      //    linearTosRGB(tonemap_aces(f_emissive + f_diffuse + f_specular));
+    } else {
+      light_normal(N, V, material.reflectance * 255.0, f_specular, f_diffuse);
+      COLOR.rgb = COLOR.rgb * (f_emissive + f_diffuse + f_specular);
+    }
   }
 
   $MAIN_FUNCTION_CALL$
-
-  OUT_COLOR = out_color;
+  
+  if(fog_amount > 0.0) {
+    COLOR = mix(env.background_color, COLOR, fog_amount);
+  }
+  
   OUT_NORMAL = N.xyz;
+  OUT_COLOR = COLOR;  
 }
 

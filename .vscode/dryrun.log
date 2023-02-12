@@ -1,7 +1,6 @@
 make --dry-run --always-make --keep-going --print-directory
 make: Entering directory '/home/abi/Projects/alasgar'
-rm -rf main
-rm -rf shadow
+rm -rf main shadow orto
 nim c --threads:on -d:release --opt:speed -r main.nim
 make: Leaving directory '/home/abi/Projects/alasgar'
  

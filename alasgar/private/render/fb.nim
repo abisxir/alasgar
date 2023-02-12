@@ -80,7 +80,7 @@ proc newRenderBuffer*(size: Vec2): FrameBuffer =
     #glBindRenderbuffer(GL_RENDERBUFFER, 0)
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
-proc newFrameBuffer*(): FrameBuffer =
+proc newFramebuffer*(): FrameBuffer =
     new(result)
    
     # Creates frame buffer object
@@ -109,6 +109,13 @@ proc use*(fb: FrameBuffer, texture: Texture, unit, level, width, height: int) =
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, unit.GLenum, texture.id, level.GLint)
     attach(texture)
     glViewport(0, 0, width.GLsizei, height.GLsizei)
+    glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+
+proc use*(fb: FrameBuffer, texture: Texture, attachment: GLenum, unit: int) =
+    glViewport(0, 0, texture.width.GLsizei, texture.height.GLsizei)
+    glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo)
+    glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, unit.GLenum, texture.id, 0.GLint)
+    attach(texture)
     glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
 proc draw*(fb: FrameBuffer) = glDrawArrays(GL_TRIANGLES, 0, 3)

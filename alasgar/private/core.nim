@@ -755,9 +755,10 @@ proc newMaterialComponent*(diffuseColor: Color=COLOR_WHITE,
         hframes=hframes,
         castShadow=castShadow,
         metallic=0.0,
-        roughness=shininess,
+        roughness=0.0,
+        reflectance=shininess,
     )
-    result.roughness = clamp(result.roughness, 0.0, 255.0)
+    result.reflectance = clamp(result.reflectance, 0.0, 255.0)
 
 func `diffuseColor=`*(m: MaterialComponent, value: Color) =
     m.diffuseColor = value

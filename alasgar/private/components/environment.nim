@@ -15,10 +15,8 @@ type
     EnvironmentComponent* = ref object of Component
         backgroundColor*: Color
         ambientColor*: Color
-        fogColor*: Color
         fogDensity*: float32
         fogGradient*: float32
-        fogEnabled*: bool
         lutMap*: Texture
         environmentMap*: Texture
         environmentIntensity*: float32
@@ -37,13 +35,15 @@ type
 func newEnvironmentComponent*(): EnvironmentComponent =
     new(result)
     result.environmentIntensity = 1.0
+    result.backgroundColor = color(0.12, 0.12, 0.12)
+
+func setEnvironmentIntensivity*(e: EnvironmentComponent, value: float32) =
+    e.environmentIntensity = value
 
 func setAmbient*(e: EnvironmentComponent, c: Color, intense: float32) =
     e.ambientColor = color(c.r * intense, c.g * intense, c.b * intense)
 
-func enableFog*(e: EnvironmentComponent, color: Color, density, gradient: float32) =
-    e.fogEnabled = true
-    e.fogColor = color
+func enableFog*(e: EnvironmentComponent, density, gradient: float32) =
     e.fogDensity = density
     e.fogGradient = gradient
 
@@ -103,7 +103,7 @@ proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
 
 proc generateGGX(cubemap: Texture): Texture =
     let 
-        fb = newFrameBuffer()
+        fb = newFramebuffer()
         size: int = cubemap.width
         texture = newCubeTexture(
             size, 
@@ -133,7 +133,7 @@ proc generateGGX(cubemap: Texture): Texture =
 proc generateLUT(cubemap: Texture): Texture =
     let 
         shader = newShader(fullscreenVS, iblFilterFS, [])
-        fb = newFrameBuffer()
+        fb = newFramebuffer()
         texture = newTexture2D(
             cubemap.width, 
             cubemap.height,
@@ -217,7 +217,7 @@ method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float
 
             # Sets scene clear color
             sys.graphic.context.clearColor = env.backgroundColor
-            shader["env.clear_color"] = env.backgroundColor
+            shader["env.background_color"] = env.backgroundColor
 
             # Sets scene ambient color
             shader["env.ambient_color"] = env.ambientColor.vec3
@@ -227,9 +227,7 @@ method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float
                 use(env.ggxMap, 6)
                 shader["env.mip_count"] = env.environmentMap.levels.float32
 
-            if env.fogEnabled:
-                shader["env.fog_enabled"] = 1
-                shader["env.fog_color"] = env.fogColor
+            if env.fogDensity > 0.0:
                 shader["env.fog_density"] = env.fogDensity
                 shader["env.fog_gradient"] = env.fogGradient
             else:

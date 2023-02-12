@@ -3,18 +3,17 @@ import ../input
 import ../system
 
 type
+    ScriptProc = proc(component: ScriptComponent, input: Input, delta: float32) {.closure.}
     ScriptComponent* = ref object of Component
-        update*: proc(component: ScriptComponent, input: Input, delta: float32) {.closure.}
+        update*: ScriptProc
         inactive*: bool
 
     ScriptSystem* = ref object of System
 
 
 # Component implementation
-func newScriptComponent*(update: proc(component: ScriptComponent, input: Input, delta: float32) {.closure.}): ScriptComponent =
-    new(result)
-    result.update = update
-
+proc newScriptComponent*(update: ScriptProc): ScriptComponent = ScriptComponent(update: update)
+proc addScript*(e: Entity, update: ScriptProc) = addComponent(e, newScriptComponent(update))
 
 # System implementation
 proc newScriptSystem*(): ScriptSystem =

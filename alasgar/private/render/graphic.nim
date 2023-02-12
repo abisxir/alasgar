@@ -206,7 +206,7 @@ proc render*(g: Graphic, view, projection: Mat4, cubemap: Texture, drawables: va
 proc applyEffects(g: Graphic): Texture =
     if len(g.context.effects) > 0:
         if isNil(g.effectsFrameBuffer):
-            g.effectsFrameBuffer = newFrameBuffer()
+            g.effectsFrameBuffer = newFramebuffer()
             g.effectsTexture = newTexture2D(g.screenSize.iWidth, g.screenSize.iHeight, levels=1)
             allocate(g.effectsTexture)
         var 

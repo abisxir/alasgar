@@ -342,7 +342,7 @@ proc cleanupShaders*() =
 proc newSpatialShader*(vertexSource: string="", fragmentSource: string=""): Shader =
     var 
         vsource: string
-        fsource = forwardF.replace("$MAX_LIGHTS$", &"{maxLights}")
+        fsource = forwardF.replace("$MAX_LIGHTS$", &"{settings.maxLights}")
             
     if isEmptyOrWhitespace(fragmentSource):
         fsource = fsource

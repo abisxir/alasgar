@@ -117,7 +117,7 @@ proc copy*(t: Texture, data: ptr float32, format=GL_RGBA, width=0, height=0) =
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w.GLsizei, h.GLsizei, format, cGL_FLOAT, data)
 
 
-proc getTextureParamText(p: GLenum): string =
+proc getTextureParamText*(p: GLenum): string =
     case p:
         of GL_NEAREST: "GL_NEAREST"
         of GL_LINEAR: "GL_LINEAR"

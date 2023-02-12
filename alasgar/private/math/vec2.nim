@@ -136,3 +136,5 @@ let VEC2_DOWN* = vec2(0, -1)
 
 func `iWidth`*(a: Vec2): int32 = a.x.int32
 func `iHeight`*(a: Vec2): int32 = a.y.int32
+func `width`*(a: Vec2): float32 = a.x
+func `height`*(a: Vec2): float32 = a.y

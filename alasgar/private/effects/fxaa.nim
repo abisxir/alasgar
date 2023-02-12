@@ -4,6 +4,7 @@ const SOURCE = """
 uniform float FXAA_REDUCE_MIN;
 uniform float FXAA_REDUCE_MUL;
 uniform float FXAA_SPAN_MAX;
+uniform float SPLIT;
 
 void texcoords(vec2 fragCoord, vec2 resolution,
 			out vec2 v_rgbNW, out vec2 v_rgbNE,
@@ -72,14 +73,17 @@ vec4 mainImage(vec2 fragCoord)
 }
 
 void fragment() {
-	vec2 fragCoord = UV.xy * frame.resolution.xy;
-	COLOR = mainImage(fragCoord);
+    if(UV.x >= SPLIT) {
+        vec2 fragCoord = UV.xy * frame.resolution.xy;
+        COLOR = mainImage(fragCoord);
+    }
 }
 """
 
-proc newFxaaEffect*(spanMax=8'f32, reduceMul=1'f32 / 8'f32, reduceMin=1'f32 / 128'f32): Shader = 
+proc newFxaaEffect*(spanMax=8'f32, reduceMul=1'f32 / 8'f32, reduceMin=1'f32 / 128'f32, split=0'f32): Shader = 
     result = newCanvasShader(SOURCE)
     set(result, "FXAA_SPAN_MAX", spanMax)
     set(result, "FXAA_REDUCE_MUL", reduceMul)
     set(result, "FXAA_REDUCE_MIN", reduceMin)
+    set(result, "SPLIT", split)
 

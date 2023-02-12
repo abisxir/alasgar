@@ -3,6 +3,7 @@ import chroma
 import ../ports/opengl
 import ../utils
 import ../shader
+import ../texture
 
 export opengl
 
@@ -14,6 +15,8 @@ type
         direct*: bool
         point*: bool
         size*: Vec2
+        shadowMap*: Texture
+        
     GraphicContext* = object
         environmentIntensity*: float32
         clearColor*: chroma.Color

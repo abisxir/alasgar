@@ -12,6 +12,7 @@ type
         intensity*: float32
         shadow: bool
         shadowMapSize: Vec2
+        shadowMap: Texture
 
     DirectLightComponent* = ref object of LightComponent
         direction*: Vec3
@@ -41,6 +42,15 @@ proc newPointLightComponent*(color: Color=COLOR_MILK,
     result.intensity = intensity
     result.shadowMapSize = shadowMapSize
     result.shadow = shadow
+    if shadow:
+        result.shadowMap = newCubeTexture(
+            shadowMapSize.iWidth, 
+            shadowMapSize.iHeight,
+            internalFormat=GL_DEPTH_COMPONENT32F,
+            minFilter=GL_LINEAR, 
+            magFilter=GL_LINEAR,
+        )
+        allocate(result.shadowMap)
 
 proc newDirectLightComponent*(direction: Vec3, 
                               color: Color=COLOR_MILK, 
@@ -53,6 +63,15 @@ proc newDirectLightComponent*(direction: Vec3,
     result.direction = direction
     result.shadowMapSize = shadowMapSize
     result.shadow = shadow
+    if shadow:
+        result.shadowMap = newTexture2D(
+            shadowMapSize.iWidth, 
+            shadowMapSize.iHeight,
+            internalFormat=GL_DEPTH_COMPONENT32F,
+            minFilter=GL_LINEAR, 
+            magFilter=GL_LINEAR,
+        )
+        allocate(result.shadowMap)
 
 proc newSpotPointLightComponent*(direction: Vec3,
                                  color: Color=COLOR_MILK, 
@@ -71,6 +90,15 @@ proc newSpotPointLightComponent*(direction: Vec3,
     result.outerCutoff = outerCutoff
     result.shadowMapSize = shadowMapSize
     result.shadow = shadow
+    if shadow:
+        result.shadowMap = newTexture2D(
+            shadowMapSize.iWidth, 
+            shadowMapSize.iHeight,
+            internalFormat=GL_DEPTH_COMPONENT32F,
+            minFilter=GL_LINEAR, 
+            magFilter=GL_LINEAR,
+        )
+        allocate(result.shadowMap)
 
 
 proc `view`*(light: LightComponent): Mat4 = 
@@ -119,7 +147,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
 
             for c in iterateComponents[DirectLightComponent](scene):
                 # Checks that entity is visible
-                if c.entity.visible and lightCount < maxLights:
+                if c.entity.visible and lightCount < settings.maxLights:
                     # Set shader params
                     shader[&"lights[{lightCount}].type"] = ltDirectional.int
                     shader[&"lights[{lightCount}].color"] = c.color.vec3
@@ -133,7 +161,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
 
             for c in iterateComponents[PointLightComponent](scene):
                 # Checks that entity is visible
-                if c.entity.visible and lightCount < maxLights:
+                if c.entity.visible and lightCount < settings.maxLights:
                     shader[&"lights[{lightCount}].type"] = ltPoint.int
                     shader[&"lights[{lightCount}].color"] = c.color.vec3
                     shader[&"lights[{lightCount}].intensity"] = c.intensity 
@@ -145,7 +173,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
 
             for c in iterateComponents[SpotPointLightComponent](scene):
                 # Checks that entity is visible
-                if c.entity.visible and lightCount < maxLights:
+                if c.entity.visible and lightCount < settings.maxLights:
                     shader[&"lights[{lightCount}].type"] = ltSpot.int
                     shader[&"lights[{lightCount}].color"] = c.color.vec3
                     shader[&"lights[{lightCount}].intensity"] = c.intensity 

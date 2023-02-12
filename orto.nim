@@ -1,24 +1,5 @@
 import alasgar
 
-proc layout*(e: Entity, level=0) =
-    echo spaces(level), "+ ", e.name
-    for c in e.components:
-        if c of AnimationClipComponent:
-            let a = cast[AnimationClipComponent](c)
-            echo spaces(level), "  - ", "AnimationClipComponent", a
-        elif c of AnimationChannelComponent:
-            echo spaces(level), "  - ", "AnimationChannelComponent"
-        elif c of SkinComponent:
-            echo spaces(level), "  - ", "SkinComponent"
-        elif c of JointComponent:
-            echo spaces(level), "  - ", "JointComponent"
-        elif c of MeshComponent:
-            echo spaces(level), "  - ", "MeshComponent"
-        else:
-            echo spaces(level), "  - ", type(c)
-    for child in e.children:
-        layout(child, level + 1)
-
 # Creates a window named Hello
 screen(1920, 1080)
 window("Hello", 1920, 1080)
@@ -35,8 +16,6 @@ addComponent(scene, newScriptComponent(proc(script: ScriptComponent, input: Inpu
 var env = newEnvironmentComponent()
 # Sets background color to black
 setBackground(env, parseHtmlName("DimGray"))
-# Enables simple fog effect
-enableFog(env, parseHtmlName("DimGray"), 0.05, 1.0)
 # Adds environment to our scene
 addComponent(scene, env)
 
@@ -47,41 +26,25 @@ cameraEntity.transform.position = vec3(6, 8, 6)
 # Adds a perspective camera component to entity
 addComponent(
     cameraEntity, 
-    newPerspectiveCamera(
-        75, 
-        runtime.ratio, 
-        0.1, 
-        100.0, 
-        vec3(0) - cameraEntity.transform.position
+    newOrthographicCamera(
+        left = -10 * runtime.ratio, 
+        right = 10 * runtime.ratio, 
+        bottom = 10, 
+        top = -10, 
+        near=0.1, 
+        far=100.0,
+        direction=vec3(0) - cameraEntity.transform.position,
     )
 )
 # Makes the camera entity child of scene
 addChild(scene, cameraEntity)
 
-let rFloor = load("res://floor/scene.gltf")
-proc addFloor(position: Vec3) =
-    let mFloor = toEntity(rFloor, scene)
-    mFloor.transform.euler = vec3(0, 0, -PI / 2)
-    mFloor.transform.scale = vec3(2.0)
-    mFloor.transform.position = position
-    addChild(scene, mFloor)
-
-addFloor(vec3(0, -2, 0))
-addFloor(vec3(8, -2, 0))
-addFloor(vec3(-8, -2, 0))
-addFloor(vec3(0, -2, 8))
-addFloor(vec3(0, -2, -8))
-addFloor(vec3(8, -2, 8))
-addFloor(vec3(-8, -2, -8))
-addFloor(vec3(8, -2, -8))
-addFloor(vec3(-8, -2, 8))
-
-
-proc createCube(name: string, position: Vec3) =
+proc createCube(name: string, position, scale: Vec3) =
     # Creates cube entity
     var cubeEntity = newEntity(scene, name)
     # Positions cube to (0, 2, 0)
     cubeEntity.transform.position = position
+    cubeEntity.transform.scale = scale
     # Add a cube mesh component to entity
     addComponent(cubeEntity, newCubeMesh())
     # Adds a script component to cube entity
@@ -104,8 +67,7 @@ proc createCube(name: string, position: Vec3) =
     # Makes the cube enity child of scene
     addChild(scene, cubeEntity)
 
-createCube("Cube1", vec3(1, 4, 0))
-createCube("Cube2", vec3(-4, 2, 0))
+createCube("Cube1", vec3(0, 0, 0), 1.0 * VEC3_ONE)
 
 proc addLight(position: Vec3) =
     # Creats spot point light entity
@@ -124,8 +86,8 @@ proc addLight(position: Vec3) =
     # Makes the new light child of the scene
     addChild(scene, spotLightEntity)
 
-addLight(vec3(12, 12, 0))
-addLight(vec3(8, 12, 4))
+addLight(vec3(5, 5, 0))
+addLight(vec3(-5, 5, 0))
 
 # Renders an empty sceene
 render(scene)

@@ -3,6 +3,7 @@ import ../utils
 import ../shader
 import ../core
 import context
+import fb
 
 
 const forwardDepthV = staticRead("shaders/forward-depth.vs")
@@ -12,11 +13,12 @@ const forwardDepthF = staticRead("shaders/forward-depth.fs")
 type
     DepthBuffer* = ref object
         fbo: GLuint
-        texture*: GLuint
+        texture: GLuint
         cube: GLuint
         size: Vec2
     Shadow* = ref object
         shader: Shader
+        fbo: Framebuffer
         buffers: seq[DepthBuffer]
 
 proc newDepthBuffer*(size: Vec2): DepthBuffer =
@@ -132,6 +134,7 @@ proc destroy*(fb: DepthBuffer) =
 proc newShadow*(): Shadow =
     new(result)
     result.shader = newShader(forwardDepthV, forwardDepthF, [])
+    result.fbo = newFramebuffer()
 
 proc provideDepthBuffer(shadow: Shadow, size: Vec2): DepthBuffer =
     for i, buffer in pairs(shadow.buffers):
@@ -157,7 +160,7 @@ proc process*(shadow: Shadow,
             var mesh = drawables[i].mesh.instance
 
             # Limits instance count by max batch size
-            var count = min(drawables[i].count, maxBatchSize)
+            var count = min(drawables[i].count, settings.maxBatchSize)
 
             for ix in 0..count - 1:
                 if drawables[i + ix].material != nil and drawables[i + ix].material.castShadow:
