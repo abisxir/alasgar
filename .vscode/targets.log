@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Feb 12 14:29:08 2023
+# Make data base, printed on Fri Feb 17 09:26:42 2023
 
 # Variables
 
@@ -19,9 +19,9 @@ LC_ALL = C
 # environment
 NO_AT_BRIDGE = 1
 # environment
-STARSHIP_SESSION_KEY = 1233318997170632
+STARSHIP_SESSION_KEY = 7162316801147420
 # environment
-I3SOCK = /run/user/1000/i3/ipc-socket.1119
+I3SOCK = /run/user/1000/i3/ipc-socket.1110
 # environment
 VSCODE_CWD = /home/abi
 # default
@@ -47,7 +47,7 @@ OLDPWD = /home/abi
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = /home/abi/.config/Code/CachedData/97dec172d3256f8ca4bfb2143f3f76b503ca0534
+VSCODE_CODE_CACHE_PATH = /home/abi/.config/Code/CachedData/441438abd1ac652551dbe4d408dfcec8a499b8bf
 # environment
 LANG = C
 # environment
@@ -79,7 +79,7 @@ MAKEFILE_LIST := Makefile
 # environment
 ZSH = /home/abi/.oh-my-zsh
 # environment
-VSCODE_PID = 6156
+VSCODE_PID = 3503
 # environment
 XDG_SESSION_TYPE = tty
 # automatic
@@ -179,7 +179,7 @@ SDL_HOME = /home/abi/.local/src/SDL
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-8612bf0f-1.74.3-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-8612bf0f-1.75.1-main.sock
 # environment
 TERM = xterm-256color
 # environment
@@ -287,12 +287,12 @@ orto: clean
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 40 / storage = 349 B / avg = 8 B
-# current buf: size = 8162 B / used = 349 B / count = 40 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 39 / storage = 344 B / avg = 8 B
+# current buf: size = 8162 B / used = 344 B / count = 39 / avg = 8 B
 
-# strcache performance: lookups = 56 / hit rate = 28%
+# strcache performance: lookups = 56 / hit rate = 30%
 # hash-table stats:
-# Load=40/8192=0%, Rehash=0, Collisions=0/56=0%
-# Finished Make data base on Sun Feb 12 14:29:08 2023
+# Load=39/8192=0%, Rehash=0, Collisions=0/56=0%
+# Finished Make data base on Fri Feb 17 09:26:42 2023
 
  

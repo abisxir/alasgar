@@ -1,22 +1,22 @@
 import math
+import tables
+
 import ../core
 import ../utils
 
-var sphereMesh: Mesh
+var cache = initTable[(int), Mesh]()
 
-proc createSphereMesh(): Mesh =
-    var vertexes = newSeq[Vertex]()
-
+proc createSphereMesh(factor: int): Mesh =
     var 
+        vertexes = newSeq[Vertex]()
         x, y, z, xy, nx, ny, nz, uvx, uvy, sectorAngle, stackAngle: float32
-
-    const sectorCount = 32
-    const stackCount = 32
-    const radius = 1.0    
-    const lengthInv = 1.0.float32 / radius
-    
-    const sectorStep: float32 = 2 * PI / sectorCount
-    const stackStep: float32 = PI / stackCount
+    let 
+        sectorCount = 32 * factor
+        stackCount = 32 * factor
+        radius = 1.0    
+        lengthInv = 1.0.float32 / radius
+        sectorStep: float32 = 2 * PI / sectorCount.float32
+        stackStep: float32 = PI / stackCount.float32
 
     for i in 0..stackCount:
         stackAngle = PI / 2 - i.float32 * stackStep
@@ -59,8 +59,8 @@ proc createSphereMesh(): Mesh =
 
     result = newMesh(drawVertexes)
 
-proc newSphereMesh*(): MeshComponent =
+proc newSphereMesh*(factor=1): MeshComponent =
     new(result)
-    if sphereMesh == nil:
-        sphereMesh = createSphereMesh()
-    result.instance = sphereMesh
+    if not hasKey(cache, factor):
+        cache[factor] = createSphereMesh(factor)
+    result.instance = cache[factor]

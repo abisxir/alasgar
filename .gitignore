@@ -57,6 +57,8 @@ shadow
 shadow.nim
 light.nim
 nakefile
+orto
+orto.nim
 
 # Build and res direcory
 build/

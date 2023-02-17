@@ -32,6 +32,8 @@ type
         value: Vec3
     ShaderParamVec4* = ref object of ShaderParam
         value: Vec4
+    ShaderParamColor* = ref object of ShaderParam
+        value: Color
     ShaderParamMat4* = ref object of ShaderParam
         value: Mat4
     ShaderParamTexture* = ref object of ShaderParam
@@ -256,6 +258,7 @@ method update(p: ShaderParamFloat, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamVec2, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamVec3, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamVec4, shader: Shader) = shader[p.key] = p.value
+method update(p: ShaderParamColor, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamMat4, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamTexture, shader: Shader) = use(p.value, p.slot)
 
@@ -310,6 +313,16 @@ proc set*(shader: Shader, key: string, value: Vec4) =
 proc get_vec4*(shader: Shader, key: string): Vec4 =
     let param = shader.params[key]
     result = cast[ShaderParamVec4](param).value
+
+proc set*(shader: Shader, key: string, value: Color) =
+    let param = new(ShaderParamColor)
+    param.key = key
+    param.value = value
+    shader.params[key] = param
+
+proc get_color*(shader: Shader, key: string): Color =
+    let param = shader.params[key]
+    result = cast[ShaderParamColor](param).value
 
 proc set*(shader: Shader, key: string, value: Mat4) =
     let param = new(ShaderParamMat4)

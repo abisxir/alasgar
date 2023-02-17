@@ -99,6 +99,7 @@ proc newSpotPointLightComponent*(direction: Vec3,
             magFilter=GL_LINEAR,
         )
         allocate(result.shadowMap)
+        #setPixels(result.shadowMap, GL_DEPTH_COMPONENT, cGL_FLOAT, nil)
 
 
 proc `view`*(light: LightComponent): Mat4 = 
@@ -132,6 +133,7 @@ proc prepareShadow(g: Graphic, shader: Shader, light: LightComponent, index: int
                 direct: light of DirectLightComponent,
                 point: light of PointLightComponent,
                 size: light.shadowMapSize,
+                shadowMap: light.shadowMap,
             )
         )
 

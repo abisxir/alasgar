@@ -518,6 +518,7 @@ void light_normal(vec3 N, vec3 V, float shininess, out vec3 f_specular, out vec3
   }
 }
 
+vec3 NORMAL;
 vec4 COLOR;
 
 $MAIN_FUNCTION$
@@ -542,68 +543,65 @@ void main() {
     fog_amount = clamp(fog_amount, 0., 1.);
   }
 
-  vec3 N;
-
-  if(0. < 1.0) {
-    if (COLOR.a < 0.01) {
-      discard;
-    }
-
-    float metallic = material.metallic;
-    if (material.has_metallic_map > 0.0) {
-      metallic *= texture(u_metallic_map, surface.uv).b;
-    }
-
-    float roughness = material.roughness;
-    if (material.has_roughness_map > 0.0) {
-      roughness *= texture(u_roughness_map, surface.uv).g;
-    }
-
-    float ao = material.ao;
-    if (material.has_ao_map > 0.0) {
-      ao *= texture(u_ao_map, surface.uv).r;
-    }
-
-    vec3 V = normalize(camera.position - surface.position.xyz);
-    N = get_normal();
-
-    // Adds emissive color
-    vec3 f_emissive = material.emissive_color;
-    if (material.has_emissive_map > 0.0) {
-      f_emissive = texture(u_emissive_map, surface.uv).rgb;
-    }
-
-    vec3 f_specular = vec3(0.0);
-    vec3 f_diffuse = vec3(0.0);
-
-    if (roughness > 0.0 || metallic > 0.0) {
-      light_pbr(
-        N, 
-        V, 
-        sRGBToLinear(COLOR.rgb), 
-        metallic, 
-        roughness, 
-        ao,
-        f_specular, 
-        f_diffuse
-      );
-      COLOR.rgb = f_emissive + f_diffuse + f_specular;  
-      COLOR.rgb = tonemap_aces(f_emissive + f_diffuse + f_specular);
-      //COLOR.rgb =
-      //    linearTosRGB(tonemap_aces(f_emissive + f_diffuse + f_specular));
-    } else {
-      light_normal(N, V, material.reflectance * 255.0, f_specular, f_diffuse);
-      COLOR.rgb = COLOR.rgb * (f_emissive + f_diffuse + f_specular);
-    }
+  if (COLOR.a < 0.01) {
+    discard;
   }
 
+  float metallic = material.metallic;
+  if (material.has_metallic_map > 0.0) {
+    metallic *= texture(u_metallic_map, surface.uv).b;
+  }
+
+  float roughness = material.roughness;
+  if (material.has_roughness_map > 0.0) {
+    roughness *= texture(u_roughness_map, surface.uv).g;
+  }
+
+  float ao = material.ao;
+  if (material.has_ao_map > 0.0) {
+    ao *= texture(u_ao_map, surface.uv).r;
+  }
+
+  vec3 V = normalize(camera.position - surface.position.xyz);
+  vec3 N = get_normal();
+
+  // Adds emissive color
+  vec3 f_emissive = material.emissive_color;
+  if (material.has_emissive_map > 0.0) {
+    f_emissive = texture(u_emissive_map, surface.uv).rgb;
+  }
+
+  vec3 f_specular = vec3(0.0);
+  vec3 f_diffuse = vec3(0.0);
+
+  if (roughness > 0.0 || metallic > 0.0) {
+    light_pbr(
+      N, 
+      V, 
+      sRGBToLinear(COLOR.rgb), 
+      metallic, 
+      roughness, 
+      ao,
+      f_specular, 
+      f_diffuse
+    );
+    COLOR.rgb = f_emissive + f_diffuse + f_specular;  
+    COLOR.rgb = tonemap_aces(f_emissive + f_diffuse + f_specular);
+    //COLOR.rgb =
+    //    linearTosRGB(tonemap_aces(f_emissive + f_diffuse + f_specular));
+  } else {
+    light_normal(N, V, material.reflectance * 255.0, f_specular, f_diffuse);
+    COLOR.rgb = COLOR.rgb * (f_emissive + f_diffuse + f_specular);
+  }
+
+  NORMAL = N;
   $MAIN_FUNCTION_CALL$
-  
+
   if(fog_amount > 0.0) {
     COLOR = mix(env.background_color, COLOR, fog_amount);
   }
   
-  OUT_NORMAL = N.xyz;
+  OUT_NORMAL = NORMAL.xyz;
   OUT_COLOR = COLOR;  
 }
 

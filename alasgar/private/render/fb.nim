@@ -6,7 +6,7 @@ import ../texture
 
 type
     FrameBuffer* = ref object
-        fbo: GLuint
+        fbo*: GLuint
         rbo: GLuint
         color*: Texture 
         normal*: Texture
@@ -96,9 +96,8 @@ proc use*(f: FrameBuffer, background: Color) =
 
     glDisable(GL_CULL_FACE)
     glEnable(GL_DEPTH_TEST)
-    glDisable(GL_BLEND)
-    #glEnable(GL_BLEND)
-    #glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glDepthFunc(GL_LESS)
 
     glClearColor(background.r, background.g, background.b, 1)
@@ -115,7 +114,6 @@ proc use*(fb: FrameBuffer, texture: Texture, attachment: GLenum, unit: int) =
     glViewport(0, 0, texture.width.GLsizei, texture.height.GLsizei)
     glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo)
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, unit.GLenum, texture.id, 0.GLint)
-    attach(texture)
     glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
 proc draw*(fb: FrameBuffer) = glDrawArrays(GL_TRIANGLES, 0, 3)
