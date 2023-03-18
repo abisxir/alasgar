@@ -2,43 +2,38 @@ import sugar
 import sequtils
 import strutils
 
-import alasgar/private/core
-import alasgar/private/resources/image
-import alasgar/private/resources/obj
-import alasgar/private/resources/gltf
-import alasgar/private/components/camera
-import alasgar/private/components/interactive
-import alasgar/private/components/collision
-import alasgar/private/components/line
-import alasgar/private/components/light
-import alasgar/private/components/environment
-import alasgar/private/components/script
-import alasgar/private/components/sprite
+import alasgar/core
+import alasgar/resources/image
+import alasgar/resources/obj
+import alasgar/resources/gltf
+import alasgar/components/camera
+import alasgar/components/catmull
+import alasgar/components/interactive
+import alasgar/components/collision
+import alasgar/components/line
+import alasgar/components/light
+import alasgar/components/environment
+import alasgar/components/script
+import alasgar/components/sprite
 when not defined(android):
-    import alasgar/private/components/sound
-import alasgar/private/geometry/cube
-import alasgar/private/geometry/grid
-import alasgar/private/geometry/sphere
-import alasgar/private/geometry/plane
-import alasgar/private/engine
-import alasgar/private/shader
-import alasgar/private/logger
-import alasgar/private/utils
-import alasgar/private/system
-import alasgar/private/physics/collision as physics_collision
-import alasgar/private/physics/ray
-import alasgar/private/math/helpers
-import alasgar/private/math/mat4
-import alasgar/private/math/vec2
-import alasgar/private/math/vec3
-import alasgar/private/math/vec4
-import alasgar/private/math/quat
-import alasgar/private/animation/easing
-import alasgar/private/animation/curve/catmull
-import alasgar/private/effects/fxaa
-import alasgar/private/effects/ssao
-import alasgar/private/effects/hbao
-import alasgar/private/effects/bloom
+    import alasgar/components/sound
+import alasgar/geometry/cube
+import alasgar/geometry/grid
+import alasgar/geometry/sphere
+import alasgar/geometry/plane
+import alasgar/engine
+import alasgar/shader
+import alasgar/logger
+import alasgar/utils
+import alasgar/system
+import alasgar/physics/collision as physics_collision
+import alasgar/physics/ray
+import alasgar/math/helpers
+import alasgar/misc/easing
+import alasgar/effects/fxaa
+import alasgar/effects/ssao
+import alasgar/effects/hbao
+import alasgar/effects/bloom
 
 
 export core,

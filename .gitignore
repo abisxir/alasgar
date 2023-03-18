@@ -54,8 +54,6 @@ Makefile
 main.nim
 main
 shadow
-shadow.nim
-light.nim
 nakefile
 orto
 orto.nim

@@ -36,7 +36,7 @@ var env = newEnvironmentComponent()
 # Sets background color to black
 setBackground(env, parseHtmlName("White"))
 # Enables simple fog effect
-enableFog(env, 0.2, 1.0)
+enableFog(env, 0.15, 1.0)
 # Adds environment to our scene
 addComponent(scene, env)
 
@@ -84,10 +84,12 @@ proc createSphere(name: string, position: Vec3) =
     addComponent(
         e, 
         newPBRMaterialComponent(
-            diffuseColor=color(0.9, 0.9, 0.9, 1.0),
-            specularColor=color(0.9, 0.9, 0.9, 1.0),
-            metallic=0.54,
-            roughness=0.46,
+            diffuseColor=color(0.0, 0.0, 0.0),
+            specularColor=color(0.3, 0.3, 0.3),
+            emissiveColor=color(0.5, 0.5, 0.5),
+            metallic=0.62,
+            roughness=0.38,
+            reflectance=0.5,
             castShadow=true,
         )
     )

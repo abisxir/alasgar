@@ -1,14 +1,12 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-make: *** No rule to make target 'all'.  Stop.
-
-# GNU Make 4.4
+# GNU Make 4.4.1
 # Built for x86_64-pc-linux-gnu
-# Copyright (C) 1988-2022 Free Software Foundation, Inc.
+# Copyright (C) 1988-2023 Free Software Foundation, Inc.
 # License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Feb 17 09:26:42 2023
+# Make data base, printed on Thu Mar 16 11:02:10 2023
 
 # Variables
 
@@ -19,9 +17,11 @@ LC_ALL = C
 # environment
 NO_AT_BRIDGE = 1
 # environment
-STARSHIP_SESSION_KEY = 7162316801147420
+STARSHIP_SESSION_KEY = 3202722738238251
 # environment
-I3SOCK = /run/user/1000/i3/ipc-socket.1110
+I3SOCK = /run/user/1000/i3/ipc-socket.1089
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
 # environment
 VSCODE_CWD = /home/abi
 # default
@@ -47,7 +47,7 @@ OLDPWD = /home/abi
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = /home/abi/.config/Code/CachedData/441438abd1ac652551dbe4d408dfcec8a499b8bf
+VSCODE_CODE_CACHE_PATH = /home/abi/.config/Code/CachedData/ee2b180d582a7f601fa6ecfdad8d9fd269ab1884
 # environment
 LANG = C
 # environment
@@ -79,7 +79,7 @@ MAKEFILE_LIST := Makefile
 # environment
 ZSH = /home/abi/.oh-my-zsh
 # environment
-VSCODE_PID = 3503
+VSCODE_PID = 32056
 # environment
 XDG_SESSION_TYPE = tty
 # automatic
@@ -155,7 +155,7 @@ GTK_MODULES = canberra-gtk-module
 # environment
 USER = abi
 # default
-MAKE_VERSION := 4.4
+MAKE_VERSION := 4.4.1
 # environment
 STARSHIP_CONFIG = /home/abi/.config/starship.toml
 # environment
@@ -179,7 +179,7 @@ SDL_HOME = /home/abi/.local/src/SDL
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-8612bf0f-1.75.1-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-8612bf0f-1.76-main.sock
 # environment
 TERM = xterm-256color
 # environment
@@ -190,6 +190,8 @@ XDG_SESSION_ID = 1
 .RECIPEPREFIX := 
 # automatic
 <F = $(notdir $<)
+# environment
+VSCODE_CRASH_REPORTER_SANDBOXED_HINT = 1
 # default
 SUFFIXES := 
 # default
@@ -197,7 +199,7 @@ SUFFIXES :=
 # environment
 DOTNET_ROOT = /usr/share/dotnet
 # variable set hash-table stats:
-# Load=92/1024=9%, Rehash=0, Collisions=7/125=6%
+# Load=94/1024=9%, Rehash=0, Collisions=7/123=6%
 
 # Pattern-specific Variable Values
 
@@ -205,9 +207,9 @@ DOTNET_ROOT = /usr/share/dotnet
 
 # Directories
 
-# . (device 66305, inode 3435472): 30 files, no impossibilities.
+# . (device 66305, inode 3435472): 33 files, no impossibilities.
 
-# 30 files, no impossibilities in 1 directories.
+# 33 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -273,11 +275,13 @@ build: clean
 
 orto: clean
 #  Implicit rule search has not been done.
+ 
+make: *** No rule to make target 'all'.  Stop.
+
 #  Modification time never checked.
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 8):
 	nim c --threads:on -d:debug -r orto.nim
- 
 
 # files hash-table stats:
 # Load=10/1024=1%, Rehash=0, Collisions=0/26=0%
@@ -287,12 +291,12 @@ orto: clean
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 39 / storage = 344 B / avg = 8 B
-# current buf: size = 8162 B / used = 344 B / count = 39 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 44 / storage = 444 B / avg = 10 B
+# current buf: size = 8162 B / used = 444 B / count = 44 / avg = 10 B
 
-# strcache performance: lookups = 56 / hit rate = 30%
+# strcache performance: lookups = 58 / hit rate = 24%
 # hash-table stats:
-# Load=39/8192=0%, Rehash=0, Collisions=0/56=0%
-# Finished Make data base on Fri Feb 17 09:26:42 2023
+# Load=44/8192=1%, Rehash=0, Collisions=0/58=0%
+# Finished Make data base on Thu Mar 16 11:02:10 2023
 
  
