@@ -20,8 +20,8 @@ proc layout*(e: Entity, level=0) =
         layout(child, level + 1)
 
 # Creates a window named Hello
-screen(1920, 1080)
-window("Hello", 1920, 1080)
+#screen(1920, 1080)
+window("Hello", 1280, 720)
    
 # Creates a new scene
 var scene = newScene()

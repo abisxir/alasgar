@@ -1,10 +1,9 @@
 import ../ports/opengl
 import ../texture
 import ../utils
-import ../shader
-
-const forwardSkyboxV = staticRead("shaders/forward-skybox-cube.vs")
-const forwardSkyboxF = staticRead("shaders/forward-skybox-cube.fs")
+import ../shaders/base
+import ../shaders/compile
+import ../shaders/skybox
 
 type
     Skybox* = ref object
@@ -59,7 +58,7 @@ var vertices = [
 
 proc newSkybox*(): Skybox =
     new(result)
-    result.shader = newShader(forwardSkyboxV, forwardSkyboxF, [])
+    result.shader = newShader(toGLSL(skyboxVertex), toGLSL(skyboxFragment), [])
     glGenVertexArrays(1, addr(result.cubeVAO))
     glGenBuffers(1, addr(result.cubeVAO))
     glBindVertexArray(result.cubeVAO);

@@ -129,8 +129,8 @@ proc mainFragment*(ALBEDO_MAP: Layout[0, Uniform[Sampler2D]],
                    FRAME: Uniform[Frame],
                    SURFACE: Surface,
                    MATERIAL: Material,
-                   COLOR: var Layout[0, Vec4],
-                   NORMAL: var Layout[0, Vec3]) =
+                   COLOR: var Vec4,
+                   NORMAL: var Vec3) =
     var FRAGMENT: Fragment = prepare(
             SURFACE, 
             MATERIAL, 
@@ -147,11 +147,13 @@ proc mainFragment*(ALBEDO_MAP: Layout[0, Uniform[Sampler2D]],
     
     if FRAGMENT.FOG_AMOUNT < 1.0:
         COLOR = vec4(FRAGMENT.ALBEDO, FRAGMENT.OPACITY)
-        if FRAGMENT.OPACITY > OPACITY_CUTOFF:
-            var lightFactor = vec3(0.0, 0.0, 0.0)
-            for i in 0..<ENV.LIGHTS_COUNT:
-                lightFactor += getLight(LIGHTS[i], FRAGMENT, SURFACE)
-            COLOR.rgb = ENV.AMBIENT_COLOR + lightFactor
+        #if FRAGMENT.OPACITY > OPACITY_CUTOFF:
+        #    var lightFactor = vec3(0.0, 0.0, 0.0)
+        #    for i in 0..<ENV.LIGHTS_COUNT:
+        #        lightFactor += getLight(LIGHTS[i], FRAGMENT, SURFACE)
+        #    COLOR.rgb = ENV.AMBIENT_COLOR + lightFactor
 
     if FRAGMENT.FOG_AMOUNT > 0.0:
         COLOR = mix(ENV.BACKGROUND_COLOR, COLOR, FRAGMENT.FOG_AMOUNT)
+
+    COLOR = vec4(1.0, 1.0, 1.0, 1.0)

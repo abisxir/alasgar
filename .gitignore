@@ -61,4 +61,5 @@ orto.nim
 # Build and res direcory
 build/
 art/
+.vscode/
 

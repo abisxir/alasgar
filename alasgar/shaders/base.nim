@@ -346,4 +346,4 @@ proc cleanupShaders*() =
     clear(cache)
 
 proc newSpatialShader*(vertexSource: string="", fragmentSource: string=""): Shader = newShader(toGLSL(mainVertex), toGLSL(mainFragment), [])
-proc newCanvasShader*(source: string=""): Shader = newCanvasShader(vertexSource="", fragmentSource=source)
+#proc newCanvasShader*(source: string=""): Shader = newCanvasShader(vertexSource="", fragmentSource=source)

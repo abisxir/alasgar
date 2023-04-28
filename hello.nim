@@ -46,7 +46,7 @@ addChild(scene, lightEntity)
 # Creates cube entity, by default position is 0, 0, 0
 var cubeEntity = newEntity(scene, "Cube")
 # Set scale to 2
-cubeEntity.transform.scale = vec3(2)
+cubeEntity.transform.scale = vec3(1)
 # Add a cube mesh component to entity
 addComponent(cubeEntity, newCubeMesh())
 # Adds a script component to cube entity

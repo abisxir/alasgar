@@ -1,224 +1,212 @@
 # https://github.com/treeform/shady
 ## Shader macro, converts Nim code into GLSL
 
-import macros, strutils, tables, vmath, strformat, osproc
+import macros, strutils, tables, vmath, strformat
 import ../utils
 
 export vmath, utils
 
-var useResult {.compiletime.}: bool
+var 
+  useResult {.compiletime.}: bool
+  typeRenameCache {.compiletime.}: Table[string, string] = initTable[string, string]()
+  simpleTypes {.compiletime.}: Table[string, string] = {
+    "Mat2": "mat2",
+    "Mat3": "mat3",
+    "Mat4": "mat4",
 
-proc listSamplers(): array[51, string] =
-  [
-    "samplerBuffer", 
-    "sampler1D", 
-    "sampler1DArray", 
-    "sampler2D", 
-    "sampler2DArray", 
-    "sampler2DRect", 
-    "sampler3D", 
-    "samplerCube", 
-    "samplerCubeArray", 
-    "sampler1DShadow", 
-    "sampler1DArrayShadow", 
-    "sampler2DShadow", 
-    "sampler2DArrayShadow", 
-    "sampler2DRectShadow", 
-    "samplerCubeShadow", 
-    "samplerCubeArrayShadow", 
-    "imageBuffer",
-    "isamplerBuffer", 
-    "isampler1D", 
-    "isampler1DArray", 
-    "isampler2D", 
-    "isampler2DArray", 
-    "isampler2DRect", 
-    "isampler3D", 
-    "isamplerCube", 
-    "isamplerCubeArray", 
-    "isampler1DShadow", 
-    "isampler1DArrayShadow", 
-    "isampler2DShadow", 
-    "isampler2DArrayShadow", 
-    "isampler2DRectShadow", 
-    "isamplerCubeShadow", 
-    "isamplerCubeArrayShadow", 
-    "iimageBuffer",
-    "usamplerBuffer", 
-    "usampler1D", 
-    "usampler1DArray", 
-    "usampler2D", 
-    "usampler2DArray", 
-    "usampler2DRect", 
-    "usampler3D", 
-    "usamplerCube", 
-    "usamplerCubeArray", 
-    "usampler1DShadow", 
-    "usampler1DArrayShadow", 
-    "usampler2DShadow", 
-    "usampler2DArrayShadow", 
-    "usampler2DRectShadow", 
-    "usamplerCubeShadow", 
-    "usamplerCubeArrayShadow", 
-    "uimageBuffer",
-  ]
+    "Vec2": "vec2",
+    "Vec3": "vec3",
+    "Vec4": "vec4",
 
-proc listInternalTypes(): seq[string] = 
-  let 
-    samplers = listSamplers()
-    structs: array[4, string] = [
-      "Layout",
-      "Uniform",
-      "UniformWriteOnly",
-      "Attribute",
-    ] 
-  add(result, samplers)
-  add(result, structs)
+    "IVec2": "ivec2",
+    "IVec3": "ivec3",
+    "IVec4": "ivec4",
 
-proc isInternalType(t: string): bool =
-  for token in listInternalTypes():
-    if toLower(token) in toLower(t):
-      return true
+    "UVec2": "uvec2",
+    "UVec3": "uvec3",
+    "UVec4": "uvec4",
 
-proc isSampler(sampler: string): bool =
-  let l = toLower(sampler)
-  for token in listSamplers():
-    if toLower(token) in l:
-      return true
+    "DVec2": "dvec2",
+    "DVec3": "dvec3",
+    "DVec4": "dvec4",
 
-proc getSampler(sampler: string): string =
-  let l = toLower(sampler)
-  for token in listSamplers():
-    if toLower(token) in l:
-      return token
+    "int32": "int",
+    "uint32": "uint",
 
-proc isLogicalOp(n: NimNode): bool = n[0].repr in ["and", "or", "xor", "shr", "shl"]
-proc getLogicalOp(n: NimNode): string = 
-  case n[0].repr:
-    of "and": "&&"
-    of "or": "||"
-    of "not": "!"
-    else: n[0].repr
-proc isBitwiseOp(n: NimNode): bool = n[0].repr in ["and", "or", "xor", "shr", "shl"] and n[1].getType().repr in ["int", "uint"]
-proc getBitwiseOp(n: NimNode): string = 
-  case n[0].repr:
-    of "and": "&"
-    of "or": "|"
-    of "xor": "^"
-    of "shr": ">>"
-    of "shl": "<<"
-    else: n[0].repr
+    "float32": "float",
+    "float64": "float",
+    "Uniform": "uniform",
+    "UniformWriteOnly": "writeonly uniform",
+    "Attribute": "attribute",
+    "Layout": "layout",
+  }.toTable()
+  vectorTypes {.compiletime.}: Table[string, string] = {
+    "GMat2[float32]": "mat2",
+    "GMat3[float32]": "mat3",
+    "GMat4[float32]": "mat4",
+    "GVec2[float32]": "vec2",
+    "GVec3[float32]": "vec3",
+    "GVec4[float32]": "vec4",
+    "GMat2[float64]": "dmat2",
+    "GMat3[float64]": "dmat3",
+    "GMat4[float64]": "dmat4",
+    "GVec2[float64]": "dvec2",
+    "GVec3[float64]": "dvec3",
+    "GVec4[float64]": "dvec4",
+    "GVec2[uint32]": "uvec2",
+    "GVec3[uint32]": "uvec3",
+    "GVec4[uint32]": "uvec4",
+    "GVec2[int32]": "ivec2",
+    "GVec3[int32]": "ivec3",
+    "GVec4[int32]": "ivec4",
+    "Uniform[float]": "float",
+    "Uniform[float64]": "float",
+    "Uniform[float32]": "float",
+    "Uniform[int]": "int",
+    "Uniform[int64]": "int",
+    "Uniform[int32]": "int",
+  }.toTable()
+  declareCache {.compiletime.} = newTable[string, string]()
+  samplers {.compiletime.} = {
+    "SamplerBuffer": "samplerBuffer", 
+    "Sampler1D": "sampler1D", 
+    "Sampler1DArray": "sampler1DArray", 
+    "Sampler2D": "sampler2D", 
+    "Sampler2DArray": "sampler2DArray", 
+    "Sampler2DRect": "sampler2DRect", 
+    "Sampler3D": "sampler3D", 
+    "SamplerCube": "samplerCube", 
+    "SamplerCubeArray": "samplerCubeArray", 
+    "Sampler1DShadow": "sampler1DShadow", 
+    "Sampler1DArrayShadow": "sampler1DArrayShadow", 
+    "Sampler2DShadow": "sampler2DShadow", 
+    "Sampler2DArrayShadow": "sampler2DArrayShadow", 
+    "Sampler2DRectShadow": "sampler2DRectShadow", 
+    "SamplerCubeShadow": "samplerCubeShadow", 
+    "SamplerCubeArrayShadow": "samplerCubeArrayShadow", 
+    "ImageBuffer": "imageBuffer",
+    "ISamplerBuffer": "isamplerBuffer", 
+    "ISampler1D": "isampler1D", 
+    "ISampler1DArray": "isampler1DArray", 
+    "ISampler2D": "isampler2D", 
+    "ISampler2DArray": "isampler2DArray", 
+    "ISampler2DRect": "isampler2DRect", 
+    "ISampler3D": "isampler3D", 
+    "ISamplerCube": "isamplerCube", 
+    "ISamplerCubeArray": "isamplerCubeArray", 
+    "ISampler1DShadow": "isampler1DShadow", 
+    "ISampler1DArrayShadow": "isampler1DArrayShadow", 
+    "ISampler2DShadow": "isampler2DShadow", 
+    "ISampler2DArrayShadow": "isampler2DArrayShadow", 
+    "ISampler2DRectShadow": "isampler2DRectShadow", 
+    "ISamplerCubeShadow": "isamplerCubeShadow", 
+    "ISamplerCubeArrayShadow": "isamplerCubeArrayShadow", 
+    "IImageBuffer": "iimageBuffer",
+    "USamplerBuffer": "usamplerBuffer", 
+    "USampler1D": "usampler1D", 
+    "USampler1DArray": "usampler1DArray", 
+    "USampler2D": "usampler2D", 
+    "USampler2DArray": "usampler2DArray", 
+    "USampler2DRect": "usampler2DRect", 
+    "USampler3D": "usampler3D", 
+    "USamplerCube": "usamplerCube", 
+    "USamplerCubeArray": "usamplerCubeArray", 
+    "USampler1DShadow": "usampler1DShadow", 
+    "USampler1DArrayShadow": "usampler1DArrayShadow", 
+    "USampler2DShadow": "usampler2DShadow", 
+    "USampler2DRectShadow": "usampler2DRectShadow", 
+    "USampler2DRectShadow": "usampler2DRectShadow", 
+    "USamplerCubeShadow": "usamplerCubeShadow", 
+    "USamplerCubeArrayShadow": "usamplerCubeArrayShadow", 
+    "UImageBuffer": "uimageBuffer",
+  }.toTable()
+  metaDataTypes {.compiletime.} = ["Layout", "Uniform", "UniformWriteonly", "Attribute"]
+  logicalOperations {.compileTime.}: Table[string, string] = {
+    "and": "&&",
+    "or": "||",
+    "not": "!",
+  }.toTable()
+  bitOperations {.compileTime.}: Table[string, string] = {
+    "and": "&", 
+    "or": "|", 
+    "xor": "^", 
+    "shr": ">>", 
+    "shl": "<<",
+  }.toTable()
+  bitOperationValidTypes {.compileTime.} = ["int", "uint"]
+  typeDefaults {.compileTime.}:Table[string, string] = {
+    "mat2": "mat2(0.0)",
+    "mat3": "mat3(0.0)",
+    "mat4": "mat4(0.0)",
+    "vec4": "vec4(0.0)",
+    "vec3": "vec3(0.0)",
+    "vec2": "vec2(0.0)",
+    "uvec2": "uvec2(0)",
+    "uvec3": "uvec3(0)",
+    "uvec4": "uvec4(0)",
+    "ivec2": "ivec2(0)",
+    "ivec3": "ivec3(0)",
+    "ivec4": "ivec4(0)",
+    "float": "0.0",
+    "int": "0",
+  }.toTable()
+
+
+proc isInternalType(t: string): bool = t in samplers or t in metaDataTypes
+proc isSampler(sampler: string): bool = sampler in samplers
+proc isSampler(n: NimNode): bool = 
+  if n.kind == nnkBracketExpr:
+    result = isSampler(n[1].repr)
+  else:
+    result = isSampler(n.repr)
+proc getSampler(sampler: string): string = samplers[sampler]
+proc isLogicalOp(n: NimNode): bool = n[0].strVal in logicalOperations
+proc getLogicalOp(n: NimNode): string = logicalOperations[n[0].strVal]
+proc isBitwiseOp(n: NimNode): bool = n[0].strVal in bitOperations and n[1].getType().strVal in bitOperationValidTypes
+proc getBitwiseOp(n: NimNode): string = bitOperations[n[0].strVal]
 
 proc err(msg: string, n: NimNode) {.noreturn.} =
-  error(&"[GLSL] {msg}: {n.repr}", n)
+  error(&"[GLSL] {msg}: {n.repr} -> {n.treeRepr}", n)
 
-proc typeRename(t: string): string =
+proc typeRenamePrivate(t: string): string =
   ## Some GLSL type names don't match Nim names, rename here.
-  case t
-  of "Mat2": "mat2"
-  of "Mat3": "mat3"
-  of "Mat4": "mat4"
+  if hasKey(simpleTypes, t):
+    simpleTypes[t]
+  elif isSampler(t):
+    getSampler(t)
+  else:
+    t
 
-  of "Vec2": "vec2"
-  of "Vec3": "vec3"
-  of "Vec4": "vec4"
+proc typeRename(t: string): string = 
+  if hasKey(typeRenameCache, t):
+    result = typeRenameCache[t]
+  else:
+    let r = typeRenamePrivate(t)
+    typeRenameCache[t] = r
+    result = r
 
-  of "IVec2": "ivec2"
-  of "IVec3": "ivec3"
-  of "IVec4": "ivec4"
+#proc parseLayoutType(n: NimNode): string =
+#  let 
+#    binding = "location"
+#    place = 0
+#    t = "int"
+#  result = &"layout({binding}={place}) {t}"
 
-  of "UVec2": "uvec2"
-  of "UVec3": "uvec3"
-  of "UVec4": "uvec4"
-
-  of "DVec2": "dvec2"
-  of "DVec3": "dvec3"
-  of "DVec4": "dvec4"
-
-  of "int32": "int"
-  of "uint32": "uint"
-
-  of "float32": "float"
-  of "float64": "float"
-  of "Uniform": "uniform"
-  of "UniformWriteOnly": "writeonly uniform"
-  of "Attribute": "attribute"
-  of "Layout": "layout"
-  else: 
-    if isSampler(t):
-      getSampler(t)
-    else:
-      t
-
-proc parseLayoutType(n: NimNode): string =
-  echo $n
-  let 
-    binding = "location"
-    place = 0
-    t = "int"
-  result = &"layout({binding}={place}) {t}"
 
 proc typeString(n: NimNode): string =
   if n.kind != nnkBracketExpr:
     typeRename(n.strVal)
+  elif hasKey(vectorTypes, n.repr):
+    vectorTypes[n.repr]
+#  elif startsWith(n.repr, "Layout"):
+#    parseLayoutType(n)
   else:
-    case n.repr:
-    of "GMat2[float32]": "mat2"
-    of "GMat3[float32]": "mat3"
-    of "GMat4[float32]": "mat4"
-    of "GVec2[float32]": "vec2"
-    of "GVec3[float32]": "vec3"
-    of "GVec4[float32]": "vec4"
-    of "GMat2[float64]": "dmat2"
-    of "GMat3[float64]": "dmat3"
-    of "GMat4[float64]": "dmat4"
-    of "GVec2[float64]": "dvec2"
-    of "GVec3[float64]": "dvec3"
-    of "GVec4[float64]": "dvec4"
-    of "GVec2[uint32]": "uvec2"
-    of "GVec3[uint32]": "uvec3"
-    of "GVec4[uint32]": "uvec4"
-    of "GVec2[int32]": "ivec2"
-    of "GVec3[int32]": "ivec3"
-    of "GVec4[int32]": "ivec4"
-    #of "GMat2[T]": "mat2"
-    #of "GMat3[T]": "mat3"
-    #of "GMat4[T]": "mat4"
-    #of "GVec2[T]": "vec2"
-    #of "GVec3[T]": "vec3"
-    #of "GVec4[T]": "vec4"
-    of "Uniform[float]": "float"
-    of "Uniform[float64]": "float"
-    of "Uniform[float32]": "float"
-    of "Uniform[int]": "int"
-    of "Uniform[int64]": "int"
-    of "Uniform[int32]": "int"
-    else:
-      if startsWith(n.repr, "Layout"):
-        parseLayoutType(n)
-      else:
-        echo n.repr
-        err "can't figure out type", n
+    err "can't figure out type", n
 
 ## Default constructor for different GLSL types.
-proc typeDefault(t: string, n: NimNode): string =
-  case t
-  of "mat2": "mat2(0.0)"
-  of "mat3": "mat3(0.0)"
-  of "mat4": "mat4(0.0)"
-  of "vec4": "vec4(0.0)"
-  of "vec3": "vec3(0.0)"
-  of "vec2": "vec2(0.0)"
-
-  of "uvec2": "uvec2(0)"
-  of "uvec3": "uvec3(0)"
-  of "uvec4": "uvec4(0)"
-  of "ivec2": "ivec2(0)"
-  of "ivec3": "ivec3(0)"
-  of "ivec4": "ivec4(0)"
-
-  of "float": "0.0"
-  of "int": "0"
+proc typeDefault(t: string, n: NimNode): string = 
+  if t in typeDefaults:
+    result = typeDefaults[t]
   else:
     err "no typeDefault " & t, n
 
@@ -330,7 +318,6 @@ proc toCodeStmts(n: NimNode, res: var string, level = 0)
 
 proc toCode(n: NimNode, res: var string, level = 0) =
   ## Inner code block.
-
   case n.kind
 
   of nnkAsgn:
@@ -712,7 +699,6 @@ proc toCode(n: NimNode, res: var string, level = 0) =
       for part in n[1][1]:
         res.add "xyzw"[part[1][1][1].intVal]
     else:
-      echo n.treeRepr
       err "Some sort of object constructor", n
 
   of nnkIfExpr:
@@ -722,7 +708,6 @@ proc toCode(n: NimNode, res: var string, level = 0) =
       case subn.kind
       of nnkElifExpr:
         if gotElse:
-          echo n.treeRepr
           err "Cannot have elif after else", n
         res.add "("
         subn[0].toCode(res)
@@ -735,14 +720,11 @@ proc toCode(n: NimNode, res: var string, level = 0) =
         subn[0].toCode(res)
         res.add ")"
       else:
-        echo n.treeRepr
         err "Invalid child of nnkIfExpr: " & subn.kind.repr, n
     res.add ")"
     if not gotElse:
-      echo n.treeRepr
       err "nnkIfExpr is missing an else clause", n
   else:
-    echo n.treeRepr
     err "Can't compile", n
 
 proc toCodeStmts(n: NimNode, res: var string, level = 0) =
@@ -757,11 +739,13 @@ proc toCodeStmts(n: NimNode, res: var string, level = 0) =
 proc parseBracket(param: NimNode, res: var string, forceOut=false): int =
   let 
     prefix = typeRename(param[0].strVal)
-  res.add(prefix)
   if prefix == "layout":
-    if isSampler(param[2].repr):
-      res.add(&"(binding={param[1].intVal}) ")
+    if isSampler(param[2]):
+      when not defined(macosx):
+        res.add(prefix)
+        res.add(&"(binding={param[1].intVal}) ")
     else:
+      res.add(prefix)
       res.add(&"(location={param[1].intVal}) ")
       if param.kind == nnkVarTy or forceOut:
         res.add("out ")
@@ -772,17 +756,19 @@ proc parseBracket(param: NimNode, res: var string, forceOut=false): int =
     else:
       res.add(typeRename(param[2].strVal))
   elif len(param[1]) > 0 and param[1][0].repr == "array":
+    res.add(prefix)
     let arr = param[1]
     res.add &" {typeRename(arr[2].repr)}"
     return arr[1].intVal.int;
   else:
+    res.add(prefix)
     res.add " "
     res.add typeRename(param[1].strVal)
 
 proc toCodeTopLevel(topLevelNode: NimNode, res: var string, level = 0) =
   ## Top level block such as in and out params.
   ## Generates the main function (which is not like all the other functions)
-
+  
   assert topLevelNode.kind == nnkProcDef
 
   for n in topLevelNode:
@@ -845,13 +831,11 @@ proc hasResult(node: NimNode): bool =
 
 proc procDef(topLevelNode: NimNode): string =
   ## Process whole function (that is not the main function).
-
   var procName = ""
   var paramsStr = ""
   var returnType = "void"
 
   assert topLevelNode.kind in {nnkFuncDef, nnkProcDef}
-  echo "* ", topLevelNode.repr
   for n in topLevelNode:
     case n.kind
     of nnkEmpty, nnkPragma:
@@ -879,9 +863,7 @@ proc procDef(topLevelNode: NimNode): string =
             elif paramType.kind == nnkBracketExpr:
               # Process varying[uniform].
               # TODO test?
-              paramsStr.add paramType[0].strVal
-              paramsStr.add " "
-              paramsStr.add typeRename(paramType[1].strVal)
+              paramsStr.add paramType[0].strVal & " " & typeRename(paramType[1].strVal)
             else:
               # Just a simple `x: float` case.
               #if paramType.strVal == "int":
@@ -913,7 +895,7 @@ proc getDeclartion(n: NimNode): string =
     impl = n.getImpl()
   ## Get the declaration of a function.
   if impl.kind == nnkTypeDef:
-    result = "struct"
+    result = &"struct {n.repr}"
   elif typeInst.kind == nnkBracketExpr:
     # might be a uniform
     if typeInst[0].repr in ["Uniform", "UniformWriteOnly", "Attribute", "typeDesc"]:
@@ -926,16 +908,15 @@ proc getDeclartion(n: NimNode): string =
     result = typeRename(typeInst.repr)
   
   result = result & " "
-  
 
 proc gatherFunction(
   topLevelNode: NimNode,
   functions: var Table[string, string],
-  globals: var Table[string, string]
+  globals: var Table[string, string],
+  indent = 0,
 ) =
   ## Looks for functions this function calls and brings them up
   for n in topLevelNode:
-    echo &" - {n.repr} started."
     if n.kind == nnkSym:
       # Looking for globals.
       let name = n.strVal
@@ -945,60 +926,65 @@ proc gatherFunction(
           if impl.kind notin {nnkIteratorDef, nnkProcDef, nnkFuncDef} and
               impl.kind != nnkNilLit and
               (impl.kind != nnkTypeDef or not isInternalType(impl[0].repr)) :
-            var defStr = getDeclartion(n)
+            var defStr: string
             if impl.kind == nnkTypeDef:
-              defStr.add " { \n"
-              for item in impl[2]:
-                if item.kind == nnkRecList:
-                  for prop in item:
-                    if prop.kind == nnkIdentDefs:
-                      if prop[0].kind == nnkPostfix:
-                        defStr.add &"  {typeRename(prop[1].repr)} {prop[0][1]};\n"
-                      else:
-                        defStr.add &"  {typeRename(prop[1].repr)} {prop[0]};\n"
-              defStr.add "};\n"
+              let key = impl[2].lineInfo
+              if hasKey(declareCache, key):
+                defStr = declareCache[key]
+              else:
+                defStr = getDeclartion(n)
+                defStr.add "{ \n"
+                for item in impl[2]:
+                  if item.kind == nnkRecList:
+                    for prop in item:
+                      if prop.kind == nnkIdentDefs:
+                        if prop[0].kind == nnkPostfix:
+                          defStr.add &"  {typeRename(prop[1].repr)} {prop[0][1]};\n"
+                        else:
+                          defStr.add &"  {typeRename(prop[1].repr)} {prop[0]};\n"
+                defStr.add "};\n"
+                defStr.addSmart ';'
+                declareCache[key] = defStr
             elif impl[2].kind != nnkEmpty:
+              defStr = getDeclartion(n)
               defStr.add " = " & repr(impl[2])
-            defStr.addSmart ';'
+              defStr.addSmart ';'
+
             if defStr notin ["uniform Uniform = T;",
                 "attribute Attribute = T;"]:
               globals[name] = defStr
-
-    if n.kind == nnkCall:
-      # Looking for functions.
-      if repr(n[0]) == "[]":
-        continue
-      let procName = repr n[0]
-      if procName in ignoreFunctions:
-        continue
-      if procName notin glslFunctions and
+    elif n.kind == nnkCall and n[0].repr != "[]":
+      let procName = n[0].repr
+      if procName notin ignoreFunctions and
+        procName notin glslFunctions and
         procName notin functions and
         not isVectorAccess(procName):
         ## If its not a builtin proc, we need to bring definition.
         let impl = n[0].getImpl()
-        gatherFunction(impl, functions, globals)
+        gatherFunction(impl, functions, globals, indent + 2)
         functions[procName] = procDef(impl)
 
-    gatherFunction(n, functions, globals)
-    echo &" + {n.repr} ended."
+    gatherFunction(n, functions, globals, indent + 2)
 
 proc toGLSLInner*(s: NimNode, version, extra: string): string =
 
   var code: string
 
   # Add GLS header stuff.
-  code.add "// from " & s.strVal & "\n\n"
+  code.add "/*\n"
+  code.add " * compiled by alasgar \n"
+  code.add " * " & s.strVal & " \n"
+  code.add " */\n\n" 
   code.add "#version " & version & "\n"
   code.add extra
+  code.add "\n"
 
   var n = getImpl(s)
 
   # Gather all globals and functions, and globals and functions they use.
-  echo "Gather function started..."
   var functions: Table[string, string]
   var globals: Table[string, string]
   gatherFunction(n, functions, globals)
-  echo "* Gather function end"
 
   # Put globals first.
   for k, v in globals:
@@ -1117,3 +1103,4 @@ proc dFdy*(v: float): float = discard
 proc smoothstep*(a: float, b: float, v: float): float = discard
 proc reflect*(a, b: Vec3): Vec3 = discard
 proc max*(v: Vec3, f: float): Vec3 = discard
+proc inversesqrt*(v: float): float = discard

@@ -23,6 +23,7 @@ import components/skin
 import components/animation
 import components/catmull
 import components/effect
+import components/sound
 import resources/resource
 import shader
 
@@ -42,8 +43,6 @@ type
         frames: float32 
         systems: seq[System]
         ratio: float32
-        frameLimit: float32 
-        verbose: bool
         newPrimary: Scene
         oldPrimary: Scene
         runGame: bool
@@ -91,15 +90,9 @@ proc addSystem*(engine: Engine, system: System, before: System = nil,
 
 proc newEngine*(windowWidth: int,
                 windowHeight: int,
-                screenWidth: int = 0,
-                screenHeight: int = 0,
                 title: string = "Alasgar",
                 fullscreen: bool = false,
-                resizeable: bool = false,
-                frameLimit: int = 0,
-                maxBatchSize: int = 16 * 1024,
-                verbose: bool=false,
-                depthMapSize: Vec2=vec2(1024, 1024)): Engine =
+                resizeable: bool = false): Engine =
 
     discard sdl2.init(INIT_EVERYTHING)
 
@@ -107,12 +100,6 @@ proc newEngine*(windowWidth: int,
 
     new(result)
     result.title = title
-    result.verbose = verbose
-
-    if frameLimit > 0:
-        result.frameLimit = 1'f32 / frameLimit.float32
-    else:
-        result.frameLimit = 0'f32
 
     var flags = SDL_WINDOW_OPENGL or SDL_WINDOW_SHOWN
 
@@ -140,8 +127,8 @@ proc newEngine*(windowWidth: int,
     let actualSize = window.getSize()
     result.ratio = actualSize.x.float32 / actualSize.y.float32
 
-    let sw = if screenWidth > 0: screenWidth else: actualSize.x
-    let sh = if screenHeight > 0: screenHeight else: actualSize.y
+    let sw = if settings.screenSize.iWidth > 0: settings.screenSize.iWidth else: actualSize.x
+    let sh = if settings.screenSize.iHeight > 0: settings.screenSize.iHeight else: actualSize.y
 
     # Creates graphic object
     result.graphic = newGraphic(
@@ -173,7 +160,7 @@ proc newEngine*(windowWidth: int,
     addSystem(result, newCameraSystem())
     addSystem(result, newEnvironmentSystem())
     addSystem(result, newPostProcessingSystem())
-    #addSystem(result, newSoundSystem())
+    addSystem(result, newSoundSystem())
     addSystem(result, newLightSystem())
     addSystem(result, newRenderSystem())
 
@@ -231,10 +218,11 @@ proc loop*(engine: Engine) =
             now = epochTime()
             delta = now - lastTicks
             sleepTime = 0'f32
+            frameLimit = if settings.fps > 0: 1'f32 / settings.fps.float32 else: 0'f32
 
-        if delta > 0 and delta < engine.frameLimit:
-            sleepTime = engine.frameLimit - delta 
-            while sleepTime > 0 and delta < engine.frameLimit:
+        if delta > 0 and delta < frameLimit:
+            sleepTime = frameLimit - delta 
+            while sleepTime > 0 and delta < frameLimit:
                 sleep(0)
                 now = epochTime()
                 delta = now - lastTicks
@@ -254,7 +242,7 @@ proc loop*(engine: Engine) =
         # Updates fps each seconds
         if age >= 1.0:
             age = 0.0
-            if engine.verbose:
+            if settings.verbose:
                 logi &"Counted frames: {frames}"
                 logi &"FPS: {engine.fps}"
                 logi &"  Drawable objects: {len(engine.primary.drawables)}"

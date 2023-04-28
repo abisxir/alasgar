@@ -34,6 +34,7 @@ import alasgar/effects/fxaa
 import alasgar/effects/ssao
 import alasgar/effects/hbao
 import alasgar/effects/bloom
+import alasgar/config
 
 
 export core,
@@ -83,42 +84,25 @@ type
 
 var 
     runtime* = Runtime.new
-    screenWidth = 0
-    screenHeight = 0
-    frameLimit = 60
-    batchSize = 16 * 1024
-    verboseFlag = false
-    depthMapSize = vec2(1024)
 
 
 proc screen*(width, height: int) =
     if runtime.engine != nil:
         quit("Cannot set screen after create window!", -1)
-    screenWidth = width
-    screenHeight = height
+    settings.screenSize = vec2(width.float32, height.float32)
 
 proc window*(title: string, width, height: int, fullscreen: bool=false, resizeable: bool=false) =
     runtime.engine = newEngine(
         width,
         height,
-        screenWidth,
-        screenHeight,
         title=title,
         fullscreen=fullscreen,
         resizeable=resizeable,
-        frameLimit=frameLimit,
-        maxBatchSize=batchSize,
-        verbose=verboseFlag,
-        depthMapSize=depthMapSize,
     )
 
-proc verbose*() = verboseFlag = true
-proc limitFrames*(value: int) = frameLimit = value
-proc setDepthMapSize*(width, height: int) = depthMapSize = vec2(width.float32, height.float32)
 proc render*(scene: Scene) = render(runtime.engine, scene)
 proc loop*() = loop(runtime.engine)
 proc stopLoop*() = quit(runtime.engine)
-proc setMaxBatchSize*(value: int) = batchSize = value
 proc screenToWorldCoord*(pos: Vec2): Vec4 = screenToWorldCoord(
     pos,
     runtime.engine.graphic.windowSize, 
