@@ -1,10 +1,5 @@
 import types
 
-proc hasFlag(value: uint, flag: int): float =
-    let r = value and flag.uint
-    if r == flag.uint:
-        result = 1.0
-
 proc unpackMaterial*(iMaterial: UVec4, material: var Material) =
     let 
         baseColor: Vec4 = unpackUnorm4x8(iMaterial.x)
@@ -17,10 +12,5 @@ proc unpackMaterial*(iMaterial: UVec4, material: var Material) =
     material.BASE_COLOR = baseColor
     material.SPECULAR_COLOR = specularColor
     material.EMISSIVE_COLOR = emissiveColor
-
     material.PBR = unpackedFactors
-    #material.METALLIC = unpackedFactors.x
-    #material.ROUGHNESS = unpackedFactors.y
-    #material.REFLECTANCE = unpackedFactors.z
-    #material.AO = unpackedFactors.w
 
