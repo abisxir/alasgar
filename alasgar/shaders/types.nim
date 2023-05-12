@@ -2,6 +2,14 @@ import compile
 
 export compile
 
+const 
+    ALBEDO_MAP_FLAG = 1
+    NORMAL_MAP_FLAG = 2
+    METALLIC_MAP_FLAG = 4
+    ROUGHNESS_MAP_FLAG = 8
+    AO_MAP_FLAG = 16
+    EMISSIVE_MAP_FLAG = 32
+
 type 
     Camera* = object
         POSITION*: Vec3
@@ -36,29 +44,10 @@ type
         NORMAL*: Vec3
         UV*: Vec2
     Material* = object
-        BASE_COLOR*: Vec3
-        SPECULAR_COLOR*: Vec3
-        EMISSIVE_COLOR*: Vec3
-        OPACITY*: float
-
-        METALLIC*: float
-        ROUGHNESS*: float
-        REFLECTANCE*: float
-        AO*: float
-
-        HAS_ALBEDO_MAP*: float
-        HAS_NORMAL_MAP*: float
-        HAS_METALLIC_MAP*: float
-        HAS_ROUGHNESS_MAP*: float
-        HAS_AO_MAP*: float
-        HAS_EMISSIVE_MAP*: float
-
-        ALBEDO_MAP_UV_CHANNEL*: float
-        NORMAL_MAP_UV_CHANNEL*: float
-        METALLIC_MAP_UV_CHANNEL*: float
-        ROUGHNESS_MAP_UV_CHANNEL*: float
-        AO_MAP_UV_CHANNEL*: float
-        EMISSIVE_MAP_UV_CHANNEL*: float
+        BASE_COLOR*: Vec4
+        SPECULAR_COLOR*: Vec4
+        EMISSIVE_COLOR*: Vec4
+        PBR*: Vec4
     Light* = object
         COLOR*: Vec3
         POSITION*: Vec3 
@@ -95,3 +84,31 @@ type
         R*: Vec3
         NoV*: float
         FOG_AMOUNT*: float
+
+
+proc hasMap(m: Material, flag: int): bool = 
+    let flags = uint(round(m.EMISSIVE_COLOR.a * 63.0))
+    let r = flags and flag.uint
+    result = r == flag.uint
+
+proc getUvChannel(m: Material, flag: int): uint = 
+    let flags = uint(round(m.SPECULAR_COLOR.a * 63.0))
+    result = flags and flag.uint
+
+
+template `METALLIC`*(m: Material): float = m.PBR.r
+template `ROUGHNESS`*(m: Material): float = m.PBR.g
+template `REFLECTANCE`*(m: Material): float = m.PBR.b
+template `AO`*(m: Material): float = m.PBR.a
+template `HAS_ALBEDO_MAP`*(m: MATERIAL): bool = hasMap(m, ALBEDO_MAP_FLAG)
+template `ALBEDO_MAP_UV_CHANNEL`*(m:MATERIAL): uint = getUvChannel(m, ALBEDO_MAP_FLAG)
+template `HAS_NORMAL_MAP`*(m: MATERIAL): bool = hasMap(m, NORMAL_MAP_FLAG)
+template `NORMAL_MAP_UV_CHANNEL`*(m:MATERIAL): uint = getUvChannel(m, NORMAL_MAP_FLAG)
+template `HAS_METALLIC_MAP`*(m: MATERIAL): bool = hasMap(m, METALLIC_MAP_FLAG)
+template `METALLIC_MAP_UV_CHANNEL`*(m:MATERIAL): uint = getUvChannel(m, METALLIC_MAP_FLAG)
+template `HAS_ROUGHNESS_MAP`*(m: MATERIAL): bool = hasMap(m, ROUGHNESS_MAP_FLAG)
+template `ROUGHNESS_MAP_UV_CHANNEL`*(m:MATERIAL): uint = getUvChannel(m, ROUGHNESS_MAP_FLAG)
+template `HAS_AO_MAP`*(m: MATERIAL): bool = hasMap(m, AO_MAP_FLAG)
+template `AO_MAP_UV_CHANNEL`*(m:MATERIAL): uint = getUvChannel(m, AO_MAP_FLAG)
+template `HAS_EMISSIVE_MAP`*(m: MATERIAL): bool = hasMap(m, EMISSIVE_MAP_FLAG)
+template `EMISSIVE_MAP_UV_CHANNEL`*(m:MATERIAL): uint = getUvChannel(m, EMISSIVE_MAP_FLAG)

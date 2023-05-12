@@ -30,6 +30,14 @@ proc pow4*(v: float): float =
 proc pow2*(v: float): float = v * v
 proc saturate*(v: float): float = clamp(v, EPSILON, 1.0)
 
+#when defined(emscripten):
+#    proc unpackUnorm4x8(i: uint32): Vec4 =cvec4(
+#        float(i and 0xff) / 255.0,
+#        float(i / 0x100 and 0xff) / 255.0,
+#        float(i / 0x10000 and 0xff) / 255.0,
+#        float(i / 0x1000000) / 255.0);
+
+
 proc calculateUV*(uv, sprite: Vec4): Vec2 =
     let
         frameSize = sprite.xy

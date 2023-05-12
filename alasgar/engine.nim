@@ -6,7 +6,7 @@ import os
 import sdl2
 
 import logger
-import render/graphic
+import render/gpu
 import core
 import input
 import utils
@@ -22,10 +22,9 @@ import components/environment
 import components/skin
 import components/animation
 import components/catmull
-import components/effect
 import components/sound
 import resources/resource
-import shader
+import shaders/base
 
 
 when defined(android) or defined(ios):
@@ -35,7 +34,6 @@ when defined(android) or defined(ios):
 type
     Engine* = ref object
         title: string
-        graphic*: Graphic
         primary*: Scene
         scenes*: seq[Scene]
         age: float32
@@ -55,20 +53,6 @@ proc `activeCamera`*(e: Engine): CameraComponent =
         e.primary.activeCamera
     else:
         nil
-
-proc log(engine: Engine) =
-    logi "Device and render info:"
-    var linked: SDL_Version
-    getVersion(linked)
-    logi "  ", &"SDL linked version  : {linked.major}.{linked.minor}.{linked.patch}"
-    logi "  ", &"Window size: ({engine.graphic.windowSize.x}, {engine.graphic.windowSize.y})"
-    var version = cast[cstring](glGetString(GL_VERSION))
-    var vendor = cast[cstring](glGetString(GL_VENDOR))
-    var renderer = cast[cstring](glGetString(GL_RENDERER))
-    logi "  ", version
-    logi "  ", vendor
-    logi "  ", renderer
-
 
 proc addSystem*(engine: Engine, system: System, before: System = nil,
         after: System = nil) =
@@ -110,6 +94,8 @@ proc newEngine*(windowWidth: int,
             
     when defined(ios) or defined(android):
         flags = SDL_WINDOW_OPENGL or SDL_WINDOW_FULLSCREEN
+    elif defined(emscripten):
+        flags = SDL_WINDOW_OPENGL
 
     # Initialize SDL windows
     let window = createWindow(
@@ -123,7 +109,7 @@ proc newEngine*(windowWidth: int,
 
     echo "* SDL window created!"
 
-  # If the window is fullscreen, specially in mobile devices, window size is going to be perhaps different
+    # If the window is fullscreen, specially in mobile devices, window size is going to be perhaps different
     let actualSize = window.getSize()
     result.ratio = actualSize.x.float32 / actualSize.y.float32
 
@@ -131,7 +117,7 @@ proc newEngine*(windowWidth: int,
     let sh = if settings.screenSize.iHeight > 0: settings.screenSize.iHeight else: actualSize.y
 
     # Creates graphic object
-    result.graphic = newGraphic(
+    initGraphics(
         window,
         screenSize=vec2(sw.float32, sh.float32),
         windowSize=vec2(
@@ -141,12 +127,7 @@ proc newEngine*(windowWidth: int,
         vsync=false,
     )
 
-    echo "* Graphic engine initialized!"
-
     setBufferSizeOf(sizeof(Drawable))
-
-    # Log SDL information
-    log(result)
 
     # Create systems
     addSystem(result, newScriptSystem())
@@ -159,13 +140,12 @@ proc newEngine*(windowWidth: int,
     addSystem(result, newPrepareSystem())
     addSystem(result, newCameraSystem())
     addSystem(result, newEnvironmentSystem())
-    addSystem(result, newPostProcessingSystem())
     addSystem(result, newSoundSystem())
     addSystem(result, newLightSystem())
     addSystem(result, newRenderSystem())
 
     for e in result.systems:
-        init(e, result.graphic)
+        init(e)
 
 
 proc pushSystem*(engine: Engine, system: System, before: System = nil,
@@ -186,9 +166,6 @@ proc destroy*(engine: Engine) =
     # Cleans systems up
     for e in engine.systems:
         cleanup(e)
-
-    # Then graphic should get shutdown
-    destroy(engine.graphic)
 
     # Finally, quits SDL
     sdl2.quit()
@@ -246,8 +223,8 @@ proc loop*(engine: Engine) =
                 logi &"Counted frames: {frames}"
                 logi &"FPS: {engine.fps}"
                 logi &"  Drawable objects: {len(engine.primary.drawables)}"
-                logi &"  Visible objects: {engine.graphic.totalObjects}"
-                logi &"  Draw calls: {engine.graphic.drawCalls}"
+                logi &"  Visible objects: {graphics.totalObjects}"
+                logi &"  Draw calls: {graphics.drawCalls}"
 
                 var totalSystemTime = 0.float
                 for key, value in mpairs(systemBenchmark):
@@ -277,18 +254,18 @@ proc loop*(engine: Engine) =
                 if windowEvent.event == WindowEvent_Resized:
                     let width = windowEvent.data1
                     let height = windowEvent.data2
-                    engine.graphic.windowSize = vec2(width.float32, height.float32)
+                    graphics.windowSize = vec2(width.float32, height.float32)
                     logi &"Window resized: ({width}, {height})"
             else:
                 # Maps SDL event to alasgar event object
-                parseEvent(addr evt, engine.graphic.windowSize, addr input)
+                parseEvent(addr evt, graphics.windowSize, addr input)
         
         # Calculates event processing elapsed time 
         eventProcessTime = epochTime() - eventStart
 
         if isNil(engine.newPrimary):
             # Clear scene
-            clear(engine.graphic)
+            clear()
 
             if engine.primary != nil and engine.primary.activeCamera != nil:
                 for system in engine.systems:
@@ -304,6 +281,7 @@ proc loop*(engine: Engine) =
     cleanupTextures()
     cleanupShaders()
     cleanupMeshes()
+    cleanupGraphics()
 
 proc render*(engine: Engine, scene: Scene) =
     if engine.primary != scene:

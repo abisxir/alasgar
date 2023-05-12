@@ -741,7 +741,7 @@ proc parseBracket(param: NimNode, res: var string, forceOut=false): int =
     prefix = typeRename(param[0].strVal)
   if prefix == "layout":
     if isSampler(param[2]):
-      when not defined(macosx):
+      when not defined(macosx) and not defined(emscripten):
         res.add(prefix)
         res.add(&"(binding={param[1].intVal}) ")
     else:
@@ -945,6 +945,8 @@ proc gatherFunction(
                 defStr.add "};\n"
                 defStr.addSmart ';'
                 declareCache[key] = defStr
+            elif impl.kind == nnkIntLit:
+              defStr.add &"const int {n.strVal} = {impl.repr};"
             elif impl[2].kind != nnkEmpty:
               defStr = getDeclartion(n)
               defStr.add " = " & repr(impl[2])
@@ -971,12 +973,14 @@ proc toGLSLInner*(s: NimNode, version, extra: string): string =
   var code: string
 
   # Add GLS header stuff.
+  code.add "#version " & version & "\n"
   code.add "/*\n"
   code.add " * compiled by alasgar \n"
   code.add " * " & s.strVal & " \n"
   code.add " */\n\n" 
-  code.add "#version " & version & "\n"
   code.add extra
+  when defined(emscripten):
+    code.add """vec4 unpackUnorm4x8(uint i) { return vec4(float(i & uint(0xff)) / 255.0, float(i/uint(0x100) & uint(0xff)) / 255.0, float(i/uint(0x10000) & uint(0xff)) / 255.0,float(i/uint(0x1000000)) / 255.0);}"""
   code.add "\n"
 
   var n = getImpl(s)
@@ -1019,7 +1023,7 @@ proc toGLSLInner*(s: NimNode, version, extra: string): string =
 
 macro toGLSL*(
   s: typed,
-  version = when defined(macosx): "410" else: "310 es",
+  version = when defined(macosx): "410" else: "300 es",
   extra = "precision highp float;\nprecision highp int;\n"
 ): string =
   ## Converts proc to a glsl string.

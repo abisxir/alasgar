@@ -2,10 +2,11 @@ import times
 import math
 
 import ../utils
-import ../shader
+import ../shaders/base
 import ../core
 import ../system
 import ../physics/plane
+import ../render/gpu
 
 type
     CameraType* = enum
@@ -210,11 +211,11 @@ method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, f
         mouseXY = getMousePosition(input)
         mouseZW = if getMouseButtonDown(input, mouseButtonLeft): mouseXY else: mouseXY * -1
 
-    for shader in sys.graphic.context.shaders:
+    for shader in graphics.context.shaders:
         updateShader(
             shader, 
             active, 
-            sys.graphic.screenSize, 
+            graphics.screenSize, 
             age, delta, 
             frames,
             mouseXY,
@@ -228,7 +229,7 @@ method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, f
             updateShader(
                 shader, 
                 active, 
-                sys.graphic.screenSize, 
+                graphics.screenSize, 
                 age, delta, 
                 frames,
                 mouseXY,
@@ -236,4 +237,4 @@ method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, f
                 today,
                 timestamp
             )
-            add(sys.graphic.context.effects, shader)
+            add(graphics.context.effects, shader)

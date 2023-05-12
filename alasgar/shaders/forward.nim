@@ -19,40 +19,40 @@ proc prepare(SURFACE: Surface,
              GGX_MAP: SamplerCube): Fragment =
     result.FOG_AMOUNT = getFogAmount(ENV.FOG_DENSITY, SURFACE.POSITION_RELATED_TO_VIEW.xyz)
     if result.FOG_AMOUNT < 1.0:
-        if MATERIAL.HAS_ALBEDO_MAP > 0.0:
+        if MATERIAL.HAS_ALBEDO_MAP:
             let c = texture(ALBEDO_MAP, SURFACE.UV)
-            result.ALBEDO = c.rgb * MATERIAL.BASE_COLOR
-            result.OPACITY = c.a * MATERIAL.OPACITY
+            result.ALBEDO = c.rgb * MATERIAL.BASE_COLOR.rgb
+            result.OPACITY = c.a * MATERIAL.BASE_COLOR.a
         else:
-            result.ALBEDO = MATERIAL.BASE_COLOR
-            result.OPACITY = MATERIAL.OPACITY
+            result.ALBEDO = MATERIAL.BASE_COLOR.rgb
+            result.OPACITY = MATERIAL.BASE_COLOR.a
 
         result.BACKGROUND = ENV.BACKGROUND_COLOR.xyz
 
-        if MATERIAL.OPACITY > OPACITY_CUTOFF:
-            result.SPECULAR = MATERIAL.SPECULAR_COLOR
-            if MATERIAL.HAS_METALLIC_MAP > 0.0 and result.METALLIC > 0.0:
+        if result.OPACITY > OPACITY_CUTOFF:
+            result.SPECULAR = MATERIAL.SPECULAR_COLOR.rgb
+            if MATERIAL.HAS_METALLIC_MAP and result.METALLIC > 0.0:
                 result.METALLIC = MATERIAL.METALLIC * texture(METALLIC_MAP, SURFACE.UV).b
             else:
                 result.METALLIC = MATERIAL.METALLIC
 
-            if MATERIAL.HAS_ROUGHNESS_MAP > 0.0 and result.ROUGHNESS > 0.0:
+            if MATERIAL.HAS_ROUGHNESS_MAP and result.ROUGHNESS > 0.0:
                 result.ROUGHNESS = MATERIAL.ROUGHNESS * texture(ROUGHNESS_MAP, SURFACE.UV).g
             else:
                 result.ROUGHNESS = MATERIAL.ROUGHNESS
 
-            if MATERIAL.HAS_AO_MAP > 0.0 and MATERIAL.AO > 0.0:
+            if MATERIAL.HAS_AO_MAP and MATERIAL.AO > 0.0:
                 result.AO = MATERIAL.AO * texture(AO_MAP, SURFACE.UV).r
             else:
                 result.AO = MATERIAL.AO
 
-            if MATERIAL.HAS_EMISSIVE_MAP > 0.0:
+            if MATERIAL.HAS_EMISSIVE_MAP:
                 result.EMISSIVE = texture(EMISSIVE_MAP, SURFACE.UV).rgb
             else:
-                result.EMISSIVE = MATERIAL.EMISSIVE_COLOR
+                result.EMISSIVE = MATERIAL.EMISSIVE_COLOR.rgb
 
             result.P = SURFACE.POSITION.xyz
-            if MATERIAL.HAS_NORMAL_MAP > 0.0:
+            if MATERIAL.HAS_NORMAL_MAP:
                 result.N = getNormalMap(result.P, SURFACE.NORMAL, SURFACE.UV, NORMAL_MAP)
             else:
                 result.N = SURFACE.NORMAL
@@ -85,7 +85,7 @@ proc mainVertex*(iPosition: Layout[0, Vec3],
                  iMaterial: Layout[9, UVec4],
                  iSprite: Layout[10, Vec4],
                  iSkin: Layout[11, Vec4],
-                 uSkinMap: Layout[15, Uniform[Sampler2D]],
+                 SKIN_MAP: Layout[0, Uniform[Sampler2D]],
                  CAMERA: Uniform[Camera],
                  ENV: Uniform[Environment],
                  FRAME: Uniform[Frame],
@@ -95,7 +95,7 @@ proc mainVertex*(iPosition: Layout[0, Vec3],
     
     let
         position = vec4(iPosition, 1)
-        model = applySkinTransform(uSkinMap, ENV, iModel, iBone, iWeight, iSkin)
+        model = applySkinTransform(SKIN_MAP, ENV, iModel, iBone, iWeight, iSkin)
 
     unpackMaterial(iMaterial, MATERIAL)
     SURFACE.POSITION = model * position
@@ -107,30 +107,30 @@ proc mainVertex*(iPosition: Layout[0, Vec3],
     gl_Position = SURFACE.PROJECTED_POSITION
 
 
-proc mainFragment*(ALBEDO_MAP: Layout[0, Uniform[Sampler2D]],
-                   NORMAL_MAP: Layout[1, Uniform[Sampler2D]],
-                   METALLIC_MAP: Layout[2, Uniform[Sampler2D]],
-                   ROUGHNESS_MAP: Layout[3, Uniform[Sampler2D]],
-                   AO_MAP: Layout[4, Uniform[Sampler2D]],
-                   EMISSIVE_MAP: Layout[5, Uniform[Sampler2D]],
-                   GGX_MAP: Layout[5, Uniform[SamplerCube]],
-                   DEPTH_MAP0: Layout[7, Uniform[Sampler2D]],
-                   DEPTH_MAP1: Layout[8, Uniform[Sampler2D]],
-                   DEPTH_MAP2: Layout[9, Uniform[Sampler2D]],
-                   DEPTH_MAP3: Layout[10, Uniform[Sampler2D]],
-                   DEPTH_CUBE_MAP0: Layout[11, Uniform[SamplerCube]],
-                   DEPTH_CUBE_MAP1: Layout[12, Uniform[SamplerCube]],
-                   DEPTH_CUBE_MAP2: Layout[13, Uniform[SamplerCube]],
-                   DEPTH_CUBE_MAP3: Layout[14, Uniform[SamplerCube]],
-                   SKIN_MAP: Layout[15, Uniform[Sampler2D]],
+proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
+                   ALBEDO_MAP: Layout[1, Uniform[Sampler2D]],
+                   NORMAL_MAP: Layout[2, Uniform[Sampler2D]],
+                   METALLIC_MAP: Layout[3, Uniform[Sampler2D]],
+                   ROUGHNESS_MAP: Layout[4, Uniform[Sampler2D]],
+                   AO_MAP: Layout[5, Uniform[Sampler2D]],
+                   EMISSIVE_MAP: Layout[6, Uniform[Sampler2D]],
+                   GGX_MAP: Layout[7, Uniform[SamplerCube]],
+                   DEPTH_MAP0: Layout[8, Uniform[Sampler2D]],
+                   DEPTH_MAP1: Layout[9, Uniform[Sampler2D]],
+                   DEPTH_MAP2: Layout[10, Uniform[Sampler2D]],
+                   DEPTH_MAP3: Layout[11, Uniform[Sampler2D]],
+                   DEPTH_CUBE_MAP0: Layout[12, Uniform[SamplerCube]],
+                   DEPTH_CUBE_MAP1: Layout[13, Uniform[SamplerCube]],
+                   DEPTH_CUBE_MAP2: Layout[14, Uniform[SamplerCube]],
+                   DEPTH_CUBE_MAP3: Layout[15, Uniform[SamplerCube]],
                    LIGHTS: Uniform[array[64, Light]],
                    CAMERA: Uniform[Camera],
                    ENV: Uniform[Environment],
                    FRAME: Uniform[Frame],
                    SURFACE: Surface,
                    MATERIAL: Material,
-                   COLOR: var Vec4,
-                   NORMAL: var Vec3) =
+                   COLOR: var Layout[0, Vec4],
+                   NORMAL: var Layout[1, Vec3]) =
     var FRAGMENT: Fragment = prepare(
             SURFACE, 
             MATERIAL, 

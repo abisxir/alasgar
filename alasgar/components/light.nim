@@ -1,8 +1,9 @@
 import ../core
 import ../utils
 import ../system
-import ../shader
+import ../shaders/base
 import ../render/context
+import ../render/gpu
 
 
 type
@@ -120,12 +121,12 @@ proc newLightSystem*(): LightSystem =
     new(result)
     result.name = "Light System"
 
-proc prepareShadow(g: Graphic, shader: Shader, light: LightComponent, index: int) =
+proc prepareShadow(shader: Shader, light: LightComponent, index: int) =
     if light.shadow:
         shader[&"LIGHTS[{index}].SHADOW_MVP"] = light.projection * light.view
-        shader[&"LIGHTS[{index}].DEPTH_MAP"] = len(g.context.shadowCasters)
+        shader[&"LIGHTS[{index}].DEPTH_MAP"] = len(graphics.context.shadowCasters)
         add(
-            g.context.shadowCasters,
+            graphics.context.shadowCasters,
             ShadowCaster(
                 view: light.view,
                 projection: light.projection,
@@ -141,7 +142,7 @@ proc prepareShadow(g: Graphic, shader: Shader, light: LightComponent, index: int
 method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
     if scene.root != nil:
         # Makes a loop on all of shaders
-        for shader in sys.graphic.context.shaders:
+        for shader in graphics.context.shaders:
             use(shader)
 
             # Keeps track of available point lights
@@ -188,7 +189,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
                     shader[&"LIGHTS[{lightCount}].DEPTH_MAP"] = -1
                     
                     # Takes care of shadow
-                    prepareShadow(sys.graphic, shader, c, lightCount)
+                    prepareShadow(shader, c, lightCount)
 
                     inc(lightCount)
 

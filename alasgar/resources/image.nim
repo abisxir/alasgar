@@ -18,22 +18,22 @@ type
         pixels*: seq[byte]
         bits*: int
 
-proc loadImage(url: string): Resource =
-    var 
-        r = new(ImageResource)
-        buffer: string
-    setFlipVerticallyOnLoad(false)
+proc prepareBuffer(url: string): string =
     if startsWith(url, "data:image/"):
         let data = split(url, "base64,")
-        buffer = decode(data[1])
+        result = decode(data[1])
     else:
-        r.hdr = url.endsWith(".hdr")
         var stream = openAssetStream(url)
         defer: close(stream)
         if stream == nil:
             halt &"Could not open [{url}]."
-        buffer = readAll(stream)
-    
+        result = readAll(stream)
+
+proc loadImage(url: string): Resource =
+    var 
+        r = new(ImageResource)
+        buffer = prepareBuffer(url)
+    setFlipVerticallyOnLoad(false)    
     var byteSeq = cast[seq[byte]](buffer)
     r.pixels = loadFromMemory(
         byteSeq, 
@@ -42,6 +42,7 @@ proc loadImage(url: string): Resource =
         r.channels, 
         stbi.Default
     )
+    r.hdr = url.endsWith(".hdr")
     r.bits = 8 * (len(r.pixels) / (r.width * r.height * r.channels)).int
     if not startsWith(url, "data:image/"):
         echo &"Image [{url}] loaded with image with size [{r.width}x{r.height}] in [{r.channels}] channels and [{r.bits}]bpp."

@@ -2,7 +2,7 @@ import chroma
 
 import ../ports/opengl
 import ../utils
-import ../shader
+import ../shaders/base
 import ../texture
 
 export opengl
@@ -17,7 +17,7 @@ type
         size*: Vec2
         shadowMap*: Texture
         
-    GraphicContext* = object
+    GraphicsContext* = object
         environmentIntensity*: float32
         clearColor*: chroma.Color
         defaultShader*: Shader
@@ -26,7 +26,7 @@ type
         shadowCasters*: seq[ShadowCaster]
         shaderParams*: seq[ShaderParam]
 
-proc addShader*(g: var GraphicContext, shader: Shader) =
+proc addShader*(g: var GraphicsContext, shader: Shader) =
     if shader != nil and not contains(g.shaders, shader):
         add(g.shaders, shader)
 

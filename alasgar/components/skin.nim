@@ -1,8 +1,9 @@
 import ../utils
 import ../system
 import ../core
-import ../shader
+import ../shaders/base
 import ../texture
+import ../render/gpu
 
 type
     JointSystem* = ref object of System
@@ -71,9 +72,9 @@ method process*(sys: SkinSystem, scene: Scene, input: Input, delta: float32, fra
         copy(sys.texture, sys.buffer[0].addr, width=sys.width, height=offset div sys.width)
 
         # Attachs skin texture to all of shaders
-        for shader in sys.graphic.context.shaders:
+        for shader in graphics.context.shaders:
             use(shader)
-            use(sys.texture, 15)
+            use(shader, sys.texture, "SKIN_MAP", 0)
             shader["ENV.SKIN_SAMPLER_WIDTH"] = sys.width
 
             

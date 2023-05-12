@@ -89,7 +89,7 @@ proc adjustBy(c: SoundEffectComponent, pos: Vec3) =
 proc newSoundSystem*(): SoundSystem = new(result)
 
 
-method init*(sys: SoundSystem, g: Graphic) = 
+method init*(sys: SoundSystem) = 
     var 
         audio_rate: cint
         audio_format: uint16

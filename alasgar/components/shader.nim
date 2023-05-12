@@ -1,7 +1,7 @@
 import ../core
 import ../utils
 import ../system
-import ../render/graphic
+import ../render/gpu
 import ../shader
 
 export newComputeShader, compute

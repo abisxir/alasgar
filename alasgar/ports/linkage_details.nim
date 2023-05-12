@@ -133,7 +133,7 @@ when not defined(emscripten):
             result = newNimNode(nnkStmtList, n)
             for i in 0..n.len-1:
                 result.add parseStmt("passToCAndL(\"-framework " & n[i].strVal & "\")")
-
+    
     when defined(ios):
         useFrameworks("OpenGLES", "UIKit", "GameController", "CoreMotion", "Metal", "AVFoundation", "CoreBluetooth")
         when not defined(simulator):

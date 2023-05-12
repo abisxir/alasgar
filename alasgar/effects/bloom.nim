@@ -1,4 +1,4 @@
-import ../shader
+import ../shaders/base
 
 const SOURCE = """
 vec3 samplef(vec2 tc)

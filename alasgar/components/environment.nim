@@ -2,10 +2,11 @@ import times
 
 import ../core
 import ../utils
-import ../shader
+import ../shaders/base
 import ../system
 import ../texture
 import ../render/fb
+import ../render/gpu
 
 const fullscreenVS = staticRead("../render/shaders/fullscreen.vs")
 const panaromaToCubemapFS = staticRead("../render/shaders/panaroma-to-cube-map.fs")
@@ -68,7 +69,7 @@ proc filter(cubemap: Texture,
     for i in 0..5:
         use(fb, target, GL_TEXTURE_CUBE_MAP_POSITIVE_X.int + i, level, currentTextureSize, currentTextureSize)       
         use(shader)
-        use(cubemap, 0)
+        use(shader, cubemap, "u_cubemap", 0)
 
         shader["u_roughness"] = roughness
         shader["u_sample_count"] = sampleCount
@@ -91,7 +92,7 @@ proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
     use(shader)
     for i in 0..5:
         use(fb, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X.int + i, 0, size, size)
-        use(inTexture, 0)
+        use(shader, inTexture, "u_panorama", 0)
         shader["u_current_face"] = i
         draw(fb)
     
@@ -145,7 +146,7 @@ proc generateLUT(cubemap: Texture): Texture =
     allocate(texture)
     use(fb, texture, GL_TEXTURE_2D.int, 0, cubemap.width, cubemap.height)
     use(shader)
-    use(cubemap, 0)
+    use(shader, cubemap, "u_cubemap", 0)
 
     shader["u_roughness"] = 0.0
     shader["u_sample_count"] = 512
@@ -210,13 +211,13 @@ method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float
     if scene.root != nil and hasComponent[EnvironmentComponent](scene):
         let env = first[EnvironmentComponent](scene)
         
-        sys.graphic.context.environmentIntensity = env.environmentIntensity
+        graphics.context.environmentIntensity = env.environmentIntensity
 
-        for shader in sys.graphic.context.shaders:
+        for shader in graphics.context.shaders:
             use(shader)
 
             # Sets scene clear color
-            sys.graphic.context.clearColor = env.backgroundColor
+            graphics.context.clearColor = env.backgroundColor
             shader["ENV.BACKGROUND_COLOR"] = env.backgroundColor
 
             # Sets scene ambient color
@@ -224,7 +225,7 @@ method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float
 
             # Sets environment maps
             if not isNil(env.environmentMap):
-                use(env.ggxMap, 6)
+                use(shader, env.ggxMap, "GGX_MAP", 7)
                 shader["ENV.MIP_COUNT"] = env.environmentMap.levels.float32
                 shader["ENV.HAS_ENV_MAP"] = 1
             else:

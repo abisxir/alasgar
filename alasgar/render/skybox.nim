@@ -82,13 +82,13 @@ proc render*(skybox: Skybox, cubemap: Texture, view, projection: Mat4, intensity
     normalizedView[3, 0] = 0
     normalizedView[3, 1] = 0
     normalizedView[3, 2] = 0
-    skybox.shader["u_view"] = normalizedView
-    skybox.shader["u_projection"] = projection
-    skybox.shader["u_environment_intensity"] = intensity
-    skybox.shader["u_mip_count"] = cubemap.levels.float32
+    skybox.shader["VIEW"] = normalizedView
+    skybox.shader["PROJECTION"] = projection
+    skybox.shader["INVIRONMENT_INTENSITY"] = intensity
+    skybox.shader["MIP_COUNT"] = cubemap.levels.float32
 
     glDepthMask(GL_FALSE.GLboolean)
-    use(cubemap, 0)
+    use(skybox.shader, cubemap, "SKYBOX", 0)
     glBindVertexArray(skybox.cubeVAO)
     glDrawArrays(GL_TRIANGLES, 0, 36)
     glBindVertexArray(0)

@@ -18,16 +18,21 @@ type
 proc newRenderBuffer*(size: Vec2): FrameBuffer =
     new(result)
 
+    # Creates frame buffer object
+    glGenFramebuffers(1, addr(result.fbo))
+    glBindFramebuffer(GL_FRAMEBUFFER, result.fbo)
+
     # Creates texture
     result.color = newTexture2D(
         width=size.iWidth, 
         height=size.iHeight, 
-        #minFilter=GL_LINEAR,
-        #magFilter=GL_LINEAR,
-        #wrapT=GL_CLAMP_TO_EDGE,
-        #wrapS=GL_CLAMP_TO_EDGE,
+        minFilter=GL_LINEAR,
+        magFilter=GL_LINEAR,
+        wrapT=GL_CLAMP_TO_EDGE,
+        wrapS=GL_CLAMP_TO_EDGE,
     )
     allocate(result.color)
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, result.color.id, 0)
 
     result.normal = newTexture2D(
         width=size.iWidth, 
@@ -41,11 +46,12 @@ proc newRenderBuffer*(size: Vec2): FrameBuffer =
         dataType=cGL_FLOAT,
     )
     allocate(result.normal)
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, result.normal.id, 0)
 
     result.depth = newTexture2D(
         width=size.iWidth, 
         height=size.iHeight, 
-        internalFormat=GL_DEPTH_COMPONENT16,
+        internalFormat=GL_DEPTH_COMPONENT32F,
         format=GL_DEPTH_COMPONENT,
         minFilter=GL_NEAREST,
         magFilter=GL_NEAREST,
@@ -54,14 +60,7 @@ proc newRenderBuffer*(size: Vec2): FrameBuffer =
         dataType=cGL_FLOAT,
     )
     allocate(result.depth)
-
-    # Creates frame buffer object
-    glGenFramebuffers(1, addr(result.fbo))
-    glBindFramebuffer(GL_FRAMEBUFFER, result.fbo)
-
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, result.depth.id, 0)
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, result.color.id, 0)
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, result.normal.id, 0)
 
     var buffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1]
     glDrawBuffers(2, buffers[0].addr)
@@ -74,8 +73,9 @@ proc newRenderBuffer*(size: Vec2): FrameBuffer =
     #glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, result.color.width, result.color.height)
     #glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, result.rbo)
 
-    if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
-        quit("ERROR::FRAMEBUFFER:: Framebuffer is not complete!")
+    let fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER)
+    if fbStatus != GL_FRAMEBUFFER_COMPLETE:
+        quit(&"ERROR::FRAMEBUFFER:: Framebuffer is incomplete, status: 0x{fbStatus.int:0x}")
         
     #glBindRenderbuffer(GL_RENDERBUFFER, 0)
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
@@ -134,6 +134,7 @@ proc saveImage*(path: string) =
     glPixelStorei(GL_PACK_ALIGNMENT, 4)
     glReadBuffer(GL_FRONT)
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, addr buffer[0])
+
     stbi.writePNG(path, width.int, height.int, nrChannels.int, buffer, stride.int)
 
 proc destroy*(fb: FrameBuffer) =

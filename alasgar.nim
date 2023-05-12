@@ -2,6 +2,9 @@ import sugar
 import sequtils
 import strutils
 
+when defined(emscripten):
+    import jsbind/emscripten
+
 import alasgar/core
 import alasgar/resources/image
 import alasgar/resources/obj
@@ -22,7 +25,7 @@ import alasgar/geometry/grid
 import alasgar/geometry/sphere
 import alasgar/geometry/plane
 import alasgar/engine
-import alasgar/shader
+import alasgar/shaders/base
 import alasgar/logger
 import alasgar/utils
 import alasgar/system
@@ -35,6 +38,7 @@ import alasgar/effects/ssao
 import alasgar/effects/hbao
 import alasgar/effects/bloom
 import alasgar/config
+import alasgar/render/gpu
 
 
 export core,
@@ -72,7 +76,6 @@ export core,
        sugar,
        sequtils,
        strutils,
-       shader,
        fxaa,
        bloom,
        ssao,
@@ -101,11 +104,18 @@ proc window*(title: string, width, height: int, fullscreen: bool=false, resizeab
     )
 
 proc render*(scene: Scene) = render(runtime.engine, scene)
-proc loop*() = loop(runtime.engine)
+proc innerLoop() {.cdecl.} = loop(runtime.engine)
 proc stopLoop*() = quit(runtime.engine)
+
+proc loop*() =
+    when defined(emscripten):
+        emscripten_set_main_loop(innerLoop, 0, 0)
+    else:
+        loop(runtime.engine)
+
 proc screenToWorldCoord*(pos: Vec2): Vec4 = screenToWorldCoord(
     pos,
-    runtime.engine.graphic.windowSize, 
+    graphics.windowSize, 
     runtime.engine.activeCamera
 )
 
@@ -119,4 +129,4 @@ proc newFragmentShaderComponent*(source: string): ShaderComponent = newShaderCom
 template `engine`*(r: Runtime): Engine = r.engine
 template `age`*(r: Runtime): float32 = r.engine.age
 template `ratio`*(r: Runtime): float32 = r.engine.ratio
-template `window`*(r: Runtime): Vec2 = r.engine.graphic.windowSize
+template `window`*(r: Runtime): Vec2 = graphics.windowSize

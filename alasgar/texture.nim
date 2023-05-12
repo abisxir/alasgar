@@ -365,6 +365,7 @@ proc newCubeTexture*(px, nx, py, ny, pz, nz: string): Texture =
         faces=faces
     )
 
+#[
 proc copy*(src, dst: Texture) =
     if src.target == dst.target:
         let depth = if src.target == GL_TEXTURE_CUBE_MAP: 6 else: 1
@@ -385,6 +386,7 @@ proc copy*(src, dst: Texture) =
             src.height.GLsizei, 
             depth.GLsizei
         )
+]#
 
 proc mipmap*(t: Texture) =
     if t.levels > 1:
@@ -398,6 +400,11 @@ proc attach*(t: Texture) =
     if t != nil:
         glBindTexture(t.target, t.buffer)
 
+proc unit*(t: Texture, slot: int) = 
+    glActiveTexture((GL_TEXTURE0.int + slot).GLenum)
+    glBindTexture(t.target, t.buffer)
+
+#[
 proc use*(t: Texture, slot: int) = 
     glActiveTexture((GL_TEXTURE0.int + slot).GLenum)
     if t != nil:
@@ -415,6 +422,7 @@ proc useForOutput*(t: Texture, slot: int, levels: int, layered=false) =
         GL_WRITE_ONLY, 
         t.internalFormat
     )
+]#
 
 proc destroy*(t: Texture) = remove(cache, t)
 proc cleanupTextures*() = 

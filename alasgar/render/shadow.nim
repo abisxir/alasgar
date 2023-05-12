@@ -1,6 +1,6 @@
 import ../ports/opengl
 import ../utils
-import ../shader
+import ../shaders/base
 import ../core
 import context
 import fb
@@ -45,7 +45,7 @@ proc renderDepthMap(drawables: var seq[Drawable]) =
         inc(i, count)    
 
 proc process*(shadow: Shadow, 
-              context: var GraphicContext,
+              context: var GraphicsContext,
               drawables: var seq[Drawable]) = 
     for j, caster in mpairs(context.shadowCasters):
         use(shadow.fb, caster.shadowMap, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D.int)

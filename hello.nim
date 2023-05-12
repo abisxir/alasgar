@@ -62,8 +62,7 @@ addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input:
 addComponent(cubeEntity, newMaterialComponent(
     diffuseColor=parseHtmlName("white"),
     albedoMap=newTexture("res://stone-texture.png")
-    )
-)
+))
 # Makes the cube enity child of scene
 addChild(scene, cubeEntity)
 

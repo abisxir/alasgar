@@ -5,7 +5,7 @@ import hashes
 
 import ../core
 import ../system
-import ../render/graphic
+import ../render/gpu
 import ../components/line
 import ../components/sprite
 #import ../components/camera
@@ -141,7 +141,7 @@ method process*(sys: PrepareSystem, scene: Scene, input: Input, delta: float32, 
 
             # Adds shader to graphic
             if drawable.shader != nil:
-                addShader(sys.graphic.context, drawable.shader.instance)
+                addShader(graphics.context, drawable.shader.instance)
 
             # Checks mesh hash for counting
             let meshHash = hash(drawable.mesh.instance)

@@ -10,7 +10,7 @@ import utils
 import input
 import mesh
 import texture
-import shader
+import shaders/base
 
 export utils, input, mesh, texture, config
 

@@ -138,4 +138,5 @@ proc loadObj(filename: string): Resource =
     if len(vertices) > 0 and not isEmptyOrWhitespace(modelName):
         discard addMesh(modelResource, modelName, vertices)
 
-registerResourceManager("obj", loadObj, destroyModel)
+when not defined(emscripten):
+    registerResourceManager("obj", loadObj, destroyModel)

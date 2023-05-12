@@ -6,7 +6,7 @@ import ../core
 import ../system
 import ../components/camera
 import ../components/environment
-import ../render/graphic
+import ../render/gpu
 
 type
     RenderSystem* = ref object of System
@@ -26,7 +26,6 @@ method process*(sys: RenderSystem, scene: Scene, input: Input, delta: float32, f
 
     # Sends data to GPU
     render(
-        sys.graphic, 
         camera.view, 
         camera.projection, 
         skybox,
@@ -34,5 +33,5 @@ method process*(sys: RenderSystem, scene: Scene, input: Input, delta: float32, f
     )
 
     # Swaps buffers
-    swap(sys.graphic)
+    swap()
 

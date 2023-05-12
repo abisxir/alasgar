@@ -8,8 +8,7 @@ import ../utils
 import ../container
 import ../texture
 
-import compile
-import forward
+import compile, forward, effect
 
 type
     Shader* = ref object
@@ -50,6 +49,12 @@ proc hash*(o: Shader): Hash =
         int(o.program)
     else:
         0
+
+proc printSource(source: string) =
+    var output = ""
+    for i, line in pairs(split(source, "\n")):
+        add(output, &"{i:4} {line}\n")
+    echo output
 
 proc isShaderCompiled(shader: GLuint): bool {.inline.} =
     var compiled: GLint
@@ -144,26 +149,10 @@ proc createProgram*(vs, fs: string,
 
     let linked = isProgramLinked(result)
     if not linked:
+        echo(vs)
+        echo(fs)
         halt &"Could not link: {programInfoLog(result)}"
 
-
-proc createProgram*(cs: string): GLuint =
-    result = glCreateProgram()
-    if result == 0:
-        halt &"Could not create program: {glGetError().int}" 
-    let csShader = loadShaderSource(cs, GL_COMPUTE_SHADER)
-    if csShader == 0:
-        glDeleteProgram(result)
-        halt &"Could not create compute shader: {glGetError().int}" 
-
-    glAttachShader(result, csShader)
-
-    glLinkProgram(result)
-    glDeleteShader(csShader)
-
-    let linked = isProgramLinked(result)
-    if not linked:
-        halt &"Could not link: {programInfoLog(result)}"
 
 proc newShader*(vs, fs: string, attributes: openarray[tuple[index: GLuint, name: string]]): Shader =
     new(result)
@@ -178,24 +167,6 @@ proc newShader*(vs, fs: string, attributes: openarray[tuple[index: GLuint, name:
 
     add(cache, result)
     
-
-proc newComputeShader*(cs: string): Shader =
-    new(result)
-    when defined(macosx):
-        let shaderProfile = "#version 410"
-    else:
-        let shaderProfile = "#version 310 es"
-    
-    result.program = createProgram(cs.replace("$SHADER_PROFILE$", shaderProfile))
-
-    add(cache, result)
-
-proc compute*(xGroups, yGroups, zGroups: int) =
-    glDispatchCompute(xGroups.GLuint, yGroups.GLuint, zGroups.GLuint)
-    let error = glGetError() != GL_NO_ERROR.GLenum
-    if error:
-        echo "error -> ", glGetError().int
-    glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT or GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
 
 proc getKeyLocation(s: Shader, key: string): GLint =
     if not s.map.hasKey(key):
@@ -253,7 +224,9 @@ method update(p: ShaderParamVec3, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamVec4, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamColor, shader: Shader) = shader[p.key] = p.value
 method update(p: ShaderParamMat4, shader: Shader) = shader[p.key] = p.value
-method update(p: ShaderParamTexture, shader: Shader) = use(p.value, p.slot)
+method update(p: ShaderParamTexture, shader: Shader) = 
+    shader[p.key] = p.slot
+    unit(p.value, p.slot)
 
 proc set*(shader: Shader, key: string, value: int32) =
     let param = new(ShaderParamInt)
@@ -340,10 +313,14 @@ proc use*(shader: Shader) =
     for param in values(shader.params):
         update(param, shader)
 
+proc use*(shader: Shader, texture: Texture, name: string, slot: int) =
+    shader[name] = slot
+    unit(texture, slot)
+
 proc destroy*(shader: Shader) = remove(cache, shader)
 proc cleanupShaders*() =
     echo &"Cleaning up [{len(cache)}] shaders..."
     clear(cache)
 
 proc newSpatialShader*(vertexSource: string="", fragmentSource: string=""): Shader = newShader(toGLSL(mainVertex), toGLSL(mainFragment), [])
-#proc newCanvasShader*(source: string=""): Shader = newCanvasShader(vertexSource="", fragmentSource=source)
+proc newCanvasShader*(vertexSource: string="", fragmentSource: string=""): Shader = newShader(toGLSL(effectVertex), toGLSL(effectFragment), [])

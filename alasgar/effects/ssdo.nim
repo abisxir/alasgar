@@ -1,4 +1,4 @@
-import ../shader
+import ../shaders/base
 import ../texture
 
 const SOURCE = """

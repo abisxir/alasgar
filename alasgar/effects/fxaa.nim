@@ -1,4 +1,4 @@
-import ../shader
+import ../shaders/base
 
 const SOURCE = """
 uniform float FXAA_REDUCE_MIN;

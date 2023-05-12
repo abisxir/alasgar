@@ -12,15 +12,16 @@ installFiles = @["alasgar.nim"]
 
 # Dependencies
 requires "sdl2"
+requires "opengl"
 requires "chroma"
 requires "vmath"
-requires "pixie"
-requires "shady"
+requires "stb_image"
+requires "jsbind"
+#requires "pixie"
 requires "nake"
-requires "stbimage"
 requires "jnim" # For android target
-requires "closure_compiler"
 requires "plists"
+requires "closure_compiler"
 requires "https://github.com/tormund/nester"
 requires "https://github.com/yglukhov/android"
 requires "https://github.com/yglukhov/darwin"

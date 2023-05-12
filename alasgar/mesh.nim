@@ -111,7 +111,6 @@ func `$`*(v: Mesh): string = &"Vertices: [{v.count / 3}] triangles"
 
 proc createAttribute[T](index, offset: var int, dataType: GLenum, count: int) =
     const stride = sizeof(Vertex).GLsizei
-    echo "stride:", stride
     glEnableVertexAttribArray(index.GLuint)
     glVertexAttribPointer(index.GLuint, count.GLint, dataType, false, stride.GLsizei, cast[pointer](offset))
     offset += count * sizeof(T)
@@ -176,7 +175,6 @@ proc newMesh*(data: var openArray[Vertex],
 
     glGenBuffers(1, result.modelBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.modelBufferObject)
-    echo "bufferSizeOf:", bufferSizeOf
     createPointerAttribute[float32](index, 0, cGL_FLOAT, 4, bufferSizeOf)
     createPointerAttribute[float32](index, 1, cGL_FLOAT, 4, bufferSizeOf)
     createPointerAttribute[float32](index, 2, cGL_FLOAT, 4, bufferSizeOf)
@@ -199,7 +197,7 @@ proc newMesh*(data: var openArray[Vertex],
     glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     result.count = data.len.GLsizei
-    echo &"Mesh with [{result.count / 3}] faces created."
+    echo &"Mesh with [{result.count}] indices created."
 
     add(cache, result)
 

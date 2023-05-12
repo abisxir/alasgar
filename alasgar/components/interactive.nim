@@ -3,6 +3,7 @@ import ../system
 import ../physics/collision
 import ../physics/ray
 import ../physics/collision
+import ../render/gpu
 import collision as collision_component
 import camera
 
@@ -76,7 +77,7 @@ method process*(sys: InteractiveSystem, scene: Scene, input: Input, delta: float
     let activeCamera = scene.activeCamera
     let worldCoords = screenToWorldCoord(
         getMousePosition(input),
-        sys.graphic.windowSize, 
+        graphics.windowSize, 
         activeCamera
     )
     var ray: Ray
