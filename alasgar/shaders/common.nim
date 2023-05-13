@@ -4,7 +4,7 @@ import compile
 import types
 import ../math/helpers
 
-export HALF_PI, ONE_OVER_PI, LOG2, EPSILON
+export HALF_PI, ONE_OVER_PI, LOG2, EPSILON, compile
 
 const OPACITY_CUTOFF* = 0.01
 const LIGHT_TYPE_DIRECTIONAL* = 0

@@ -11,6 +11,6 @@ proc skyboxVertex*(PROJECTION: Uniform[Mat4],
 proc skyboxFragment*(SKYBOX: Layout[0, Uniform[SamplerCube]],
                      INVIRONMENT_INTENSITY: Uniform[float],
                      MIP_COUNT: Uniform[float],
-                     DIRECTION: Layout[0, Vec3],
+                     DIRECTION: Vec3,
                      COLOR: var Vec4) =
     COLOR = textureLod(SKYBOX, normalize(DIRECTION), MIP_COUNT * (1.0 - INVIRONMENT_INTENSITY))

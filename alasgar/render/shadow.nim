@@ -1,13 +1,11 @@
 import ../ports/opengl
 import ../utils
 import ../shaders/base
+import ../shaders/compile
+import ../shaders/shadow
 import ../core
 import context
 import fb
-
-
-const forwardDepthV = staticRead("shaders/forward-depth.vs")
-const forwardDepthF = staticRead("shaders/forward-depth.fs")
 
 
 type
@@ -17,7 +15,7 @@ type
 
 proc newShadow*(): Shadow =
     new(result)
-    result.shader = newShader(forwardDepthV, forwardDepthF, [])
+    result.shader = newShader(toGLSL(shadowVertex), toGLSL(shadowFragment), [])
     result.fb = newFramebuffer()
 
 proc renderDepthMap(drawables: var seq[Drawable]) =
@@ -53,7 +51,7 @@ proc process*(shadow: Shadow,
         glCullFace(GL_FRONT)
         glEnable(GL_DEPTH_TEST)
         use(shadow.shader)
-        shadow.shader["u_shadow_mvp"] = caster.projection * caster.view
+        shadow.shader["SHADOW_MVP"] = caster.projection * caster.view
 
         renderDepthMap(drawables)
 

@@ -93,3 +93,4 @@ proc render*(skybox: Skybox, cubemap: Texture, view, projection: Mat4, intensity
     glDrawArrays(GL_TRIANGLES, 0, 36)
     glBindVertexArray(0)
     glDepthMask(GL_TRUE.GLboolean)
+    echo "Rendering skybox"

@@ -8,6 +8,7 @@ type
         verbose*: bool
         fps*: int
         depthMapSize*: int
+        exitOnEsc*: bool
 
 var settings* = Settings(
     maxBatchSize: 1,
@@ -16,4 +17,5 @@ var settings* = Settings(
     verbose: false,
     fps: 60,
     depthMapSize: 1024,
+    exitOnEsc: false,
 )

@@ -30,7 +30,7 @@ type
         entities: seq[Entity]
         containers: seq[ContainerBase]
         tags: Table[string, seq[Entity]]
-        root*: Entity
+        root* {.cursor.}: Entity
         drawables*: seq[Drawable]
 
     Entity* = ref object

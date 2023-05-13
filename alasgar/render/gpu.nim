@@ -192,8 +192,8 @@ proc swap*() =
     glBindRenderbuffer(GL_RENDERBUFFER, 0)
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
     glViewport(0, 0, graphics.windowSize.iWidth, graphics.windowSize.iHeight)
-    #glEnable(GL_BLEND)
-    #glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glDisable(GL_DEPTH_TEST)
     glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
 

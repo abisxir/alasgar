@@ -236,7 +236,7 @@ const glslFunctions = [
   "floor", "ceil", "round", "exp", "inversesqrt", "exp2",
   "[]", "[]=",
   "inverse",
-  "sin", "cos", "tan", "pow",
+  "sin", "cos", "tan", "pow", "atan", "asin", "acos",
   "lessThan", "lessThanEqual", "greaterThan", "greaterThanEqual",
   "equal", "notEqual",
   "unpackUnorm4x8", "unpackUnorm2x16",
@@ -1108,3 +1108,5 @@ proc smoothstep*(a: float, b: float, v: float): float = discard
 proc reflect*(a, b: Vec3): Vec3 = discard
 proc max*(v: Vec3, f: float): Vec3 = discard
 proc inversesqrt*(v: float): float = discard
+proc atan*(a, b: float): float = arctan2(a, b)
+proc acos*(a: float): float = arccos(a)

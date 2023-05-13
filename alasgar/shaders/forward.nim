@@ -130,7 +130,7 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
                    SURFACE: Surface,
                    MATERIAL: Material,
                    COLOR: var Layout[0, Vec4],
-                   NORMAL: var Layout[1, Vec3]) =
+                   NORMAL: var Layout[1, Vec4]) =
     var FRAGMENT: Fragment = prepare(
             SURFACE, 
             MATERIAL, 
@@ -157,3 +157,4 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
         COLOR = mix(ENV.BACKGROUND_COLOR, COLOR, FRAGMENT.FOG_AMOUNT)
 
     COLOR = vec4(1.0, 1.0, 1.0, 1.0)
+    NORMAL = vec4(FRAGMENT.N, 0.0)

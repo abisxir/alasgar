@@ -7,10 +7,13 @@ import ../system
 import ../texture
 import ../render/fb
 import ../render/gpu
+import ../shaders/effect
+import ../shaders/ibl
+import ../shaders/compile
 
-const fullscreenVS = staticRead("../render/shaders/fullscreen.vs")
-const panaromaToCubemapFS = staticRead("../render/shaders/panaroma-to-cube-map.fs")
-const iblFilterFS = staticRead("../render/shaders/ibl-filter.fs")
+const iblFilterFS = staticRead("../shaders/ibl-filter.fs")
+const fullscreenVS = toGLSL(effectVertex)
+const panaromaToCubemapFS = toGLSL(panoramaToCubemapFragment)
 
 type
     EnvironmentComponent* = ref object of Component

@@ -1,10 +1,6 @@
 import sugar
 import sequtils
 import strutils
-
-when defined(emscripten):
-    import jsbind/emscripten
-
 import alasgar/core
 import alasgar/resources/image
 import alasgar/resources/obj
@@ -18,8 +14,7 @@ import alasgar/components/light
 import alasgar/components/environment
 import alasgar/components/script
 import alasgar/components/sprite
-when not defined(android):
-    import alasgar/components/sound
+import alasgar/components/sound
 import alasgar/geometry/cube
 import alasgar/geometry/grid
 import alasgar/geometry/sphere
@@ -50,7 +45,7 @@ export core,
        light,
        script,
        sprite,
-       #sound,
+       sound,
        interactive,
        collision,
        physics_collision,
@@ -81,21 +76,9 @@ export core,
        ssao,
        hbao
 
-type 
-    Runtime = ref object
-        engine: Engine
-
-var 
-    runtime* = Runtime.new
-
-
-proc screen*(width, height: int) =
-    if runtime.engine != nil:
-        quit("Cannot set screen after create window!", -1)
-    settings.screenSize = vec2(width.float32, height.float32)
 
 proc window*(title: string, width, height: int, fullscreen: bool=false, resizeable: bool=false) =
-    runtime.engine = newEngine(
+    initEngine(
         width,
         height,
         title=title,
@@ -103,30 +86,9 @@ proc window*(title: string, width, height: int, fullscreen: bool=false, resizeab
         resizeable=resizeable,
     )
 
-proc render*(scene: Scene) = render(runtime.engine, scene)
-proc innerLoop() {.cdecl.} = loop(runtime.engine)
-proc stopLoop*() = quit(runtime.engine)
-
-proc loop*() =
-    when defined(emscripten):
-        emscripten_set_main_loop(innerLoop, 0, 0)
-    else:
-        loop(runtime.engine)
-
-proc screenToWorldCoord*(pos: Vec2): Vec4 = screenToWorldCoord(
-    pos,
-    graphics.windowSize, 
-    runtime.engine.activeCamera
-)
-
 proc newShaderComponent*(vertexSource, fragmentSource: string): ShaderComponent =
     var instance = newSpatialShader(vertexSource, fragmentSource)
     result = newShaderComponent(instance)
 
 proc newVertexShaderComponent*(source: string): ShaderComponent = newShaderComponent(vertexSource=source, fragmentSource="")
 proc newFragmentShaderComponent*(source: string): ShaderComponent = newShaderComponent(vertexSource="", fragmentSource=source)
-
-template `engine`*(r: Runtime): Engine = r.engine
-template `age`*(r: Runtime): float32 = r.engine.age
-template `ratio`*(r: Runtime): float32 = r.engine.ratio
-template `window`*(r: Runtime): Vec2 = graphics.windowSize

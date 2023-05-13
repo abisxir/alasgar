@@ -162,6 +162,7 @@ proc newMesh*(data: var openArray[Vertex],
         offset = 0
         index = 0
 
+    # Sets first vertex attribute array enabled
     createAttribute[float32](index, offset, cGL_FLOAT, 3)
     createAttribute[float32](index, offset, cGL_FLOAT, 3)
     createAttribute[float32](index, offset, cGL_FLOAT, 4)
@@ -182,7 +183,7 @@ proc newMesh*(data: var openArray[Vertex],
 
     glGenBuffers(1, result.materialBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.materialBufferObject)
-    createPointerAttribute[float32](index, 0, cGL_FLOAT, 4, bufferSizeOf)
+    createPointerAttribute[uint32](index, 0, GL_UNSIGNED_INT, 4, bufferSizeOf)
 
     glGenBuffers(1, result.spriteBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.spriteBufferObject)
@@ -194,6 +195,7 @@ proc newMesh*(data: var openArray[Vertex],
 
     # Releases the bound vertex array
     glBindVertexArray(0)
+    glEnableVertexAttribArray(0)
     glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     result.count = data.len.GLsizei

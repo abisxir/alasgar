@@ -1260,6 +1260,37 @@ proc load_GL_ES_VERSION_3_0(load: proc) =
   glGetInternalformativ = cast[proc (target: GLenum, internalformat: GLenum, pname: GLenum, count: GLsizei, params: ptr GLint) {.stdcall.}](load("glGetInternalformativ"))
 
 
+proc hasExt(extname: string): bool =
+  if extname.len == 0:
+    return false
+  if glVersionMajor < 3:
+    var extensions = $cast[cstring](glGetString(GL_EXTENSIONS))
+    if extensions.len == 0:
+      return false
+    var
+      loc, terminatorLoc: int
+      terminator: char
+    while true:
+      loc = extensions.find(extname)
+      if loc < 0:
+        return false
+      terminatorLoc = loc + extname.len
+      terminator = extensions[terminatorLoc]
+      if (loc == 0 or extensions[loc - 1] == ' ') and
+         (terminator == ' ' or terminator == '\0'):
+        return true
+      extensions = extensions[terminatorLoc..^1]
+  else:
+    var
+      num: GLint
+      s: cstring
+    glGetIntegerv(GL_NUM_EXTENSIONS, num.addr)
+    for i in 0..num-1:
+      s = cast[cstring](glGetStringi(GL_EXTENSIONS, GLuint(i)))
+      if s == extname:
+        return true
+
+
 proc findExtensionsGLES2() =
   GLAD_GL_EXT_color_buffer_float = hasExt("GL_EXT_color_buffer_float")
   GLAD_GL_EXT_color_buffer_half_float = hasExt("GL_EXT_color_buffer_half_float")

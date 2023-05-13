@@ -15,6 +15,7 @@ type
         program*: GLuint
         map: Table[string, GLint]
         params: Table[string, ShaderParam]
+        source: string
 
     ShaderParam* = ref object of RootObj
         key: string  
@@ -123,7 +124,7 @@ proc loadShaderSource(src: cstring, kind: GLenum): GLuint =
 
 
 proc createProgram*(vs, fs: string,
-        attributes: openarray[tuple[index: GLuint, name: string]]): GLuint =
+        attributes: openarray[tuple[index: int, name: string]]): GLuint =
     result = glCreateProgram()
     if result == 0:
         halt &"Could not create program: {glGetError().int}" 
@@ -141,7 +142,7 @@ proc createProgram*(vs, fs: string,
     glAttachShader(result, fShader)
 
     for a in attributes:
-        glBindAttribLocation(result, a.index, a.name.cstring)
+        glBindAttribLocation(result, a.index.GLuint, a.name.cstring)
 
     glLinkProgram(result)
     glDeleteShader(vShader)
@@ -154,17 +155,17 @@ proc createProgram*(vs, fs: string,
         halt &"Could not link: {programInfoLog(result)}"
 
 
-proc newShader*(vs, fs: string, attributes: openarray[tuple[index: GLuint, name: string]]): Shader =
+proc newShader*(vs, fs: string, attributes: openarray[tuple[index: int, name: string]]): Shader =
     new(result)
     when defined(macosx):
         let shaderProfile = "#version 410"
     else:
-        let shaderProfile = "#version 310 es"
+        let shaderProfile = "#version 300 es"
     
     result.program = createProgram(
         vs.replace("$SHADER_PROFILE$", shaderProfile), 
         fs.replace("$SHADER_PROFILE$", shaderProfile), attributes)
-
+    result.source = &"{vs}\n{fs}"
     add(cache, result)
     
 
@@ -314,13 +315,17 @@ proc use*(shader: Shader) =
         update(param, shader)
 
 proc use*(shader: Shader, texture: Texture, name: string, slot: int) =
-    shader[name] = slot
-    unit(texture, slot)
+    var location = getKeyLocation(shader, name)
+    if location >= 0:
+        #echo &"Setting [{name}] to [{slot}] in location [{location.int}]" 
+        shader[name] = slot
+        unit(texture, slot)
 
 proc destroy*(shader: Shader) = remove(cache, shader)
 proc cleanupShaders*() =
     echo &"Cleaning up [{len(cache)}] shaders..."
     clear(cache)
 
-proc newSpatialShader*(vertexSource: string="", fragmentSource: string=""): Shader = newShader(toGLSL(mainVertex), toGLSL(mainFragment), [])
+proc newSpatialShader*(vertexSource: string="", fragmentSource: string=""): Shader = 
+    result = newShader(toGLSL(mainVertex), toGLSL(mainFragment), [(0, "iPosition")])
 proc newCanvasShader*(vertexSource: string="", fragmentSource: string=""): Shader = newShader(toGLSL(effectVertex), toGLSL(effectFragment), [])

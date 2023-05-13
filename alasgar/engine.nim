@@ -3,6 +3,8 @@ import tables
 import times
 import os
 
+when defined(emscripten):
+    import jsbind/emscripten
 import sdl2
 
 import logger
@@ -32,10 +34,9 @@ when defined(android) or defined(ios):
     sdlMain()
 
 type
-    Engine* = ref object
+    Engine* = object
         title: string
         primary*: Scene
-        scenes*: seq[Scene]
         age: float32
         fps: float32
         frames: float32 
@@ -43,7 +44,17 @@ type
         ratio: float32
         newPrimary: Scene
         oldPrimary: Scene
+    Runtime* = object
+        engine: Engine
         runGame: bool
+        age: float32
+        frames: int
+        lastTicks:float
+        eventProcessTime: float
+        systemBenchmark: Table[string, float]
+
+
+var runtime*: Runtime
 
 proc `ratio`*(e: Engine): float32 = e.ratio
 proc `age`*(e: Engine): float32 = e.age
@@ -54,36 +65,35 @@ proc `activeCamera`*(e: Engine): CameraComponent =
     else:
         nil
 
-proc addSystem*(engine: Engine, system: System, before: System = nil,
+proc addSystem*(system: System, before: System = nil,
         after: System = nil) =
-    if before != nil and contains(engine.systems, before):
-        var i = find(engine.systems, before)
-        if i + 1 >= len engine.systems:
-            add(engine.systems, system)
+    if before != nil and contains(runtime.engine.systems, before):
+        var i = find(runtime.engine.systems, before)
+        if i + 1 >= len runtime.engine.systems:
+            add(runtime.engine.systems, system)
         else:
-            insert(engine.systems, system, i)
-    elif after != nil and contains(engine.systems, after):
-        var i = find(engine.systems, after) + 1
-        if i + 1 >= len engine.systems:
-            add(engine.systems, system)
+            insert(runtime.engine.systems, system, i)
+    elif after != nil and contains(runtime.engine.systems, after):
+        var i = find(runtime.engine.systems, after) + 1
+        if i + 1 >= len runtime.engine.systems:
+            add(runtime.engine.systems, system)
         else:
-            insert(engine.systems, system, i)
+            insert(runtime.engine.systems, system, i)
     else:
-        add(engine.systems, system)
+        add(runtime.engine.systems, system)
 
 
-proc newEngine*(windowWidth: int,
-                windowHeight: int,
-                title: string = "Alasgar",
-                fullscreen: bool = false,
-                resizeable: bool = false): Engine =
+proc initEngine*(windowWidth: int,
+                 windowHeight: int,
+                 title: string = "Alasgar",
+                 fullscreen: bool = false,
+                 resizeable: bool = false) =
 
     discard sdl2.init(INIT_EVERYTHING)
 
     echo "* SDL initialized."
 
-    new(result)
-    result.title = title
+    runtime.engine.title = title
 
     var flags = SDL_WINDOW_OPENGL or SDL_WINDOW_SHOWN
 
@@ -99,7 +109,7 @@ proc newEngine*(windowWidth: int,
 
     # Initialize SDL windows
     let window = createWindow(
-        result.title.cstring,
+        runtime.engine.title.cstring,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         windowWidth.cint,
@@ -111,7 +121,7 @@ proc newEngine*(windowWidth: int,
 
     # If the window is fullscreen, specially in mobile devices, window size is going to be perhaps different
     let actualSize = window.getSize()
-    result.ratio = actualSize.x.float32 / actualSize.y.float32
+    runtime.engine.ratio = actualSize.x.float32 / actualSize.y.float32
 
     let sw = if settings.screenSize.iWidth > 0: settings.screenSize.iWidth else: actualSize.x
     let sh = if settings.screenSize.iHeight > 0: settings.screenSize.iHeight else: actualSize.y
@@ -130,166 +140,181 @@ proc newEngine*(windowWidth: int,
     setBufferSizeOf(sizeof(Drawable))
 
     # Create systems
-    addSystem(result, newScriptSystem())
-    addSystem(result, newInteractiveSystem())
-    addSystem(result, newCatmullSystem())
-    addSystem(result, newAnimationSystem())
-    addSystem(result, newTraverseSystem())
-    addSystem(result, newJointSystem())
-    addSystem(result, newSkinSystem())
-    addSystem(result, newPrepareSystem())
-    addSystem(result, newCameraSystem())
-    addSystem(result, newEnvironmentSystem())
-    addSystem(result, newSoundSystem())
-    addSystem(result, newLightSystem())
-    addSystem(result, newRenderSystem())
+    addSystem(newScriptSystem())
+    addSystem(newInteractiveSystem())
+    addSystem(newCatmullSystem())
+    addSystem(newAnimationSystem())
+    addSystem(newTraverseSystem())
+    addSystem(newJointSystem())
+    addSystem(newSkinSystem())
+    addSystem(newPrepareSystem())
+    addSystem(newCameraSystem())
+    addSystem(newEnvironmentSystem())
+    addSystem(newSoundSystem())
+    addSystem(newLightSystem())
+    addSystem(newRenderSystem())
 
-    for e in result.systems:
+    for e in runtime.engine.systems:
         init(e)
 
+    runtime.age = 0.0
+    runtime.frames = 0
+    runtime.lastTicks = epochTime()
+    runtime.eventProcessTime = 0.0
+    runtime.systemBenchmark = initTable[string, float]()
+    for sys in runtime.engine.systems:
+        runtime.systemBenchmark[sys.name] = 0.float
 
-proc pushSystem*(engine: Engine, system: System, before: System = nil,
+
+proc pushSystem(system: System, before: System = nil,
         after: System = nil) =
-    insert(engine.systems, system, 0)
+    insert(runtime.engine.systems, system, 0)
 
 
-proc destroy*(engine: Engine) =
-    #if not isNil(engine.primary):
-    #    destroy(engine.primary)
-    #    engine.primary = nil
+proc destroy*() =
+    #if not isNil(runtime.engine.primary):
+    #    destroy(runtime.engine.primary)
+    #    runtime.engine.primary = nil
     #
-    #if len(engine.scenes) > 0:
-    #    for scene in engine.scenes:
-    #        destroy(scene)
-    #    setLen(scene, 0)
 
     # Cleans systems up
-    for e in engine.systems:
+    for e in runtime.engine.systems:
         cleanup(e)
 
     # Finally, quits SDL
     sdl2.quit()
 
-
-proc loop*(engine: Engine) =
-    var
+proc handleFrame() =
+    # Calculates delta time between current frame and the last drawn frame
+    var 
         evt = sdl2.defaultEvent
-        age: float32 = 0.0
-        frames: int = 0
-        lastTicks = epochTime()
-        eventProcessTime = 0.0
-        systemBenchmark = initTable[string, float]()
+        input: Input
+        now = epochTime()
+        delta = now - runtime.lastTicks
+        sleepTime = 0'f32
+        frameLimit = if settings.fps > 0: 1'f32 / settings.fps.float32 else: 0'f32
 
-    for sys in engine.systems:
-        systemBenchmark[sys.name] = 0.float
+    if not isNil(runtime.engine.primary):
+        # Cleans up the scene, removes dangling entities
+        cleanup(runtime.engine.primary)
 
-    engine.runGame = true
-    while engine.runGame:
-        if not isNil(engine.primary):
-            # Cleans up the scene, removes dangling entities
-            cleanup(engine.primary)
-
-        # Calculates delta time between current frame and the last drawn frame
-        var 
-            input: Input
+    if delta > 0 and delta < frameLimit:
+        sleepTime = frameLimit - delta 
+        while sleepTime > 0 and delta < frameLimit:
+            sleep(0)
             now = epochTime()
-            delta = now - lastTicks
-            sleepTime = 0'f32
-            frameLimit = if settings.fps > 0: 1'f32 / settings.fps.float32 else: 0'f32
+            delta = now - runtime.lastTicks
+    
+    # Updates last tick with the current time
+    runtime.lastTicks = now
 
-        if delta > 0 and delta < frameLimit:
-            sleepTime = frameLimit - delta 
-            while sleepTime > 0 and delta < frameLimit:
-                sleep(0)
-                now = epochTime()
-                delta = now - lastTicks
-       
-        # Updates last tick with the current time
-        lastTicks = now
+    # Calculates FPS
+    runtime.engine.fps = 1.float32 / delta
+    runtime.engine.frames += 1
 
-        # Calculates FPS
-        engine.fps = 1.float32 / delta
-        engine.frames += 1
+    # Keeps age of running system
+    runtime.engine.age += delta
+    runtime.age += delta
+    inc(runtime.frames)
 
-        # Keeps age of running system
-        engine.age += delta
-        age += delta
-        inc(frames)
+    # Updates fps each seconds
+    if runtime.age >= 1.0:
+        runtime.age = 0.0
+        if settings.verbose:
+            logi &"Counted frames: {runtime.frames}"
+            logi &"FPS: {runtime.engine.fps}"
+            logi &"  Drawable objects: {len(runtime.engine.primary.drawables)}"
+            logi &"  Visible objects: {graphics.totalObjects}"
+            logi &"  Draw calls: {graphics.drawCalls}"
 
-        # Updates fps each seconds
-        if age >= 1.0:
-            age = 0.0
-            if settings.verbose:
-                logi &"Counted frames: {frames}"
-                logi &"FPS: {engine.fps}"
-                logi &"  Drawable objects: {len(engine.primary.drawables)}"
-                logi &"  Visible objects: {graphics.totalObjects}"
-                logi &"  Draw calls: {graphics.drawCalls}"
+            var totalSystemTime = 0.float
+            for key, value in mpairs(runtime.systemBenchmark):
+                logi &"    + {key:<24}: {value}"
+                totalSystemTime += value
+                value = 0.float
+            logi &"    + Events                  : {runtime.eventProcessTime}"
+            logi &"    + Sleep                   : {sleepTime}"
+            logi &"    = {delta}"
 
-                var totalSystemTime = 0.float
-                for key, value in mpairs(systemBenchmark):
-                    logi &"    + {key:<24}: {value}"
-                    totalSystemTime += value
-                    value = 0.float
-                logi &"    + Events                  : {eventProcessTime}"
-                logi &"    + Sleep                   : {sleepTime}"
-                logi &"    = {delta}"
+        runtime.frames = 0
 
-            frames = 0
+    # Marks start of processing events
+    let eventStart = epochTime()
 
-        # Marks start of processing events
-        let eventStart = epochTime()
+    # Set mouse position, even if there is not event.
+    updateMousePosition(addr input)        
 
-        # Set mouse position, even if there is not event.
-        updateMousePosition(addr input)        
-
-        # Pulls SDL event and passes to the nodes that need event processing
-        while pollEvent(evt):
-            if evt.kind == QuitEvent:
-                engine.runGame = false
-            #elif evt.kind == KeyDown and (evt.evKeyboard.keysym.scancode == SDL_SCANCODE_ESCAPE or evt.evKeyboard.keysym.scancode == SDL_SCANCODE_Q):
-            #    runGame = false
-            elif evt.kind == WindowEvent:
-                var windowEvent = cast[WindowEventPtr](addr(evt))
-                if windowEvent.event == WindowEvent_Resized:
-                    let width = windowEvent.data1
-                    let height = windowEvent.data2
-                    graphics.windowSize = vec2(width.float32, height.float32)
-                    logi &"Window resized: ({width}, {height})"
-            else:
-                # Maps SDL event to alasgar event object
-                parseEvent(addr evt, graphics.windowSize, addr input)
-        
-        # Calculates event processing elapsed time 
-        eventProcessTime = epochTime() - eventStart
-
-        if isNil(engine.newPrimary):
-            # Clear scene
-            clear()
-
-            if engine.primary != nil and engine.primary.activeCamera != nil:
-                for system in engine.systems:
-                    let start = epochTime()
-                    process(system, engine.primary, input, delta, engine.frames, engine.age)
-                    systemBenchmark[system.name] = epochTime() - start
+    # Pulls SDL event and passes to the nodes that need event processing
+    while pollEvent(evt):
+        if evt.kind == QuitEvent:
+            runtime.runGame = false
+        elif settings.exitOnEsc and evt.kind == KeyDown and (evt.evKeyboard.keysym.scancode == SDL_SCANCODE_ESCAPE or evt.evKeyboard.keysym.scancode == SDL_SCANCODE_Q):
+            runtime.runGame = false
+        elif evt.kind == WindowEvent:
+            var windowEvent = cast[WindowEventPtr](addr(evt))
+            if windowEvent.event == WindowEvent_Resized:
+                let width = windowEvent.data1
+                let height = windowEvent.data2
+                graphics.windowSize = vec2(width.float32, height.float32)
+                logi &"Window resized: ({width}, {height})"
         else:
-            destroy(engine.primary)
-            engine.primary = engine.newPrimary
-            engine.newPrimary = nil
+            # Maps SDL event to alasgar event object
+            parseEvent(addr evt, graphics.windowSize, addr input)
+    
+    # Calculates event processing elapsed time 
+    runtime.eventProcessTime = epochTime() - eventStart
 
+    if isNil(runtime.engine.newPrimary):
+        # Clear scene
+        clear()
+
+        if runtime.engine.primary != nil and runtime.engine.primary.activeCamera != nil:
+            for system in runtime.engine.systems:
+                let start = epochTime()
+                process(system, runtime.engine.primary, input, delta, runtime.engine.frames, runtime.engine.age)
+                runtime.systemBenchmark[system.name] = epochTime() - start
+    else:
+        destroy(runtime.engine.primary)
+        runtime.engine.primary = runtime.engine.newPrimary
+        runtime.engine.newPrimary = nil
+
+proc handleFrameWhenEmscripten() {.cdecl.} = handleFrame()
+
+proc loop*() =
+    runtime.runGame = true
+    when defined(emscripten):
+        emscripten_set_main_loop(handleFrameWhenEmscripten, 0, 1)
+    else:
+        while runtime.runGame:
+            handleFrame()
+        
     cleanupResources()
     cleanupTextures()
     cleanupShaders()
     cleanupMeshes()
     cleanupGraphics()
 
-proc render*(engine: Engine, scene: Scene) =
-    if engine.primary != scene:
-        if isNil(engine.primary):
-            engine.primary = scene
+proc render*(scene: Scene) =
+    if runtime.engine.primary != scene:
+        if isNil(runtime.engine.primary):
+            runtime.engine.primary = scene
         else:
-            engine.newPrimary = scene
+            runtime.engine.newPrimary = scene
 
 
-proc quit*(engine: Engine) =
-    engine.runGame = false
+proc stopLoop*() =
+    runtime.runGame = false
+
+proc screen*(width, height: int) =
+    settings.screenSize = vec2(width.float32, height.float32)
+
+proc screenToWorldCoord*(pos: Vec2): Vec4 = screenToWorldCoord(
+    pos,
+    graphics.windowSize, 
+    runtime.engine.activeCamera
+)
+
+template `engine`*(r: Runtime): Engine = r.engine
+template `age`*(r: Runtime): float32 = r.engine.age
+template `ratio`*(r: Runtime): float32 = r.engine.ratio
+template `window`*(r: Runtime): Vec2 = graphics.windowSize
