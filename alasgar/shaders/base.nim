@@ -51,11 +51,9 @@ proc hash*(o: Shader): Hash =
     else:
         0
 
-proc printSource(source: string) =
-    var output = ""
+proc formatSource(source: string): string =
     for i, line in pairs(split(source, "\n")):
-        add(output, &"{i:4} {line}\n")
-    echo output
+        add(result, &"{i:4} {line}\n")
 
 proc isShaderCompiled(shader: GLuint): bool {.inline.} =
     var compiled: GLint
@@ -87,14 +85,6 @@ proc programInfoLog(s: GLuint): string =
         result = $infoLog
         dealloc(infoLog)
 
-proc extractLineNo(line: string): int =
-    result = -1
-    let step1 = split(line, "(")
-    if len(step1) > 1:
-        let step2 = split(step1[0], ":")
-        if len(step2) > 1:
-            result = parseInt(step2[1])
-
 proc loadShaderSource(src: cstring, kind: GLenum): GLuint =
     result = glCreateShader(kind)
     if result == 0:
@@ -111,13 +101,8 @@ proc loadShaderSource(src: cstring, kind: GLenum): GLuint =
     let compiled = isShaderCompiled(result)
     let info = shaderInfoLog(result)
     if not compiled:
-        let 
-            lineNo = extractLineNo(info)
-            lines = split(&"{$src}", "\n")
-        logi "The shader: ", src
+        echo formatSource(&"{src}")
         logi "Shader compile error: ", info
-        if lineNo > 0 and lineNo < len(lines):
-            logi "-> ", lines[lineNo - 1], "\n"
         glDeleteShader(result)
     elif info.len > 0:
         logi "Shader compile log: ", info
@@ -157,10 +142,7 @@ proc createProgram*(vs, fs: string,
 
 proc newShader*(vs, fs: string, attributes: openarray[tuple[index: int, name: string]]): Shader =
     new(result)
-    when defined(macosx):
-        let shaderProfile = "#version 410"
-    else:
-        let shaderProfile = "#version 300 es"
+    let shaderProfile = &"#version {OPENGL_SHADER_VERSION}"
     
     result.program = createProgram(
         vs.replace("$SHADER_PROFILE$", shaderProfile), 
@@ -169,53 +151,56 @@ proc newShader*(vs, fs: string, attributes: openarray[tuple[index: int, name: st
     add(cache, result)
     
 
-proc getKeyLocation(s: Shader, key: string): GLint =
+proc getUniformLocation*(s: Shader, key: string): GLint =
     if not s.map.hasKey(key):
         s.map[key] = glGetUniformLocation(s.program, key)
     result = s.map[key]
-
+    
+proc getAttributeLocation*(s: Shader, key: string): GLint = glGetAttribLocation(s.program, key)
 
 proc `[]=`*(s: Shader; key: string; value: Vec2) =
-    var location = s.getKeyLocation key
+    var location = getUniformLocation(s, key)
     var data = value
     glUniform2fv location, 1, data.caddr
 
 proc `[]=`*(s: Shader; key: string; value: Vec3) =
-    var location = s.getKeyLocation key
+    var location = getUniformLocation(s, key)
     var data = value
     glUniform3fv location, 1, data.caddr
 
 proc `[]=`*(s: Shader; key: string; value: Vec4) =
-    var location = s.getKeyLocation key
+    var location = getUniformLocation(s, key)
     var data = value
     glUniform4fv location, 1, data.caddr
 
 proc `[]=`*(s: Shader; key: string; value: Color) =
-    var location = s.getKeyLocation key
+    var location = getUniformLocation(s, key)
     var data = vec4(value.r, value.g, value.b, value.a)
     glUniform4fv location, 1, data.caddr
 
 proc `[]=`*(s: Shader; key: string; value: float32) =
-    var location = s.getKeyLocation key
+    var location = getUniformLocation(s, key)
     glUniform1f location, value
 
 
 proc `[]=`*(s: Shader; key: string; value: int) =
-    var location = s.getKeyLocation key
+    var location = getUniformLocation(s, key)
     glUniform1i location, value.GLint
 
 
 proc `[]=`*(s: Shader; key: string; value: var Mat4) =
-    var location = s.getKeyLocation key
+    var location = getUniformLocation(s, key)
     glUniformMatrix4fv location, 1, false, value.caddr
 
 proc `[]=`*(s: Shader; key: string; value: ptr Mat4) =
-    var location = s.getKeyLocation key
+    var location = getUniformLocation(s, key)
     glUniformMatrix4fv location, 1, false, value[].caddr
 
-proc `[]=`*(s: Shader; key: string; value: Mat4) =
+proc `[]=`*(s: Shader, key: string, value: Mat4) =
     var matrix = value
     s[key] = matrix
+
+#proc `[]`*(s: Shader, key: string): int = getUniformLocation(s, key).int
 
 method update(p: ShaderParam, shader: Shader) {.base.} = discard
 method update(p: ShaderParamInt, shader: Shader) = shader[p.key] = p.value
@@ -315,7 +300,7 @@ proc use*(shader: Shader) =
         update(param, shader)
 
 proc use*(shader: Shader, texture: Texture, name: string, slot: int) =
-    var location = getKeyLocation(shader, name)
+    var location = getUniformLocation(shader, name)
     if location >= 0:
         #echo &"Setting [{name}] to [{slot}] in location [{location.int}]" 
         shader[name] = slot
@@ -326,6 +311,5 @@ proc cleanupShaders*() =
     echo &"Cleaning up [{len(cache)}] shaders..."
     clear(cache)
 
-proc newSpatialShader*(vertexSource: string="", fragmentSource: string=""): Shader = 
-    result = newShader(toGLSL(mainVertex), toGLSL(mainFragment), [(0, "iPosition")])
+proc newSpatialShader*(vertexSource: string="", fragmentSource: string=""): Shader = newShader(toGLSL(mainVertex), toGLSL(mainFragment), [])
 proc newCanvasShader*(vertexSource: string="", fragmentSource: string=""): Shader = newShader(toGLSL(effectVertex), toGLSL(effectFragment), [])

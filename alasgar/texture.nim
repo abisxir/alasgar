@@ -102,6 +102,7 @@ proc setFaces(t: Texture,
         glGenerateMipmap(t.target)
 
 proc allocate*(t: Texture) =
+    #when defined(glTexStorage2D):
     glTexStorage2D(
         t.target, 
         t.levels.GLsizei, 
@@ -109,6 +110,19 @@ proc allocate*(t: Texture) =
         t.width.GLsizei, 
         t.height.GLsizei
     )
+    #else:
+    #    glTexImage2D(
+    #        t.target, 
+    #        0.GLint, 
+    #        t.internalFormat.GLint, 
+    #        t.width.GLsizei, 
+    #        t.height.GLsizei, 
+    #        0.GLint, 
+    #        GL_RGBA, 
+    #        GL_UNSIGNED_BYTE, 
+    #        nil
+    #    )
+
 
 proc copy*(t: Texture, data: ptr float32, format=GL_RGBA, width=0, height=0) =
     let 
@@ -267,7 +281,11 @@ proc newCubeTexture*(width,
                      height: int, 
                      levels: int=1,
                      internalFormat: GLenum=GL_RGBA8,
-                     wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture =
+                     wrapS=GL_CLAMP_TO_EDGE, 
+                     wrapT=GL_CLAMP_TO_EDGE, 
+                     wrapR=GL_CLAMP_TO_EDGE, 
+                     minFilter=GL_NEAREST, 
+                     magFilter=GL_NEAREST): Texture =
     result = newTexture(
         target=GL_TEXTURE_CUBE_MAP,
         width=width,

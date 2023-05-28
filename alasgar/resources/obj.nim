@@ -26,9 +26,6 @@ proc extractName(buf: string): string =
 
 proc getFilename(fullpath: string): string = filterIt(split(fullpath, "/"), not isEmptyOrWhitespace(it))[^1]
 proc makeFileName(fullpath, filename: string): string = replace(fullpath, getFilename(fullpath), filename)
-proc readFloats(buf: string): seq[float32] =
-    let vs = filterIt(buf.split(" "), not isEmptyOrWhitespace(it))
-    result = mapIt(vs, parseFloat(it).float32)
 
 proc readFloat2(buf: string): (float32, float32) =
     let vs = filterIt(buf.split(" "), not isEmptyOrWhitespace(it))

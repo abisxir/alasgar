@@ -183,7 +183,7 @@ proc newMesh*(data: var openArray[Vertex],
 
     glGenBuffers(1, result.materialBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.materialBufferObject)
-    createPointerAttribute[uint32](index, 0, GL_UNSIGNED_INT, 4, bufferSizeOf)
+    createPointerAttribute[uint32](index, 0, cGL_FLOAT, 4, bufferSizeOf)
 
     glGenBuffers(1, result.spriteBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.spriteBufferObject)

@@ -23,26 +23,23 @@ type
         fogGradient*: float32
         lutMap*: Texture
         environmentMap*: Texture
-        environmentIntensity*: float32
         ggxMap*: Texture
+        environmentIntensity*: float32
+        sampleCount*: int
 
     EnvironmentSystem* = ref object of System
-
-#proc attach(fb: FrameBuffer, texture: Texture, unit: int, size: int, level: int) =
-#    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, unit.GLenum, texture.id, level.GLint)
-#    attach(texture)
-#    glViewport(0, 0, size.GLsizei, size.GLsizei)
-#    #glClearColor(1, 0, 0, 0)
-#    glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-
 
 func newEnvironmentComponent*(): EnvironmentComponent =
     new(result)
     result.environmentIntensity = 1.0
     result.backgroundColor = color(0.12, 0.12, 0.12)
+    result.sampleCount = 2048
 
-func setEnvironmentIntensivity*(e: EnvironmentComponent, value: float32) =
+func setEnvironmentIntensity*(e: EnvironmentComponent, value: float32) =
     e.environmentIntensity = value
+
+func setSampleCount*(e: EnvironmentComponent, sampleCount: int) =
+    e.sampleCount = sampleCount
 
 func setAmbient*(e: EnvironmentComponent, c: Color, intense: float32) =
     e.ambientColor = color(c.r * intense, c.g * intense, c.b * intense)
@@ -90,13 +87,19 @@ proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
     let 
         fb = newFramebuffer()
         shader = newShader(fullscreenVS, panaromaToCubemapFS, [])
-        texture = newCubeTexture(size, size, minFilter=GL_LINEAR, magFilter=GL_LINEAR, levels=calculateMipMap(size))
+        texture = newCubeTexture(
+            size,
+            size,
+            minFilter=GL_LINEAR,
+            magFilter=GL_LINEAR,
+            levels=calculateMipMap(size)
+        )
 
     use(shader)
     for i in 0..5:
         use(fb, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X.int + i, 0, size, size)
-        use(shader, inTexture, "u_panorama", 0)
-        shader["u_current_face"] = i
+        use(shader, inTexture, "PANAROMA_MAP", 0)
+        shader["FACE"] = i
         draw(fb)
     
     mipmap(texture)
@@ -105,7 +108,7 @@ proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
 
     return texture
 
-proc generateGGX(cubemap: Texture): Texture =
+proc generateGGX(cubemap: Texture, sampleCount: int): Texture =
     let 
         fb = newFramebuffer()
         size: int = cubemap.width
@@ -126,7 +129,7 @@ proc generateGGX(cubemap: Texture): Texture =
             target=texture, 
             level=level, 
             distribution=1, 
-            sampleCount=1024, 
+            sampleCount=sampleCount, 
             lodBias=0.0
         )
 
@@ -134,7 +137,7 @@ proc generateGGX(cubemap: Texture): Texture =
 
     result = texture
 
-proc generateLUT(cubemap: Texture): Texture =
+proc generateLUT(cubemap: Texture, sampleCount: int): Texture =
     let 
         shader = newShader(fullscreenVS, iblFilterFS, [])
         fb = newFramebuffer()
@@ -152,7 +155,7 @@ proc generateLUT(cubemap: Texture): Texture =
     use(shader, cubemap, "u_cubemap", 0)
 
     shader["u_roughness"] = 0.0
-    shader["u_sample_count"] = 512
+    shader["u_sample_count"] = sampleCount
     shader["u_width"] = 0
     shader["u_lod_bias"] = 0.0
     shader["u_distribution"] = 1
@@ -171,8 +174,8 @@ proc setSkybox*(env: EnvironmentComponent, cubemap: Texture, size: int) =
     let start = now()
 
     env.environmentMap = cubemap
-    env.ggxMap = generateGGX(cubemap)
-    env.lutMap = generateLUT(cubemap)
+    env.ggxMap = generateGGX(cubemap, env.sampleCount)
+    env.lutMap = generateLUT(cubemap, env.sampleCount)
 
     let elapsed = between(start, now())
     echo "* Skybox compute done in:", elapsed
@@ -199,10 +202,10 @@ proc setSkybox*(env: EnvironmentComponent, url: string, size: int) =
         # Converts panaroma texture to cubemap
         cubemap = panoramaToCubemap(inTexture, size)
 
-    # Destroys the given texture
+    # Destroys the created texture
     destroy(inTexture)
 
-    # Sets cubemap as skybox
+    # Sets the created cubemap from panaroma image as skybox
     setSkybox(env, cubemap, size)
 
 # System implementation
@@ -221,23 +224,23 @@ method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float
 
             # Sets scene clear color
             graphics.context.clearColor = env.backgroundColor
-            shader["ENV.BACKGROUND_COLOR"] = env.backgroundColor
+            shader["ENVIRONMENT.BACKGROUND_COLOR"] = env.backgroundColor
 
             # Sets scene ambient color
-            shader["ENV.AMBIENT_COLOR"] = env.ambientColor.vec3
+            shader["ENVIRONMENT.AMBIENT_COLOR"] = env.ambientColor.vec3
 
             # Sets environment maps
             if not isNil(env.environmentMap):
                 use(shader, env.ggxMap, "GGX_MAP", 7)
-                shader["ENV.MIP_COUNT"] = env.environmentMap.levels.float32
-                shader["ENV.HAS_ENV_MAP"] = 1
+                shader["ENVIRONMENT.MIP_COUNT"] = env.environmentMap.levels.float32
+                shader["ENVIRONMENT.HAS_ENV_MAP"] = 1
             else:
-                shader["ENV.HAS_ENV_MAP"] = 0
+                shader["ENVIRONMENT.HAS_ENV_MAP"] = 0
 
             if env.fogDensity > 0.0:
-                shader["ENV.FOG_DENSITY"] = env.fogDensity
-                shader["ENV.FOG_GRADIENT"] = env.fogGradient
+                shader["ENVIRONMENT.FOG_DENSITY"] = env.fogDensity
+                shader["ENVIRONMENT.FOG_GRADIENT"] = env.fogGradient
             else:
-                shader["ENV.FOG_DENSITY"] = 0.0
+                shader["ENVIRONMENT.FOG_DENSITY"] = 0.0
 
 

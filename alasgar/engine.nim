@@ -166,7 +166,7 @@ proc initEngine*(windowWidth: int,
         runtime.systemBenchmark[sys.name] = 0.float
 
 
-proc pushSystem(system: System, before: System = nil,
+proc pushSystem*(system: System, before: System = nil,
         after: System = nil) =
     insert(runtime.engine.systems, system, 0)
 
@@ -278,7 +278,8 @@ proc handleFrame() =
         runtime.engine.primary = runtime.engine.newPrimary
         runtime.engine.newPrimary = nil
 
-proc handleFrameWhenEmscripten() {.cdecl.} = handleFrame()
+when defined(emscripten):
+    proc handleFrameWhenEmscripten() {.cdecl.} = handleFrame()
 
 proc loop*() =
     runtime.runGame = true

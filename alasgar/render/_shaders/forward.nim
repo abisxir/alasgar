@@ -66,7 +66,7 @@ proc mainVertex*(iPosition: Layout[0, Vec3],
                  iSkin: Layout[11, Vec4],
                  uSkinMap: Layout[15, Uniform[Sampler2D]],
                  CAMERA: Uniform[Camera],
-                 ENV: Uniform[Environment],
+                 ENVIRONMENT: Uniform[Environment],
                  FRAME: Uniform[Frame],
                  SURFACE: var Surface,
                  MATERIAL: var Material,
@@ -74,7 +74,7 @@ proc mainVertex*(iPosition: Layout[0, Vec3],
     
     let
         position = vec4(iPosition, 0)
-        model = applySkinTransform(uSkinMap, ENV, iModel, iBone, iWeight, iSkin)
+        model = applySkinTransform(uSkinMap, ENVIRONMENT, iModel, iBone, iWeight, iSkin)
 
     extractMaterialData(iMaterial, MATERIAL)
     SURFACE.POSITION = model * position
@@ -88,7 +88,7 @@ proc mainVertex*(iPosition: Layout[0, Vec3],
 
 proc mainFragment*(LIGHTS: Uniform[array[64, Light]],
                    CAMERA: Uniform[Camera],
-                   ENV: Uniform[Environment],
+                   ENVIRONMENT: Uniform[Environment],
                    FRAME: Uniform[Frame],
                    SURFACE: Surface,
                    MATERIAL: Material,

@@ -16,8 +16,8 @@ proc uvToXYZ(FACE: int, UV: Vec2): Vec3 =
 
 proc dirToUV(dir: Vec3): Vec2 = 
     let 
-        x = 0.5 + 0.5 * atan(dir.z, dir.x) / 3.1415926535897932384626433832795
-        y = 1.0 - acos(dir.y) / 3.1415926535897932384626433832795
+        x: float = 0.5 + 0.5 * atan(dir.z, dir.x) / PI
+        y: float = 1.0 - acos(dir.y) / PI
     result = vec2(x, y)
 
 proc panoramaToCubemapFragment*(UV: Vec2,
@@ -29,5 +29,5 @@ proc panoramaToCubemapFragment*(UV: Vec2,
         scan = uvToXYZ(FACE, texCoordNew)
         direction: Vec3 = normalize(scan)
         src = dirToUV(direction)
-    #COLOR.rgb = texture(PANAROMA_MAP, src).rgb
+    COLOR.rgb = texture(PANAROMA_MAP, src).rgb
     COLOR.a = 1.0

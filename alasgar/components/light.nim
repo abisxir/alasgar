@@ -194,4 +194,4 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
                     inc(lightCount)
 
             # Sets direct light amount
-            shader["ENV.LIGHTS_COUNT"] = lightCount
+            shader["ENVIRONMENT.LIGHTS_COUNT"] = lightCount

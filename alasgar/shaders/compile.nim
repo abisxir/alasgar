@@ -3,6 +3,7 @@
 
 import macros, strutils, tables, vmath, strformat
 import ../utils
+import ../ports/opengl
 
 export vmath, utils
 
@@ -150,7 +151,6 @@ var
     "float": "0.0",
     "int": "0",
   }.toTable()
-
 
 proc isInternalType(t: string): bool = t in samplers or t in metaDataTypes
 proc isSampler(sampler: string): bool = sampler in samplers
@@ -968,12 +968,12 @@ proc gatherFunction(
 
     gatherFunction(n, functions, globals, indent + 2)
 
-proc toGLSLInner*(s: NimNode, version, extra: string): string =
+proc toGLSLInner*(s: NimNode, extra: string): string =
 
   var code: string
 
   # Add GLS header stuff.
-  code.add "#version " & version & "\n"
+  code.add "#version " & OPENGL_SHADER_VERSION & "\n"
   code.add "/*\n"
   code.add " * compiled by alasgar \n"
   code.add " * " & s.strVal & " \n"
@@ -1023,11 +1023,10 @@ proc toGLSLInner*(s: NimNode, version, extra: string): string =
 
 macro toGLSL*(
   s: typed,
-  version = when defined(macosx): "410" else: "300 es",
   extra = "precision highp float;\nprecision highp int;\n"
 ): string =
   ## Converts proc to a glsl string.
-  result = newLit(toGLSLInner(s, version.strVal, extra.strVal))
+  result = newLit(toGLSLInner(s, extra.strVal))
   #echo(result)
 
 ## GLSL helper functions

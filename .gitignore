@@ -65,3 +65,5 @@ art/
 
 hello
 test
+SDL2.dll
+SDL2_mixer.dll

@@ -77,20 +77,20 @@ proc destroy*(skybox: Skybox) =
             skybox.cubeVAO = 0
 
 proc render*(skybox: Skybox, cubemap: Texture, view, projection: Mat4, intensity: float32) = 
-    use(skybox.shader)
     var normalizedView = view
     normalizedView[3, 0] = 0
     normalizedView[3, 1] = 0
     normalizedView[3, 2] = 0
+
+    use(skybox.shader)
     skybox.shader["VIEW"] = normalizedView
     skybox.shader["PROJECTION"] = projection
-    skybox.shader["INVIRONMENT_INTENSITY"] = intensity
+    skybox.shader["ENVIRONMENT_INTENSITY"] = intensity
     skybox.shader["MIP_COUNT"] = cubemap.levels.float32
+    use(skybox.shader, cubemap, "SKYBOX_MAP", 0)
 
     glDepthMask(GL_FALSE.GLboolean)
-    use(skybox.shader, cubemap, "SKYBOX", 0)
     glBindVertexArray(skybox.cubeVAO)
     glDrawArrays(GL_TRIANGLES, 0, 36)
     glBindVertexArray(0)
     glDepthMask(GL_TRUE.GLboolean)
-    echo "Rendering skybox"

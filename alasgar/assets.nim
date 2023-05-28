@@ -21,8 +21,7 @@ proc normalize(url: string): string =
     when defined(android):
         result = url.replace("res://", "")
     else:
-        result = url.replace("res://", "res/")
-    
+        result = url.replace("res://", "res/").replace("/", &"{DirSep}")
     result = replace(result, "%20", " ")
 
 proc openAssetStream*(url: string): Stream =
@@ -37,8 +36,9 @@ proc openAssetStream*(url: string): Stream =
             raise newAlasgarError(&"Could not open [{filename}].")
         else:
             logi &"File [{filename}] opened."
+        logi &"Loading [{filename}] for windows ..."        
     else:
-        logi &"Loading [{filename}] for linux ..."
+        logi &"Loading [{filename}] ..."
         result = newFileStream(filename, fmRead)
 
 proc readAsset*(url: string): string =

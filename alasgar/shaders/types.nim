@@ -65,8 +65,10 @@ type
         ALBEDO*: Vec3
         SPECULAR*: Vec3
         BACKGROUND*: Vec3
+        AMBIENT*: Vec3
         EMISSIVE*: Vec3
         OPACITY*: float
+        PBR*: bool
         METALLIC*: float
         ROUGHNESS*: float
         ALPHA*: float                # ROUGHNESS²
@@ -78,6 +80,8 @@ type
         AO*: float
         SHININESS*: float
         GGX_MAP_LOD*: float
+        F0*: Vec3
+        F*: Vec3
         P*: Vec3
         N*: Vec3
         V*: Vec3

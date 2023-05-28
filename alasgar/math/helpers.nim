@@ -16,6 +16,7 @@ const LOG2*: float32 = 1.442695
 # Scalar
 func inverseLerp*(a, b, v: float32): float32 = (v - a) / (b - a)
 func lerp*(a, b, v: float32): float32 = a * (1.0 - v) + b * v
+func lerp*(a: Vec3, b: Vec3, v: float32): Vec3 = a * (1.0 - v) + b * v
 func map*(x, A, B, C, D: float32): float32 = (x - A) / (B - A) * (D - C) + C
 
 # Vec3

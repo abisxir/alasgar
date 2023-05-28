@@ -2,19 +2,29 @@ import strformat
 
 import sdl2
 
-import glad
+when defined(windows):
+    import gl460
+    export gl460
+elif defined(macosx):
+    import gl410
+    export gl410
+elif defined(emscripten):
+    import gles320
+    export gles320
+else:
+    import gles300
+    export gles300
 
-export glad
-
-proc printGlDebug(
-    source, typ: GLenum,
-    id: GLuint,
-    severity: GLenum,
-    length: GLsizei,
-    message: ptr GLchar,
-    userParam: pointer
-    ) {.stdcall.} =
-    echo &"source={source.uint32:0x} type={typ.uint32:0x} id={id} severity={severity.uint32:0x}: {$message}"
+when defined(glDebugMessageCallback):
+    proc printGlDebug(
+        source, typ: GLenum,
+        id: GLuint,
+        severity: GLenum,
+        length: GLsizei,
+        message: ptr GLchar,
+        userParam: pointer
+        ) {.stdcall.} =
+        echo &"source={source.uint32:0x} type={typ.uint32:0x} id={id} severity={severity.uint32:0x}: {$message}"
 
 
 proc logContextInfo() =
@@ -36,25 +46,20 @@ proc logContextInfo() =
     echo &"  Max varying vectors: {maxVaryingVectors}"
 
 
+const
+    OPENGL_PROFILE* = when defined(macosx) or defined(windows): SDL_GL_CONTEXT_PROFILE_CORE else: SDL_GL_CONTEXT_PROFILE_ES
+    OPENGL_MAJOR_VERSION* = when defined(macosx) or defined(windows): 4 else: 3
+    OPENGL_MINOR_VERSION* = when defined(macosx): 1 elif defined(windows): 6 elif defined(emscripten): 0 else: 2
+    OPENGL_SHADER_VERSION* = when defined(macosx): "410" elif defined(windows): "460" elif defined(emscripten): "300 es" else: "320 es"
+
 proc createOpenGLContext*(window: WindowPtr): GlContextPtr =
     # Initialize opengl context
-    when defined(macosx):
-        discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE)
-        discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4)
-        discard glSetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1)
-        discard glSetAttribute(SDL_GL_RED_SIZE, 8)
-        discard glSetAttribute(SDL_GL_GREEN_SIZE, 8)
-        discard glSetAttribute(SDL_GL_BLUE_SIZE, 8)
-        discard glSetAttribute(SDL_GL_ALPHA_SIZE, 8)
-        discard glSetAttribute(SDL_GL_STENCIL_SIZE, 8)
-    else:
-        discard glSetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1)
-        discard glSetAttribute(SDL_GL_DOUBLEBUFFER, 1)
-        discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES)
-        discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3)
-        discard glSetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0)
+    discard glSetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1)
+    discard glSetAttribute(SDL_GL_DOUBLEBUFFER, 1)
+    discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, OPENGL_PROFILE)
+    discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, OPENGL_MAJOR_VERSION.cint)
+    discard glSetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, OPENGL_MINOR_VERSION.cint)
     
-
     # Creates opengl context
     result = glCreateContext(window)
 
@@ -66,7 +71,10 @@ proc createOpenGLContext*(window: WindowPtr): GlContextPtr =
     discard glMakeCurrent(window, result)
 
     # Loads opengl es
-    discard gladLoadGLES2(glGetProcAddress)
+    when defined(windows) or defined(macosx):
+        discard gladLoadGL(glGetProcAddress)
+    else:
+        discard gladLoadGLES2(glGetProcAddress)
 
     # Logs context info
     logContextInfo()
@@ -76,3 +84,5 @@ proc createOpenGLContext*(window: WindowPtr): GlContextPtr =
         glDebugMessageCallback(printGlDebug, nil)
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS)
         glEnable(GL_DEBUG_OUTPUT)
+
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS)

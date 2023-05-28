@@ -1,7 +1,3 @@
-import hashes
-#import threadpool
-#{.experimental: "parallel".}
-
 import ../core
 import ../system
 import ../components/camera

@@ -83,14 +83,14 @@ proc packMaterial*(drawable: ptr Drawable) =
             drawable.materialVersion = 0
             drawable.materialPack[0] = packUnorm4x8(1, 1, 1, 1)
             drawable.materialPack[1] = packUnorm4x8(1, 1, 1, 0)
-            drawable.materialPack[2] = packUnorm4x8(1.0, 1.0, 0.1, 1.0)
+            drawable.materialPack[2] = packUnorm4x8(1, 1, 1, 1)
             drawable.materialPack[3] = packUnorm4x8(1, 1, 1, 1)
             drawable.spritePack = vec4(0, 0, 0, 0)
     else:
         let material = drawable.material
         if drawable.materialVersion != drawable.material.version:
             drawable.materialVersion = material.version
-            drawable.materialPack[0] = packUnorm4x8(material.diffuseColor.r, material.diffuseColor.g, material.diffuseColor.b, material.entity.opacity)
+            drawable.materialPack[0] = packUnorm4x8(material.diffuseColor.r, material.diffuseColor.g, material.diffuseColor.b, material.diffuseColor.a)
             drawable.materialPack[1] = packUnorm4x8(material.specularColor.r, material.specularColor.g, material.specularColor.b, material.uvChannels.float32 / 63.float32)
             drawable.materialPack[2] = packUnorm4x8(material.emissiveColor.r, material.emissiveColor.g, material.emissiveColor.b, material.availableMaps.float32 / 63.float32)
             drawable.materialPack[3] = packUnorm4x8(material.metallic, material.roughness, material.reflectance, material.ao)

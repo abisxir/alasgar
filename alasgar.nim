@@ -74,7 +74,9 @@ export core,
        fxaa,
        bloom,
        ssao,
-       hbao
+       hbao,
+       config,
+       gpu
 
 
 proc window*(title: string, width, height: int, fullscreen: bool=false, resizeable: bool=false) =

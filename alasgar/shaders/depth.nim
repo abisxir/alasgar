@@ -13,13 +13,13 @@ proc depthVertex*(iPosition: Layout[0, Vec3],
                   iSprite: Layout[10, Vec4],
                   iSkin: Layout[11, Vec4],
                   uSkinMap: Layout[15, Uniform[Sampler2D]],
-                  ENV: Uniform[Environment],
+                  ENVIRONMENT: Uniform[Environment],
                   SHADOW_MVP: Uniform[Mat4],
                   DEPTH: var float,
                   gl_Position: var Vec4) =
     
     let
-        model = applySkinTransform(uSkinMap, ENV, iModel, iBone, iWeight, iSkin)
+        model = applySkinTransform(uSkinMap, ENVIRONMENT, iModel, iBone, iWeight, iSkin)
         fragmentPosition = model * vec4(iPosition, 1)
         lightPosition = SHADOW_MVP * fragmentPosition
         nz = lightPosition.z / lightPosition.w

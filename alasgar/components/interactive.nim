@@ -2,7 +2,6 @@ import ../core
 import ../system
 import ../physics/collision
 import ../physics/ray
-import ../physics/collision
 import ../render/gpu
 import collision as collision_component
 import camera

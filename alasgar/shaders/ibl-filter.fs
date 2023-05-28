@@ -11,8 +11,6 @@ const int LAMBERTIAN = 0;
 const int cGGX = 1;
 const int CHARLIE = 2;
 
-
-//layout(push_constant) uniform FilterParameters {
 uniform float u_roughness;
 uniform int u_sample_count;
 uniform int u_width;
@@ -21,7 +19,6 @@ uniform int u_distribution; // enum
 uniform int u_current_face;
 uniform int u_is_generating_lut;
 
-//layout (location = 0) in vec2 inUV;
 in vec2 UV;
 
 

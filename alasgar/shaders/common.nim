@@ -4,7 +4,7 @@ import compile
 import types
 import ../math/helpers
 
-export HALF_PI, ONE_OVER_PI, LOG2, EPSILON, compile
+export HALF_PI, ONE_OVER_PI, LOG2, EPSILON, compile, types
 
 const OPACITY_CUTOFF* = 0.01
 const LIGHT_TYPE_DIRECTIONAL* = 0
@@ -31,11 +31,11 @@ proc pow2*(v: float): float = v * v
 proc saturate*(v: float): float = clamp(v, EPSILON, 1.0)
 
 #when defined(emscripten):
-#    proc unpackUnorm4x8(i: uint32): Vec4 =cvec4(
-#        float(i and 0xff) / 255.0,
-#        float(i / 0x100 and 0xff) / 255.0,
-#        float(i / 0x10000 and 0xff) / 255.0,
-#        float(i / 0x1000000) / 255.0);
+#    proc unpackUnorm4x8(i: uint32): Vec4 = vec4(
+#        float(i and 0xff.uint32) / 255.0,
+#        float(i / 0x100.uint32 and 0xff.uint32) / 255.0,
+#        float(i / 0x10000.uint32 and 0xff.uint32) / 255.0,
+#        float(i / 0x1000000.uint32) / 255.0);
 
 
 proc calculateUV*(uv, sprite: Vec4): Vec2 =
@@ -53,13 +53,13 @@ proc getNormalMap*(P, N: Vec3, UV: Vec2, NORMAL_MAP: Sampler2D): Vec3 =
         dp2: Vec3 = dFdy(P)
         duv1: Vec2 = dFdx(UV)
         duv2: Vec2 = dFdy(UV)
-        dp2perp: Vec3 = cross(dp2, result)
-        dp1perp: Vec3 = cross(result, dp1)
+        dp2perp: Vec3 = cross(dp2, N)
+        dp1perp: Vec3 = cross(N, dp1)
         T: Vec3 = dp2perp * duv1.x + dp1perp * duv2.x
         B: Vec3 = dp2perp * duv1.y + dp1perp * duv2.y
         invmax: float = inversesqrt(max(dot(T, T), dot(B, B)))
-        TBN: Mat3 = mat3(T * invmax, B * invmax, result)
-        map: Vec3 = texture(NORMAL_MAP, UV).rgb * 2.007874 - 1.007874
+        TBN: Mat3 = mat3(T * invmax, B * invmax, N)
+        map: Vec3 = texture(NORMAL_MAP, UV).rgb * 2.0 - 1.0
     
     result = normalize(TBN * map)
 
@@ -71,4 +71,8 @@ proc getFogAmount*(density: float, position: Vec3): float =
         result = exp2(-density * density * distance * distance * LOG2)
         result = clamp(result, 0.0, 1.0)
 
-proc isPBR*(FRAGMENT: Fragment): bool = FRAGMENT.ROUGHNESS <= 0.0 and FRAGMENT.METALLIC <= 0.0
+proc isPBR*(FRAGMENT: Fragment): bool = FRAGMENT.ROUGHNESS >= 0.0 or FRAGMENT.METALLIC >= 0.0
+proc linearToGamma*(color: Vec3): Vec3 = sqrt(color)
+proc gammaToLinear*(color: Vec3): Vec3 = color * color
+proc linearToGamma*(color: Vec4): Vec4 = vec4(sqrt(color.rgb), color.a)
+proc gammaToLinear*(color: Vec4): Vec4 = vec4(color.rgb * color.rgb, color.a)

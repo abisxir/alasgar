@@ -12,7 +12,7 @@ installFiles = @["alasgar.nim"]
 
 # Dependencies
 requires "sdl2"
-requires "opengl"
+#requires "opengl"
 requires "chroma"
 requires "vmath"
 requires "stb_image"

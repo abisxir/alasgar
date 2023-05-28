@@ -75,7 +75,7 @@ method process*(sys: SkinSystem, scene: Scene, input: Input, delta: float32, fra
         for shader in graphics.context.shaders:
             use(shader)
             use(shader, sys.texture, "SKIN_MAP", 0)
-            shader["ENV.SKIN_SAMPLER_WIDTH"] = sys.width
+            shader["ENVIRONMENT.SKIN_SAMPLER_WIDTH"] = sys.width
 
             
 method cleanup(sys: SkinSystem) =
