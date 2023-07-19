@@ -98,7 +98,7 @@ If everything was right, you will see an empty window with the given size. Run i
 nim c -r main.nim
 ```
 
-![](https://abisxir.github.io/alasgar/step1/build)
+Check it here [GitHub](https://abisxir.github.io/alasgar/step1/build).
 
 When you create a window by defult it runs in window mode, you can easily enable fullscreen mode:
 ```nim
