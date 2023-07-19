@@ -3,7 +3,7 @@ import ../input
 import ../system
 
 type
-    ScriptProc = proc(component: ScriptComponent, input: Input, delta: float32) {.closure.}
+    ScriptProc = proc(component: ScriptComponent) {.closure.}
     ScriptComponent* = ref object of Component
         update*: ScriptProc
         inactive*: bool
@@ -13,7 +13,7 @@ type
 
 # Component implementation
 proc newScriptComponent*(update: ScriptProc): ScriptComponent = ScriptComponent(update: update)
-proc addScript*(e: Entity, update: ScriptProc) = addComponent(e, newScriptComponent(update))
+proc program*(e: Entity, update: ScriptProc) = addComponent(e, newScriptComponent(update))
 
 # System implementation
 proc newScriptSystem*(): ScriptSystem =
@@ -23,9 +23,10 @@ proc newScriptSystem*(): ScriptSystem =
 
 proc updateScript(script: ScriptComponent, i: Input, d: float32) =
     if script.update != nil and not script.inactive:
-        script.update(script, i, d)
+        script.update(script)
 
 
-method process*(sys: ScriptSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
+method process*(sys: ScriptSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
+    {.warning[LockLevel]:off.}
     forEachComponent(scene, input, delta, updateScript)
 

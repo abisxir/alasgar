@@ -593,3 +593,10 @@ void main() {
   OUT_COLOR = COLOR;  
 }
 
+/*
+vec3 getEnvironmentReflection(vec3 R, float roughness) {
+  vec3 prefilteredColor = texture(u_prefilter_map, R, roughness).rgb;
+  vec2 brdf = texture(u_brdf_lut, vec2(max(dot(NORMAL, V), 0.0), roughness)).rg;
+  return prefilteredColor * (f0 + (1.0 - f0) * brdf.x) * brdf.y;
+}
+*/

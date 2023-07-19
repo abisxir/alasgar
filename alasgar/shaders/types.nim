@@ -27,6 +27,7 @@ type
         FOG_DENSITY*: float
         FOG_GRADIENT*: float
         MIP_COUNT*: float
+        INTENSITY*: float
         HAS_ENV_MAP*: int
         LIGHTS_COUNT*: int
         SKIN_SAMPLER_WIDTH*: int
@@ -55,12 +56,12 @@ type
         NORMALIZED_DIRECTION*: Vec3
         LUMINANCE*: float 
         RANGE*: float 
-        INTENSITY*: float
         INNER_CUTOFF_COS*: float
         OUTER_CUTOFF_COS*: float
         TYPE*: int
-        DEPTH_MAP*: int
-        SHADOW_MAP*: Mat4
+        DEPTH_MAP_LAYER*: int
+        SHADOW_MVP*: Mat4
+        SHADOW_BIAS*: float
     Fragment* = object
         ALBEDO*: Vec3
         SPECULAR*: Vec3
@@ -79,16 +80,13 @@ type
         REFLECTANCE*: float
         AO*: float
         SHININESS*: float
-        GGX_MAP_LOD*: float
         F0*: Vec3
-        F*: Vec3
-        P*: Vec3
+        POSITION*: Vec3
         N*: Vec3
         V*: Vec3
         R*: Vec3
         NoV*: float
         FOG_AMOUNT*: float
-
 
 proc hasMap(m: Material, flag: int): bool = 
     let flags = uint(round(m.EMISSIVE_COLOR.a * 63.0))
@@ -98,7 +96,6 @@ proc hasMap(m: Material, flag: int): bool =
 proc getUvChannel(m: Material, flag: int): uint = 
     let flags = uint(round(m.SPECULAR_COLOR.a * 63.0))
     result = flags and flag.uint
-
 
 template `METALLIC`*(m: Material): float = m.PBR.r
 template `ROUGHNESS`*(m: Material): float = m.PBR.g

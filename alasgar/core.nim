@@ -11,13 +11,14 @@ import input
 import mesh
 import texture
 import shaders/base
+import shaders/forward
 
 export utils, input, mesh, texture, config
 
 type
     Component* = ref object of RootObj
-        version*: int16
-        entity: Entity
+        version: int16
+        entity {.cursor.} : Entity
 
     ContainerBase = ref object of RootObj
         entities: seq[Entity]
@@ -40,8 +41,8 @@ type
         layer*: int32
         opacity*: float32
         scene: Scene
-        transform: TransformComponent
-        parent: Entity
+        transform {.cursor.} : TransformComponent
+        parent {.cursor.} : Entity
         children: seq[Entity]
         components: seq[(Component, ContainerBase)]
         visible: bool
@@ -83,9 +84,9 @@ type
         availableMaps: uint32
         uvChannels: uint32
 
-        vframes: int32
-        hframes: int32
-        frame: int32
+        vframes: int
+        hframes: int
+        frame: int
         frameSize: Vec2
         frameOffset: Vec2
         castShadow*: bool
@@ -140,6 +141,10 @@ proc newShaderComponent*(instance: Shader): ShaderComponent =
     new(result)
     result.instance = instance
 
+template newShaderComponent*(vx, fs: untyped): ShaderComponent = newShaderComponent(newSpatialShader(vx, fs))
+template newVertexShaderComponent*(vx: untyped): ShaderComponent = newShaderComponent(vx, mainFragment)
+template newFragmentShaderComponent*(fs: untyped): ShaderComponent = newShaderComponent(mainVertex, fs)
+
 # Entity implmentation
 proc `$`*(e: Entity): string = &"{e.id}:{e.name}"
 proc findDrawable(scene: Scene, mesh: MeshComponent): ptr Drawable =
@@ -152,17 +157,21 @@ proc findDrawable(scene: Scene, mesh: MeshComponent): ptr Drawable =
 proc updateDrawable(e: Entity, c: Component) =
     # Handles drawables
     if c of MeshComponent:
-        let mesh = cast[MeshComponent](c)
-        let material = getComponent[MaterialComponent](e)
-        let skin = getComponent[SkinComponent](e)
-        let shader = getComponent[ShaderComponent](e)
-        add(e.scene.drawables,
-            Drawable(
+        var 
+            mesh = cast[MeshComponent](c)
+            drawable = findDrawable(e.scene, mesh)
+        if drawable != nil:
+            drawable.mesh = mesh
+            drawable.material = getComponent[MaterialComponent](e)
+            drawable.skin = getComponent[SkinComponent](e)
+            drawable.shader = getComponent[ShaderComponent](e)
+        else:
+            add(e.scene.drawables, Drawable(
                 transform: e.transform,
-                mesh: mesh,
-                material: material,
-                skin: skin,
-                shader: shader,
+                mesh: cast[MeshComponent](c),
+                material: getComponent[MaterialComponent](e),
+                skin: getComponent[SkinComponent](e),
+                shader: getComponent[ShaderComponent](e),
                 transformVersion: -1.int16,
                 materialVersion: -1.int16
             ))
@@ -278,8 +287,6 @@ proc rebase*(e: Entity, parent: Mat4, parentIsDirty: bool): var Mat4 =
 
     result = e.transform.world
 
-
-
 proc setAttach(e: Entity, flag: bool) =
     if not isEmptyOrWhitespace(e.tag):
         if flag:
@@ -320,7 +327,6 @@ proc getChild*(n: Entity, name: string): Entity =
         if child.name == name:
             result = child
             break
-
 
 iterator `children`*(n: Entity): Entity =
     for child in n.children:
@@ -384,6 +390,7 @@ proc findEntityByTag*(n: Entity, tag: string): seq[Entity] = findEntityByTag(
         n.scene, tag)
 
 # Component implementation
+proc `version`*(c: Component): int16 = c.version 
 proc `inc`(c: Component) = c.version = if c.version == high(int16): 0.int16 else: c.version + 1.int16
 func `transform`*(c: Component): TransformComponent = c.entity[].transform
 func `entity`*(c: Component): Entity = c.entity
@@ -633,18 +640,13 @@ proc `globalRotation=`*(t: TransformComponent, r: Quat) =
     else:
         var pr = t.parent.globalRotation
         t.rotation = inverse(pr) * r
+        #t.rotation = mult(inverse(pr) , r)
     markDirty(t)
 
 proc lookAt*(t: TransformComponent, target: Vec3, up: Vec3 = VEC3_UP) =
-    t.globalRotation = quat(inverse(lookAt(target, t.globalPosition, up)))
-    #var direction = target - t.transform.globalPosition
-    #t.globalRotation = lookAt(direction)
-    markDirty(t)
+    t.globalRotation = quat(lookAt(t.globalPosition, target, up))
 
-
-proc lookAt*(t: TransformComponent, target: TransformComponent,
-        up: Vec3 = VEC3_UP) =
-    lookAt(t, target.globalPosition, up)
+proc lookAt*(t: TransformComponent, target: TransformComponent, up: Vec3 = VEC3_UP) = lookAt(t, target.globalPosition, up)
 
 proc `world=`*(t: TransformComponent, world: Mat4) =
     t.world = world
@@ -700,6 +702,13 @@ func updateAvailableMaps(m: MaterialComponent) =
         if m.emissiveMap.uvChannel == 1:
             m.uvChannels = m.uvChannels or emissiveMaterialMap.uint32
 
+func updateFrame(material: MaterialComponent) =
+    if material.hframes > 0 and material.vframes > 0:
+        let fxy = vec2(float32(material.frame mod material.hframes), float32(material.vframes - (material.frame div material.hframes) - 1))
+        material.frameSize = vec2(1.float32 / material.hframes.float32, 1.float32 / material.vframes.float32)
+        material.frameOffset = vec2(fxy.x * material.frameSize.x, fxy.y * material.frameSize.y)    
+        inc(material)
+
 func newPBRMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
         specularColor: Color=COLOR_WHITE, 
         emissiveColor: Color=COLOR_BLACK,
@@ -708,9 +717,9 @@ func newPBRMaterialComponent*(diffuseColor: Color=COLOR_WHITE,
         roughness: float32 = 1.0,
         reflectance: float32 = 1.0,
         ao: float32 = 1.0,
-        frame: int32=0,
-        vframes: int32=1,
-        hframes: int32=1,
+        frame: int=0,
+        vframes: int=1,
+        hframes: int=1,
         castShadow: bool=false): MaterialComponent =
     new(result)
     result.diffuseColor = diffuseColor
@@ -726,12 +735,13 @@ func newPBRMaterialComponent*(diffuseColor: Color=COLOR_WHITE,
     result.roughnessMap = roughnessMap
     result.aoMap = aoMap
     result.emissiveMap = emissiveMap
+    result.castShadow = castShadow
     result.frame = max(0, frame)
     result.vframes = max(1, vframes)
     result.hframes = max(1, hframes)
-    result.frameSize = vec2(1, 1)
-    result.frameOffset = vec2(0, 0)
-    result.castShadow = castShadow
+    updateFrame(result)
+    #result.frameSize = vec2(1, 1)
+    #result.frameOffset = vec2(0, 0)
     updateAvailableMaps(result)
 
 
@@ -740,25 +750,29 @@ proc newMaterialComponent*(diffuseColor: Color=COLOR_WHITE,
         emissiveColor: Color=COLOR_BLACK,
         albedoMap: Texture=nil, 
         normalMap: Texture=nil, 
-        shininess: float32 = 150.0 / 255.0,
-        frame: int32=0,
-        vframes: int32=1,
-        hframes: int32=1,
+        aoMap: Texture=nil,
+        shininess: float32 = 128.0,
+        ao: float32 = 1.0,
+        frame: int=0,
+        vframes: int=1,
+        hframes: int=1,
         castShadow: bool=false): MaterialComponent =
     result = newPBRMaterialComponent(
         diffuseColor=diffuseColor,
         specularColor=specularColor,
         albedoMap=albedoMap,
         normalMap=normalMap,
+        aoMap=aoMap,
         frame=frame,
         vframes=vframes,
         hframes=hframes,
         castShadow=castShadow,
         metallic=0.0,
         roughness=0.0,
-        reflectance=shininess,
+        ao=ao,
+        reflectance=clamp(shininess, 1.0, 255.0) / 255.0,
     )
-    result.reflectance = clamp(result.reflectance, 0.0, 255.0)
+    result.reflectance = clamp(result.reflectance, 0.0, 1.0)
 
 func `diffuseColor=`*(m: MaterialComponent, value: Color) =
     m.diffuseColor = value
@@ -782,6 +796,10 @@ func `metallic=`*(m: MaterialComponent, value: float32) =
 
 func `reflectance=`*(m: MaterialComponent, value: float32) =
     m.reflectance = value
+    inc(m)
+
+func `shininess=`*(m: MaterialComponent, value: float32) =
+    m.reflectance = clamp(value, 1.0, 255.0) / 255.0
     inc(m)
 
 func `ao=`*(m: MaterialComponent, value: float32) =
@@ -828,7 +846,7 @@ template `diffuseColor`*(m: MaterialComponent): Color = m.diffuseColor
 template `specularColor`*(m: MaterialComponent): Color = m.specularColor
 template `emissiveColor`*(m: MaterialComponent): Color = m.emissiveColor
 template `roughness`*(m: MaterialComponent): float32 = m.roughness
-template `shininess`*(m: MaterialComponent): float32 = m.roughness
+template `shininess`*(m: MaterialComponent): float32 = m.reflectance * 255.0
 template `metallic`*(m: MaterialComponent): float32 = m.metallic
 template `reflectance`*(m: MaterialComponent): float32 = m.reflectance
 template `ao`*(m: MaterialComponent): float32 = m.ao
@@ -838,13 +856,6 @@ template `hframes`*(material: MaterialComponent): int = material.hframes
 template `availableMaps`*(material: MaterialComponent): uint32 = material.availableMaps
 template `uvChannels`*(material: MaterialComponent): uint32 = material.uvChannels
 
-func update(material: MaterialComponent) =
-    if material.hframes > 0 and material.vframes > 0:
-        let fxy = vec2(float32(material.frame mod material.hframes), float32(material.vframes - (material.frame div material.hframes) - 1))
-        material.frameSize = vec2(1.float32 / material.hframes.float32, 1.float32 / material.vframes.float32)
-        material.frameOffset = vec2(fxy.x * material.frameSize.x, fxy.y * material.frameSize.y)    
-        inc(material)
-
 template `frame=`*(material: MaterialComponent, value: int) =
     material.frame = value
     if material.frame < 0:
@@ -852,17 +863,17 @@ template `frame=`*(material: MaterialComponent, value: int) =
     let framesCount = max(0, (material.hframes * material.vframes) - 1)
     if material.frame > framesCount:
         material.frame = framesCount
-    update(material)
+    updateFrame(material)
 
 template `vframes=`*(material: MaterialComponent, value: int) =
     if value > 0:
         material.vframes = value
-        update(material) 
+        updateFrame(material) 
 
 template `hframes=`*(material: MaterialComponent, value: int) =
     if value > 0:
         material.hframes = value
-        update(material) 
+        updateFrame(material) 
 
 template `frameSize`*(material: MaterialComponent): Vec2 = material.frameSize
 template `frameOffset`*(material: MaterialComponent): Vec2 = material.frameOffset

@@ -11,31 +11,28 @@ import ../texture
 import compile, forward, effect
 
 type
+    ShaderValueKind* = enum
+        svUint, svInt, svFloat, svVec2, svVec3, svVec4, svColor, svMat3, svMat4, svTexture
+    ShaderValue {.union.} = object
+        uintVal: uint32
+        intVal: int32
+        floatVal: float32
+        vec2Val: Vec2
+        vec3Val: Vec3
+        vec4Val: Vec4
+        colorVal: Color
+        mat3Val: Mat3
+        mat4Val: Mat4
+        textureVal: Texture
+    ShaderParam = ref object
+        kind: ShaderValueKind
+        value: ShaderValue
+        extra: int
     Shader* = ref object
         program*: GLuint
         map: Table[string, GLint]
         params: Table[string, ShaderParam]
         source: string
-
-    ShaderParam* = ref object of RootObj
-        key: string  
-    ShaderParamInt* = ref object of ShaderParam
-        value: int32
-    ShaderParamFloat* = ref object of ShaderParam
-        value: float32
-    ShaderParamVec2* = ref object of ShaderParam
-        value: Vec2
-    ShaderParamVec3* = ref object of ShaderParam
-        value: Vec3
-    ShaderParamVec4* = ref object of ShaderParam
-        value: Vec4
-    ShaderParamColor* = ref object of ShaderParam
-        value: Color
-    ShaderParamMat4* = ref object of ShaderParam
-        value: Mat4
-    ShaderParamTexture* = ref object of ShaderParam
-        value: Texture
-        slot: int
 
 proc destroyShader(shader: Shader) =
     if shader.program != 0:
@@ -135,15 +132,14 @@ proc createProgram*(vs, fs: string,
 
     let linked = isProgramLinked(result)
     if not linked:
-        echo(vs)
-        echo(fs)
+        #echo(vs)
+        #echo(fs)
         halt &"Could not link: {programInfoLog(result)}"
 
 
 proc newShader*(vs, fs: string, attributes: openarray[tuple[index: int, name: string]]): Shader =
     new(result)
     let shaderProfile = &"#version {OPENGL_SHADER_VERSION}"
-    
     result.program = createProgram(
         vs.replace("$SHADER_PROFILE$", shaderProfile), 
         fs.replace("$SHADER_PROFILE$", shaderProfile), attributes)
@@ -187,6 +183,9 @@ proc `[]=`*(s: Shader; key: string; value: int) =
     var location = getUniformLocation(s, key)
     glUniform1i location, value.GLint
 
+proc `[]=`*(s: Shader; key: string; value: uint32) =
+    var location = getUniformLocation(s, key)
+    glUniform1ui location, value.GLuint
 
 proc `[]=`*(s: Shader; key: string; value: var Mat4) =
     var location = getUniformLocation(s, key)
@@ -200,116 +199,144 @@ proc `[]=`*(s: Shader, key: string, value: Mat4) =
     var matrix = value
     s[key] = matrix
 
+proc `[]=`*(s: Shader; key: string; value: var Mat3) =
+    var location = getUniformLocation(s, key)
+    glUniformMatrix3fv location, 1, false, value.caddr
+
+proc `[]=`*(s: Shader, key: string, value: Mat3) =
+    var matrix = value
+    s[key] = matrix
+
 #proc `[]`*(s: Shader, key: string): int = getUniformLocation(s, key).int
 
-method update(p: ShaderParam, shader: Shader) {.base.} = discard
-method update(p: ShaderParamInt, shader: Shader) = shader[p.key] = p.value
-method update(p: ShaderParamFloat, shader: Shader) = shader[p.key] = p.value
-method update(p: ShaderParamVec2, shader: Shader) = shader[p.key] = p.value
-method update(p: ShaderParamVec3, shader: Shader) = shader[p.key] = p.value
-method update(p: ShaderParamVec4, shader: Shader) = shader[p.key] = p.value
-method update(p: ShaderParamColor, shader: Shader) = shader[p.key] = p.value
-method update(p: ShaderParamMat4, shader: Shader) = shader[p.key] = p.value
-method update(p: ShaderParamTexture, shader: Shader) = 
-    shader[p.key] = p.slot
-    unit(p.value, p.slot)
+#method update(p: ShaderParamTexture, shader: Shader) = 
+#    shader[p.key] = p.slot
+#    unit(p.value, p.slot)
+
+proc get*(shader: Shader, key: string, r: var uint32) = r = shader.params[key].value.uintVal
+proc get*(shader: Shader, key: string, r: var int32) = r = shader.params[key].value.intVal
+proc get*(shader: Shader, key: string, r: var int) = r = shader.params[key].value.intVal.int
+proc get*(shader: Shader, key: string, r: var float32) = r = shader.params[key].value.floatVal
+proc get*(shader: Shader, key: string, r: var Vec2) = r = shader.params[key].value.vec2Val
+proc get*(shader: Shader, key: string, r: var Vec3) = r = shader.params[key].value.vec3Val
+proc get*(shader: Shader, key: string, r: var Vec4) = r = shader.params[key].value.vec4Val
+proc get*(shader: Shader, key: string, r: var Mat3) = r = shader.params[key].value.mat3Val
+proc get*(shader: Shader, key: string, r: var Mat4) = r = shader.params[key].value.mat4Val
+proc get*(shader: Shader, key: string, r: var Color) = r = shader.params[key].value.colorVal
+
+proc set*(shader: Shader, key: string, value: uint32) =
+    shader.params[key] = ShaderParam(
+        kind: svUint, 
+        value: ShaderValue(
+            uintVal: value
+        )
+    )
 
 proc set*(shader: Shader, key: string, value: int32) =
-    let param = new(ShaderParamInt)
-    param.key = key
-    param.value = value
-    shader.params[key] = param
+    shader.params[key] = ShaderParam(
+        kind: svInt, 
+        value: ShaderValue(
+            intVal: value
+        )
+    )
 
 proc set*(shader: Shader, key: string, value: int) = set(shader, key, value.int32)
 
-proc get_int*(shader: Shader, key: string): int32 =
-    let param = shader.params[key]
-    result = cast[ShaderParamInt](param).value
-
 proc set*(shader: Shader, key: string, value: float32) =
-    let param = new(ShaderParamFloat)
-    param.key = key
-    param.value = value
-    shader.params[key] = param
-
-proc get_float*(shader: Shader, key: string): float32 =
-    let param = shader.params[key]
-    result = cast[ShaderParamFloat](param).value
+    shader.params[key] = ShaderParam(
+        kind: svFloat, 
+        value: ShaderValue(
+            floatVal: value
+        )
+    )
 
 proc set*(shader: Shader, key: string, value: Vec2) =
-    let param = new(ShaderParamVec2)
-    param.key = key
-    param.value = value
-    shader.params[key] = param
-
-proc get_vec2*(shader: Shader, key: string): Vec2 =
-    let param = shader.params[key]
-    result = cast[ShaderParamVec2](param).value
+    shader.params[key] = ShaderParam(
+        kind: svVec2, 
+        value: ShaderValue(
+            vec2Val: value
+        )
+    )
 
 proc set*(shader: Shader, key: string, value: Vec3) =
-    let param = new(ShaderParamVec3)
-    param.key = key
-    param.value = value
-    shader.params[key] = param
-
-proc get_vec3*(shader: Shader, key: string): Vec3 =
-    let param = shader.params[key]
-    result = cast[ShaderParamVec3](param).value
+    shader.params[key] = ShaderParam(
+        kind: svVec3, 
+        value: ShaderValue(
+            vec3Val: value
+        )
+    )
 
 proc set*(shader: Shader, key: string, value: Vec4) =
-    let param = new(ShaderParamVec4)
-    param.key = key
-    param.value = value
-    shader.params[key] = param
-
-proc get_vec4*(shader: Shader, key: string): Vec4 =
-    let param = shader.params[key]
-    result = cast[ShaderParamVec4](param).value
+    shader.params[key] = ShaderParam(
+        kind: svVec4, 
+        value: ShaderValue(
+            vec4Val: value
+        )
+    )
 
 proc set*(shader: Shader, key: string, value: Color) =
-    let param = new(ShaderParamColor)
-    param.key = key
-    param.value = value
-    shader.params[key] = param
-
-proc get_color*(shader: Shader, key: string): Color =
-    let param = shader.params[key]
-    result = cast[ShaderParamColor](param).value
+    shader.params[key] = ShaderParam(
+        kind: svColor, 
+        value: ShaderValue(
+            colorVal: value
+        )
+    )
 
 proc set*(shader: Shader, key: string, value: Mat4) =
-    let param = new(ShaderParamMat4)
-    param.key = key
-    param.value = value
-    shader.params[key] = param
-
-proc get_mat4*(shader: Shader, key: string): Mat4 =
-    let param = shader.params[key]
-    result = cast[ShaderParamMat4](param).value
+    shader.params[key] = ShaderParam(
+        kind: svMat4, 
+        value: ShaderValue(
+            mat4Val: value
+        )
+    )
 
 proc set*(shader: Shader, key: string, value: Texture, slot: int) =
-    let param = new(ShaderParamTexture)
-    param.key = key
-    param.value = value
-    param.slot = slot
-    shader.params[key] = param
+    shader.params[key] = ShaderParam(
+        kind: svTexture, 
+        value: ShaderValue(
+            textureVal: value
+        ),
+        extra: slot
+    )
 
+proc hasUniform*(shader: Shader, name: string): bool =
+    var location = getUniformLocation(shader, name)
+    result = location >= 0
+
+proc use*(shader: Shader, texture: Texture, name: string, slot: int) =
+    #echo &"Setting [{name}] to [{slot}] for shader [{shader.program}]"
+    var location = getUniformLocation(shader, name)
+    if location >= 0:
+        shader[name] = slot
+        unit(texture, slot)
+
+proc update(shader: Shader, key: string, p: ShaderParam) =
+    case p.kind:
+        of svUint: shader[key] = p.value.uintVal
+        of svInt: shader[key] = p.value.intVal
+        of svFloat: shader[key] = p.value.floatVal
+        of svVec2: shader[key] = p.value.vec2Val
+        of svVec3: shader[key] = p.value.vec3Val
+        of svVec4: shader[key] = p.value.vec4Val
+        of svColor: shader[key] = p.value.colorVal
+        of svMat3: shader[key] = p.value.mat3Val
+        of svMat4: shader[key] = p.value.mat4Val
+        of svTexture: 
+            use(shader, p.value.textureVal, key, p.extra)
 
 proc use*(shader: Shader) =
     glUseProgram(shader.program)
-    for param in values(shader.params):
-        update(param, shader)
-
-proc use*(shader: Shader, texture: Texture, name: string, slot: int) =
-    var location = getUniformLocation(shader, name)
-    if location >= 0:
-        #echo &"Setting [{name}] to [{slot}] in location [{location.int}]" 
-        shader[name] = slot
-        unit(texture, slot)
+    for key, param in pairs(shader.params):
+        update(shader, key, param)
 
 proc destroy*(shader: Shader) = remove(cache, shader)
 proc cleanupShaders*() =
     echo &"Cleaning up [{len(cache)}] shaders..."
     clear(cache)
 
-proc newSpatialShader*(vertexSource: string="", fragmentSource: string=""): Shader = newShader(toGLSL(mainVertex), toGLSL(mainFragment), [])
-proc newCanvasShader*(vertexSource: string="", fragmentSource: string=""): Shader = newShader(toGLSL(effectVertex), toGLSL(effectFragment), [])
+proc newSpatialShader*(): Shader = newShader(toGLSL(mainVertex), toGLSL(mainFragment), [])
+template newSpatialShader*(fs: untyped): Shader = newShader(toGLSL(mainVertex), toGLSL(fs), [])
+template newSpatialShader*(vx, fs: untyped): Shader = newShader(toGLSL(vx), toGLSL(fs), [])
+proc newCanvasShader*(): Shader = newShader(toGLSL(effectVertex), toGLSL(effectFragment), [])
+template newCanvasShader*(fs: untyped): Shader = newShader(toGLSL(effectVertex), toGLSL(fs), [])
+template newCanvasShader*(vx, fs: untyped): Shader = newShader(toGLSL(vx), toGLSL(fs), [])

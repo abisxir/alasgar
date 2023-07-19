@@ -1,51 +1,67 @@
 import types
 import common
-import pbr
+import brdf
 
-proc getLightIntensity(LIGHT: Light, 
-                       FRAGMENT: Fragment, 
-                       pointToLight: Vec3): Vec3 =
-    var intensity: float = 0.0
-        
+proc getLightProps(LIGHT: Light, 
+                   FRAGMENT: Fragment, 
+                   L: var Vec3,
+                   NoL: var float,
+                   intensity: var float) =
     if LIGHT.TYPE == LIGHT_TYPE_DIRECTIONAL:
-        intensity = dot(FRAGMENT.N, -LIGHT.NORMALIZED_DIRECTION) * LIGHT.INTENSITY
-    elif LIGHT.TYPE == LIGHT_TYPE_SPOT:
-        let
-            distance: float = length(pointToLight) 
-            angle = dot(normalize(pointToLight), -LIGHT.NORMALIZED_DIRECTION)
-            luma = LIGHT.LUMINANCE / (distance * distance)
-        intensity = luma * smoothstep(LIGHT.OUTER_CUTOFF_COS, LIGHT.INNER_CUTOFF_COS, angle)
+        L = -LIGHT.NORMALIZED_DIRECTION
+        NoL = dot(FRAGMENT.N, L)
+        intensity = LIGHT.LUMINANCE
     else:
-        let distance: float = length(pointToLight)
-        intensity = LIGHT.LUMINANCE / (distance * distance)
-    
-    result = LIGHT.COLOR * intensity
-
-#proc getIndirectSpecular(FRAGMENT: Fragment, ENVIRONMENT: Environment, GGX_MAP: Sampler2D): Vec3 =
-#    result = ENVIRONMENT.BACKGROUND_COLOR.rgb
-#    if ENVIRONMENT.HAS_ENV_MAP > 0:
-#        result = textureLod(GGX_MAP, FRAGMENT.R, FRAGMENT.GGX_MAP_LOD).rgb    
-
-#proc getEnvironmentReflection(FRAGMENT: Fragment, ENVIRONMENT: Environment, bakedLighting: Vec3): Vec3 =
-#    let 
-#        c: Vec3 = bakedLighting * data.ALBEDO * data.AO
-#        reflection = -normalize(reflect(data.V, data.N))
-#        irradiance = getIndirectSpecular(data, unity_SpecCube0_HDR) * data.AO
-#        surfaceReduction = 1.0 / (data.ALPHA2 + 1.0)
-#        fresnelTerm = pow5(1.0 - saturate(data.NoV))
-#    result = c + surfaceReduction * irradiance * lerp(data.SPECULAR, vec3(data.REFLECTANCE), fresnelTerm)
-
-proc getLight*(LIGHT: Light, FRAGMENT: Fragment, SURFACE: Surface): Vec3 = 
-    var 
-        pointToLight: Vec3 = LIGHT.POSITION - SURFACE.POSITION.xyz
-        L: Vec3 = normalize(pointToLight)
-        H: Vec3 = normalize(FRAGMENT.V + L)
-        NoH = max(dot(FRAGMENT.N, H), 0.0)
+        let 
+            pointToLight = LIGHT.POSITION - FRAGMENT.POSITION
+            distance = length(pointToLight) 
+        L = normalize(pointToLight)
         NoL = max(dot(FRAGMENT.N, L), 0.0)
-        #VoH = max(dot(FRAGMENT.V, H), 0.0)
-        LoH = max(dot(L, H), 0.0)
-        intensity = getLightIntensity(LIGHT, FRAGMENT, pointToLight)
-        light = getCookTorranceV1(FRAGMENT, LIGHT, NoL, NoH, LoH)
+        intensity = LIGHT.LUMINANCE / (distance * distance)
+        if LIGHT.TYPE == LIGHT_TYPE_SPOT:
+            let
+                angle = dot(L, -LIGHT.NORMALIZED_DIRECTION)
+            intensity *= smoothstep(LIGHT.OUTER_CUTOFF_COS, LIGHT.INNER_CUTOFF_COS, angle)
+    intensity *= NoL
 
-    result = intensity * light
 
+proc sampleShadow(POSITION: Vec4,
+                  SHADOW_MVP: Mat4,
+                  SHADOW_BIAS: float,
+                  DEPTH_MAPS: Sampler2DArrayShadow,
+                  DEPTH_MAP_LAYER: int): float =
+    result = 1.0
+    if DEPTH_MAP_LAYER >= 0:
+        let 
+            shadowPosition: Vec4 = SHADOW_MVP * POSITION
+            lightSpacePositionNormalized: Vec4 = shadowPosition / shadowPosition.w
+            lightSpacePosition: Vec4 = lightSpacePositionNormalized * 0.5 + 0.5
+            shadowDepth = texture(DEPTH_MAPS, vec4(lightSpacePosition.xy, DEPTH_MAP_LAYER.float, lightSpacePosition.z))
+        if shadowDepth < SHADOW_BIAS:
+            result = shadowDepth
+
+proc getLight*(LIGHT: Light, FRAGMENT: Fragment, SURFACE: Surface, DEPTH_MAPS: Sampler2DArrayShadow): Vec3 = 
+    var 
+        L: Vec3
+        NoL: float
+        intensity: float
+        shadow: float
+        light: Vec3
+
+    # Calculates    
+    getLightProps(LIGHT, FRAGMENT, L, NoL, intensity)
+    
+    if intensity > 0.0:
+        shadow = sampleShadow(SURFACE.POSITION, LIGHT.SHADOW_MVP, LIGHT.SHADOW_BIAS, DEPTH_MAPS, LIGHT.DEPTH_MAP_LAYER)
+        let
+            H: Vec3 = normalize(FRAGMENT.V + L)
+            NoH = max(dot(FRAGMENT.N, H), 0.0)
+        if isPBR(FRAGMENT):
+            let
+                LoH = max(dot(L, H), 0.0)
+            light = getBRDF(FRAGMENT, LIGHT, NoL, NoH, LoH)
+        else:
+            let
+                VoH = max(dot(FRAGMENT.V, H), 0.0)
+            light = getPhong(FRAGMENT, LIGHT, L, H, NoL, NoH, VoH)
+        result = shadow * light * intensity

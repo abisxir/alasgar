@@ -40,6 +40,11 @@ func cmp(a, b: MaterialComponent): int =
                 result = cmp(a.normalMap, b.normalMap)
         else:
             result = cmp(a.albedoMap, b.albedoMap)
+    if result == 0:
+        if a.castShadow and not b.castShadow:
+            result = -1
+        elif not a.castShadow and b.castShadow:
+            result = 1
 
 proc cmp(a, b: Drawable): int =
     if a.visible != b.visible:
@@ -81,10 +86,10 @@ proc packMaterial*(drawable: ptr Drawable) =
     if drawable.material == nil:
         if drawable.materialVersion != 0: 
             drawable.materialVersion = 0
-            drawable.materialPack[0] = packUnorm4x8(1, 1, 1, 1)
-            drawable.materialPack[1] = packUnorm4x8(1, 1, 1, 0)
-            drawable.materialPack[2] = packUnorm4x8(1, 1, 1, 1)
-            drawable.materialPack[3] = packUnorm4x8(1, 1, 1, 1)
+            drawable.materialPack[0] = packUnorm4x8(0.7, 0.7, 0.7, 1)
+            drawable.materialPack[1] = packUnorm4x8(0.7, 0.7, 0.7, 0)
+            drawable.materialPack[2] = packUnorm4x8(0.1, 0.1, 0.1, 0)
+            drawable.materialPack[3] = packUnorm4x8(0, 0, 0.3, 0)
             drawable.spritePack = vec4(0, 0, 0, 0)
     else:
         let material = drawable.material
@@ -95,10 +100,8 @@ proc packMaterial*(drawable: ptr Drawable) =
             drawable.materialPack[2] = packUnorm4x8(material.emissiveColor.r, material.emissiveColor.g, material.emissiveColor.b, material.availableMaps.float32 / 63.float32)
             drawable.materialPack[3] = packUnorm4x8(material.metallic, material.roughness, material.reflectance, material.ao)
             drawable.spritePack = vec4(material.frameSize.x, material.frameSize.y, material.frameOffset.x, material.frameOffset.y) 
-
-        if material.albedoMap != nil and drawable.mesh.version != drawable.meshVersion and drawable.mesh of SpriteComponent:
-            drawable.meshVersion = drawable.mesh.version
-            #drawable.extra[6] = packSnorm2x16(material.albedoMap.ratio)
+        #if material.albedoMap != nil and drawable.mesh.version != drawable.meshVersion and drawable.mesh of SpriteComponent:
+        #    drawable.meshVersion = drawable.mesh.version
     if drawable.skin != nil:
         drawable.skinPack = vec4(drawable.skin.count.float32, drawable.skin.offset.float32, 0, 0)
     else:
@@ -114,7 +117,7 @@ func getTextureHash(d: ptr Drawable): Hash =
     if d.material != nil and d.material.albedoMap != nil:
         result = hash(d.material.albedoMap)
 
-method process*(sys: PrepareSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
+method process*(sys: PrepareSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     if scene.root != nil:
         # Considers all the lines
         for c in iterateComponents[LineComponent](scene):

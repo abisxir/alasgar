@@ -1,0 +1,16 @@
+FROM emscripten/emsdk as base
+
+RUN apt update
+RUN apt install -y vim
+WORKDIR /opt
+RUN wget https://nim-lang.org/download/nim-1.6.14-linux_x64.tar.xz
+RUN tar -xf nim-1.6.14-linux_x64.tar.xz
+RUN mv nim-1.6.14 nim
+RUN ln -s /opt/nim/bin/nim /usr/local/bin/nim
+RUN ln -s /opt/nim/bin/nimble /usr/local/bin/nimble
+RUN nimble install alasgar
+
+FROM base as build
+WORKDIR /src
+COPY src /src
+RUN nim c -d:emscripten -d:noSignalHandlers -d:release main.nim

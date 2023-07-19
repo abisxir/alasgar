@@ -175,32 +175,32 @@ proc toTextureParams(document: Document, sampler: Option[int]): (GLenum, GLenum,
     if sampler.isSome:
         let props = document.samplers.get[sampler.get]
         if props.wrapT.isSome:
-            wrapT = case props.wrapT.get.FilterType:
-                of filterTypeClampToEdge: GL_CLAMP_TO_EDGE
-                of filterTypeRepeat: GL_REPEAT
-                of filterTypeMirroredRepeat: GL_MIRRORED_REPEAT
+            wrapT = case props.wrapT.get:
+                of filterTypeClampToEdge.int: GL_CLAMP_TO_EDGE
+                of filterTypeRepeat.int: GL_REPEAT
+                of filterTypeMirroredRepeat.int: GL_MIRRORED_REPEAT
                 else: GL_CLAMP_TO_EDGE
         if props.wrapS.isSome:
-            wrapS = case props.wrapT.get.FilterType:
-                of filterTypeClampToEdge: GL_CLAMP_TO_EDGE
-                of filterTypeRepeat: GL_REPEAT
-                of filterTypeMirroredRepeat: GL_MIRRORED_REPEAT
+            wrapS = case props.wrapT.get:
+                of filterTypeClampToEdge.int: GL_CLAMP_TO_EDGE
+                of filterTypeRepeat.int: GL_REPEAT
+                of filterTypeMirroredRepeat.int: GL_MIRRORED_REPEAT
                 else: GL_CLAMP_TO_EDGE
         if props.minFilter.isSome:
-            minFilter = case props.minFilter.get.FilterType:
-                of filterTypeLinear: GL_LINEAR
-                of filterTypeLinearMipmapLinear: GL_LINEAR_MIPMAP_LINEAR
-                of filterTypeLinearMipmapNearst: GL_LINEAR_MIPMAP_NEAREST
-                of filterTypeNearstMipmapLinear: GL_NEAREST_MIPMAP_LINEAR
-                of filterTypeNearstMipmapNearst: GL_NEAREST_MIPMAP_NEAREST
+            minFilter = case props.minFilter.get:
+                of filterTypeLinear.int: GL_LINEAR
+                of filterTypeLinearMipmapLinear.int: GL_LINEAR_MIPMAP_LINEAR
+                of filterTypeLinearMipmapNearst.int: GL_LINEAR_MIPMAP_NEAREST
+                of filterTypeNearstMipmapLinear.int: GL_NEAREST_MIPMAP_LINEAR
+                of filterTypeNearstMipmapNearst.int: GL_NEAREST_MIPMAP_NEAREST
                 else: GL_NEAREST
         if props.magFilter.isSome:
-            magFilter = case props.magFilter.get.FilterType:
-                of filterTypeLinear: GL_LINEAR
-                of filterTypeLinearMipmapLinear: GL_LINEAR_MIPMAP_LINEAR
-                of filterTypeLinearMipmapNearst: GL_LINEAR_MIPMAP_NEAREST
-                of filterTypeNearstMipmapLinear: GL_NEAREST_MIPMAP_LINEAR
-                of filterTypeNearstMipmapNearst: GL_NEAREST_MIPMAP_NEAREST
+            magFilter = case props.magFilter.get:
+                of filterTypeLinear.int: GL_LINEAR
+                of filterTypeLinearMipmapLinear.int: GL_LINEAR_MIPMAP_LINEAR
+                of filterTypeLinearMipmapNearst.int: GL_LINEAR_MIPMAP_NEAREST
+                of filterTypeNearstMipmapLinear.int: GL_NEAREST_MIPMAP_LINEAR
+                of filterTypeNearstMipmapNearst.int: GL_NEAREST_MIPMAP_NEAREST
                 else: GL_NEAREST
 
     return (wrapT, wrapS, wrapT, minFilter, magFilter)

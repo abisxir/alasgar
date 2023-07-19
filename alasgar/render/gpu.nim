@@ -58,8 +58,9 @@ proc initGraphics*(window: WindowPtr,
         echo "* Shadow initialized!"
 
         # Sets vsync to off, if required
-        if not graphics.vsync:
-            discard glSetSwapInterval(0.cint)
+        when not defined(emscripten):
+            if not graphics.vsync:
+                discard glSetSwapInterval(0.cint)
 
         echo "* Graphics initialized!"
 
@@ -74,7 +75,14 @@ proc clear*() =
 
 proc renderToFrameBuffer(view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
     if not isNil(cubemap):
-        render(graphics.skybox, cubemap, view, projection, graphics.context.environmentIntensity)
+        render(
+            graphics.skybox, 
+            cubemap, 
+            view, 
+            projection, 
+            graphics.context.environmentIntensity,
+            graphics.context.environmentBlurrity,
+        )
 
     # Resets render info
     graphics.totalObjects = 0
@@ -105,8 +113,6 @@ proc renderToFrameBuffer(view, projection: Mat4, cubemap: Texture, drawables: va
         if shader != lastShader:
             lastShader = shader
             use(lastShader)
-            #if graphics.shadow.enabled:
-            #    attach(graphics.depthBuffer, lastShader)
 
         if albedo != lastAlbedo:
             lastAlbedo = albedo
@@ -152,6 +158,29 @@ proc renderToFrameBuffer(view, projection: Mat4, cubemap: Texture, drawables: va
 
 
 proc render*(view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
+    for shader in graphics.context.shaders:
+        use(shader)
+        if hasUniform(shader, "SKIN_MAP"):
+            shader["SKIN_MAP"] = 0
+        if hasUniform(shader, "ALBEDO_MAP"):
+            shader["ALBEDO_MAP"] = 1
+        if hasUniform(shader, "NORMAL_MAP"):
+            shader["NORMAL_MAP"] = 2
+        if hasUniform(shader, "METALLIC_MAP"):
+            shader["METALLIC_MAP"] = 3
+        if hasUniform(shader, "ROUGHNESS_MAP"):
+            shader["ROUGHNESS_MAP"] = 4
+        if hasUniform(shader, "AO_MAP"):
+            shader["AO_MAP"] = 5
+        if hasUniform(shader, "EMISSIVE_MAP"):
+            shader["EMISSIVE_MAP"] = 6
+        if hasUniform(shader, "SKYBOX_MAP"):
+            shader["SKYBOX_MAP"] = 7
+        if hasUniform(shader, "DEPTH_MAPS"):
+            shader["DEPTH_MAPS"] = 8
+        if hasUniform(shader, "DEPTH_CUBE_MAPS"):
+            shader["DEPTH_CUBE_MAPS"] = 9
+        
     # If there is shadow casters processes them
     if len(graphics.context.shadowCasters) > 0:
         process(graphics.shadow, graphics.context, drawables)
@@ -178,9 +207,9 @@ proc applyEffects(): Texture =
             swap(source, target)
             use(graphics.effectsFrameBuffer, target, GL_TEXTURE_2D.int, 0, graphics.screenSize.iWidth, graphics.screenSize.iHeight)
             use(shader)
-            use(shader, source, "COLOR_CHANNEL", 4)
-            use(shader, graphics.fb.normal, "NORMAL_CHANNEL", 5)
-            use(shader, graphics.fb.depth, "DEPTH_CHANNEL", 6)
+            use(shader, source, "COLOR_CHANNEL", 0)
+            use(shader, graphics.fb.normal, "NORMAL_CHANNEL", 1)
+            use(shader, graphics.fb.depth, "DEPTH_CHANNEL", 2)
             draw(graphics.effectsFrameBuffer)
         result = target
     else:
@@ -198,12 +227,17 @@ proc swap*() =
     glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
 
     use(graphics.blitShader)
-    use(graphics.blitShader, blitTexture, "COLOR_CHANNEL", 4)
-    use(graphics.blitShader, graphics.fb.normal, "NORMAL_CHANNEL", 5)
-    use(graphics.blitShader, graphics.fb.depth, "DEPTH_CHANNEL", 6)
+    use(graphics.blitShader, blitTexture, "COLOR_CHANNEL", 0)
+    use(graphics.blitShader, graphics.fb.normal, "NORMAL_CHANNEL", 1)
+    use(graphics.blitShader, graphics.fb.depth, "DEPTH_CHANNEL", 2)
     glDrawArrays(GL_TRIANGLES, 0, 3)
-   
+
+
     glSwapWindow(graphics.window)
+
+    glBindRenderbuffer(GL_RENDERBUFFER, 0)
+    glBindFramebuffer(GL_FRAMEBUFFER, 0)
+    detach(blitTexture)
 
 proc cleanupGraphics*() =
     destroy(graphics.skybox)

@@ -51,19 +51,16 @@ htmldocs/
 # Local files
 res/
 Makefile
-main.nim
 main
 shadow
 nakefile
 orto
-orto.nim
+hello
 
 # Build and res direcory
 build/
 art/
 .vscode/
 
-hello
-test
 SDL2.dll
 SDL2_mixer.dll

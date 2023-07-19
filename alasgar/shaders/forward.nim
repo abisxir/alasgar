@@ -1,12 +1,12 @@
 import compile
 import types
 import common
-import skin
-import material
+#import skin
+#import material
 import light
 import vertex
 import fragment
-import pbr
+import ibl
 
 
 proc mainVertex*(POSITION: Layout[0, Vec3], 
@@ -52,15 +52,9 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
                    ROUGHNESS_MAP: Layout[4, Uniform[Sampler2D]],
                    AO_MAP: Layout[5, Uniform[Sampler2D]],
                    EMISSIVE_MAP: Layout[6, Uniform[Sampler2D]],
-                   GGX_MAP: Layout[7, Uniform[SamplerCube]],
-                   DEPTH_MAP0: Layout[8, Uniform[Sampler2D]],
-                   DEPTH_MAP1: Layout[9, Uniform[Sampler2D]],
-                   DEPTH_MAP2: Layout[10, Uniform[Sampler2D]],
-                   DEPTH_MAP3: Layout[11, Uniform[Sampler2D]],
-                   DEPTH_CUBE_MAP0: Layout[12, Uniform[SamplerCube]],
-                   DEPTH_CUBE_MAP1: Layout[13, Uniform[SamplerCube]],
-                   DEPTH_CUBE_MAP2: Layout[14, Uniform[SamplerCube]],
-                   DEPTH_CUBE_MAP3: Layout[15, Uniform[SamplerCube]],
+                   SKYBOX_MAP: Layout[7, Uniform[SamplerCube]],
+                   DEPTH_MAPS: Layout[8, Uniform[Sampler2DArrayShadow]],
+                   DEPTH_CUBE_MAPS: Layout[9, Uniform[SamplerCube]],
                    LIGHTS: Uniform[array[64, Light]],
                    CAMERA: Uniform[Camera],
                    ENVIRONMENT: Uniform[Environment],
@@ -79,21 +73,59 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
             METALLIC_MAP, 
             ROUGHNESS_MAP, 
             EMISSIVE_MAP, 
-            AO_MAP,
-            GGX_MAP,
+            AO_MAP
         )
     
     if FRAGMENT.FOG_AMOUNT < 1.0:
         COLOR.rgb = FRAGMENT.ALBEDO * FRAGMENT.AMBIENT
         COLOR.a = FRAGMENT.OPACITY
-        if FRAGMENT.OPACITY > OPACITY_CUTOFF:
-            var 
-                lightFactor = getEnvironmentReflection(FRAGMENT, GGX_MAP)
-            for i in 0..<ENVIRONMENT.LIGHTS_COUNT:
-                lightFactor += getLight(LIGHTS[i], FRAGMENT, SURFACE)
-            COLOR.rgb = COLOR.rgb + lightFactor
+        if FRAGMENT.OPACITY <= OPACITY_CUTOFF:
+            discard
+        else:        
+            if ENVIRONMENT.LIGHTS_COUNT > 0:
+                for i in 0..<ENVIRONMENT.LIGHTS_COUNT:
+                    COLOR.rgb = COLOR.rgb + getLight(LIGHTS[i], FRAGMENT, SURFACE, DEPTH_MAPS)
+                COLOR.rgb = COLOR.rgb + FRAGMENT.EMISSIVE
+                if ENVIRONMENT.HAS_ENV_MAP > 0:
+                    COLOR.rgb = COLOR.rgb + ENVIRONMENT.INTENSITY * getIBL(ENVIRONMENT, FRAGMENT, SKYBOX_MAP)
     
     if FRAGMENT.FOG_AMOUNT > 0.0:
         COLOR = mix(ENVIRONMENT.BACKGROUND_COLOR, COLOR, FRAGMENT.FOG_AMOUNT)
-    
+
+    when defined(DEBUG_ALBEDO):
+        COLOR.rgb = vec3(FRAGMENT.ALBEDO)
+        COLOR.a = 1.0
+
+    when defined(DEBUG_ROUGHNESS):
+        COLOR.rgb = vec3(FRAGMENT.ROUGHNESS)
+        COLOR.a = 1.0
+
+    when defined(DEBUG_METALLIC):
+        COLOR.rgb = vec3(FRAGMENT.METALLIC)
+        COLOR.a = 1.0
+
+    when defined(DEBUG_AO):
+        COLOR.rgb = vec3(FRAGMENT.AO)
+        COLOR.a = 1.0
+
+    when defined(DEBUG_NORMAL):
+        COLOR.rgb = vec3(FRAGMENT.N)
+        COLOR.a = 1.0
+
+    when defined(DEBUG_V):
+        COLOR.rgb = vec3(FRAGMENT.V)
+        COLOR.a = 1.0
+
+    when defined(DEBUG_REFLECTANCE):
+        COLOR.rgb = vec3(FRAGMENT.REFLECTANCE)
+        COLOR.a = 1.0
+
+    when defined(DEBUG_SHADOW):
+        let depth = texture(DEPTH_MAPS, vec4(SURFACE.UV.x, SURFACE.UV.y, 0.0, 0.0))
+        COLOR.rgb = vec3(depth)
+        COLOR.a = 1.0
+
+    #COLOR.rgb = FRAGMENT.N
+    #COLOR.a = 1.0
+
     NORMAL = vec4(FRAGMENT.N, 0.0)

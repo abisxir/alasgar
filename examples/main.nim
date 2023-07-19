@@ -37,8 +37,8 @@ addComponent(
 addComponent(lightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
     const r = 5 
     # Change position on transform
-    script.transform.positionX = r * sin(runtime.engine.age) 
-    script.transform.positionZ = r * cos(runtime.engine.age)
+    script.transform.positionX = r * sin(runtime.age) 
+    script.transform.positionZ = r * cos(runtime.age)
 ))
 # Makes the light entity child of the scene
 addChild(scene, lightEntity)
@@ -53,9 +53,9 @@ addComponent(cubeEntity, newCubeMesh())
 addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
     # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
     script.transform.euler = vec3(
-        sin(runtime.engine.age) * sin(runtime.engine.age), 
-        cos(runtime.engine.age), 
-        sin(runtime.engine.age)
+        sin(runtime.age) * sin(runtime.age), 
+        cos(runtime.age), 
+        sin(runtime.age)
     )
 ))
 # Adds a material to cube
@@ -87,9 +87,9 @@ addComponent(spotLightEntity, newScriptComponent(proc(script: ScriptComponent, i
     let light = getComponent[SpotPointLightComponent](script)
     # Changes light color
     light.color = color(
-        abs(sin(runtime.engine.age)), 
-        abs(cos(runtime.engine.age)), 
-        abs(sin(runtime.engine.age) * sin(runtime.engine.age))
+        abs(sin(runtime.age)), 
+        abs(cos(runtime.age)), 
+        abs(sin(runtime.age) * sin(runtime.age))
     )
 ))
 # Makes the new light child of the scene

@@ -40,9 +40,9 @@ proc destroyMesh(mesh: Mesh) =
         mesh.vertexArrayObject = 0
         mesh.vertexBufferObject = 0
 
-var cache = newCachedContainer[Mesh](destroyMesh)
-
-var bufferSizeOf: int = 0 # Drawable size as stride
+var 
+    cache = newCachedContainer[Mesh](destroyMesh)
+    bufferSizeOf: int = 0 # Drawable size as stride
 
 proc setBufferSizeOf*(size: int) = bufferSizeOf = size
 
@@ -122,6 +122,12 @@ proc createPointerAttribute[T](index: var int, offset: int, dataType: GLenum, co
     glEnableVertexAttribArray(index.GLuint);    
     inc(index)
 
+proc createIntPointerAttribute[T](index: var int, offset: int, dataType: GLenum, count, stride: int) =
+    glVertexAttribIPointer(index.GLuint, count.GLint, dataType, stride.GLsizei, cast[pointer](offset * count * sizeof(T)));
+    glVertexAttribDivisor(index.GLuint, 1);
+    glEnableVertexAttribArray(index.GLuint);    
+    inc(index)
+
 proc newMesh*(data: var openArray[Vertex], 
               indices: openArray[uint32], 
               drawMode: GLenum = GL_TRIANGLES, 
@@ -183,7 +189,7 @@ proc newMesh*(data: var openArray[Vertex],
 
     glGenBuffers(1, result.materialBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.materialBufferObject)
-    createPointerAttribute[uint32](index, 0, cGL_FLOAT, 4, bufferSizeOf)
+    createIntPointerAttribute[uint32](index, 0, GL_UNSIGNED_INT, 4, bufferSizeOf)
 
     glGenBuffers(1, result.spriteBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.spriteBufferObject)

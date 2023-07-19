@@ -11,7 +11,7 @@ proc newRenderSystem*(): RenderSystem =
     new(result)
     result.name = "Render System"
 
-method process*(sys: RenderSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =  
+method process*(sys: RenderSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =  
     let 
         # Gets active camera, it is needed for getting view and projection matrix
         camera = scene.activeCamera

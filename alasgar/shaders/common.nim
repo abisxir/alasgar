@@ -30,13 +30,12 @@ proc pow4*(v: float): float =
 proc pow2*(v: float): float = v * v
 proc saturate*(v: float): float = clamp(v, EPSILON, 1.0)
 
-#when defined(emscripten):
-#    proc unpackUnorm4x8(i: uint32): Vec4 = vec4(
-#        float(i and 0xff.uint32) / 255.0,
-#        float(i / 0x100.uint32 and 0xff.uint32) / 255.0,
-#        float(i / 0x10000.uint32 and 0xff.uint32) / 255.0,
-#        float(i / 0x1000000.uint32) / 255.0);
-
+#when defined(emscripten) or defined(linux):
+#    proc unpackUnorm4x8*(i: uint): Vec4 = vec4(
+#        float(i and 0xff.uint) / 255.0,
+#        float(i / (0x100.uint and 0xff.uint)) / 255.0,
+#        float(i / (0x10000.uint and 0xff.uint)) / 255.0,
+#        float(i / 0x1000000.uint / 255.0))
 
 proc calculateUV*(uv, sprite: Vec4): Vec2 =
     let
@@ -71,8 +70,22 @@ proc getFogAmount*(density: float, position: Vec3): float =
         result = exp2(-density * density * distance * distance * LOG2)
         result = clamp(result, 0.0, 1.0)
 
-proc isPBR*(FRAGMENT: Fragment): bool = FRAGMENT.ROUGHNESS >= 0.0 or FRAGMENT.METALLIC >= 0.0
+proc getPosition*(CAMERA: Camera, UV: Vec2, DEPTH_CHANNEL: Sampler2D): Vec3 =
+    let 
+        z = texture(DEPTH_CHANNEL, UV).r
+        # Get x/w and y/w from the viewport position
+        x = UV.x * 2.0 - 1.0
+        y = (1.0 - UV.y) * 2.0 - 1.0
+        pos = vec4(x, y, z, 1.0)
+        #Transform by the inverse projection matrix
+        projectedPos = CAMERA.INV_PROJECTION_MATRIX * pos
+        normalized = projectedPos / projectedPos.w
+        positionInViewSpace = CAMERA.INV_VIEW_MATRIX * normalized
+    result = positionInViewSpace.xyz
+
+proc isPBR*(FRAGMENT: Fragment): bool = FRAGMENT.ROUGHNESS > 0.0 or FRAGMENT.METALLIC > 0.0
 proc linearToGamma*(color: Vec3): Vec3 = sqrt(color)
 proc gammaToLinear*(color: Vec3): Vec3 = color * color
 proc linearToGamma*(color: Vec4): Vec4 = vec4(sqrt(color.rgb), color.a)
 proc gammaToLinear*(color: Vec4): Vec4 = vec4(color.rgb * color.rgb, color.a)
+

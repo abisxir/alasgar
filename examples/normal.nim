@@ -63,7 +63,7 @@ addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input:
     # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
     script.transform.euler = vec3(
         0, 
-        sin(runtime.engine.age * 0.1), 
+        sin(runtime.age * 0.1), 
         0
     )
 ))

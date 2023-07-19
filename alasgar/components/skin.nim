@@ -25,7 +25,7 @@ proc newJointSystem*(): JointSystem =
     new(result)
     result.name = "Joint System"
 
-method process*(sys: JointSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) = 
+method process*(sys: JointSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) = 
     for joint in iterateComponents[JointComponent](scene):
         if joint.entity.visible:
             joint.model = joint.transform.world * joint.inverseMatrix
@@ -47,7 +47,8 @@ proc copy(skin: SkinComponent, buffer: var seq[float32], offset: var int) =
         copyMem(buffer[offset].addr, joint.model.caddr, size)
         inc(offset, 16)
 
-method process*(sys: SkinSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) = 
+method process*(sys: SkinSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) = 
+    {.warning[LockLevel]:off.}
     var 
         offset = 0
         capacity = sys.width * sys.height

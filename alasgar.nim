@@ -15,12 +15,14 @@ import alasgar/components/environment
 import alasgar/components/script
 import alasgar/components/sprite
 import alasgar/components/sound
+import alasgar/components/timer
 import alasgar/geometry/cube
 import alasgar/geometry/grid
 import alasgar/geometry/sphere
 import alasgar/geometry/plane
 import alasgar/engine
 import alasgar/shaders/base
+import alasgar/shaders/compile
 import alasgar/logger
 import alasgar/utils
 import alasgar/system
@@ -34,6 +36,7 @@ import alasgar/effects/hbao
 import alasgar/effects/bloom
 import alasgar/config
 import alasgar/render/gpu
+import alasgar/misc/camera as misc_camera
 
 
 export core,
@@ -46,6 +49,7 @@ export core,
        script,
        sprite,
        sound,
+       timer,
        interactive,
        collision,
        physics_collision,
@@ -76,7 +80,10 @@ export core,
        ssao,
        hbao,
        config,
-       gpu
+       gpu,
+       misc_camera,
+       compile,
+       base
 
 
 proc window*(title: string, width, height: int, fullscreen: bool=false, resizeable: bool=false) =
@@ -87,10 +94,3 @@ proc window*(title: string, width, height: int, fullscreen: bool=false, resizeab
         fullscreen=fullscreen,
         resizeable=resizeable,
     )
-
-proc newShaderComponent*(vertexSource, fragmentSource: string): ShaderComponent =
-    var instance = newSpatialShader(vertexSource, fragmentSource)
-    result = newShaderComponent(instance)
-
-proc newVertexShaderComponent*(source: string): ShaderComponent = newShaderComponent(vertexSource=source, fragmentSource="")
-proc newFragmentShaderComponent*(source: string): ShaderComponent = newShaderComponent(vertexSource="", fragmentSource=source)

@@ -15,14 +15,9 @@ proc effectVertex*(CAMERA: Uniform[Camera],
     
 proc effectFragment*(CAMERA: Uniform[Camera],
                      FRAME: Uniform[Frame],
-                     CHANNEL0: Layout[0, Uniform[Sampler2D]],
-                     CHANNEL1: Layout[1, Uniform[Sampler2D]],
-                     CHANNEL2: Layout[2, Uniform[Sampler2D]],
-                     CHANNEL3: Layout[3, Uniform[Sampler2D]],
-                     COLOR_CHANNEL: Layout[4, Uniform[Sampler2D]],
-                     NORMAL_CHANNEL: Layout[5, Uniform[Sampler2D]],
-                     DEPTH_CHANNEL: Layout[6, Uniform[Sampler2D]],
-                     NOISE_CHANNEL: Layout[7, Uniform[Sampler2D]],
+                     COLOR_CHANNEL: Layout[0, Uniform[Sampler2D]],
+                     NORMAL_CHANNEL: Layout[1, Uniform[Sampler2D]],
+                     DEPTH_CHANNEL: Layout[2, Uniform[Sampler2D]],
                      UV: Vec2,
                      COLOR: var Vec4) =
     COLOR = texture(COLOR_CHANNEL, UV)

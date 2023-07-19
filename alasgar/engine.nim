@@ -4,7 +4,9 @@ import times
 import os
 
 when defined(emscripten):
-    import jsbind/emscripten
+    proc emscripten_set_main_loop(f: proc() {.cdecl.}, a: cint, b: cint) {.importc.}
+    proc emscripten_cancel_main_loop() {.importc.}
+    #import jsbind/emscripten
 import sdl2
 
 import logger
@@ -25,40 +27,34 @@ import components/skin
 import components/animation
 import components/catmull
 import components/sound
+import components/timer
 import resources/resource
 import shaders/base
 
-
-when defined(android) or defined(ios):
-    import ports/linkage_details
-    sdlMain()
+when defined(emscripten):
+    proc handleFrameWhenEmscripten() {.cdecl.}
 
 type
     Engine* = object
         title: string
         primary*: Scene
-        age: float32
-        fps: float32
-        frames: float32 
         systems: seq[System]
         ratio: float32
         newPrimary: Scene
         oldPrimary: Scene
     Runtime* = object
         engine: Engine
+        input: Input
         runGame: bool
         age: float32
         frames: int
+        delta: float32
         lastTicks:float
         eventProcessTime: float
         systemBenchmark: Table[string, float]
 
-
 var runtime*: Runtime
 
-proc `ratio`*(e: Engine): float32 = e.ratio
-proc `age`*(e: Engine): float32 = e.age
-proc `fps`*(e: Engine): float32 = e.fps
 proc `activeCamera`*(e: Engine): CameraComponent =
     if e.primary != nil:
         e.primary.activeCamera
@@ -88,9 +84,10 @@ proc initEngine*(windowWidth: int,
                  title: string = "Alasgar",
                  fullscreen: bool = false,
                  resizeable: bool = false) =
-
+    when defined(emscripten):
+        emscripten_set_main_loop(handleFrameWhenEmscripten, 0, 0)
+    
     discard sdl2.init(INIT_EVERYTHING)
-
     echo "* SDL initialized."
 
     runtime.engine.title = title
@@ -140,6 +137,7 @@ proc initEngine*(windowWidth: int,
     setBufferSizeOf(sizeof(Drawable))
 
     # Create systems
+    addSystem(newTimerSystem())
     addSystem(newScriptSystem())
     addSystem(newInteractiveSystem())
     addSystem(newCatmullSystem())
@@ -191,6 +189,7 @@ proc handleFrame() =
         input: Input
         now = epochTime()
         delta = now - runtime.lastTicks
+        age = 0'f32
         sleepTime = 0'f32
         frameLimit = if settings.fps > 0: 1'f32 / settings.fps.float32 else: 0'f32
 
@@ -198,43 +197,40 @@ proc handleFrame() =
         # Cleans up the scene, removes dangling entities
         cleanup(runtime.engine.primary)
 
-    if delta > 0 and delta < frameLimit:
-        sleepTime = frameLimit - delta 
-        while sleepTime > 0 and delta < frameLimit:
-            sleep(0)
-            now = epochTime()
-            delta = now - runtime.lastTicks
+    when not defined(emscripten):
+        if delta > 0 and delta < frameLimit:
+            sleepTime = frameLimit - delta 
+            while sleepTime > 0 and delta < frameLimit:
+                sleep(0)
+                now = epochTime()
+                delta = now - runtime.lastTicks
     
     # Updates last tick with the current time
     runtime.lastTicks = now
-
-    # Calculates FPS
-    runtime.engine.fps = 1.float32 / delta
-    runtime.engine.frames += 1
-
     # Keeps age of running system
-    runtime.engine.age += delta
+    age += delta
     runtime.age += delta
-    inc(runtime.frames)
+    runtime.frames += 1
+    runtime.delta = delta
 
     # Updates fps each seconds
-    if runtime.age >= 1.0:
-        runtime.age = 0.0
+    if age >= 1.0:
+        age = 0.0
         if settings.verbose:
-            logi &"Counted frames: {runtime.frames}"
-            logi &"FPS: {runtime.engine.fps}"
-            logi &"  Drawable objects: {len(runtime.engine.primary.drawables)}"
-            logi &"  Visible objects: {graphics.totalObjects}"
-            logi &"  Draw calls: {graphics.drawCalls}"
+            echo &"Counted frames: {runtime.frames}"
+            echo &"FPS: {1.0 / delta}"
+            echo &"  Drawable objects: {len(runtime.engine.primary.drawables)}"
+            echo &"  Visible objects: {graphics.totalObjects}"
+            echo &"  Draw calls: {graphics.drawCalls}"
 
             var totalSystemTime = 0.float
             for key, value in mpairs(runtime.systemBenchmark):
-                logi &"    + {key:<24}: {value}"
+                echo &"    + {key:<24}: {value}"
                 totalSystemTime += value
                 value = 0.float
-            logi &"    + Events                  : {runtime.eventProcessTime}"
-            logi &"    + Sleep                   : {sleepTime}"
-            logi &"    = {delta}"
+            echo &"    + Events                  : {runtime.eventProcessTime}"
+            echo &"    + Sleep                   : {sleepTime}"
+            echo &"    = {delta}"
 
         runtime.frames = 0
 
@@ -242,7 +238,7 @@ proc handleFrame() =
     let eventStart = epochTime()
 
     # Set mouse position, even if there is not event.
-    updateMousePosition(addr input)        
+    updateMousePosition(addr runtime.input)
 
     # Pulls SDL event and passes to the nodes that need event processing
     while pollEvent(evt):
@@ -260,6 +256,8 @@ proc handleFrame() =
         else:
             # Maps SDL event to alasgar event object
             parseEvent(addr evt, graphics.windowSize, addr input)
+    # Updates input in runtime so all scripts can access it
+    runtime.input = input
     
     # Calculates event processing elapsed time 
     runtime.eventProcessTime = epochTime() - eventStart
@@ -267,33 +265,34 @@ proc handleFrame() =
     if isNil(runtime.engine.newPrimary):
         # Clear scene
         clear()
-
         if runtime.engine.primary != nil and runtime.engine.primary.activeCamera != nil:
             for system in runtime.engine.systems:
                 let start = epochTime()
-                process(system, runtime.engine.primary, input, delta, runtime.engine.frames, runtime.engine.age)
+                process(system, runtime.engine.primary, runtime.input, delta, runtime.frames, runtime.age)
                 runtime.systemBenchmark[system.name] = epochTime() - start
     else:
         destroy(runtime.engine.primary)
         runtime.engine.primary = runtime.engine.newPrimary
         runtime.engine.newPrimary = nil
-
+    
 when defined(emscripten):
-    proc handleFrameWhenEmscripten() {.cdecl.} = handleFrame()
+    proc handleFrameWhenEmscripten() {.cdecl.} = 
+        if runtime.runGame:
+            handleFrame()
 
 proc loop*() =
     runtime.runGame = true
-    when defined(emscripten):
-        emscripten_set_main_loop(handleFrameWhenEmscripten, 0, 1)
-    else:
+    when not defined(emscripten):
         while runtime.runGame:
-            handleFrame()
-        
-    cleanupResources()
-    cleanupTextures()
-    cleanupShaders()
-    cleanupMeshes()
-    cleanupGraphics()
+            handleFrame()       
+        cleanupResources()
+        cleanupTextures()
+        cleanupShaders()
+        cleanupMeshes()
+        cleanupGraphics()
+    else:
+        emscripten_cancel_main_loop()
+        emscripten_set_main_loop(handleFrameWhenEmscripten, 0, 0)
 
 proc render*(scene: Scene) =
     if runtime.engine.primary != scene:
@@ -301,7 +300,6 @@ proc render*(scene: Scene) =
             runtime.engine.primary = scene
         else:
             runtime.engine.newPrimary = scene
-
 
 proc stopLoop*() =
     runtime.runGame = false
@@ -316,6 +314,15 @@ proc screenToWorldCoord*(pos: Vec2): Vec4 = screenToWorldCoord(
 )
 
 template `engine`*(r: Runtime): Engine = r.engine
-template `age`*(r: Runtime): float32 = r.engine.age
+template `age`*(r: Runtime): float32 = r.age
+template `frames`*(r: Runtime): int = r.frames
+template `fps`*(r: Runtime): float32 = 1.float32 / r.delta
+template `delta`*(r: Runtime): float32 = r.delta
+template `input`*(r: Runtime): Input = r.input
 template `ratio`*(r: Runtime): float32 = r.engine.ratio
 template `window`*(r: Runtime): Vec2 = graphics.windowSize
+template `ratio`*(e: Engine): float32 = e.ratio
+
+when defined(android) or defined(ios):
+    import ports/linkage_details
+    sdlMain()

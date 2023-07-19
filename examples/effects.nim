@@ -1,4 +1,5 @@
 import alasgar
+import alasgar/shaders/common
 
 # Creates a window named Hello
 window("Hello", 640, 360)
@@ -59,12 +60,12 @@ addComponent(cubeEntity, newMaterialComponent(
     albedoMap=newTexture("res://stone-texture.png")
 ))
 # Adds a script component to cube entity
-addScript(cubeEntity, proc(script: ScriptComponent, input: Input, delta: float32) =
+addScript(cubeEntity, proc(script: ScriptComponent) =
     # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
     script.transform.euler = vec3(
-        sin(runtime.engine.age) * sin(runtime.engine.age), 
-        cos(runtime.engine.age), 
-        sin(runtime.engine.age)
+        sin(runtime.age) * sin(runtime.age), 
+        cos(runtime.age), 
+        sin(runtime.age)
     )
 )
 # Makes the cube enity child of scene
@@ -82,94 +83,8 @@ addComponent(gridEntity, newMaterialComponent(
     diffuseColor=parseHtmlName("white"),
 ))
 # Adds a shader to cube
-addComponent(gridEntity, newFragmentShaderComponent("""
-float time;
-vec3 pln;
-
-float terrain(vec3 p)
-{
-	float nx=floor(p.x)*10.0+floor(p.z)*100.0,center=0.0,scale=2.0;
-	vec4 heights=vec4(0.0,0.0,0.0,0.0);
-	
-	for(int i=0;i<5;i+=1)
-	{
-		vec2 spxz=step(vec2(0.0),p.xz);
-		float corner_height = mix(mix(heights.x, heights.y, spxz.x),
-								  mix(heights.w, heights.z, spxz.x),spxz.y);
-		
-		vec4 mid_heights=(heights+heights.yzwx)*0.5;
-		
-		heights =mix(mix(vec4(heights.x,mid_heights.x,center,mid_heights.w),
-					     vec4(mid_heights.x,heights.y,mid_heights.y,center), spxz.x),
-					 mix(vec4(mid_heights.w,center,mid_heights.z,heights.w), 
-						 vec4(center,mid_heights.y,heights.z,mid_heights.z), spxz.x), spxz.y);
-		
-		nx=nx*4.0+spxz.x+2.0*spxz.y;
-		
-		center=(center+corner_height)*0.5+cos(nx*20.0)/scale*30.0;
-		p.xz=fract(p.xz)-vec2(0.5);
-		p*=2.0;
-		scale*=2.0;
-	}
-	
-		
-	float d0=p.x+p.z;
-	
-	vec2 plh=mix( mix(heights.xw,heights.zw,step(0.0,d0)),
-				  mix(heights.xy,heights.zy,step(0.0,d0)), step(p.z,p.x));
-	
-	pln=normalize(vec3(plh.x-plh.y,2.0,(plh.x-center)+(plh.y-center)));
-
-	if(p.x+p.z>0.0)
-		pln.xz=-pln.zx;
-	
-	if(p.x<p.z)
-		pln.xz=pln.zx;
-	
-	p.y-=center;	
-	return dot(p,pln)/scale;
-}
-
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
-{
-	time=frame.time*0.4;
-	vec2 uv=(fragCoord.xy / frame.resolution.xy)*2.0-vec2(1.0);
-	uv.x*=frame.resolution.x/frame.resolution.y;
-	
-	float sc=(time+sin(time*0.2)*4.0)*0.8;
-	vec3 camo=vec3(sc+cos(time*0.2)*0.5,0.7+sin(time*0.3)*0.4,0.3+sin(time*0.4)*0.8);
-	vec3 camt=vec3(sc+cos(time*0.04)*1.5,-1.5,0.0);
-	vec3 camd=normalize(camt-camo);
-	
-	vec3 camu=normalize(cross(camd,vec3(0.5,1.0,0.0))),camv=normalize(cross(camu,camd));
-	camu=normalize(cross(camd,camv));
-	
-	mat3 m=mat3(camu,camv,camd);
-	
-	vec3 rd=m*normalize(vec3(uv,1.8)),rp;
-	
-	float t=0.0;
-	
-	for(int i=0;i<100;i+=1)
-	{
-		rp=camo+rd*t;
-		float d=terrain(rp);
-		if(d<4e-3)
-			break;
-		t+=d;
-	}
-
-	vec3 ld=normalize(vec3(1.0,0.6,2.0));
-	fragColor.rgb=mix(vec3(0.1,0.1,0.5)*0.4,vec3(1.0,1.0,0.8),pow(0.5+0.5*dot(pln,ld),0.7));
-	fragColor.rgb=mix(vec3(0.5,0.6,1.0),fragColor.rgb,exp(-t*0.02));
-	
-}
-
-
-void fragment() {
-    mainImage(COLOR, surface.uv.xy * frame.resolution.xy);
-}
-"""))
+proc fs(COLOR_CHANNEL: Layout[0, Uniform[Sampler2D]], UV: Vec2, COLOR: var Vec4) = COLOR.r = 1.0
+addComponent(gridEntity, newFragmentShaderComponent(fs))
 # Makes the cube enity child of scene
 addChild(scene, gridEntity)
 
@@ -188,14 +103,14 @@ addComponent(spotLightEntity, newSpotPointLightComponent(
     outerCutoff=30                                # Outer circle of light
 ))
 # Adds a script component to spot point light entity
-addComponent(spotLightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
+addComponent(spotLightEntity, newScriptComponent(proc(script: ScriptComponent) =
     # Access to point light component, if it returns nil then there is no such a component on this entity.
     let light = getComponent[SpotPointLightComponent](script)
     # Changes light color
     light.color = color(
-        abs(sin(runtime.engine.age)), 
-        abs(cos(runtime.engine.age)), 
-        abs(sin(runtime.engine.age) * sin(runtime.engine.age))
+        abs(sin(runtime.age)), 
+        abs(cos(runtime.age)), 
+        abs(sin(runtime.age) * sin(runtime.age))
     )
 ))
 # Makes the new light child of the scene

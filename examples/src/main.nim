@@ -2,14 +2,10 @@ import alasgar
 
 settings.verbose = true
 # Creates a window named Hello
-window("Hello", 768, 480)
+window("Hello", 1920, 1080)
    
 # Creates a new scene
-var 
-    scene = newScene()
-    env = newEnvironmentComponent()
-setBackground(env, parseHex("f3f3f3"))
-addComponent(scene, env)
+var scene = newScene()
 
 # Creates camera entity
 var 
@@ -21,12 +17,15 @@ addComponent(
     cameraEntity, 
     newPerspectiveCamera(
         75, 
-        runtime.ratio, 
+        runtime.engine.ratio, 
         0.1, 
         100.0, 
         vec3(0) - cameraEntity.transform.position
     )
 )
+#proc testEffect(COLOR: var Vec4) = 
+#    COLOR = vec4(1.0, 0.0, 0.0, 1.0)
+#addEffect(cameraEntity[CameraComponent], "test", testEffect)
 # Makes the camera entity child of scene
 addChild(scene, cameraEntity)
 
@@ -52,18 +51,18 @@ cubeEntity.transform.scale = vec3(2)
 # Add a cube mesh component to entity
 addComponent(cubeEntity, newCubeMesh())
 # Adds a script component to cube entity
-program(cubeEntity, proc(script: ScriptComponent) =
+addScript(cubeEntity, proc(script: ScriptComponent) =
     # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
     script.transform.euler = vec3(
-        sin(runtime.age) * cos(runtime.age), 
+        sin(runtime.age) * sin(runtime.age), 
         cos(runtime.age), 
         sin(runtime.age)
     )
 )
+# Adds a material to cube
 addComponent(cubeEntity, newMaterialComponent(
     diffuseColor=parseHtmlName("white"),
     specularColor=parseHtmlName("gray"),
-    albedoMap=newTexture("res://stone-texture.png"),
 ))
 # Makes the cube enity child of scene
 addChild(scene, cubeEntity)

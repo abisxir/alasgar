@@ -7,7 +7,7 @@ Alasgar is a pure nim game engine based on OpenGL ES. The reason behind it was t
  - Linux
  - Windows
  - Android
- - Web (work in progress)
+ - WebAssembly
  - Mac (work in progress)
  - iOS (not supoorted)
 
@@ -17,9 +17,13 @@ This is a basic game engine, and it is also too much limited so it is not ready 
 ## nimx and vmath
 I copied most of nimx build system here, just removed and reformed some parts. I will rewrite this part later to use nimble instead of nake. nimx is a UI library (and game framework) for nim, check it out here: https://github.com/yglukhov/nimx
 
-Also most of math stuff copied from vmath: https://github.com/treeform/vmath
+For game mathematics, vmath is used. vmath has a good convention, check it out for more information here: https://github.com/treeform/vmath
 
 ## Installation
+```bash
+nimble install alasgar
+```
+or simply the latest version:
 ```bash
 nimble install https://github.com/abisxir/alasgar
 ```
@@ -72,7 +76,7 @@ addComponent(
     cameraEntity, 
     newPerspectiveCamera(
         75, 
-        runtime.engine.ratio, 
+        runtime.ratio, 
         0.1, 
         100.0, 
         vec3(0) - cameraEntity.transform.position
@@ -93,6 +97,8 @@ If everything was right, you will see an empty window with the given size. Run i
 ```bash
 nim c -r main.nim
 ```
+
+![](https://abisxir.github.io/alasgar/step1/build)
 
 When you create a window by defult it runs in window mode, you can easily enable fullscreen mode:
 ```nim
@@ -162,12 +168,16 @@ addComponent(
     newPointLightComponent()
 )
 # Adds a script component to light entity
-addComponent(lightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
+addComponent(lightEntity, newScriptComponent(proc(script: ScriptComponent) =
     const r = 5 
     # Change position on transform
-    script.transform.positionX = r * sin(runtime.engine.age) 
-    script.transform.positionZ = r * cos(runtime.engine.age)
+    script.transform.position = r * vec3(
+        sin(runtime.age),
+        cos(runtime.age),
+        sin(runtime.age) * cos(runtime.age),
+    )
 ))
+# Also you can add using a suger function called "program", will explain it later
 # Makes the light entity child of the scene
 addChild(scene, lightEntity)
 
@@ -176,8 +186,9 @@ addChild(scene, lightEntity)
 
 ![](docs/files/light-moves.gif)
 
-If you run the code, light is going to move around the cube. As you see in the code we used a anonymous function to change light's position.
-You can define a function and use it, here. Feel free to play with nim features.
+If you run the code, light is going to move around the cube. As you see in the code we used an anonymous function to change light's position.
+You can define a function and use it, here. Feel free to play with nim features. As you see we directly access transform component from script 
+component. Each entity has a transform component, all other components have a pointer to it. Entity also have a pointer to transform component.
 
 
 Rotation
@@ -191,15 +202,15 @@ Let us rotate the cube. To do it we need a script component attached to cube ent
 var cubeEntity = newEntity(scene, "Cube")
 # Add a cube mesh component to entity
 addComponent(cubeEntity, newCubeMesh())
-# Adds a script component to cube entity
-addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
-    # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
+# Adds a script component to cube entity, we use this helpful function:
+program(cubeEntity, proc(script: ScriptComponent) =
+    # We can rotate an object using euler also it is possible to directly set rotation property which is a quaternion.
     script.transform.euler = vec3(
-        sin(runtime.engine.age) * sin(runtime.engine.age), 
+        sin(runtime.age) * cos(runtime.age), 
         cos(runtime.engine.age), 
         sin(runtime.engine.age)
     )
-))# Makes the cube enity child of the scene
+)# Makes the cube enity child of the scene
 addChild(scene, cubeEntity)
 
 ...
@@ -210,8 +221,8 @@ addChild(scene, cubeEntity)
 
 Material
 ========
-We can change cube color using material components. We scale cube and make it bigger and then we add a component to define cube material.
-I used chroma library to manipulate colors, it is a great library, check here to see how to use it:
+We can change cube color using material components. We scale cube and make it bigger and then we add a component to define cube's material.
+I used chroma library to manipulate colors, it is a great library, here you can see how to use it:
 https://github.com/treeform/chroma
 
 ```nim
@@ -224,14 +235,14 @@ cubeEntity.transform.scale = vec3(2)
 # Add a cube mesh component to entity
 addComponent(cubeEntity, newCubeMesh())
 # Adds a script component to cube entity
-addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
+program(cubeEntity, proc(script: ScriptComponent) =
     # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
     script.transform.euler = vec3(
-        sin(runtime.engine.age) * sin(runtime.engine.age), 
-        cos(runtime.engine.age), 
-        sin(runtime.engine.age)
+        sin(runtime.age) * cos(runtime.age), 
+        cos(runtime.age), 
+        sin(runtime.age)
     )
-))
+)
 # Adds a material to cube
 addComponent(cubeEntity, newMaterialComponent(diffuseColor=parseHtmlName("olive")))
 # Makes the cube enity child of scene
@@ -312,7 +323,7 @@ addChild(scene, spotLightEntity)
 
 Access components
 =================
-Let us dance with light's color, to access a component we can call getComponent[T] on an entity or a component. Also it is possible to access it using index operator on any entity or component:
+Let us play with light's color, to access a component we can call getComponent[T] on an entity or a component. Also it is possible to access it using index operator on any entity or component:
 
 ```nim
 let c = getComponent[MyComponent](e)
@@ -343,19 +354,19 @@ addComponent(spotLightEntity, newSpotPointLightComponent(
     )
 )
 # Adds a script component to spot point light entity
-addComponent(spotLightEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
+program(spotLightEntity, proc(script: ScriptComponent) =
     # Access to point light component, if it returns nil when there is no such a component in this entity.
     let light = script[SpotPointLightComponent]
-    # Or you can access it by calling function:
+    # Or you can access it by calling getComponent function:
     # let light = getComponent[SpotPointLightComponent](script)
 
     # Changes light color
     light.color = color(
-        abs(sin(runtime.engine.age)), 
-        abs(cos(runtime.engine.age)), 
-        abs(sin(runtime.engine.age) * sin(runtime.engine.age))
+        abs(sin(runtime.age)), 
+        abs(cos(runtime.age)), 
+        abs(sin(runtime.age) * cos(runtime.age))
     )
-))
+)
 # Makes the new light child of the scene
 addChild(scene, spotLightEntity)
 

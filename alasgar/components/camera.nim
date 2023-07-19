@@ -147,8 +147,8 @@ proc addEffect*(camera: CameraComponent, name: string, shader: Shader) =
     removeEffect(camera, name)
     add(camera.effects, (name, shader, true))
 
-proc addEffect*(camera: CameraComponent, name: string, source: string) = addEffect(camera, name, newCanvasShader(source))
-proc addEffect*(camera: CameraComponent, name: string, vsource, fsource: string) = addEffect(camera, name, newCanvasShader(vsource, fsource))
+template addEffect*(camera: CameraComponent, name: string, fs: untyped) = addEffect(camera, name, newCanvasShader(fs))
+template addEffect*(camera: CameraComponent, name: string, vx, fx: untyped) = addEffect(camera, name, newCanvasShader(vx, fs))
 proc getEffect*(camera: CameraComponent, name: string): Shader =
     for (key, shader, enable) in camera.effects:
         if key == name and enable:
@@ -176,15 +176,15 @@ proc `activeCamera`*(scene: Scene): CameraComponent =
         if result == nil or c.timestamp > result.timestamp:
             result = c
 
-
 proc updateShader(shader: Shader, 
                   active: CameraComponent, 
                   screenSize: Vec2, 
-                  age, delta, frames: float32, 
+                  age, delta: float32, 
+                  frames: int, 
                   mouseXY: Vec2,
-                  mouseZW: Vec2,
-                  today: DateTime,
-                  timestamp: Time) =
+                  mouseZW: Vec2) =
+                  #today: DateTime,
+                  #timestamp: Time) =
     use(shader)
 
     shader["CAMERA.PROJECTION_MATRIX"] = active.projection
@@ -198,18 +198,18 @@ proc updateShader(shader: Shader,
     shader["FRAME.RESOLUTION"] = vec3(screenSize.x, screenSize.y, 0)
     shader["FRAME.TIME"] = age
     shader["FRAME.TIME_DELTA"] = delta
-    shader["FRAME.COUNT"] = frames.int32
+    shader["FRAME.COUNT"] = frames.float32
     shader["FRAME.MOUSE"] = vec4(mouseXY.x, mouseXY.y, mouseZW.x, mouseZW.y)
-    shader["FRAME.DATE"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
+    #shader["FRAME.DATE"] = vec4(today.year.float32, today.month.float32, today.monthday.float32, toUnixFloat(timestamp))
 
  
-method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
-    let 
-        active = scene.activeCamera
-        today = now()
-        timestamp = getTime()
-        mouseXY = getMousePosition(input)
-        mouseZW = if getMouseButtonDown(input, mouseButtonLeft): mouseXY else: mouseXY * -1
+method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
+    {.warning[LockLevel]:off.}
+    let active = scene.activeCamera
+    #let today = now()
+    #let timestamp = getTime()
+    let mouseXY = getMousePosition(input)
+    let mouseZW = if getMouseButtonDown(input, mouseButtonLeft): mouseXY else: mouseXY * -1
 
     for shader in graphics.context.shaders:
         updateShader(
@@ -220,8 +220,8 @@ method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, f
             frames,
             mouseXY,
             mouseZW,
-            today,
-            timestamp
+            #today,
+            #timestamp
         )
 
     for (name, shader, enable) in active.effects:
@@ -234,7 +234,7 @@ method process*(sys: CameraSystem, scene: Scene, input: Input, delta: float32, f
                 frames,
                 mouseXY,
                 mouseZW,
-                today,
-                timestamp
+                #today,
+                #timestamp
             )
             add(graphics.context.effects, shader)

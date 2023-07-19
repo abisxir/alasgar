@@ -96,7 +96,9 @@ proc newAnimationClipComponent*(animator: AnimatorComponent, name: string): Anim
     result.endTime = float32.low
     result.duration = 0
 
-proc `$`*(c: AnimationClipComponent): string = &"[{c.duration}]"
+proc `$`*(c: AnimationClipComponent): string = &"[{c.name}-{c.duration}]"
+proc `name`*(c: AnimationClipComponent): string = c.name
+proc `duration`*(c: AnimationClipComponent): float32 = c.duration
 
 func newAnimatorComponent*(): AnimatorComponent = 
     new(result)
@@ -274,7 +276,8 @@ proc newAnimationSystem*(): AnimationSystem =
     new(result)
     result.name = "Animation System"
 
-method process*(sys: AnimationSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
+method process*(sys: AnimationSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
+    {.warning[LockLevel]:off.}
     for c in iterateComponents[AnimationClipComponent](scene):
         # Checks that entity is visible
         if c.entity.visible:

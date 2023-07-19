@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Mar 16 11:02:10 2023
+# Make data base, printed on Wed Jul 19 08:28:39 2023
 
 # Variables
 
@@ -17,9 +17,9 @@ LC_ALL = C
 # environment
 NO_AT_BRIDGE = 1
 # environment
-STARSHIP_SESSION_KEY = 3202722738238251
+STARSHIP_SESSION_KEY = 2757020852418120
 # environment
-I3SOCK = /run/user/1000/i3/ipc-socket.1089
+I3SOCK = /run/user/1000/i3/ipc-socket.1119
 # environment
 VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
 # environment
@@ -47,11 +47,11 @@ OLDPWD = /home/abi
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = /home/abi/.config/Code/CachedData/ee2b180d582a7f601fa6ecfdad8d9fd269ab1884
+VSCODE_CODE_CACHE_PATH = /home/abi/.config/Code/CachedData/695af097c7bd098fbf017ce3ac85e09bbc5dda06
 # environment
 LANG = C
 # environment
-XAUTHORITY = /home/abi/.lyxauth
+XAUTHORITY = /run/user/1000/lyxauth
 # default
 .LOADED := 
 # default
@@ -72,6 +72,8 @@ MFLAGS = -pqrR
 .SHELLFLAGS := -c
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
+# environment
+XDG_SESSION_DESKTOP = i3
 # makefile (from 'Makefile', line 1)
 MAKEFILE_LIST := Makefile
 # automatic
@@ -79,9 +81,9 @@ MAKEFILE_LIST := Makefile
 # environment
 ZSH = /home/abi/.oh-my-zsh
 # environment
-VSCODE_PID = 32056
+VSCODE_PID = 3398
 # environment
-XDG_SESSION_TYPE = tty
+XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # environment
@@ -95,7 +97,7 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 # automatic
 <D = $(patsubst %/,%,$(dir $<))
 # environment
-VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"en-us","osLocale":"en-us","availableLanguages":{},"_languagePackSupport":true}
 # default
 MAKE_HOST := x86_64-pc-linux-gnu
 # environment
@@ -169,6 +171,8 @@ _ = /sbin/make
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
+AWS_SDK_LOAD_CONFIG = true
+# environment
 XDG_SESSION_CLASS = user
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
@@ -179,7 +183,7 @@ SDL_HOME = /home/abi/.local/src/SDL
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-8612bf0f-1.76-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-8612bf0f-1.79-main.sock
 # environment
 TERM = xterm-256color
 # environment
@@ -190,8 +194,6 @@ XDG_SESSION_ID = 1
 .RECIPEPREFIX := 
 # automatic
 <F = $(notdir $<)
-# environment
-VSCODE_CRASH_REPORTER_SANDBOXED_HINT = 1
 # default
 SUFFIXES := 
 # default
@@ -199,7 +201,7 @@ SUFFIXES :=
 # environment
 DOTNET_ROOT = /usr/share/dotnet
 # variable set hash-table stats:
-# Load=94/1024=9%, Rehash=0, Collisions=7/123=6%
+# Load=95/1024=9%, Rehash=0, Collisions=7/124=6%
 
 # Pattern-specific Variable Values
 
@@ -207,9 +209,9 @@ DOTNET_ROOT = /usr/share/dotnet
 
 # Directories
 
-# . (device 66305, inode 3435472): 33 files, no impossibilities.
+# . (device 66305, inode 3435472): 20 files, no impossibilities.
 
-# 33 files, no impossibilities in 1 directories.
+# 20 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -274,10 +276,10 @@ build: clean
 	nim c --threads:on
 
 orto: clean
-#  Implicit rule search has not been done.
  
 make: *** No rule to make target 'all'.  Stop.
 
+#  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 8):
@@ -291,12 +293,12 @@ make: *** No rule to make target 'all'.  Stop.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 44 / storage = 444 B / avg = 10 B
-# current buf: size = 8162 B / used = 444 B / count = 44 / avg = 10 B
+# strcache buffers: 1 (0) / strings = 32 / storage = 263 B / avg = 8 B
+# current buf: size = 8162 B / used = 263 B / count = 32 / avg = 8 B
 
-# strcache performance: lookups = 58 / hit rate = 24%
+# strcache performance: lookups = 45 / hit rate = 28%
 # hash-table stats:
-# Load=44/8192=1%, Rehash=0, Collisions=0/58=0%
-# Finished Make data base on Thu Mar 16 11:02:10 2023
+# Load=32/8192=0%, Rehash=0, Collisions=0/45=0%
+# Finished Make data base on Wed Jul 19 08:28:39 2023
 
  

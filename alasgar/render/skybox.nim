@@ -76,7 +76,7 @@ proc destroy*(skybox: Skybox) =
             glDeleteVertexArrays(1, addr(skybox.cubeVAO))
             skybox.cubeVAO = 0
 
-proc render*(skybox: Skybox, cubemap: Texture, view, projection: Mat4, intensity: float32) = 
+proc render*(skybox: Skybox, cubemap: Texture, view, projection: Mat4, intensity, blurrity: float32) = 
     var normalizedView = view
     normalizedView[3, 0] = 0
     normalizedView[3, 1] = 0
@@ -86,6 +86,7 @@ proc render*(skybox: Skybox, cubemap: Texture, view, projection: Mat4, intensity
     skybox.shader["VIEW"] = normalizedView
     skybox.shader["PROJECTION"] = projection
     skybox.shader["ENVIRONMENT_INTENSITY"] = intensity
+    skybox.shader["ENVIRONMENT_BLURRITY"] = blurrity
     skybox.shader["MIP_COUNT"] = cubemap.levels.float32
     use(skybox.shader, cubemap, "SKYBOX_MAP", 0)
 

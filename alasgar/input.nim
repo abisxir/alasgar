@@ -156,6 +156,7 @@ func getMouseButtonUp*(i: Input, btn: MouseButton): bool = i.mouse.state == mous
 func getMouseClicks*(i: Input): uint8 = i.mouse.clicks
 func getTouchCount*(i: Input): int = len(i.touch.data)
 
+
 func getTouchPosition*(i: Input, pos: var Vec2): bool =
     result = len(i.touch.data) > 0
     if result:
@@ -175,6 +176,9 @@ func getGlobalMousePosition*(): Vec2 =
     result = vec2(x.float32, y.float32)
 
 func `mouse`*(i: Input): Mouse = i.mouse
+func `position`*(m: Mouse): Vec2 = m.position
+func `wheel`*(m: Mouse): Vec2 = vec2(m.wheel.x.float32, m.wheel.y.float32)
+func `scrolling`*(m: Mouse): bool = m.wheel.state == mouseWheelStateScroll
 func `keyboard`*(i: Input): Keyboard = i.keyboard
 func `touch`*(i: Input): Touch = i.touch
 func `$`*(mouse: Mouse): string = &"Mouse\n\tposition: [{mouse.position}]\n\tstate: [{mouse.state}]\n\tbutton: [{mouse.button}]\n\tclicks: [{mouse.clicks}]\n\twheel state: [{mouse.wheel.state}]\n\twheel data: [{mouse.wheel.x}, {mouse.wheel.y}]"

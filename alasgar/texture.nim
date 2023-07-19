@@ -15,6 +15,7 @@ type
         height: int32
         ratio: Vec2
         levels: int32
+        layers: int32
         target: GLenum
         internalFormat: GLenum
         minFilter: GLenum
@@ -24,6 +25,8 @@ template `id`*(t: Texture): GLuint = t.buffer
 template `levels`*(t: Texture): int32 = t.levels
 template `width`*(t: Texture): int32 = t.width
 template `height`*(t: Texture): int32 = t.height
+template `layers`*(t: Texture): int32 = t.layers
+template `target`*(t: Texture): GLenum = t.target
 
 proc destroyTexture(t: Texture) =
     if t != nil and t.buffer != 0:
@@ -48,7 +51,8 @@ proc createTexture(target: GLenum,
                    minFilter=GL_NEAREST, 
                    magFilter=GL_NEAREST, 
                    levels=1,
-                   internalFormat:GLenum=GL_RGBA8): Texture =
+                   internalFormat:GLenum=GL_RGBA8,
+                   layers=1): Texture =
     new(result)
     result.width = width.int32
     result.height = height.int32
@@ -57,6 +61,7 @@ proc createTexture(target: GLenum,
     result.target = target
     result.internalFormat = internalFormat
     result.minFilter = minFilter
+    result.layers = layers.int32
 
     glGenTextures(1, result.buffer.addr)
     glBindTexture(target, result.buffer)
@@ -101,27 +106,28 @@ proc setFaces(t: Texture,
     if t.levels > 1:
         glGenerateMipmap(t.target)
 
-proc allocate*(t: Texture) =
-    #when defined(glTexStorage2D):
-    glTexStorage2D(
-        t.target, 
-        t.levels.GLsizei, 
-        t.internalFormat, 
-        t.width.GLsizei, 
-        t.height.GLsizei
-    )
-    #else:
-    #    glTexImage2D(
-    #        t.target, 
-    #        0.GLint, 
-    #        t.internalFormat.GLint, 
-    #        t.width.GLsizei, 
-    #        t.height.GLsizei, 
-    #        0.GLint, 
-    #        GL_RGBA, 
-    #        GL_UNSIGNED_BYTE, 
-    #        nil
-    #    )
+proc allocate*(t: Texture, format=GL_RGBA, dataType=GL_UNSIGNED_BYTE) =
+    if t.target in [GL_TEXTURE_2D_ARRAY]:
+        glTexImage3D(
+            t.target, 
+            0, 
+            t.internalFormat.GLint, 
+            t.width.GLsizei, 
+            t.height.GLsizei, 
+            t.layers.GLsizei, 
+            0.GLint, 
+            format, 
+            dataType, 
+            nil
+        )
+    else:
+        glTexStorage2D(
+            t.target, 
+            t.levels.GLsizei, 
+            t.internalFormat, 
+            t.width.GLsizei, 
+            t.height.GLsizei
+        )
 
 
 proc copy*(t: Texture, data: ptr float32, format=GL_RGBA, width=0, height=0) =
@@ -149,7 +155,12 @@ proc newTexture*(target: GLenum,
                  height: int, 
                  levels: int=1,
                  internalFormat: GLenum=GL_RGBA8,
-                 wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture =
+                 wrapS=GL_CLAMP_TO_EDGE, 
+                 wrapT=GL_CLAMP_TO_EDGE, 
+                 wrapR=GL_CLAMP_TO_EDGE, 
+                 minFilter=GL_NEAREST, 
+                 magFilter=GL_NEAREST,
+                 layers: int=1): Texture =
     result = createTexture(
         target,
         width, 
@@ -160,7 +171,8 @@ proc newTexture*(target: GLenum,
         minFilter=if levels > 1: GL_LINEAR_MIPMAP_LINEAR  else: minFilter, 
         magFilter=magFilter, 
         levels=levels,
-        internalFormat=internalFormat
+        internalFormat=internalFormat,
+        layers=layers
     )
         
 proc extractFormats(bits: int, channels: int, hdr: bool): (GLenum, GLenum, GLenum) =
@@ -417,6 +429,9 @@ proc params*(t: Texture, param: GLenum, value: GLenum) =
 proc attach*(t: Texture) = 
     if t != nil:
         glBindTexture(t.target, t.buffer)
+
+proc detach*(t: Texture) = 
+    glBindTexture(t.target, 0)
 
 proc unit*(t: Texture, slot: int) = 
     glActiveTexture((GL_TEXTURE0.int + slot).GLenum)

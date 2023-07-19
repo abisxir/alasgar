@@ -112,20 +112,21 @@ proc getPath(node: Node): seq[tuple[int, int]] =
   # return the path
   return path
 
-# define a test grid
-var grid = [
-  [0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 1, 0, 0],
-  [0, 0, 0, 1, 0, 0],
-  [0, 0, 0, 1, 0, 0],
-  [0, 0, 0, 0, 0, 0]
-]
 
-# find the path from the start to the goal
-var start = (0, 0)
-var goal = (5, 5)
-var path = getPath(astar(grid, start, goal))
+when isMainModule:
+  # define a test grid
+  var grid = [
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0, 0]
+  ]
+  # find the path from the start to the goal
+  var start = (0, 0)
+  var goal = (5, 5)
+  var path = getPath(astar(grid, start, goal))
 
-# print the path
-echo path
+  # print the path
+  echo path

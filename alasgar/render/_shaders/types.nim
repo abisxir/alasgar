@@ -70,5 +70,5 @@ type
         INNER_CUTOFF_COS*: float
         OUTER_CUTOFF_COS*: float
         TYPE*: int
-        DEPTH_MAP*: int
+        DEPTH_MAP_LAYER*: int
         SHADOW_MAP*: Mat4

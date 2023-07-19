@@ -9,10 +9,9 @@ type
 
 var systems = newSeq[System]()
 
-method process*(sys: System, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) {.base.} = discard
+method process*(sys: System, scene: Scene, input: Input, delta: float32, frames: int, age: float32) {.base.} = discard
 method cleanup*(sys: System) {.base.} = discard
-method init*(sys: System) {.base.} = 
-    add(systems, sys)
+method init*(sys: System) {.base.} = add(systems, sys)
 
 proc getSystem*[T](): T = 
     for sys in systems:

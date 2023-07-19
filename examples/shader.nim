@@ -115,9 +115,9 @@ proc createCube(name: string, position: Vec3, scale=VEC3_ONE, shadow=true) =
     #addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
     #    # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
     #    script.transform.euler = vec3(
-    #        runtime.engine.age * 0.1, 
-    #        runtime.engine.age * 0.3, 
-    #        runtime.engine.age * 0.2,
+    #        runtime.age * 0.1, 
+    #        runtime.age * 0.3, 
+    #        runtime.age * 0.2,
     #    )
     #))
     # Adds a material to cube

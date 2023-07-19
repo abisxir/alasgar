@@ -8,14 +8,11 @@ when defined(windows):
 elif defined(macosx):
     import gl410
     export gl410
-elif defined(emscripten):
-    import gles320
-    export gles320
 else:
     import gles300
     export gles300
 
-when defined(glDebugMessageCallback):
+when declared(glDebugMessageCallback):
     proc printGlDebug(
         source, typ: GLenum,
         id: GLuint,
@@ -45,12 +42,11 @@ proc logContextInfo() =
     echo &"  Renderer: {renderer}"
     echo &"  Max varying vectors: {maxVaryingVectors}"
 
-
 const
     OPENGL_PROFILE* = when defined(macosx) or defined(windows): SDL_GL_CONTEXT_PROFILE_CORE else: SDL_GL_CONTEXT_PROFILE_ES
     OPENGL_MAJOR_VERSION* = when defined(macosx) or defined(windows): 4 else: 3
-    OPENGL_MINOR_VERSION* = when defined(macosx): 1 elif defined(windows): 6 elif defined(emscripten): 0 else: 2
-    OPENGL_SHADER_VERSION* = when defined(macosx): "410" elif defined(windows): "460" elif defined(emscripten): "300 es" else: "320 es"
+    OPENGL_MINOR_VERSION* = when defined(macosx): 1 elif defined(windows): 6 else: 0
+    OPENGL_SHADER_VERSION* = when defined(macosx): "410" elif defined(windows): "460" else: "300 es"
 
 proc createOpenGLContext*(window: WindowPtr): GlContextPtr =
     # Initialize opengl context
@@ -80,9 +76,10 @@ proc createOpenGLContext*(window: WindowPtr): GlContextPtr =
     logContextInfo()
 
     # Sets debug callback
-    when defined(glDebugMessageCallback):
+    when declared(glDebugMessageCallback):
         glDebugMessageCallback(printGlDebug, nil)
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS)
         glEnable(GL_DEBUG_OUTPUT)
 
-    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS)
+    when declared(GL_TEXTURE_CUBE_MAP_SEAMLESS):
+        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS)

@@ -9,8 +9,7 @@ proc prepareFragment*(SURFACE: Surface,
                       METALLIC_MAP: Sampler2D,
                       ROUGHNESS_MAP: Sampler2D,
                       EMISSIVE_MAP: Sampler2D,
-                      AO_MAP: Sampler2D,
-                      GGX_MAP: SamplerCube): Fragment =
+                      AO_MAP: Sampler2D): Fragment =
     result.FOG_AMOUNT = getFogAmount(ENVIRONMENT.FOG_DENSITY, SURFACE.POSITION_RELATED_TO_VIEW.xyz)
     if result.FOG_AMOUNT < 1.0:
         if MATERIAL.HAS_ALBEDO_MAP:
@@ -47,13 +46,13 @@ proc prepareFragment*(SURFACE: Surface,
             else:
                 result.EMISSIVE = MATERIAL.EMISSIVE_COLOR.rgb
 
-            result.P = SURFACE.POSITION.xyz
+            result.POSITION = SURFACE.POSITION.xyz / SURFACE.POSITION.w
             if MATERIAL.HAS_NORMAL_MAP:
-                result.N = getNormalMap(result.P, SURFACE.NORMAL, SURFACE.UV, NORMAL_MAP)
+                result.N = getNormalMap(result.POSITION, SURFACE.NORMAL, SURFACE.UV, NORMAL_MAP)
             else:
                 result.N = SURFACE.NORMAL
-            result.V = normalize(SURFACE.POSITION.xyz - CAMERA.POSITION)
-            result.R = -normalize(reflect(result.V, result.N))
+            result.V = normalize(CAMERA.POSITION - result.POSITION)
+            result.R = normalize(reflect(-result.V, result.N))
             result.NoV = max(dot(result.N, result.V), EPSILON)
 
             if isPBR(result):
@@ -63,12 +62,10 @@ proc prepareFragment*(SURFACE: Surface,
                 result.K = pow2(result.ROUGHNESS + 1.0) / 8.0
                 result.NORMALIZED_ROUGHNESS = (result.ROUGHNESS + 0.5) * 4.0
                 result.REFLECTANCE = MATERIAL.REFLECTANCE
-                result.GGX_MAP_LOD = result.ROUGHNESS * ENVIRONMENT.MIP_COUNT
-                result.F0 = result.METALLIC * result.ALBEDO + 0.16 * result.REFLECTANCE * result.REFLECTANCE * (1.0 - result.METALLIC)
-                result.F = mix(result.ALBEDO * (1.0 - result.F0), vec3(0), result.METALLIC)
-                #if ENVIRONMENT.HAS_ENV_MAP > 0:
-                #    result.INDIRECT_SPECULAR = textureLod(GGX_MAP, FRAGMENT.R, result.GGX_MAP_LOD).rgb
+                result.F0 = mix(vec3(0.04 * result.REFLECTANCE * result.REFLECTANCE), result.ALBEDO, result.METALLIC)
+                result.ALBEDO = result.ALBEDO * (1.0 - 0.04) * (1.0 - result.METALLIC)
+                #result.F0 = result.METALLIC * result.ALBEDO + 0.16 * result.REFLECTANCE * result.REFLECTANCE * (1.0 - result.METALLIC)
+                #result.F = mix(result.ALBEDO * (1.0 - result.F0), vec3(0), result.METALLIC)
             else:
-                result.SHININESS = result.REFLECTANCE * 255.0
-                #if ENVIRONMENT.HAS_ENV_MAP > 0:
-                #    result.INDIRECT_SPECULAR = textureLod(GGX_MAP, FRAGMENT.R, result.REFLECTANCE * ENVIRONMENT.MIP_COUNT).rgb
+                result.SHININESS = MATERIAL.REFLECTANCE * 255.0
+                result.F0 = mix(vec3(0.04 * result.REFLECTANCE * result.REFLECTANCE), result.ALBEDO, 1.0 - result.REFLECTANCE)

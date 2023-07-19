@@ -72,17 +72,20 @@ func newInteractiveSystem*(): InteractiveSystem =
     result.name = "Interactive System"
 
 
-method process*(sys: InteractiveSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) =
-    let activeCamera = scene.activeCamera
-    let worldCoords = screenToWorldCoord(
-        getMousePosition(input),
-        graphics.windowSize, 
-        activeCamera
-    )
+method process*(sys: InteractiveSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
+    {.warning[LockLevel]:off.}
+    let 
+        activeCamera = scene.activeCamera
+        worldCoords = screenToWorldCoord(
+            getMousePosition(input),
+            graphics.windowSize, 
+            activeCamera
+        )
     var ray: Ray
     if activeCamera.kind == orthographicCamera:
-        let near = vec3(worldCoords.x, worldCoords.y, activeCamera.near)
-        let far = vec3(worldCoords.x, worldCoords.y, activeCamera.far)
+        let 
+            near = vec3(worldCoords.x, worldCoords.y, activeCamera.near)
+            far = vec3(worldCoords.x, worldCoords.y, activeCamera.far)
         ray = newRay(near, far - near)
     else:
         let rayDirection = normalize(worldCoords.xyz) * activeCamera.far

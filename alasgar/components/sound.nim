@@ -99,14 +99,16 @@ method init*(sys: SoundSystem) =
     if openAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0:
         raise newAlasgarError("Could not open audio!")
 
-method process*(sys: SoundSystem, scene: Scene, input: Input, delta: float32, frames: float32, age: float32) = 
-    var activeCamera = scene.activeCamera 
-    var pos = activeCamera.transform.globalPosition
+method process*(sys: SoundSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) = 
+    let 
+        activeCamera = scene.activeCamera 
+        pos = activeCamera.transform.globalPosition
     for c in iterateComponents[SoundEffectComponent](scene):
         if isPlaying(c):
             adjustBy(c, pos)
 
 method cleanup*(sys: SoundSystem) = 
+    {.warning[LockLevel]:off.}
     for music in values(musicCache):
         freeMusic(music)
     clear(musicCache)

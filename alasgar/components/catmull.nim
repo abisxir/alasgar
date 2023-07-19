@@ -90,7 +90,8 @@ proc newCatmullSystem*(): CatMullSystem =
     new(result)
     result.name = "Catmull System"
 
-method process*(sys: CatMullComponent, scene: Scene, input: Input, delta: float32) =
+method process*(sys: CatMullSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
+    {.warning[LockLevel]:off.}
     for c in iterateComponents[CatMullComponent](scene):
         if c.playing:
             if c.current < c.curve.nodesCount:

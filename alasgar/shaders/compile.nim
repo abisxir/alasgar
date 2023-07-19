@@ -229,11 +229,11 @@ const glslFunctions = [
   "IVec2", "IVec3", "IVec4",
 
   "abs", "clamp", "min", "max", "dot", "sqrt", "mix", "length", "cross", "reflect",
-  "smoothstep",
+  "smoothstep", "step",
   "dFdx", "dFdy", 
   "texelFetch", "imageStore", "imageLoad", "texture", "textureLod",
   "normalize",
-  "floor", "ceil", "round", "exp", "inversesqrt", "exp2",
+  "floor", "ceil", "round", "exp", "inversesqrt", "exp2", "log", "fract",
   "[]", "[]=",
   "inverse",
   "sin", "cos", "tan", "pow", "atan", "asin", "acos",
@@ -341,12 +341,10 @@ proc toCode(n: NimNode, res: var string, level = 0) =
       n[1].toCode(res)
       res.add " % "
       n[2].toCode(res)
-      res.addSmart ';'
     elif n[0].repr == "div":
       n[1].toCode(res)
       res.add " / "
       n[2].toCode(res)
-      res.addSmart ';'
     elif n[0].repr in ["+=", "-=", "*=", "/="]:
       res.addIndent level
       n[1].toCode(res)
@@ -530,9 +528,14 @@ proc toCode(n: NimNode, res: var string, level = 0) =
   of nnkNone:
     assert false
 
-  of nnkEmpty, nnkNilLit, nnkDiscardStmt, nnkPragma:
+  of nnkEmpty, nnkNilLit, nnkPragma:
     # Skip all nil, empty and discard statements.
     discard
+
+  of nnkDiscardStmt:
+    res.addIndent level
+    res.add "discard"
+    res.addSmart ';'
 
   of nnkIntLit .. nnkInt64Lit:
     var iv = $n.intVal
@@ -741,7 +744,7 @@ proc parseBracket(param: NimNode, res: var string, forceOut=false): int =
     prefix = typeRename(param[0].strVal)
   if prefix == "layout":
     if isSampler(param[2]):
-      when not defined(macosx) and not defined(emscripten):
+      when defined(windows):
         res.add(prefix)
         res.add(&"(binding={param[1].intVal}) ")
     else:
@@ -979,7 +982,7 @@ proc toGLSLInner*(s: NimNode, extra: string): string =
   code.add " * " & s.strVal & " \n"
   code.add " */\n\n" 
   code.add extra
-  when defined(emscripten):
+  when defined(emscripten) or defined(linux):
     code.add """vec4 unpackUnorm4x8(uint i) { return vec4(float(i & uint(0xff)) / 255.0, float(i/uint(0x100) & uint(0xff)) / 255.0, float(i/uint(0x10000) & uint(0xff)) / 255.0,float(i/uint(0x1000000)) / 255.0);}"""
   code.add "\n"
 
@@ -1023,7 +1026,7 @@ proc toGLSLInner*(s: NimNode, extra: string): string =
 
 macro toGLSL*(
   s: typed,
-  extra = "precision highp float;\nprecision highp int;\n"
+  extra = "precision highp float;\nprecision highp int;\nprecision highp sampler2DArray;\nprecision highp sampler2DArrayShadow;\n\n"
 ): string =
   ## Converts proc to a glsl string.
   result = newLit(toGLSLInner(s, extra.strVal))
@@ -1092,6 +1095,9 @@ type
 proc texelFetch*(sampler: Sampler2D, P: IVec2, lod: int): Vec4 = discard
 proc textureLod*(sampler: SamplerCube, P: Vec3, lod: float): Vec4 = discard
 proc texture*(sampler: Sampler2D, P: Vec2): Vec4 = discard
+proc texture*(sampler: Sampler2DShadow, P: Vec3): float = discard
+proc texture*(sampler: Sampler2DArray, P: Vec3): Vec4 = discard
+proc texture*(sampler: Sampler2DArrayShadow, P: Vec4): float = discard
 proc ivec2*(x, y: int): IVec2 = discard
 proc `-`*(a: float, b: Vec3): Vec3 = discard
 proc `*`*(x: Mat4, y: float32): Mat4 = discard
@@ -1103,9 +1109,18 @@ proc dFdx*(v: Vec2): Vec2 = discard
 proc dFdy*(v: Vec2): Vec2 = discard
 proc dFdx*(v: float): float = discard
 proc dFdy*(v: float): float = discard
-proc smoothstep*(a: float, b: float, v: float): float = discard
+proc smoothstep*(a, b, v: float): float = discard
+proc smoothstep*(a, b, v: Vec2): Vec2 = discard
 proc reflect*(a, b: Vec3): Vec3 = discard
 proc max*(v: Vec3, f: float): Vec3 = discard
 proc inversesqrt*(v: float): float = discard
 proc atan*(a, b: float): float = arctan2(a, b)
 proc acos*(a: float): float = arccos(a)
+proc fract*(v: Vec3): Vec3 = discard
+proc fract*(v: Vec2): Vec2 = discard
+proc fract*(v: float): float = discard
+proc pow*(a, b: Vec3): Vec3 = discard
+proc log*(a: float): float = discard
+proc clamp*(v, min, max: Vec2): Vec2 = discard
+proc clamp*(v, min, max: Vec3): Vec3 = discard
+proc clamp*(v, min, max: Vec4): Vec4 = discard
