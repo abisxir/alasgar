@@ -34,7 +34,7 @@ func newEnvironmentComponent*(): EnvironmentComponent =
     new(result)
     result.environmentIntensity = 1.0
     result.environmentBlurrity = 0.0
-    result.backgroundColor = color(0.12, 0.12, 0.12)
+    result.backgroundColor = color(0.0, 0.0, 0.0)
     result.sampleCount = 2048
 
 func setEnvironmentIntensity*(e: EnvironmentComponent, value: float32) =

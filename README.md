@@ -39,6 +39,7 @@ Table of Contents
 =================
 
 * [Window and scene creation](#window-and-scene-creation)  
+* [Change background color](#background)  
 * [First mesh](#first-mesh)  
 * [Point light](#point-light)
 * [Scripts](#scripts)
@@ -98,7 +99,7 @@ If everything was right, you will see an empty window with the given size. Run i
 nim c -r main.nim
 ```
 
-Check it here [GitHub](https://abisxir.github.io/alasgar/step1/build).
+Check the [example](https://abisxir.github.io/alasgar/step1/build) here.
 
 When you create a window by defult it runs in window mode, you can easily enable fullscreen mode:
 ```nim
@@ -106,7 +107,25 @@ When you create a window by defult it runs in window mode, you can easily enable
 window("Hello", 640, 360, fullscreen=true)
 ```
 
-Let us add a cube to our scene.
+Let us add a cube to our scene, but it is better to see the cube if we give a nice background to our window, will make it easier to see our meshes before we add lights. To add background we need to introduce environment component:
+
+Background
+==========
+```nim
+...
+var 
+    # Creates a new scene
+    scene = newScene()
+    # Creates an environment component
+    env = newEnvironmentComponent()
+
+# Sets background color
+setBackground(env, parseHex("d7d1bf"))
+# Adds environment component to scene
+addComponent(scene, env)
+...
+```
+That was all you need to do, if you compile and run it, you will see an empty window with a nicer [color](https://abisxir.github.io/alasgar/step2/build).
 
 
 First mesh

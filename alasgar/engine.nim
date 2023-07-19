@@ -292,7 +292,7 @@ proc loop*() =
         cleanupGraphics()
     else:
         emscripten_cancel_main_loop()
-        emscripten_set_main_loop(handleFrameWhenEmscripten, 0, 0)
+        emscripten_set_main_loop(handleFrameWhenEmscripten, 0, 1)
 
 proc render*(scene: Scene) =
     if runtime.engine.primary != scene:
