@@ -66,10 +66,10 @@ import alasgar
 window("Hello", 640, 360)
    
 # Creates a new scene
-var scene = newScene()
+let scene = newScene()
 
 # Creates camera entity
-var cameraEntity = newEntity(scene, "Camera")
+let cameraEntity = newEntity(scene, "Camera")
 # Sets camera position
 cameraEntity.transform.position = vec3(5, 5, 5)
 # Adds a perspective camera component to entity
@@ -107,13 +107,13 @@ When you create a window by defult it runs in window mode, you can easily enable
 window("Hello", 640, 360, fullscreen=true)
 ```
 
-Let us add a cube to our scene, but it is better to see the cube if we give a nice background to our window, will make it easier to see our meshes before we add lights. To add background we need to introduce environment component:
+Let us add a cube to our scene, but to see the cube, it is better if we give a brighter background to our window, it will make it easier to see our meshes before we add lights. To add background we need to introduce environment component:
 
 Background
 ==========
 ```nim
 ...
-var 
+let 
     # Creates a new scene
     scene = newScene()
     # Creates an environment component
@@ -125,6 +125,7 @@ setBackground(env, parseHex("d7d1bf"))
 addComponent(scene, env)
 ...
 ```
+
 That was all you need to do, if you compile and run it, you will see an empty window with a nicer [color](https://abisxir.github.io/alasgar/step2/build).
 
 
@@ -134,16 +135,18 @@ First mesh
 ...
 
 # Creates cube entity, by default position is 0, 0, 0
-var cubeEntity = newEntity(scene, "Cube")
+let cubeEntity = newEntity(scene, "Cube")
 # Add a cube mesh component to entity
 addComponent(cubeEntity, newCubeMesh())
 # Makes the cube enity child of the scene
 addChild(scene, cubeEntity)
+# Scale it up
+cubeEntity.transform.scale = vec3(2)
 
 ...
 ```
 
-When you run the game barely you can see the cube, as you guess we need to have a light in our scene, let us add a point light to our scene:
+When you run it you will see an ugly black [cube](https://abisxir.github.io/alasgar/step3/build), as you guess we need to have a light in our scene, let us add a point light to our scene:
 
 Point light
 ===========
@@ -151,7 +154,7 @@ Point light
 ...
 
 # Creates light entity
-var lightEntity = newEntity(scene, "Light")
+let lightEntity = newEntity(scene, "Light")
 # Sets light position
 lightEntity.transform.position = vec3(-5, 5, 5)
 # Adds a point light component to entity
@@ -165,20 +168,17 @@ addChild(scene, lightEntity)
 ...
 ```
 
-![](docs/files/cube.jpg)
-
-When you run the code, you will see an ugly grey cube. Let us move the light:
-
+That is all we needed, our ugly cube maybe is [less ugly](https://abisxir.github.io/alasgar/step4/build) now. Lights have some properties, like color, luminance, etc. You change it and you will shade the cube differently. But if we want to see light effect better we need to have darker background, let us set it to black in the next sample and move the light:
 
 Scripts
 =======
-To program an entity, we need to add a ScriptComponent to our light entity. Each component has access to entity, entity's transform and component's data.
+To program an entity, we need to add a ScriptComponent to our light entity. Each component has access to entity, entity's transform and component's data. We can add a script to any entity using "program" function or directly by instantiating a ScriptComponent using "newScriptComponent".
 
 ```nim
 ...
 
 # Creates light entity
-var lightEntity = newEntity(scene, "Light")
+let lightEntity = newEntity(scene, "Light")
 # Sets light position
 lightEntity.transform.position = vec3(-5, 5, 5)
 # Adds a point light component to entity
@@ -187,7 +187,7 @@ addComponent(
     newPointLightComponent()
 )
 # Adds a script component to light entity
-addComponent(lightEntity, newScriptComponent(proc(script: ScriptComponent) =
+program(lightEntity, proc(script: ScriptComponent) =
     const r = 5 
     # Change position on transform
     script.transform.position = r * vec3(
@@ -195,15 +195,18 @@ addComponent(lightEntity, newScriptComponent(proc(script: ScriptComponent) =
         cos(runtime.age),
         sin(runtime.age) * cos(runtime.age),
     )
-))
-# Also you can add using a suger function called "program", will explain it later
+)
 # Makes the light entity child of the scene
 addChild(scene, lightEntity)
 
 ...
 ```
 
-![](docs/files/light-moves.gif)
+[See](https://abisxir.github.io/alasgar/step5/build) now our light moves around our scene and lights our cube from different directions.
+
+```html
+<iframe src="https://abisxir.github.io/alasgar/step5/build"></iframe>
+```
 
 If you run the code, light is going to move around the cube. As you see in the code we used an anonymous function to change light's position.
 You can define a function and use it, here. Feel free to play with nim features. As you see we directly access transform component from script 
