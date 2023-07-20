@@ -2,6 +2,8 @@ import alasgar
 
 # Creates a window named Hello
 window("Hello", 640, 360)
+
+echo runtime.screenSize
    
 # Creates a new scene
 var scene = newScene()

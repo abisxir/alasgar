@@ -6,7 +6,7 @@ type
         maxLights*: int
         screenSize*: Vec2
         verbose*: bool
-        fps*: int
+        maxFPS*: int
         depthMapSize*: int
         exitOnEsc*: bool
 
@@ -15,7 +15,7 @@ var settings* = Settings(
     maxLights: 8,
     screenSize: vec2(0, 0),
     verbose: false,
-    fps: 60,
+    maxFPS: 60,
     depthMapSize: 1024,
     exitOnEsc: false,
 )

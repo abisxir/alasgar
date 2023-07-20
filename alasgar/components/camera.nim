@@ -69,10 +69,18 @@ proc `projection`*(camera: CameraComponent): Mat4 =
     else:
         ortho(camera.left, camera.right, camera.bottom, camera.top, camera.near, camera.far)
 
-proc `view`*(camera: CameraComponent): Mat4 = lookAt(
-    camera.transform.globalPosition, 
-    camera.transform.globalPosition + camera.direction, 
-    camera.up)
+proc `view`*(camera: CameraComponent): Mat4 = 
+    lookAt(
+        camera.transform.globalPosition, 
+        camera.transform.globalPosition + camera.direction, 
+        camera.up
+    )
+    #fromAngles(
+    #    toAngles(
+    #        camera.transform.globalPosition, 
+    #        camera.transform.globalPosition + camera.direction
+    #    )
+    #)
 
 proc activate*(camera: CameraComponent) = camera.timestamp = cpuTime()
 

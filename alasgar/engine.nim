@@ -191,7 +191,7 @@ proc handleFrame() =
         delta = now - runtime.lastTicks
         age = 0'f32
         sleepTime = 0'f32
-        frameLimit = if settings.fps > 0: 1'f32 / settings.fps.float32 else: 0'f32
+        frameLimit = if settings.maxFPS > 0: 1'f32 / settings.maxFPS.float32 else: 0'f32
 
     if not isNil(runtime.engine.primary):
         # Cleans up the scene, removes dangling entities
@@ -320,7 +320,8 @@ template `fps`*(r: Runtime): float32 = 1.float32 / r.delta
 template `delta`*(r: Runtime): float32 = r.delta
 template `input`*(r: Runtime): Input = r.input
 template `ratio`*(r: Runtime): float32 = r.engine.ratio
-template `window`*(r: Runtime): Vec2 = graphics.windowSize
+template `windowSize`*(r: Runtime): Vec2 = graphics.windowSize
+template `screenSize`*(r: Runtime): Vec2 = graphics.screenSize
 template `ratio`*(e: Engine): float32 = e.ratio
 
 when defined(android) or defined(ios):

@@ -43,7 +43,7 @@ Table of Contents
 * [First mesh](#first-mesh)  
 * [Point light](#point-light)
 * [Scripts](#scripts)
-* [Rotation](#rotation)
+* [Rotation and transform](#rotation)
 * [Material](#material)
 * [Texture](#texture)
 * [More lights](#more-lights)
@@ -63,7 +63,7 @@ Window and scene creation
 import alasgar
 
 # Creates a window named Hello
-window("Hello", 640, 360)
+window("Hello", 960, 540)
    
 # Creates a new scene
 let scene = newScene()
@@ -104,7 +104,7 @@ Check the [example](https://abisxir.github.io/alasgar/step1/build) here.
 When you create a window by defult it runs in window mode, you can easily enable fullscreen mode:
 ```nim
 # Creates a window named Hello and enables fullscreen mode.
-window("Hello", 640, 360, fullscreen=true)
+window("Hello", 960, 540, fullscreen=true)
 ```
 
 Let us add a cube to our scene, but to see the cube, it is better if we give a brighter background to our window, it will make it easier to see our meshes before we add lights. To add background we need to introduce environment component:
@@ -179,8 +179,6 @@ To program an entity, we need to add a ScriptComponent to our light entity. Each
 
 # Creates light entity
 let lightEntity = newEntity(scene, "Light")
-# Sets light position
-lightEntity.transform.position = vec3(-5, 5, 5)
 # Adds a point light component to entity
 addComponent(
     lightEntity, 
@@ -188,7 +186,7 @@ addComponent(
 )
 # Adds a script component to light entity
 program(lightEntity, proc(script: ScriptComponent) =
-    const r = 5 
+    const r = 7.0 
     # Change position on transform
     script.transform.position = r * vec3(
         sin(runtime.age),
@@ -202,16 +200,23 @@ addChild(scene, lightEntity)
 ...
 ```
 
-[See](https://abisxir.github.io/alasgar/step5/build) now our light moves around our scene and lights our cube from different directions.
+[See](https://abisxir.github.io/alasgar/step5/build) now our light moves around our scene and lights our cube from different directions. As you see in the code we used an anonymous function to change light's position. You can define a function and use it, here. Feel free to play with nim features. As you see we directly access transform component from script component. Each entity has a transform component, all entity's components have a pointer to it. Entitis also have a pointer to transform component.
+In script we used runtime variable, it is a readonly variable that gives us some good information about engine, also has an instance to engine inside it:
 
-```html
-<iframe src="https://abisxir.github.io/alasgar/step5/build"></iframe>
+```nim
+type 
+    Runtime = object
+        engine: Engine   # engine instance
+        age: float32     # total seconds engine is running
+        frames: int      # total frames rendered
+        fps: float32     # current fps
+        delta: float32   # delta between last two frames
+        input: Input     # last input state
+        ratio: float32   # screen ratio
+        windowSize: Vec2 # window size
+        screenSize: Vec2 # screen size
+
 ```
-
-If you run the code, light is going to move around the cube. As you see in the code we used an anonymous function to change light's position.
-You can define a function and use it, here. Feel free to play with nim features. As you see we directly access transform component from script 
-component. Each entity has a transform component, all other components have a pointer to it. Entity also have a pointer to transform component.
-
 
 Rotation
 ========
@@ -220,60 +225,75 @@ Let us rotate the cube. To do it we need a script component attached to cube ent
 ```nim
 ...
 
-# Creates cube entity, by default position is 0, 0, 0
-var cubeEntity = newEntity(scene, "Cube")
-# Add a cube mesh component to entity
-addComponent(cubeEntity, newCubeMesh())
 # Adds a script component to cube entity, we use this helpful function:
 program(cubeEntity, proc(script: ScriptComponent) =
     # We can rotate an object using euler also it is possible to directly set rotation property which is a quaternion.
-    script.transform.euler = vec3(
-        sin(runtime.age) * cos(runtime.age), 
-        cos(runtime.engine.age), 
-        sin(runtime.engine.age)
-    )
-)# Makes the cube enity child of the scene
-addChild(scene, cubeEntity)
-
-...
-```
-
-![](docs/files/cube-rotates.gif)
-
-
-Material
-========
-We can change cube color using material components. We scale cube and make it bigger and then we add a component to define cube's material.
-I used chroma library to manipulate colors, it is a great library, here you can see how to use it:
-https://github.com/treeform/chroma
-
-```nim
-...
-
-# Creates cube entity, by default position is 0, 0, 0
-var cubeEntity = newEntity(scene, "Cube")
-# Set scale to 2
-cubeEntity.transform.scale = vec3(2)
-# Add a cube mesh component to entity
-addComponent(cubeEntity, newCubeMesh())
-# Adds a script component to cube entity
-program(cubeEntity, proc(script: ScriptComponent) =
-    # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
     script.transform.euler = vec3(
         sin(runtime.age) * cos(runtime.age), 
         cos(runtime.age), 
         sin(runtime.age)
     )
 )
-# Adds a material to cube
-addComponent(cubeEntity, newMaterialComponent(diffuseColor=parseHtmlName("olive")))
-# Makes the cube enity child of scene
-addChild(scene, cubeEntity)
 
 ...
 ```
 
-![](docs/files/cube-diffuse.gif)
+As you [see](https://abisxir.github.io/alasgar/step6/build) our ugly cube is rotating and we used euler angles to change rotation. But also rotation as quat is enable in TransformComponent and you can use it if you are looking for troubles. Transform component has some useful functions and properties:
+
+```nim
+type
+    TransformComponent = ref object of RootObj
+        position: Vec3              # position in local space
+        scale: Vec3                 # scale in local space
+        rotation: Quat              # rotation in local space
+        euler: Vec3                 # write only euler angles in local space
+        globalPosition: Vec3        # position in global space
+        globalScale: Vec3           # scale in global space
+        globalRotation: Quat        # rotation in global space
+        parent: TransformComponent  # parent transform, read only
+
+proc lookAt*(t: TransformComponent, target: Vec3)
+proc lookAt*(t: TransformComponent, target: TransformComponent)
+
+```
+
+
+Material
+========
+We can change cube color using material components. So what we need is to add a material component to define cube's material.
+I used chroma library to manipulate colors, it is a great library, [here](https://abisxir.github.io/alasgar/step7/build) you can see how to use it.
+
+
+```nim
+...
+
+# Adds a material to cube
+addComponent(cubeEntity, newMaterialComponent(diffuseColor=parseHtmlName("Tomato")))
+
+...
+```
+Material component in alasgar is instantiated using "newMaterialComponent" that accepts these parameters:
+```nim
+func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
+                           specularColor: Color=COLOR_WHITE, 
+                           emissiveColor: Color=COLOR_BLACK,
+                           albedoMap, 
+                           normalMap, 
+                           metallicMap, 
+                           roughnessMap, 
+                           aoMap, 
+                           emissiveMap: Texture = nil, 
+                           metallic: float32 = 0.0,
+                           roughness: float32 = 0.0,
+                           reflectance: float32 = 0.0,
+                           shininess: float32 = 128.0,
+                           ao: float32 = 1.0,
+                           frame: int=0,
+                           vframes: int=1,
+                           hframes: int=1,
+                           castShadow: bool=false)
+```
+If roughness and metallic factors are zero also there is no metallic map and roughness map provided then shader will use shininess and shades with phong model otherwise will be PBR. vfames, hframes and frame is used to offset texture, very helpful for sprites or animations, will discuss it later in sprites section.
 
 Texture
 =======
@@ -283,46 +303,28 @@ The assets are accessable using a relative path by res like "res://stone-texture
 ```nim
 ...
 
-# Creates cube entity, by default position is 0, 0, 0
-var cubeEntity = newEntity(scene, "Cube")
-# Set scale to 2
-cubeEntity.transform.scale = vec3(2)
-# Add a cube mesh component to entity
-addComponent(cubeEntity, newCubeMesh())
-# Adds a script component to cube entity
-addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
-    # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
-    script.transform.euler = vec3(
-        sin(runtime.engine.age) * sin(runtime.engine.age), 
-        cos(runtime.engine.age), 
-        sin(runtime.engine.age)
-    )
-))
 # Adds a material to cube
 addComponent(cubeEntity, newMaterialComponent(
     diffuseColor=parseHtmlName("white"),
+    specularColor=parseHtmlName("grey"),
     albedoMap=newTexture("res://stone-texture.png")
-    )
-)
-# Makes the cube enity child of scene
-addChild(scene, cubeEntity)
+))
 
 ...
 ```
-
-![](docs/files/cube-texture.gif)
+If you run the sample, you will see a [textured](https://abisxir.github.io/alasgar/step8/build) cube which is not that much ugly this time but there are a lot to improve.
 
 The texture used here grabbed from: https://opengameart.org/content/handpainted-stone-floor-texture
 
 More lights
 ===========
-As you scene our scene has just one light and the light is moving, let us add a new light to make the scene much clear:
+As you see our scene has just one light and the light is moving, let us add a new light to try another type of lights:
 
 ```nim
 ...
 
 # Creats spot point light entity
-var spotLightEntity = newEntity(scene, "SpotLight")
+let spotLightEntity = newEntity(scene, "SpotLight")
 # Sets position to (-6, 6, 6)
 spotLightEntity.transform.position = vec3(-6, 6, 6)
 # Adds a spot point light component
@@ -332,8 +334,7 @@ addComponent(spotLightEntity, newSpotPointLightComponent(
     shadow=false,                                 # Casts shadow or not
     innerCutoff=30,                               # Inner circle of light
     outerCutoff=90                                # Outer circle of light
-    )
-)
+))
 # Makes the new light child of the scene
 addChild(scene, spotLightEntity)
 
@@ -351,7 +352,7 @@ Let us play with light's color, to access a component we can call getComponent[T
 let c = getComponent[MyComponent](e)
 ```
 
-Or using an index operator:
+Or simply using an index operator:
 
 ```nim
 let c = e[MyComponent]

@@ -73,12 +73,14 @@ proc getViewMatrix*(light: LightComponent, camera: CameraComponent): Mat4 =
     if light of SpotPointLightComponent:
         let spot = cast[SpotPointLightComponent](light)
         result = lookAt(spot.transform.globalPosition, spot.transform.globalPosition + spot.direction, VEC3_UP)
+        #result = fromAngles(toAngles(spot.transform.globalPosition, spot.transform.globalPosition + spot.direction))
     elif light of DirectLightComponent:
         let 
             direct = cast[DirectLightComponent](light)
             depth = 0.25 * (camera.far - camera.near)
             position = camera.transform.globalPosition - depth * normalize(direct.direction)
         result = lookAt(position, direct.direction, VEC3_UP)
+        #result = fromAngles(toAngles(position, direct.direction))
 
 proc getProjectionMatrix*(light: LightComponent, camera: CameraComponent): Mat4 = 
     #result = perspective(light.outerLimit, 1, 1, 100)

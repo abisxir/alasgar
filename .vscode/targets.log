@@ -1,4 +1,6 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make: *** No rule to make target 'all'.  Stop.
+
 # GNU Make 4.4.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2023 Free Software Foundation, Inc.
@@ -6,7 +8,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed Jul 19 08:28:39 2023
+# Make data base, printed on Thu Jul 20 08:52:36 2023
 
 # Variables
 
@@ -17,9 +19,9 @@ LC_ALL = C
 # environment
 NO_AT_BRIDGE = 1
 # environment
-STARSHIP_SESSION_KEY = 2757020852418120
+STARSHIP_SESSION_KEY = 5641893092119345
 # environment
-I3SOCK = /run/user/1000/i3/ipc-socket.1119
+I3SOCK = /run/user/1000/i3/ipc-socket.1117
 # environment
 VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
 # environment
@@ -64,6 +66,8 @@ ANDROID_NDK_HOME = /opt/android-ndk
 CURDIR := /home/abi/Projects/alasgar
 # environment
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -81,7 +85,7 @@ MAKEFILE_LIST := Makefile
 # environment
 ZSH = /home/abi/.oh-my-zsh
 # environment
-VSCODE_PID = 3398
+VSCODE_PID = 1540
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -115,7 +119,7 @@ MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = /home/abi/.cargo/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/opt/android-sdk/platform-tools:/home/abi/.dotnet/tools:/usr/lib/emscripten:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/opt/android-sdk/platform-tools:/usr/lib/emscripten:/home/abi/.local/bin:/home/abi/.nimble/bin:/usr/lib/emscripten:/home/abi/.nimble/bin
+PATH = /home/abi/.cargo/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/opt/android-sdk/platform-tools:/home/abi/.dotnet/tools:/usr/lib/emscripten:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/opt/android-sdk/platform-tools:/usr/lib/emscripten:/home/abi/.local/bin:/home/abi/.nimble/bin:/usr/lib/emscripten
 # default
 MAKEFILES := 
 # environment
@@ -171,8 +175,6 @@ _ = /sbin/make
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
-AWS_SDK_LOAD_CONFIG = true
-# environment
 XDG_SESSION_CLASS = user
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
@@ -201,7 +203,7 @@ SUFFIXES :=
 # environment
 DOTNET_ROOT = /usr/share/dotnet
 # variable set hash-table stats:
-# Load=95/1024=9%, Rehash=0, Collisions=7/124=6%
+# Load=95/1024=9%, Rehash=0, Collisions=8/124=6%
 
 # Pattern-specific Variable Values
 
@@ -276,11 +278,9 @@ build: clean
 	nim c --threads:on
 
 orto: clean
- 
-make: *** No rule to make target 'all'.  Stop.
-
 #  Implicit rule search has not been done.
 #  Modification time never checked.
+ 
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 8):
 	nim c --threads:on -d:debug -r orto.nim
@@ -299,6 +299,6 @@ make: *** No rule to make target 'all'.  Stop.
 # strcache performance: lookups = 45 / hit rate = 28%
 # hash-table stats:
 # Load=32/8192=0%, Rehash=0, Collisions=0/45=0%
-# Finished Make data base on Wed Jul 19 08:28:39 2023
+# Finished Make data base on Thu Jul 20 08:52:36 2023
 
  

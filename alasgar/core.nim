@@ -709,25 +709,33 @@ func updateFrame(material: MaterialComponent) =
         material.frameOffset = vec2(fxy.x * material.frameSize.x, fxy.y * material.frameSize.y)    
         inc(material)
 
-func newPBRMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
-        specularColor: Color=COLOR_WHITE, 
-        emissiveColor: Color=COLOR_BLACK,
-        albedoMap, normalMap, metallicMap, roughnessMap, aoMap, emissiveMap: Texture = nil, 
-        metallic: float32 = 1.0,
-        roughness: float32 = 1.0,
-        reflectance: float32 = 1.0,
-        ao: float32 = 1.0,
-        frame: int=0,
-        vframes: int=1,
-        hframes: int=1,
-        castShadow: bool=false): MaterialComponent =
+func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
+                           specularColor: Color=COLOR_WHITE, 
+                           emissiveColor: Color=COLOR_BLACK,
+                           albedoMap, normalMap, metallicMap, roughnessMap, aoMap, emissiveMap: Texture = nil, 
+                           metallic: float32 = 0.0,
+                           roughness: float32 = 0.0,
+                           reflectance: float32 = 0.0,
+                           shininess: float32 = 128.0,
+                           ao: float32 = 1.0,
+                           frame: int=0,
+                           vframes: int=1,
+                           hframes: int=1,
+                           castShadow: bool=false): MaterialComponent =
     new(result)
     result.diffuseColor = diffuseColor
     result.specularColor = specularColor
     result.emissiveColor = emissiveColor
-    result.metallic = metallic
-    result.roughness = roughness
-    result.reflectance = reflectance
+    if roughness > 0.0 or metallic > 0.0:
+        result.metallic = metallic
+        result.roughness = roughness
+        result.reflectance = reflectance
+    elif not isNil(metallicMap) or not isNil(roughnessMap):
+        result.metallic = 1.0
+        result.roughness = 1.0
+        result.reflectance = reflectance
+    else:
+        result.reflectance = clamp(shininess, 1.0, 255.0) / 255.0
     result.ao = ao
     result.albedoMap = albedoMap
     result.normalMap = normalMap
@@ -740,39 +748,7 @@ func newPBRMaterialComponent*(diffuseColor: Color=COLOR_WHITE,
     result.vframes = max(1, vframes)
     result.hframes = max(1, hframes)
     updateFrame(result)
-    #result.frameSize = vec2(1, 1)
-    #result.frameOffset = vec2(0, 0)
     updateAvailableMaps(result)
-
-
-proc newMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
-        specularColor: Color=COLOR_WHITE, 
-        emissiveColor: Color=COLOR_BLACK,
-        albedoMap: Texture=nil, 
-        normalMap: Texture=nil, 
-        aoMap: Texture=nil,
-        shininess: float32 = 128.0,
-        ao: float32 = 1.0,
-        frame: int=0,
-        vframes: int=1,
-        hframes: int=1,
-        castShadow: bool=false): MaterialComponent =
-    result = newPBRMaterialComponent(
-        diffuseColor=diffuseColor,
-        specularColor=specularColor,
-        albedoMap=albedoMap,
-        normalMap=normalMap,
-        aoMap=aoMap,
-        frame=frame,
-        vframes=vframes,
-        hframes=hframes,
-        castShadow=castShadow,
-        metallic=0.0,
-        roughness=0.0,
-        ao=ao,
-        reflectance=clamp(shininess, 1.0, 255.0) / 255.0,
-    )
-    result.reflectance = clamp(result.reflectance, 0.0, 1.0)
 
 func `diffuseColor=`*(m: MaterialComponent, value: Color) =
     m.diffuseColor = value
