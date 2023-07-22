@@ -330,7 +330,8 @@ spotLightEntity.transform.position = vec3(-6, 6, 6)
 # Adds a spot point light component
 addComponent(spotLightEntity, newSpotPointLightComponent(
     vec3(0) - spotLightEntity.transform.position, # Light direction
-    color=parseHtmlName("aqua"),                  # Light color
+    color=parseHtmlName("Tomato")                 # Light color
+    luminance=100.0                               # Luminance amount
     shadow=false,                                 # Casts shadow or not
     innerCutoff=30,                               # Inner circle of light
     outerCutoff=90                                # Outer circle of light
@@ -338,15 +339,26 @@ addComponent(spotLightEntity, newSpotPointLightComponent(
 # Makes the new light child of the scene
 addChild(scene, spotLightEntity)
 
+# Creats direct light entity
+let directLightEntity = newEntity(scene, "DirectLight")
+# Adds a direct light component, and select camera direction for lighting
+addComponent(directLightEntity, newDirectLightComponent(
+    vec3(0) - cameraEntity.transform.position,    # Light direction
+    color=parseHtmlName("Aqua"),                  # Light color
+    luminance=150.0,                              # Light intensity
+    shadow=false,                                 # Casts shadow or not
+))
+# Makes the new light child of the scene
+addChild(scene, directLightEntity)
+
 ...
 ```
-
-![](docs/files/spotpoint-light.gif)
+As you [see](https://abisxir.github.io/alasgar/step9/build) now, our cube is shaded by three different kind of lights, not that much ugly anymore. However our scene with just one cube is boring. Before we go and add a another mesh, let us see how we can access components when we program an entity.
 
 
 Access components
 =================
-Let us play with light's color, to access a component we can call getComponent[T] on an entity or a component. Also it is possible to access it using index operator on any entity or component:
+Let us program the direct light entity and access to light component and just for fun change the light color and luminance. To access a component we can call getComponent[T] on an entity or a component. Also it is possible to access it using index operator on any entity or component:
 
 ```nim
 let c = getComponent[MyComponent](e)
@@ -358,40 +370,26 @@ Or simply using an index operator:
 let c = e[MyComponent]
 ```
 
-We add a script component to our spot light to program it:
+If there is no such a component, it will return nil. Let us try it by adding a script component to our spot light to program it:
 
 ```nim
 ...
 
-# Creats spot point light entity
-var spotLightEntity = newEntity(scene, "SpotLight")
-# Sets position to (-6, 6, 6)
-spotLightEntity.transform.position = vec3(-6, 6, 6)
-# Adds a spot point light component
-addComponent(spotLightEntity, newSpotPointLightComponent(
-    vec3(0) - spotLightEntity.transform.position, # Light direction
-    color=parseHtmlName("aqua"),                            # Light color
-    shadow=false,                                 # Casts shadow or not
-    innerCutoff=30,                               # Inner circle of light
-    outerCutoff=90                                # Outer circle of light
-    )
-)
-# Adds a script component to spot point light entity
-program(spotLightEntity, proc(script: ScriptComponent) =
-    # Access to point light component, if it returns nil when there is no such a component in this entity.
-    let light = script[SpotPointLightComponent]
+# Adds a script component to direct light entity
+program(directLightEntity, proc(script: ScriptComponent) =
+    # Access to direct light component.
+    let light = script[DirectLightComponent]
     # Or you can access it by calling getComponent function:
-    # let light = getComponent[SpotPointLightComponent](script)
-
+    # let light = getComponent[DirectLightComponent](script)
     # Changes light color
     light.color = color(
         abs(sin(runtime.age)), 
         abs(cos(runtime.age)), 
         abs(sin(runtime.age) * cos(runtime.age))
     )
+    # Change luminance, will be between 250 and 750
+    light.luminance = 500.0 + 250.0 * sin(runtime.age)
 )
-# Makes the new light child of the scene
-addChild(scene, spotLightEntity)
 
 ...
 ```

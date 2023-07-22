@@ -83,7 +83,7 @@ proc initEngine*(windowWidth: int,
                  windowHeight: int,
                  title: string = "Alasgar",
                  fullscreen: bool = false,
-                 resizeable: bool = false) =
+                 resizable: bool = false) =
     when defined(emscripten):
         emscripten_set_main_loop(handleFrameWhenEmscripten, 0, 0)
     
@@ -96,7 +96,7 @@ proc initEngine*(windowWidth: int,
 
     if fullscreen: 
         flags = flags or SDL_WINDOW_FULLSCREEN_DESKTOP 
-    elif resizeable:
+    elif resizable:
         flags = flags or SDL_WINDOW_RESIZABLE
             
     when defined(ios) or defined(android):
@@ -251,7 +251,7 @@ proc handleFrame() =
             if windowEvent.event == WindowEvent_Resized:
                 let width = windowEvent.data1
                 let height = windowEvent.data2
-                graphics.windowSize = vec2(width.float32, height.float32)
+                resizeGraphics(vec2(width.float32, height.float32))
                 logi &"Window resized: ({width}, {height})"
         else:
             # Maps SDL event to alasgar event object

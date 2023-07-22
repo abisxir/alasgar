@@ -86,11 +86,11 @@ export core,
        base
 
 
-proc window*(title: string, width, height: int, fullscreen: bool=false, resizeable: bool=false) =
+proc window*(title: string, width, height: int, fullscreen: bool=false, resizable: bool=false) =
     initEngine(
         width,
         height,
         title=title,
         fullscreen=fullscreen,
-        resizeable=resizeable,
+        resizable=resizable,
     )

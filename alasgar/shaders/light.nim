@@ -10,7 +10,7 @@ proc getLightProps(LIGHT: Light,
     if LIGHT.TYPE == LIGHT_TYPE_DIRECTIONAL:
         L = -LIGHT.NORMALIZED_DIRECTION
         NoL = dot(FRAGMENT.N, L)
-        intensity = LIGHT.LUMINANCE
+        intensity = LIGHT.LUMINANCE / 100.0
     else:
         let 
             pointToLight = LIGHT.POSITION - FRAGMENT.POSITION

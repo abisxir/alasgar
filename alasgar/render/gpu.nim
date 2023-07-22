@@ -64,6 +64,19 @@ proc initGraphics*(window: WindowPtr,
 
         echo "* Graphics initialized!"
 
+proc resizeGraphics*(windowSize: Vec2) =
+    graphics.windowSize = windowSize
+    if not settings.keepRatio:
+        if settings.screenSize.x == 0 and settings.screenSize.y == 0:
+            graphics.screenSize = windowSize
+        elif not settings.keepRatio:
+            graphics.screenSize = vec2(
+                settings.screenSize.x, 
+                settings.screenSize.y * windowSize.y / windowSize.x
+            )
+        destroy(graphics.fb)
+        graphics.fb = newRenderBuffer(graphics.screenSize)
+
 proc `totalObjects`*(g: Graphics): int = g.totalObjects
 proc `drawCalls`*(g: Graphics): int = g.drawCalls
 
