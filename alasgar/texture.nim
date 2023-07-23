@@ -371,6 +371,18 @@ proc newTexture*(url: string, wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wr
         magFilter,
     )
 
+proc newTexture*(byteSeq: var seq[byte], wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture = 
+    let resource = new(ImageResource)
+    loadImage(byteSeq, resource)
+    result = newTexture(
+        resource, 
+        wrapS, 
+        wrapT, 
+        wrapR,
+        minFilter, 
+        magFilter,
+    )
+
 proc newCubeTexture*(px, nx, py, ny, pz, nz: string): Texture = 
     var 
         urls = [px, nx, py, ny, pz, nz]

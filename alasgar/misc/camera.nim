@@ -94,9 +94,9 @@ proc handleCameraControler(script: ScriptComponent) =
     camera.direction = controller.target - camera.transform.position
 
 
-proc addCameraController*(e: Entity, theta=PI/4.0, phi=PI/4.0) =
+proc addCameraController*(e: Entity, distance= 10.0, theta=PI/4.0, phi=PI/4.0) =
     let controller = new(CameraControllerComponent)
-    controller.distance = 10
+    controller.distance = distance
     controller.speed = 10
     controller.theta = theta
     controller.phi = phi

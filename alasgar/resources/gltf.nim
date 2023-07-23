@@ -309,6 +309,15 @@ proc copy[R, O](accessor: Accessor, bufferView: BufferView, buffer: var Buffer, 
         for i in 0..len(output) - 1:
             output[i] = normalize(output[i])
 
+proc extract(bufferView: BufferView, buffer: var Buffer, output: var seq[byte]) =
+    var 
+        count = bufferView.byteLength
+        offset = if bufferView.byteOffset.isSome: bufferView.byteOffset.get else: 0
+        data = buffer.data.get
+
+    output.setLen(count)
+    copyMem(output[0].addr, data[offset].addr, count)
+
 proc getAccessor(document: Document, index: Option[int]): Option[Accessor] =
     if index.isSome:
         result = some(document.accessors[index.get])
@@ -436,10 +445,15 @@ proc loadTexture(document: Document, sampler: Option[Sampler]): Texture =
             if image.uri.isSome:
                 let uri = if startsWith(image.uri.get, "data:image/"): image.uri.get else: &"{document.path}/{image.uri.get}"
                 result = newTexture(uri, wrapT=wrapT, wrapS=wrapS, wrapR=wrapR, minFilter=minFilter, magFilter=magFilter)
+            elif image.bufferView.isSome:
+                var 
+                    bufferView = document.bufferViews[image.bufferView.get]
+                    buffer = document.buffers[bufferView.buffer]
+                    byteSeq: seq[byte]
+                extract(bufferView, buffer, byteSeq)
+                result = newTexture(byteSeq, wrapT=wrapT, wrapS=wrapS, wrapR=wrapR, minFilter=minFilter, magFilter=magFilter)
             else:
-                # TODO: check mimeType and bufferView
-                echo "Has buffer instead of image file: ", document.filename
-                raise newAlasgarError("Image in buffer is not supported")
+                raise newAlasgarError("Image is not supported!")
                 
 
 proc loadMaterials(document: Document, model: ModelResource) =

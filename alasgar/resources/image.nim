@@ -29,12 +29,8 @@ proc prepareBuffer(url: string): string =
             halt &"Could not open [{url}]."
         result = readAll(stream)
 
-proc loadImage(url: string): Resource =
-    var 
-        r = new(ImageResource)
-        buffer = prepareBuffer(url)
-    setFlipVerticallyOnLoad(false)    
-    var byteSeq = cast[seq[byte]](buffer)
+proc loadImage*(byteSeq: var seq[byte], r: ImageResource) =
+    setFlipVerticallyOnLoad(false)
     r.pixels = loadFromMemory(
         byteSeq, 
         r.width, 
@@ -42,15 +38,22 @@ proc loadImage(url: string): Resource =
         r.channels, 
         stbi.Default
     )
-    r.hdr = url.endsWith(".hdr")
     r.bits = 8 * (len(r.pixels) / (r.width * r.height * r.channels)).int
+
+proc loadImage(url: string): Resource =
+    var 
+        r = new(ImageResource)
+        buffer = prepareBuffer(url)
+        byteSeq = cast[seq[byte]](buffer)
+    
+    loadImage(byteSeq, r)
+    r.hdr = url.endsWith(".hdr")
     if not startsWith(url, "data:image/"):
         echo &"Image [{url}] loaded with image with size [{r.width}x{r.height}] in [{r.channels}] channels and [{r.bits}] bpp."
     else:
         let t = url[0..16]
         echo &"Image [{t}...] loaded with image with size [{r.width}x{r.height}] in [{r.channels}] channels and [{r.bits}] bpp."
     result = r
-
 
 proc destroyImage(r: Resource) =
     var ir = cast[ImageResource](r)

@@ -1,7 +1,7 @@
 ![](docs/files/screen-size.gif)
 
 # alasgar
-Alasgar is a pure nim game engine based on OpenGL ES. The reason behind it was to learn graphic programming using nim programming language.
+alasgar is a pure nim game engine based on OpenGL. The main reason to start developing a new game engine, was to learn graphics programming (first challenge) using nim programming language (second challenge). You can write the whole game logic and also shaders in nim. It supports a few platforms including mobile, web, and desktop. It performs well in the performance tests. It is the journey of a backend/system developer through graphics/game programming.
 
 # Platforms
  - Linux
@@ -12,12 +12,12 @@ Alasgar is a pure nim game engine based on OpenGL ES. The reason behind it was t
  - iOS (not supoorted)
 
 ## Experimental game engine
-This is a basic game engine, and it is also too much limited so it is not ready for production use.
+alasgar is a basic game engine, and it is limited, so it is not ready for production use.
 
 ## nimx and vmath
-I copied most of nimx build system here, just removed and reformed some parts. I will rewrite this part later to use nimble instead of nake. nimx is a UI library (and game framework) for nim, check it out here: https://github.com/yglukhov/nimx
+Most of nimx build system has been copied here, just removed and reformed some parts. This part will be rewritten later to use nimble instead of nake. nimx is a UI library (and game framework) for nim, check it out [here](https://github.com/yglukhov/nimx). 
 
-For game mathematics, vmath is used. vmath has a good convention, check it out for more information here: https://github.com/treeform/vmath
+For game mathematics, vmath is used. vmath has a good convention, check it out for more information [here](https://github.com/treeform/vmath). 
 
 ## Installation
 ```bash
@@ -92,8 +92,7 @@ render(scene)
 loop()
 ```
 
-As you see, we instantiate a scene, add a camera to it and we render the created scene.
-If everything was right, you will see an empty window with the given size. Run it using nim compiler:
+As you see, we instantiate a scene, add a camera to that, and render the created scene. If everything goes right, you will see an empty window with the given size. Run it using the nim compiler:
 
 ```bash
 nim c -r main.nim
@@ -107,7 +106,7 @@ When you create a window by defult it runs in window mode, you can easily enable
 window("Hello", 960, 540, fullscreen=true)
 ```
 
-Let us add a cube to our scene, but to see the cube, it is better if we give a brighter background to our window, it will make it easier to see our meshes before we add lights. To add background we need to introduce environment component:
+Let us add a cube to our scene, but to see the cube, it is better if we give a brighter background to our window, it will make it easier to see our meshes before we add lights. To set the background color, we need to introduce the environment component:
 
 Background
 ==========
@@ -126,7 +125,7 @@ addComponent(scene, env)
 ...
 ```
 
-That was all you need to do, if you compile and run it, you will see an empty window with a nicer [color](https://abisxir.github.io/alasgar/step2/build).
+That was all you need to do. If you compile and execute it, you will see an empty window with a slightly better [color](https://abisxir.github.io/alasgar/step2/build).
 
 
 First mesh
@@ -146,7 +145,7 @@ cubeEntity.transform.scale = vec3(2)
 ...
 ```
 
-When you run it you will see an ugly black [cube](https://abisxir.github.io/alasgar/step3/build), as you guess we need to have a light in our scene, let us add a point light to our scene:
+When you execute the program, you will see an ugly black [cube](https://abisxir.github.io/alasgar/step3/build). As you guess we need to have a light in our scene so let us add a point light to our scene:
 
 Point light
 ===========
@@ -168,11 +167,11 @@ addChild(scene, lightEntity)
 ...
 ```
 
-That is all we needed, our ugly cube maybe is [less ugly](https://abisxir.github.io/alasgar/step4/build) now. Lights have some properties, like color, luminance, etc. You change it and you will shade the cube differently. But if we want to see light effect better we need to have darker background, let us set it to black in the next sample and move the light:
+That is all we needed, our ugly cube maybe is [less ugly](https://abisxir.github.io/alasgar/step4/build) now. Lights have some properties, like color, luminance, etc. You change it and you will shade the cube differently.
 
 Scripts
 =======
-To program an entity, we need to add a ScriptComponent to our light entity. Each component has access to entity, entity's transform and component's data. We can add a script to any entity using "program" function or directly by instantiating a ScriptComponent using "newScriptComponent".
+To program an entity, we need to add a ScriptComponent to our light entity. Each component has access to an entity, the entity's transform, and the component's data. We can add a script to any entity using the "program" function or directly by instantiating a ScriptComponent using the "newScriptComponent" function.
 
 ```nim
 ...
@@ -199,9 +198,10 @@ addChild(scene, lightEntity)
 
 ...
 ```
+![](docs/files/step5.webm)
 
-[See](https://abisxir.github.io/alasgar/step5/build) now our light moves around our scene and lights our cube from different directions. As you see in the code we used an anonymous function to change light's position. You can define a function and use it, here. Feel free to play with nim features. As you see we directly access transform component from script component. Each entity has a transform component, all entity's components have a pointer to it. Entitis also have a pointer to transform component.
-In script we used runtime variable, it is a readonly variable that gives us some good information about engine, also has an instance to engine inside it:
+[See](https://abisxir.github.io/alasgar/step5/build) now our light moves around our scene and lights our cube from different directions. As you see in the source code, we used an anonymous function to change light's position. You can define a function and use that here. Feel free to play with nim features. As you notice, we directly access transform component from script component. Each entity has a  reference to the transform component, and all entity components have a reference to that.
+In the script we used runtime variable, it is a readonly variable that gives us some good information about engine, also has an instance to engine inside it:
 
 ```nim
 type 
@@ -220,7 +220,7 @@ type
 
 Rotation
 ========
-Let us rotate the cube. To do it we need a script component attached to cube entity:
+Let us rotate the cube. To do that we need a script component attached to the cube entity:
 
 ```nim
 ...
@@ -237,8 +237,7 @@ program(cubeEntity, proc(script: ScriptComponent) =
 
 ...
 ```
-
-As you [see](https://abisxir.github.io/alasgar/step6/build) our ugly cube is rotating and we used euler angles to change rotation. But also rotation as quat is enable in TransformComponent and you can use it if you are looking for troubles. Transform component has some useful functions and properties:
+As you [see](https://abisxir.github.io/alasgar/step6/build) our ugly cube is rotating and we used Euler angles to change rotation. But also rotation as quat is enabled in TransformComponent and you can use it if you are looking for troubles. Transform component has some useful functions and properties:
 
 ```nim
 type
@@ -260,9 +259,8 @@ proc lookAt*(t: TransformComponent, target: TransformComponent)
 
 Material
 ========
-We can change cube color using material components. So what we need is to add a material component to define cube's material.
-I used chroma library to manipulate colors, it is a great library, [here](https://abisxir.github.io/alasgar/step7/build) you can see how to use it.
-
+We can change the cube color using material components. So what we need is to add a material component to define the cube's material.
+I used the chroma library to manipulate colors, it is a great library, [here](https://abisxir.github.io/alasgar/step7/build) you can see how to use it.
 
 ```nim
 ...
@@ -293,12 +291,12 @@ func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE,
                            hframes: int=1,
                            castShadow: bool=false)
 ```
-If roughness and metallic factors are zero also there is no metallic map and roughness map provided then shader will use shininess and shades with phong model otherwise will be PBR. vfames, hframes and frame is used to offset texture, very helpful for sprites or animations, will discuss it later in sprites section.
+If roughness and metallic factors are zero also there is no metallic map and roughness map provided then the shader will use shininess and shades with phong model otherwise will be PBR. vfames, hframes, and frame is used to offset texture, very helpful for sprites or animations, will discuss it later in the sprites section.
 
 Texture
 =======
-It is time to give a texture to our cube. To make it multi-platform you need to make "res" folder in you project root and copy your assets inside.
-The assets are accessable using a relative path by res like "res://stone-texture.png". It applies to all other assets like obj files or audio files.
+It is time to give texture to our cube. To make it multi-platform you need to make "res" folder in your project root and copy your assets inside.
+The assets are accessible using a relative path by res like "res://stone-texture.png". It applies to all other assets like obj files or audio files.
 
 ```nim
 ...
@@ -318,7 +316,7 @@ The texture used here grabbed from: https://opengameart.org/content/handpainted-
 
 More lights
 ===========
-As you see our scene has just one light and the light is moving, let us add a new light to try another type of lights:
+As you see our scene has just one light and the light is moving. Let us add a new light to try another type of lights:
 
 ```nim
 ...
@@ -353,12 +351,12 @@ addChild(scene, directLightEntity)
 
 ...
 ```
-As you [see](https://abisxir.github.io/alasgar/step9/build) now, our cube is shaded by three different kind of lights, not that much ugly anymore. However our scene with just one cube is boring. Before we go and add a another mesh, let us see how we can access components when we program an entity.
+As you [see](https://abisxir.github.io/alasgar/step9/build) now, our cube is shaded by three different kinds of lights, not that much ugly anymore. However, our scene with just one cube is boring. Before we go and add another mesh, let us see how we can access components when we program an entity.
 
 
 Access components
 =================
-Let us program the direct light entity and access to light component and just for fun change the light color and luminance. To access a component we can call getComponent[T] on an entity or a component. Also it is possible to access it using index operator on any entity or component:
+Let us program the direct light's entity and access to the direct light's component and just for fun change the light color and luminance. To access a component we can call getComponent[T] on an entity or a component. Also, it is possible to access it using the index operator on any entity or component:
 
 ```nim
 let c = getComponent[MyComponent](e)
@@ -393,11 +391,7 @@ program(directLightEntity, proc(script: ScriptComponent) =
 
 ...
 ```
-
-![](docs/files/light-color-changes.gif)
-
-See sample source [here](examples/hello.nim).
-
+If you [execute](https://abisxir.github.io/alasgar/step10/build) the program, you will notice that the color is changing. Now we will add a plane to our scene and we will enable shadow for direct and spot point light. Please consider it is mandatory to enable shadow casting flag in the cube's material:
 
 Screen size
 ===========
@@ -413,9 +407,6 @@ window("Hello", 640, 360)
 ```
 
 You need to specify it before creating window, after window creation there is no effect.
-
-![](docs/files/screen-size.gif)
-
 
 Environment variables
 =====================

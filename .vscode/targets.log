@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat Jul 22 10:40:55 2023
+# Make data base, printed on Sun Jul 23 10:13:03 2023
 
 # Variables
 
@@ -17,9 +17,9 @@ LC_ALL = C
 # environment
 NO_AT_BRIDGE = 1
 # environment
-STARSHIP_SESSION_KEY = 1515225664592495
+STARSHIP_SESSION_KEY = 1843314069137026
 # environment
-I3SOCK = /run/user/1000/i3/ipc-socket.1135
+I3SOCK = /run/user/1000/i3/ipc-socket.1161
 # environment
 VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
 # environment
@@ -81,7 +81,7 @@ MAKEFILE_LIST := Makefile
 # environment
 ZSH = /home/abi/.oh-my-zsh
 # environment
-VSCODE_PID = 2055
+VSCODE_PID = 2073
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -283,6 +283,9 @@ orto: clean
 	nim c --threads:on -d:debug -r orto.nim
 
 # files hash-table stats:
+ 
+make: *** No rule to make target 'all'.  Stop.
+
 # Load=10/1024=1%, Rehash=0, Collisions=0/26=0%
 # VPATH Search Paths
 
@@ -296,8 +299,6 @@ orto: clean
 # strcache performance: lookups = 44 / hit rate = 29%
 # hash-table stats:
 # Load=31/8192=0%, Rehash=0, Collisions=0/44=0%
-# Finished Make data base on Sat Jul 22 10:40:55 2023
+# Finished Make data base on Sun Jul 23 10:13:03 2023
 
  
-make: *** No rule to make target 'all'.  Stop.
-
