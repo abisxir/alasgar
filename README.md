@@ -198,7 +198,7 @@ addChild(scene, lightEntity)
 
 ...
 ```
-![](docs/files/step5.webm)
+![](docs/files/step5.gif)
 
 [See](https://abisxir.github.io/alasgar/step5/build) now our light moves around our scene and lights our cube from different directions. As you see in the source code, we used an anonymous function to change light's position. You can define a function and use that here. Feel free to play with nim features. As you notice, we directly access transform component from script component. Each entity has a  reference to the transform component, and all entity components have a reference to that.
 In the script we used runtime variable, it is a readonly variable that gives us some good information about engine, also has an instance to engine inside it:
