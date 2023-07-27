@@ -349,7 +349,7 @@ proc render*(mesh: Mesh, model: ptr float32, material: ptr uint32, sprite: ptr f
 
     if len(mesh.indices) > 0:
         if count > 1:
-            glDrawElementsInstanced(mesh.drawMode, len(mesh.indices).GLsizei, GL_UNSIGNED_INT, addr mesh.indices[0], count.GLsizei) 
+            glDrawElementsInstanced(mesh.drawMode, len(mesh.indices).GLsizei, GL_UNSIGNED_INT, addr mesh.indices[0], count.GLsizei)
         else:
             glDrawElements(mesh.drawMode, len(mesh.indices).GLsizei, GL_UNSIGNED_INT, addr mesh.indices[0]) 
     else:

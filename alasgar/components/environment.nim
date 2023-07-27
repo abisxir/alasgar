@@ -1,5 +1,3 @@
-import times
-
 import ../core
 import ../utils
 import ../shaders/base
@@ -11,9 +9,12 @@ import ../shaders/effect
 import ../shaders/ibl
 import ../shaders/compile
 
-#const iblFilterFS = staticRead("../shaders/ibl-filter.fs")
+const iblFilterFS = staticRead("../shaders/_ibl-filter.fs")
 const fullscreenVS = toGLSL(effectVertex)
 const panaromaToCubemapFS = toGLSL(panoramaToCubemapFragment)
+
+# Forward declarations
+proc generateGGX(cubemap: Texture, sampleCount: int): Texture
 
 type
     EnvironmentComponent* = ref object of Component
@@ -37,25 +38,13 @@ func newEnvironmentComponent*(): EnvironmentComponent =
     result.backgroundColor = color(0.0, 0.0, 0.0)
     result.sampleCount = 2048
 
-func setEnvironmentIntensity*(e: EnvironmentComponent, value: float32) =
-    e.environmentIntensity = value
-
-func setEnvironmentBlurrity*(e: EnvironmentComponent, value: float32) =
-    e.environmentBlurrity = value
-
-func setSampleCount*(e: EnvironmentComponent, sampleCount: int) =
-    e.sampleCount = sampleCount
-
-func setAmbient*(e: EnvironmentComponent, c: Color, intense: float32) =
-    e.ambientColor = color(c.r * intense, c.g * intense, c.b * intense)
-
-func enableFog*(e: EnvironmentComponent, density, gradient: float32) =
-    e.fogDensity = density
-    e.fogGradient = gradient
-
-func setBackground*(env: EnvironmentComponent, c: Color) =
-    env.backgroundColor = c
-
+func setEnvironmentIntensity*(env: EnvironmentComponent, value: float32) = env.environmentIntensity = value
+func setEnvironmentBlurrity*(env: EnvironmentComponent, value: float32) = env.environmentBlurrity = value
+func setSampleCount*(env: EnvironmentComponent, sampleCount: int) = env.sampleCount = sampleCount
+func setAmbient*(env: EnvironmentComponent, c: Color, intense: float32) = env.ambientColor = color(c.r * intense, c.g * intense, c.b * intense)
+func setFogDensity*(env: EnvironmentComponent, density: float32) = env.fogDensity = density
+func setFogGradient*(env: EnvironmentComponent, gradient: float32) = env.fogGradient = gradient
+func setBackground*(env: EnvironmentComponent, c: Color) = env.backgroundColor = c
 func calculateMipMap(size: int): int = log2(size.float32).int + 1
 
 proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
@@ -65,11 +54,11 @@ proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
         texture = newCubeTexture(
             size,
             size,
-            minFilter=GL_LINEAR,
+            minFilter=GL_NEAREST_MIPMAP_LINEAR,
             magFilter=GL_LINEAR,
             levels=calculateMipMap(size)
         )
-
+    
     use(shader)
     for i in 0..5:
         use(fb, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X.int + i, 0, size, size)
@@ -84,14 +73,9 @@ proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
     return texture
 
 proc setSkybox*(env: EnvironmentComponent, cubemap: Texture, size: int) =
-    let start = now()
-
     env.environmentMap = cubemap
     #env.ggxMap = generateGGX(cubemap, env.sampleCount)
     #env.lutMap = generateLUT(cubemap, env.sampleCount)
-
-    let elapsed = between(start, now())
-    echo "* Skybox compute done in:", elapsed
 
 proc setSkybox*(env: EnvironmentComponent, px, nx, py, ny, pz, nz: string, size: int) = 
     let cubeTexture = newCubeTexture(
@@ -160,7 +144,6 @@ method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float
                 shader["ENVIRONMENT.FOG_DENSITY"] = 0.0
 
 
-#[
 proc filter(cubemap: Texture, 
             fb: FrameBuffer,
             target: Texture,
@@ -220,7 +203,7 @@ proc generateGGX(cubemap: Texture, sampleCount: int): Texture =
     destroy(fb)
 
     result = texture
-
+#[
 proc generateLUT(cubemap: Texture, sampleCount: int): Texture =
     let 
         shader = newShader(fullscreenVS, iblFilterFS, [])

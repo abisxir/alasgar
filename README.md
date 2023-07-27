@@ -351,7 +351,7 @@ addChild(scene, directLightEntity)
 
 ...
 ```
-As you [see](https://abisxir.github.io/alasgar/step9/build) now, our cube is shaded by three different kinds of lights, not that much ugly anymore. However, our scene with just one cube is boring. Before we go and add another mesh, let us see how we can access components when we program an entity.
+As you [see](https://abisxir.github.io/alasgar/step9/build) now, our cube is shaded by three different kinds of lights, not that much ugly anymore. However, our scene with just one cube is boring. Before we add another objects to our scene, let us see how we can access components when we program an entity.
 
 
 Access components
@@ -391,7 +391,7 @@ program(directLightEntity, proc(script: ScriptComponent) =
 
 ...
 ```
-If you [execute](https://abisxir.github.io/alasgar/step10/build) the program, you will notice that the color is changing. Now we will add a plane to our scene and we will enable shadow for direct and spot point light. Please consider it is mandatory to enable shadow casting flag in the cube's material:
+If you [execute](https://abisxir.github.io/alasgar/step10/build) the program, you will notice that the color is changing.
 
 Screen size
 ===========
@@ -410,36 +410,29 @@ You need to specify it before creating window, after window creation there is no
 
 Environment variables
 =====================
-Environment variables are for the scene, you can manipulate scene by following effects:
+We already used envionment variable to change background color. We can set these attributes:
     - Background color
     - Fog
-    - Ambient light
-    - Postprocessing effects
-
-To manipluate environment variables, we create a EnvironmentComponent, set the parameters and then we add it to our scene:
+    - Ambient light color
+    - Skybox
 
 ```nim
-...
-
-# Creates a new scene
-var scene = newScene()
-# Creates an instance of environment component
-var env = newEnvironmentComponent()
-# Sets background color to black
-setBackground(env, parseHtmlName("Black"))
-# Enables simple fog effect
-enableFog(
-    env,                        # Environment instance
-    parseHtmlName("DimGray"),   # Fog color
-    0.01,                       # Fog density
-    1.0                         # Fog gredient
-)
-# Sets ambient color and intensity
-setAmbient(env, parseHtmlName("white"), 0.7)
-# Adds environment to our scene
-addComponent(scene, env)
-
-...
+# Sets background color
+func setBackground(env: EnvironmentComponent, color: Color) 
+# Sets ambient light color
+func setAmbient(env: EnvironmentComponent, color: Color, intense: float32)
+# Sets fog density
+func setFogDensity(env: EnvironmentComponent, density: float32)
+# Sets fog gradient
+func setFogGradient(env: EnvironmentComponent, gradient: float32) 
+# Sets skybox, for each side totally 6 images
+func setSkybox(env: EnvironmentComponent, px, nx, py, ny, pz, nz: string, size: int) 
+# Sets skybox, takes panroma image and converts it to a cube box texture, accepts hdr images
+func setSkybox(env: EnvironmentComponent, url: string, size: int)
+# Sets environment intensity, for IBL
+func setEnvironmentIntensity(env: EnvironmentComponent, value: float32)
+# Sets envirnoment blurrity, the higher it gets, skybox will get much blur 
+func setEnvironmentBlurrity(env: EnvironmentComponent, value: float32)
 ```
 
 We will discuss postprocessing effects later on a dedicated section. You can see and example of environment variables in shadows section.

@@ -86,8 +86,8 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
                 for i in 0..<ENVIRONMENT.LIGHTS_COUNT:
                     COLOR.rgb = COLOR.rgb + getLight(LIGHTS[i], FRAGMENT, SURFACE, DEPTH_MAPS)
                 COLOR.rgb = COLOR.rgb + FRAGMENT.EMISSIVE
-                if ENVIRONMENT.HAS_ENV_MAP > 0:
-                    COLOR.rgb = COLOR.rgb + ENVIRONMENT.INTENSITY * getIBL(ENVIRONMENT, FRAGMENT, SKYBOX_MAP)
+            if ENVIRONMENT.HAS_ENV_MAP > 0:
+                COLOR.rgb = COLOR.rgb + ENVIRONMENT.INTENSITY * getIBL(ENVIRONMENT, FRAGMENT, SKYBOX_MAP)
     
     if FRAGMENT.FOG_AMOUNT > 0.0:
         COLOR = mix(ENVIRONMENT.BACKGROUND_COLOR, COLOR, FRAGMENT.FOG_AMOUNT)

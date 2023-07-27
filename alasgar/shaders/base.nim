@@ -141,8 +141,10 @@ proc newShader*(vs, fs: string, attributes: openarray[tuple[index: int, name: st
     new(result)
     let shaderProfile = &"#version {OPENGL_SHADER_VERSION}"
     result.program = createProgram(
-        vs.replace("$SHADER_PROFILE$", shaderProfile), 
-        fs.replace("$SHADER_PROFILE$", shaderProfile), attributes)
+        vs, 
+        fs, 
+        attributes
+    )
     result.source = &"{vs}\n{fs}"
     add(cache, result)
     
@@ -334,7 +336,11 @@ proc cleanupShaders*() =
     echo &"Cleaning up [{len(cache)}] shaders..."
     clear(cache)
 
-proc newSpatialShader*(): Shader = newShader(toGLSL(mainVertex), toGLSL(mainFragment), [])
+proc newSpatialShader*(): Shader = 
+    let 
+        vs: (string, int) = compileToGLSL(mainVertex)
+        fs = toGLSL(mainFragment)
+    newShader(vs[0], fs, [])
 template newSpatialShader*(fs: untyped): Shader = newShader(toGLSL(mainVertex), toGLSL(fs), [])
 template newSpatialShader*(vx, fs: untyped): Shader = newShader(toGLSL(vx), toGLSL(fs), [])
 proc newCanvasShader*(): Shader = newShader(toGLSL(effectVertex), toGLSL(effectFragment), [])

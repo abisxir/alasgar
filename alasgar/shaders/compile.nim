@@ -739,7 +739,7 @@ proc toCodeStmts(n: NimNode, res: var string, level = 0) =
   else:
     n.toCode(res, level)
 
-proc parseBracket(param: NimNode, res: var string, forceOut=false): int =
+proc parseBracket(param: NimNode, res: var string, forceOut=false, attributeCount: var int): int =
   let 
     prefix = typeRename(param[0].strVal)
   if prefix == "layout":
@@ -754,8 +754,9 @@ proc parseBracket(param: NimNode, res: var string, forceOut=false): int =
         res.add("out ")
       else:
         res.add("in ")
+        attributeCount += 1
     if param[2].kind == nnkBracketExpr:
-      return parseBracket(param[2], res)
+      return parseBracket(param[2], res, false, attributeCount)
     else:
       res.add(typeRename(param[2].strVal))
   elif len(param[1]) > 0 and param[1][0].repr == "array":
@@ -768,10 +769,9 @@ proc parseBracket(param: NimNode, res: var string, forceOut=false): int =
     res.add " "
     res.add typeRename(param[1].strVal)
 
-proc toCodeTopLevel(topLevelNode: NimNode, res: var string, level = 0) =
+proc toCodeTopLevel(topLevelNode: NimNode, res: var string, level = 0, attributeCount: var int) =
   ## Top level block such as in and out params.
   ## Generates the main function (which is not like all the other functions)
-  
   assert topLevelNode.kind == nnkProcDef
 
   for n in topLevelNode:
@@ -797,13 +797,13 @@ proc toCodeTopLevel(topLevelNode: NimNode, res: var string, level = 0) =
             #elif param[1][0].repr == "int":
             #  res.add "flat "
             if param[1][0].kind == nnkBracketExpr:
-              arraySize = parseBracket(param[1][0], res, true)
+              arraySize = parseBracket(param[1][0], res, true, attributeCount)
             else:
               res.add "out "
               res.add typeRename(param[1][0].strVal)
           else:
             if param[1].kind == nnkBracketExpr:
-              arraySize = parseBracket(param[1], res)
+              arraySize = parseBracket(param[1], res, false, attributeCount)
             else:
               if param[0].strVal == "gl_FragCoord":
                 res.add "layout(origin_upper_left) "
@@ -971,9 +971,11 @@ proc gatherFunction(
 
     gatherFunction(n, functions, globals, indent + 2)
 
-proc toGLSLInner*(s: NimNode, extra: string): string =
+proc toGLSLInner*(s: NimNode): (string, int) =
 
-  var code: string
+  var 
+    code: string
+    attributeCount = 0
 
   # Add GLS header stuff.
   code.add "#version " & OPENGL_SHADER_VERSION & "\n"
@@ -981,7 +983,7 @@ proc toGLSLInner*(s: NimNode, extra: string): string =
   code.add " * compiled by alasgar \n"
   code.add " * " & s.strVal & " \n"
   code.add " */\n\n" 
-  code.add extra
+  code.add "precision highp float;\nprecision highp int;\nprecision highp sampler2DArray;\nprecision highp sampler2DArrayShadow;"
   when defined(emscripten) or defined(linux):
     code.add """vec4 unpackUnorm4x8(uint i) { return vec4(float(i & uint(0xff)) / 255.0, float(i/uint(0x100) & uint(0xff)) / 255.0, float(i/uint(0x10000) & uint(0xff)) / 255.0,float(i/uint(0x1000000)) / 255.0);}"""
   code.add "\n"
@@ -1020,17 +1022,33 @@ proc toGLSLInner*(s: NimNode, extra: string): string =
   code.add "\n"
 
   # Put the main function last.
-  toCodeTopLevel(n, code)
+  toCodeTopLevel(n, code, 0, attributeCount)
 
-  return code
+  return (code, attributeCount)
+
+macro compileToGLSL*(
+  s: typed,
+): (string, int) =
+  ## Converts proc to a glsl string.
+  result = newLit(toGLSLInner(s))
 
 macro toGLSL*(
   s: typed,
-  extra = "precision highp float;\nprecision highp int;\nprecision highp sampler2DArray;\nprecision highp sampler2DArrayShadow;\n\n"
 ): string =
   ## Converts proc to a glsl string.
-  result = newLit(toGLSLInner(s, extra.strVal))
-  #echo(result)
+  let r = newLit(toGLSLInner(s))
+  result = r[0]
+
+#template toGLSL*(s: typed): string =
+#  ## Converts proc to a glsl string.
+#  let r = compileToGLSL(s)
+#  result = r[0]
+#
+#template toGLSL*(s: typed, attributeCount: var int): string =
+#  ## Converts proc to a glsl string.
+#  let r = compileToGLSL(s)
+#  result = r[0]
+#  attributeCount = r[1]
 
 ## GLSL helper functions
 

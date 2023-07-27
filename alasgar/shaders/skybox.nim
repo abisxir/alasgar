@@ -13,7 +13,7 @@ proc skyboxFragment*(SKYBOX_MAP: Layout[0, Uniform[SamplerCube]],
                      ENVIRONMENT_BLURRITY: Uniform[float],
                      MIP_COUNT: Uniform[float],
                      DIRECTION: Vec3,
-                     COLOR: var Vec4) =
+                     COLOR: var Layout[0, Vec4],
+                     NORMAL: var Layout[1, Vec4]) =
     COLOR = textureLod(SKYBOX_MAP, normalize(DIRECTION), ENVIRONMENT_BLURRITY * (MIP_COUNT - 1.0)) * ENVIRONMENT_INTENSITY
-    #COLOR = vec4(normalize(DIRECTION), 1.0)
-    #COLOR = vec4(1.0, 0.0, 0.0, 1.0)
+    NORMAL = vec4(normalize(-DIRECTION), 0.0)
