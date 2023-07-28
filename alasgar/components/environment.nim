@@ -5,16 +5,13 @@ import ../system
 import ../texture
 import ../render/fb
 import ../render/gpu
-import ../shaders/effect
 import ../shaders/ibl
 import ../shaders/compile
 
-const iblFilterFS = staticRead("../shaders/_ibl-filter.fs")
-const fullscreenVS = toGLSL(effectVertex)
-const panaromaToCubemapFS = toGLSL(panoramaToCubemapFragment)
+#const iblFilterFS = staticRead("../shaders/_ibl-filter.fs")
 
 # Forward declarations
-proc generateGGX(cubemap: Texture, sampleCount: int): Texture
+#proc generateGGX(cubemap: Texture, sampleCount: int): Texture
 
 type
     EnvironmentComponent* = ref object of Component
@@ -50,7 +47,7 @@ func calculateMipMap(size: int): int = log2(size.float32).int + 1
 proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
     let 
         fb = newFramebuffer()
-        shader = newShader(fullscreenVS, panaromaToCubemapFS, [])
+        shader = newCanvasShader(panoramaToCubemapFragment)
         texture = newCubeTexture(
             size,
             size,
@@ -143,7 +140,7 @@ method process*(sys: EnvironmentSystem, scene: Scene, input: Input, delta: float
             else:
                 shader["ENVIRONMENT.FOG_DENSITY"] = 0.0
 
-
+#[
 proc filter(cubemap: Texture, 
             fb: FrameBuffer,
             target: Texture,
@@ -152,7 +149,7 @@ proc filter(cubemap: Texture,
             sampleCount: int,
             lodBias: float32) =
     let 
-        shader = newShader(fullscreenVS, iblFilterFS, [])
+        shader = newCanvasShader(iblFilterFS)
         roughness = level.float32 / (target.levels.float32 - 1.0)
         size = cubemap.width
         currentTextureSize = size shr level
@@ -203,7 +200,7 @@ proc generateGGX(cubemap: Texture, sampleCount: int): Texture =
     destroy(fb)
 
     result = texture
-#[
+
 proc generateLUT(cubemap: Texture, sampleCount: int): Texture =
     let 
         shader = newShader(fullscreenVS, iblFilterFS, [])

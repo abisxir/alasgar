@@ -406,7 +406,7 @@ window("Hello", 640, 360)
 ...   
 ```
 
-You need to specify it before creating window, after window creation there is no effect.
+You need to specify it before creating window, after window creation there is no effect when setting the screen size.
 
 Environment variables
 =====================

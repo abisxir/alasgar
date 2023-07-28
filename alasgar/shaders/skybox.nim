@@ -1,8 +1,8 @@
 import types
 
-proc skyboxVertex*(PROJECTION: Uniform[Mat4],
+proc skyboxVertex*(POSITION: Layout[0, Vec3],
+                   PROJECTION: Uniform[Mat4],
                    VIEW: Uniform[Mat4],
-                   POSITION: Layout[0, Vec3],
                    DIRECTION: var Vec3,
                    gl_Position: var Vec4) =
     DIRECTION = POSITION

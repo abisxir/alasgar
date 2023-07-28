@@ -61,11 +61,14 @@ proc newSkybox*(): Skybox =
     result.shader = newSpatialShader(skyboxVertex, skyboxFragment)
     glGenVertexArrays(1, addr(result.cubeVAO))
     glBindVertexArray(result.cubeVAO)
-    glGenBuffers(1, addr(result.cubeVAO))
-    glBindBuffer(GL_ARRAY_BUFFER, result.cubeVAO)
+    glGenBuffers(1, addr(result.cubeVBO))
+    glBindBuffer(GL_ARRAY_BUFFER, result.cubeVBO)
     glBufferData(GL_ARRAY_BUFFER, (sizeof(float32) * vertices.len).GLsizeiptr, addr(vertices[0]), GL_STATIC_DRAW)
     glVertexAttribPointer(0, 3, cGL_FLOAT, false, (3 * sizeof(float32)).GLsizei, cast[pointer](0))
-    #glEnableVertexAttribArray(0)
+    glEnableVertexAttribArray(0)
+
+    glBindVertexArray(0)
+    glBindBuffer(GL_ARRAY_BUFFER, 0)
 
 proc destroy*(skybox: Skybox) =
     if skybox != nil:
@@ -90,12 +93,10 @@ proc render*(skybox: Skybox, cubemap: Texture, view, projection: Mat4, intensity
     skybox.shader["MIP_COUNT"] = cubemap.levels.float32
     use(skybox.shader, cubemap, "SKYBOX_MAP", 0)
 
-    #glDepthMask(GL_FALSE.GLboolean)
+    glDepthMask(GL_FALSE.GLboolean)
     glBindVertexArray(skybox.cubeVAO)
-    #glBindBuffer(GL_ARRAY_BUFFER, skybox.cubeVAO)
-    #glEnableVertexAttribArray(0)
     
     glDrawArrays(GL_TRIANGLES, 0, 36)
     
     glBindVertexArray(0)
-    #glDepthMask(GL_TRUE.GLboolean)
+    glDepthMask(GL_TRUE.GLboolean)

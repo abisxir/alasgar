@@ -30,6 +30,7 @@ type
         extra: int
     Shader* = ref object
         program*: GLuint
+        attributeCount: int
         map: Table[string, GLint]
         params: Table[string, ShaderParam]
         source: string
@@ -105,8 +106,7 @@ proc loadShaderSource(src: cstring, kind: GLenum): GLuint =
         logi "Shader compile log: ", info
 
 
-proc createProgram*(vs, fs: string,
-        attributes: openarray[tuple[index: int, name: string]]): GLuint =
+proc createProgram*(vs, fs: string): GLuint =
     result = glCreateProgram()
     if result == 0:
         halt &"Could not create program: {glGetError().int}" 
@@ -123,8 +123,8 @@ proc createProgram*(vs, fs: string,
 
     glAttachShader(result, fShader)
 
-    for a in attributes:
-        glBindAttribLocation(result, a.index.GLuint, a.name.cstring)
+    #for a in attributes:
+    #    glBindAttribLocation(result, a.index.GLuint, a.name.cstring)
 
     glLinkProgram(result)
     glDeleteShader(vShader)
@@ -137,14 +137,13 @@ proc createProgram*(vs, fs: string,
         halt &"Could not link: {programInfoLog(result)}"
 
 
-proc newShader*(vs, fs: string, attributes: openarray[tuple[index: int, name: string]]): Shader =
+proc newShader*(vs, fs: string, attributeCount: int): Shader =
     new(result)
-    let shaderProfile = &"#version {OPENGL_SHADER_VERSION}"
     result.program = createProgram(
         vs, 
-        fs, 
-        attributes
+        fs,
     )
+    result.attributeCount = attributeCount
     result.source = &"{vs}\n{fs}"
     add(cache, result)
     
@@ -326,7 +325,23 @@ proc update(shader: Shader, key: string, p: ShaderParam) =
         of svTexture: 
             use(shader, p.value.textureVal, key, p.extra)
 
+# In threading, this can cause a crash
+var lastAttributeCount = 0
+
+proc updateAttributes(shader: Shader) =
+    if lastAttributeCount < shader.attributeCount:
+        for i in lastAttributeCount..<shader.attributeCount:
+            glEnableVertexAttribArray(i.GLuint)
+    elif lastAttributeCount > shader.attributeCount:
+        for i in shader.attributeCount..<lastAttributeCount:
+            glDisableVertexAttribArray(i.GLuint)
+    if shader.attributeCount == 0:
+        glDisableVertexAttribArray(0)
+
+    lastAttributeCount = shader.attributeCount      
+
 proc use*(shader: Shader) =
+    #updateAttributes(shader)    
     glUseProgram(shader.program)
     for key, param in pairs(shader.params):
         update(shader, key, param)
@@ -336,13 +351,14 @@ proc cleanupShaders*() =
     echo &"Cleaning up [{len(cache)}] shaders..."
     clear(cache)
 
-proc newSpatialShader*(): Shader = 
+template newSpatialShader*(vx, fs: untyped): Shader = 
     let 
-        vs: (string, int) = compileToGLSL(mainVertex)
-        fs = toGLSL(mainFragment)
-    newShader(vs[0], fs, [])
-template newSpatialShader*(fs: untyped): Shader = newShader(toGLSL(mainVertex), toGLSL(fs), [])
-template newSpatialShader*(vx, fs: untyped): Shader = newShader(toGLSL(vx), toGLSL(fs), [])
-proc newCanvasShader*(): Shader = newShader(toGLSL(effectVertex), toGLSL(effectFragment), [])
-template newCanvasShader*(fs: untyped): Shader = newShader(toGLSL(effectVertex), toGLSL(fs), [])
-template newCanvasShader*(vx, fs: untyped): Shader = newShader(toGLSL(vx), toGLSL(fs), [])
+        vs: (string, int) = compileToGLSL(vx)
+        fs = toGLSL(fs)
+    newShader(vs[0], fs, vs[1])
+template newSpatialShader*(fs: untyped): Shader = newSpacialShader(mainVertex, fs)
+proc newSpatialShader*(): Shader = newSpatialShader(mainVertex, mainFragment)
+
+template newCanvasShader*(vx, fs: untyped): Shader = newSpatialShader(vx, fs)
+template newCanvasShader*(fs: untyped): Shader = newCanvasShader(effectVertex, fs)
+proc newCanvasShader*(): Shader = newCanvasShader(effectVertex, effectFragment)

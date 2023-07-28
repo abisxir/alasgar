@@ -754,7 +754,8 @@ proc parseBracket(param: NimNode, res: var string, forceOut=false, attributeCoun
         res.add("out ")
       else:
         res.add("in ")
-        attributeCount += 1
+        if attributeCount < param[1].intVal.int:
+          attributeCount = param[1].intVal.int + 1
     if param[2].kind == nnkBracketExpr:
       return parseBracket(param[2], res, false, attributeCount)
     else:
