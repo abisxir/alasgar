@@ -47,7 +47,7 @@ proc calculateUV*(uv, sprite: Vec4): Vec2 =
         result = uv.xy
 
 proc getNormalMap*(P, N: Vec3, UV: Vec2, NORMAL_MAP: Sampler2D): Vec3 =
-    let 
+    var 
         dp1: Vec3 = dFdx(P)
         dp2: Vec3 = dFdy(P)
         duv1: Vec2 = dFdx(UV)

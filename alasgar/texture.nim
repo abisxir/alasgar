@@ -121,13 +121,27 @@ proc allocate*(t: Texture, format=GL_RGBA, dataType=GL_UNSIGNED_BYTE) =
             nil
         )
     else:
-        glTexStorage2D(
-            t.target, 
-            t.levels.GLsizei, 
-            t.internalFormat, 
-            t.width.GLsizei, 
-            t.height.GLsizei
-        )
+        when defined(macosx):
+            glTexImage2D(
+                t.target, 
+                0.GLint, 
+                t.internalFormat.GLint, 
+                t.width.GLsizei, 
+                t.height.GLsizei, 
+                0.GLint, 
+                format, 
+                dataType, 
+                cast[pointer](0)
+            )
+        else:
+            glTexStorage2D(
+                t.target, 
+                t.levels.GLsizei, 
+                t.internalFormat, 
+                t.width.GLsizei, 
+                t.height.GLsizei
+            )
+
 
 
 proc copy*(t: Texture, data: ptr float32, format=GL_RGBA, width=0, height=0) =

@@ -51,7 +51,7 @@ proc newRenderBuffer*(size: Vec2): FrameBuffer =
         wrapS=GL_CLAMP_TO_EDGE,
         dataType=cGL_FLOAT,
     )
-    allocate(result.normal)
+    allocate(result.normal, GL_RGBA, cGL_FLOAT)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, result.normal.id, 0)
 
     result.depth = newTexture2D(
@@ -65,7 +65,7 @@ proc newRenderBuffer*(size: Vec2): FrameBuffer =
         wrapS=GL_CLAMP_TO_EDGE,
         dataType=cGL_FLOAT,
     )
-    allocate(result.depth)
+    allocate(result.depth, GL_DEPTH_COMPONENT, cGL_FLOAT)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, result.depth.id, 0)
 
     var buffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1]

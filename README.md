@@ -41,6 +41,7 @@ Table of Contents
 * [Window and scene creation](#window-and-scene-creation)  
 * [Change background color](#background)  
 * [First mesh](#first-mesh)  
+* [Screen size](#screen-size)
 * [Point light](#point-light)
 * [Scripts](#scripts)
 * [Rotation and transform](#rotation)
@@ -48,7 +49,6 @@ Table of Contents
 * [Texture](#texture)
 * [More lights](#more-lights)
 * [Access components](#access-components)
-* [Screen size](#screen-size)
 * [Environment variables](#environment-variables)
 * [Normal maps](#normal-maps)
 * [Interactive objects](#interactive-objects)
@@ -146,6 +146,21 @@ cubeEntity.transform.scale = vec3(2)
 ```
 
 When you execute the program, you will see an ugly black [cube](https://abisxir.github.io/alasgar/step3/build). As you guess we need to have a light in our scene so let us add a point light to our scene:
+
+Screen size
+===========
+By default the screen size is equal with window size, but maybe you like to have a lower resolution:
+```nim
+import alasgar
+
+# Creates a window named Hello, and sets screen size to (160, 90)
+screen(160, 90)
+window("Hello", 640, 360)
+
+...   
+```
+
+You need to specify it before creating window, after window creation there is no effect when setting the screen size.
 
 Point light
 ===========
@@ -351,7 +366,7 @@ addChild(scene, directLightEntity)
 
 ...
 ```
-As you [see](https://abisxir.github.io/alasgar/step9/build) now, our cube is shaded by three different kinds of lights, not that much ugly anymore. However, our scene with just one cube is boring. Before we add another objects to our scene, let us see how we can access components when we program an entity.
+As you [see](https://abisxir.github.io/alasgar/step9/build) now, our cube is shaded by three different kinds of lights, not that much ugly anymore. However, our scene with just one cube is boring. Before we change some properties on the scene, let us see how we can access components when we program an entity.
 
 
 Access components
@@ -393,21 +408,6 @@ program(directLightEntity, proc(script: ScriptComponent) =
 ```
 If you [execute](https://abisxir.github.io/alasgar/step10/build) the program, you will notice that the color is changing.
 
-Screen size
-===========
-By default the screen size is equal with window size, but maybe you like to have a lower resolution:
-```nim
-import alasgar
-
-# Creates a window named Hello, and sets screen size to (160, 90)
-screen(160, 90)
-window("Hello", 640, 360)
-
-...   
-```
-
-You need to specify it before creating window, after window creation there is no effect when setting the screen size.
-
 Environment variables
 =====================
 We already used envionment variable to change background color. We can set these attributes:
@@ -435,8 +435,34 @@ func setEnvironmentIntensity(env: EnvironmentComponent, value: float32)
 func setEnvironmentBlurrity(env: EnvironmentComponent, value: float32)
 ```
 
-We will discuss postprocessing effects later on a dedicated section. You can see and example of environment variables in shadows section.
+Let us set a skybox (cubebox) as environment map which will affect cube shading also as when there is an environment map available alasgar will automatically use IBL, even on none PBR materials. You can can of course change the shininess of material or reduce environment intensity to change the effects on each material:
+```nim
+...
+# Sets background color, but it is useless anymore as we fill the screen with skybox.
+# setBackground(env, parseHex("d7d1bf"))
+# Sets skybox, uses a panaorama image here
+setSkybox(env, "res://skybox.jpeg", 512)
+# Adds environment component to scene
+addComponent(scene, env)
 
+# Sets camera position
+cameraEntity.transform.position = vec3(5, 5, 5)
+# Adds a perspective camera component to entity
+addComponent(
+    cameraEntity, 
+    newPerspectiveCamera(
+        75, 
+        runtime.ratio, 
+        0.1, 
+        100.0, 
+        vec3(0) - cameraEntity.transform.position
+    )
+)
+# Adds orbital camera controller to camera entity
+addCameraController(cameraEntity)
+...
+```
+As you [see](https://abisxir.github.io/alasgar/step11/build) in this demo, we also added an orbital camera controller to our camera so we can freely view our scene from differnt angles and distance. The panaroma image used in this example can be found [here](https://sketchfab.com/3d-models/free-skybox-forgotten-ruins-373864f2e84b4af6a02e23c529191004). 
 
 Normal maps
 ===========
