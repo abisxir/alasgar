@@ -59,8 +59,7 @@ proc getNormalMap*(P, N: Vec3, UV: Vec2, NORMAL_MAP: Sampler2D): Vec3 =
         invmax: float = inversesqrt(max(dot(T, T), dot(B, B)))
         TBN: Mat3 = mat3(T * invmax, B * invmax, N)
         map: Vec3 = texture(NORMAL_MAP, UV).rgb * 2.0 - 1.0
-    
-    result = normalize(TBN * map)
+    result = normalize(TBN * vec3(-map.x, map.y, map.z))
 
 proc getFogAmount*(density: float, position: Vec3): float =
     result = 0.0

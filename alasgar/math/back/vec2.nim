@@ -119,7 +119,7 @@ func `[]=`*(a: var Vec2, i: int, b: float32) =
     elif i == 1:
         a.y = b
 
-proc randVec2*(): Vec2 =
+proc randomVec2*(): Vec2 =
     let a = rand(PI*2)
     let v = rand(1.0)
     vec2(cos(a)*v, sin(a)*v)

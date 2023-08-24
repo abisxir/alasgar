@@ -28,8 +28,10 @@ proc prepareFragment*(SURFACE: Surface,
 
             if MATERIAL.HAS_AO_MAP and MATERIAL.AO > 0.0:
                 result.AO = MATERIAL.AO * texture(AO_MAP, SURFACE.UV).r
-            else:
+            elif MATERIAL.AO > 0.0:
                 result.AO = MATERIAL.AO
+            else:
+                result.AO = 1.0
 
             if MATERIAL.HAS_ROUGHNESS_MAP and MATERIAL.ROUGHNESS > 0.0:
                 result.ROUGHNESS = MATERIAL.ROUGHNESS * texture(ROUGHNESS_MAP, SURFACE.UV).g

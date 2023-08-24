@@ -750,6 +750,33 @@ func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE,
     updateFrame(result)
     updateAvailableMaps(result)
 
+func newLambertMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
+                                  specularColor: Color=COLOR_WHITE, 
+                                  emissiveColor: Color=COLOR_BLACK,
+                                  albedoMap, normalMap, aoMap, emissiveMap: Texture = nil, 
+                                  shininess: float32 = 128.0,
+                                  ao: float32 = 1.0,
+                                  frame: int=0,
+                                  vframes: int=1,
+                                  hframes: int=1,
+                                  castShadow: bool=false): MaterialComponent =
+    newMaterialComponent(
+        diffuseColor, 
+        specularColor, 
+        emissiveColor,
+        albedoMap=albedoMap, normalMap=normalMap, metallicMap=nil, roughnessMap=nil, aoMap=aoMap, emissiveMap=emissiveMap, 
+        metallic=0.0,
+        roughness=0.0,
+        reflectance=0.0,
+        shininess=shininess,
+        ao=ao,
+        frame=frame,
+        vframes=vframes,
+        hframes=hframes,
+        castShadow=castShadow
+    )
+
+
 func `diffuseColor=`*(m: MaterialComponent, value: Color) =
     m.diffuseColor = value
     inc(m)

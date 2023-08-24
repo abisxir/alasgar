@@ -26,7 +26,8 @@ proc halt*(message: string) =
     quit message
 
 # Numeric utils
-proc randRange*(mi, mx: float32): float32 = rand(1'f32) * (mx - mi) + mi
+proc rand*(mi, mx: float32): float32 = rand(1'f32) * (mx - mi) + mi
+proc rand*(mi, mx: int): int = rand(mx - mi) + mi
 
 # List utils
 template delete*[T](l: var seq[T], item: T) = 
@@ -41,9 +42,8 @@ func `vec3`*(c: Color): Vec3 = vec3(c.r, c.g, c.b)
 func rgb*(r, g, b: float): Color = color(r, g, b, 1.0)
 func rgba*(r, g, b, a: float): Color = color(r, g, b, a)
 
-proc randColor*(): Color = 
-    let v = normalize(randVec3())
-    result = color(v.x, v.y, v.z)
+proc randomColor*(): Color = 
+    result = color(rand(1.0), rand(1.0), rand(1.0))
 
 let COLOR_BLACK*: Color = color(0, 0, 0)
 let COLOR_WHITE*: Color = color(1, 1, 1)

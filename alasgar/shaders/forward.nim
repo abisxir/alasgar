@@ -85,7 +85,7 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
             if ENVIRONMENT.LIGHTS_COUNT > 0:
                 for i in 0..<ENVIRONMENT.LIGHTS_COUNT:
                     COLOR.rgb = COLOR.rgb + getLight(LIGHTS[i], FRAGMENT, SURFACE, DEPTH_MAPS)
-                COLOR.rgb = COLOR.rgb + FRAGMENT.EMISSIVE
+                COLOR.rgb = COLOR.rgb * FRAGMENT.AO + FRAGMENT.EMISSIVE
             if ENVIRONMENT.HAS_ENV_MAP > 0:
                 COLOR.rgb = COLOR.rgb + ENVIRONMENT.INTENSITY * getIBL(ENVIRONMENT, FRAGMENT, SKYBOX_MAP)
     

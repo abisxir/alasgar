@@ -193,7 +193,7 @@ func almostEquals*(a, b: Vec3, precision = 1e-6): bool =
     let c = a - b
     abs(c.x) < precision and abs(c.y) < precision and abs(c.z) < precision
 
-proc randVec3*(): Vec3 =
+proc randomVec3*(): Vec3 =
     let
         u = rand(0.0 .. 1.0)
         v = rand(0.0 .. 1.0)

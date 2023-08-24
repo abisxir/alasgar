@@ -27,9 +27,8 @@ addComponent(
 addChild(scene, cameraEntity)
 
 # Creates cube entity, by default position is 0, 0, 0
-var cubeEntity = newEntity(scene, "Cube")
-# Add a cube mesh component to entity
-addComponent(cubeEntity, newCubeMesh())
+var model = load("res://glTF-Sample-Models/2.0/Box/glTF-Binary/Box.glb")
+var cubeEntity = toEntity(model, scene)
 # Makes the cube enity child of the scene
 addChild(scene, cubeEntity)
 

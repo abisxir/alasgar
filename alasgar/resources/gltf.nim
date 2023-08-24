@@ -54,7 +54,7 @@ type
         `type`: string
     Buffer = object
         byteLength: int
-        uri: string
+        uri: Option[string]
         data: Option[seq[uint8]]
     BufferView = object
         buffer: int
@@ -265,19 +265,22 @@ func toGLDrawMode(mode: DrawMode): GLenum =
 
 
 proc prepare(document: Document, buffer: var Buffer) =
-    var
-        data: string
-        path = document.path
-    if buffer.byteLength > 0 and not isEmptyOrWhitespace(buffer.uri):
-        if startsWith(buffer.uri, "data:application/octet-stream;base64,"):
-            data = decode(buffer.uri.replace("data:application/octet-stream;base64,", ""))
-        elif startsWith(buffer.uri, "data:application/gltf-buffer;base64,"):
-            data = decode(buffer.uri.replace("data:application/gltf-buffer;base64,", ""))
-        else:
-            let filename = &"{path}/{buffer.uri}"
-            data = readAsset(filename)
-        
-        buffer.data = some(cast[seq[uint8]](data))
+    if buffer.uri.isSome:
+        var
+            data: string
+            path = document.path
+            uri = buffer.uri.get
+
+        if buffer.byteLength > 0 and not isEmptyOrWhitespace(uri):
+            if startsWith(uri, "data:application/octet-stream;base64,"):
+                data = decode(uri.replace("data:application/octet-stream;base64,", ""))
+            elif startsWith(uri, "data:application/gltf-buffer;base64,"):
+                data = decode(uri.replace("data:application/gltf-buffer;base64,", ""))
+            else:
+                let filename = &"{path}/{buffer.uri}"
+                data = readAsset(filename)
+            
+            buffer.data = some(cast[seq[uint8]](data))
 
 proc openFile(url: string): Stream =
     result = openAssetStream(url)
@@ -560,17 +563,34 @@ iterator iterateNodeAnimation(document: Document): (AnimationDef, string) =
             let name = if animation.name.isSome: animation.name.get else: &"anim-{i + 1}"
             yield (animation, name)
 
-proc loadGLTF*(filename: string): Resource =
-    var 
-        fileStream = openFile(filename)
-        json = parseJson(fileStream)
-        document = to(json, Document)
+proc addChildren(document: Document, model: ModelResource, parent: string, child: int) =
+    let 
+        node = getNode(document, child)
+        main = addNode(model, node.name.get, parent, node.position, node.quat, getScale(node))
 
-    document.filename = some(filename)
+    if node.skin.isSome:
+        addSkin(model, node.name.get)
+        loadJoints(document, node, node.name.get, model)
 
-    # Closes file when the scope ends
-    defer: close(fileStream)
+    if node.mesh.isSome:
+        let mesh = document.meshes[node.mesh.get]
+        if len(mesh.primitives) > 1:
+            for p in mesh.primitives:
+                let child = addNode(model, p.name.get, node.name.get, VEC3_ZERO, quat(), VEC3_ONE)
+                child.mesh = p.name.get
+                if p.material.isSome:
+                    child.material = &"{p.material.get}"
+        else:
+            main.mesh = mesh.primitives[0].name.get
+            if mesh.primitives[0].material.isSome:
+                main.material = &"{mesh.primitives[0].material.get}"            
 
+    if node.children.isSome:
+        for c in node.children.get:
+            addChildren(document, model, node.name.get, c)
+
+
+proc loadJSON(document: var Document): Resource =
     if needsDraco(document):
         raise newAlasgarError("Draco extension is not sopprted!")
 
@@ -591,38 +611,72 @@ proc loadGLTF*(filename: string): Resource =
     for animation, animationName in iterateNodeAnimation(document):
         addAnimation(document, animation, animationName, model)
 
-    proc addChildren(parent: string, child: int) =
-        let 
-            node = getNode(document, child)
-            main = addNode(model, node.name.get, parent, node.position, node.quat, getScale(node))
-
-        if node.skin.isSome:
-            addSkin(model, node.name.get)
-            loadJoints(document, node, node.name.get, model)
-
-        if node.mesh.isSome:
-            let mesh = document.meshes[node.mesh.get]
-            if len(mesh.primitives) > 1:
-                for p in mesh.primitives:
-                    let child = addNode(model, p.name.get, node.name.get, VEC3_ZERO, quat(), VEC3_ONE)
-                    child.mesh = p.name.get
-                    if p.material.isSome:
-                        child.material = &"{p.material.get}"
-            else:
-                main.mesh = mesh.primitives[0].name.get
-                if mesh.primitives[0].material.isSome:
-                    main.material = &"{mesh.primitives[0].material.get}"            
-
-        if node.children.isSome:
-            for c in node.children.get:
-                addChildren(node.name.get, c)
-
     for i, scene in pairs(document.scenes):
         let name = &"scene-{i}"
         discard addNode(model, name, "", VEC3_ZERO, quat(), VEC3_ONE)
         for child in scene.nodes:
-            addChildren(name, child)
+            addChildren(document, model, name, child)
     
     result = model
+    
+proc loadGLTF*(filename: string): Resource =
+    var 
+        fileStream = openFile(filename)
+        json = parseJson(fileStream)
+        document = to(json, Document)
+
+    document.filename = some(filename)
+
+    # Closes file when the scope ends
+    defer: close(fileStream)
+
+    result = loadJSON(document)
+
+proc readChunk(fileStream: Stream, chunkType: var uint32, buffer: var seq[byte]) =
+    var 
+        chunkLength = readUInt32(fileStream)
+    chunkType = readUInt32(fileStream)
+    buffer.setLen(chunkLength)
+    discard readData(fileStream, buffer[0].addr, chunkLength.int)
+
+proc loadGLB*(filename: string): Resource =
+    var 
+        fileStream = openFile(filename)
+        magic = readUInt32(fileStream)
+        version = readUInt32(fileStream)
+        length = readUInt32(fileStream)
+        document: Document
+        binary: seq[uint8]
+
+    # Closes file when the scope ends
+    defer: close(fileStream)
+
+    if magic != 0x46546C67:
+        raise newAlasgarError("Invalid magic number!")
+    if version != 2:
+        raise newAlasgarError("Invalid version number, just GLTF version 2 is supported!")    
+    
+    while not atEnd(fileStream):
+        var 
+            chunkType: uint32
+            data: seq[uint8]
+        readChunk(fileStream, chunkType, data)
+        echo &"Chunk type: {chunkType:x}: {data.len} bytes"
+        if chunkType == 0x4E4F534A:
+            var str = newString(data.len)
+            copyMem(str[0].addr, data[0].addr, data.len)
+            document = to(parseJson(str), Document)
+        elif chunkType == 0x004E4942:
+            binary = data
+
+    document.filename = some(filename)
+    for buffer in mitems(document.buffers):
+        if buffer.uri.isNone or isEmptyOrWhitespace(buffer.uri.get):
+            buffer.data = some(binary)
+            buffer.byteLength = len(binary)
+
+    result = loadJSON(document)
+
 
 registerResourceManager("gltf", loadGLTF, destroyModel)
+registerResourceManager("glb", loadGLB, destroyModel)

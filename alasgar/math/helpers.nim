@@ -45,7 +45,7 @@ func vec3*(p: ptr float32, offset: int=0): Vec3 =
 func vec3*(v: array[3, float32]): Vec3 = vec3(v[0], v[1], v[2])
 func vec3*(v: Vec3): Vec3 = v
 func vec3*(v: Vec2): Vec3 = vec3(v.x, v.y, 0.0)
-proc randVec3*(): Vec3 =
+proc randomVec3*(): Vec3 =
     let
         u = rand(0.0 .. 1.0)
         v = rand(0.0 .. 1.0)
