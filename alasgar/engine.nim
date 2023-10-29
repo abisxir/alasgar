@@ -6,8 +6,8 @@ import os
 when defined(emscripten):
     proc emscripten_set_main_loop(f: proc() {.cdecl.}, a: cint, b: cint) {.importc.}
     proc emscripten_cancel_main_loop() {.importc.}
-    #import jsbind/emscripten
-import sdl2
+    
+import ports/sdl2
 
 import logger
 import render/gpu
@@ -293,7 +293,6 @@ proc loop*() =
     else:
         emscripten_cancel_main_loop()
         emscripten_set_main_loop(handleFrameWhenEmscripten, 0, 1)
-
 proc render*(scene: Scene) =
     if runtime.engine.primary != scene:
         if isNil(runtime.engine.primary):
@@ -313,6 +312,7 @@ proc screenToWorldCoord*(pos: Vec2): Vec4 = screenToWorldCoord(
     runtime.engine.activeCamera
 )
 
+template `camera`*(r: Runtime): CameraComponent = r.engine.activeCamera
 template `engine`*(r: Runtime): Engine = r.engine
 template `age`*(r: Runtime): float32 = r.age
 template `frames`*(r: Runtime): int = r.frames

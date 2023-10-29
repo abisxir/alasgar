@@ -10,9 +10,9 @@ type
         imStep = 2
         imCubic = 3
     TargetPath* = enum
-        tpRotation = "rotation"
-        tpScale = "scale"
-        tpTranslation = "translation"
+        tpRotation = 1
+        tpScale = 2
+        tpTranslation = 3
     AnimationState* = enum
         asStop = 1
         asPlay = 2
@@ -26,29 +26,22 @@ type
         frames*: seq[AnimationFrame[T]]
         interpolation: InterpolationMode
         sampler: SamplerFunc[T]
-        
-    AnimationTrackQuat* = AnimationTrack[Quat]
-    AnimationTrackScalar* = AnimationTrack[float32]
-    AnimationTrackVec3* = AnimationTrack[Vec3]
-
     AnimationProperty*[T: SomeValue] = object
         path: string
         track: AnimationTrack[T]
-
-    AnimationChannelComponent* = ref object of Component
-        clip: AnimationClipComponent
+    AnimationChannel* = object
+        #clip: AnimationClipComponent
+        entity*{.cursor.}: Entity
         rotation*: AnimationTrack[Quat]
         scale*: AnimationTrack[Vec3]
         translation*: AnimationTrack[Vec3]
-    
     AnimationClipComponent* = ref object of Component
         name: string
         animator: AnimatorComponent
-        channels: seq[AnimationChannelComponent]
+        channels: seq[AnimationChannel]
         startTime: float32
         endTime: float32
         duration: float32
-    
     AnimatorComponent* = ref object of Component
         clips: seq[AnimationClipComponent]
         active: string
@@ -56,7 +49,6 @@ type
         loop*: bool
         speed*: float32
         time: float32
-    
     AnimationSystem* = ref object of System
 
 proc adjustHermiteResult(f: float32): float32 = f
@@ -70,14 +62,16 @@ proc neighborhood(a, b: Quat): Quat =
         result = b * -1
 
 proc hermite[T](t: float32, p1, s1, p2, s2: T): T = 
-    let tt = t * t
-    let ttt = tt * t
-    var np2 = neighborhood(p1, p2)
-    let h1 = 2.0f * ttt - 3.0f * tt + 1.0f
-    let h2 = -2.0f * ttt + 3.0f * tt
-    let h3 = ttt - 2.0f * tt + t
-    let h4 = ttt - tt
-    let f = p1 * h1 + np2 * h2 + s1 * h3 + s2 * h4
+    let 
+        tt = t * t
+        ttt = tt * t
+        ttt2 = ttt * 2.0f
+        tt3 = tt * 3.0f
+        h1 = ttt2 - tt3 + 1.0f
+        h2 = tt3 - ttt2 # -2.0f * ttt + 3.0f * tt
+        h3 = ttt - 2.0f * tt + t
+        h4 = ttt - tt
+        f = p1 * h1 + neighborhood(p1, p2) * h2 + s1 * h3 + s2 * h4
     result = adjustHermiteResult(f)
 proc interpolate(a, b, t: float32): float32 = a + (b - a) * t
 proc interpolate(a, b: Vec3, t: float32): Vec3 = mix(a, b, t)
@@ -96,7 +90,8 @@ proc newAnimationClipComponent*(animator: AnimatorComponent, name: string): Anim
     result.endTime = float32.low
     result.duration = 0
 
-proc `$`*(c: AnimationClipComponent): string = &"[{c.name}-{c.duration}]"
+method `$`*(c: AnimatorComponent): string = &"AnimatorComponent"
+method `$`*(c: AnimationClipComponent): string = &"AnimationClipComponent[{c.name}]"
 proc `name`*(c: AnimationClipComponent): string = c.name
 proc `duration`*(c: AnimationClipComponent): float32 = c.duration
 
@@ -123,20 +118,17 @@ func `active`*(c: AnimatorComponent): string = c.active
 iterator clips*(c: AnimatorComponent): string =
     for clip in c.clips:
         yield clip.name
-    
+
 template `startTime`*[T: SomeValue](track: AnimationTrack[T]): float32 = track.frames[0].time 
 template `endTime`*[T: SomeValue](track: AnimationTrack[T]): float32 = track.frames[^1].time 
 template `duration`*[T: SomeValue](track: AnimationTrack[T]): float32 = track.endTime - track.startTime
 template `size`*[T: SomeValue](track: AnimationTrack[T]): int = len(track.frames)
 proc resize*[T: SomeValue](track: var AnimationTrack[T], size: int) = setLen(track.frames, size)
 proc findFrameIndex[T: SomeValue](track: AnimationTrack[T], t: float32): int =
-    if t > track.endTime:
-        result = track.size - 1
-    else:
-        for i in countdown(track.size - 1, 0):
-            if t >= track.frames[i].time:
-                result = i
-                break
+    for i in countdown(track.size - 1, 0):
+        if t >= track.frames[i].time:
+            result = i
+            break
 
 proc sampleConstant[T: SomeValue](track: AnimationTrack[T], thisFrame: int, t: float32): T =
     result = track.frames[thisFrame].value
@@ -182,46 +174,31 @@ func `interpolation=`*[T:SomeValue](track: var AnimationTrack[T], value: Interpo
 proc newAnimationTrack*[T: SomeValue](interpolation: InterpolationMode): AnimationTrack[T] =
     result.interpolation = interpolation
 
-proc probe[T: SomeValue](track: AnimationTrack[T], t: float32): int =
-    result = -1
+proc sample*[T: SomeValue](track: AnimationTrack[T], t: float32, valid: var bool): T =
     if t >= track.startTime and t <= track.endTime:
         let 
             maxSize = if track.interpolation == imStep: track.size else: track.size - 1
             frame = findFrameIndex[T](track, t)
         if frame >= 0 and frame < maxSize:
-            result = frame
+            result = track.sampler(track, frame, t)
+            valid = true
 
-proc sample*[T: SomeValue](track: AnimationTrack[T], t: float32, valid: var bool): T =
-    let 
-        frame = probe(track, t)
-    valid = frame >= 0
-    if valid:
-        result = track.sampler(track, frame, t)
-
-proc sample*(channel: AnimationChannelComponent, t: float32) =
+proc sample*(channel: AnimationChannel, t: float32) =
     var valid: bool
     if channel.rotation.size > 0:
         let rotation = sample(channel.rotation, t, valid)
         if valid:
-            channel.transform.rotation = rotation
+            channel.entity.transform.rotation = rotation
     elif channel.scale.size > 0:
         let scale = sample(channel.scale, t, valid)
         if valid:
-            channel.transform.scale = scale
+            channel.entity.transform.scale = scale
     elif channel.translation.size > 0:
         let translation = sample(channel.translation, t, valid)
         if valid:
-            channel.transform.position = translation
+            channel.entity.transform.position = translation
 
-proc newAnimationChannelComponent*(): AnimationChannelComponent = new(result)
-
-proc clone*(o: AnimationChannelComponent): AnimationChannelComponent =
-    new(result)
-    result.rotation = o.rotation
-    result.scale = o.scale
-    result.translation = o.translation
-
-proc `startTime`*(channel: AnimationChannelComponent): float32 =
+proc `startTime`*(channel: AnimationChannel): float32 =
     if channel.rotation.size > 0:
         result = channel.rotation.startTime
     elif channel.scale.size > 0:
@@ -229,7 +206,7 @@ proc `startTime`*(channel: AnimationChannelComponent): float32 =
     elif channel.translation.size > 0:
         result = channel.translation.startTime
 
-proc `endTime`*(channel: AnimationChannelComponent): float32 =
+proc `endTime`*(channel: AnimationChannel): float32 =
     if channel.rotation.size > 0:
         result = channel.rotation.endTime
     elif channel.scale.size > 0:
@@ -237,7 +214,7 @@ proc `endTime`*(channel: AnimationChannelComponent): float32 =
     elif channel.translation.size > 0:
         result = channel.translation.endTime
 
-proc `priority`*(channel: AnimationChannelComponent): int =
+proc `priority`*(channel: AnimationChannel): int =
     if channel.rotation.size > 0:
         result = 1
     elif channel.scale.size > 0:
@@ -256,10 +233,13 @@ proc recalculate(clip: AnimationClipComponent) =
     clip.duration = clip.endTime - clip.startTime
     #clip.time = clip.startTime
 
-proc addChannel*(clip: AnimationClipComponent, channel: AnimationChannelComponent) = 
+proc addChannel*(clip: AnimationClipComponent, channel: AnimationChannel) = 
     add(clip.channels, channel)
     recalculate(clip)
-    #sort(clip.channels, proc(a, b: AnimationChannelComponent): int = b.priority - a.priority)
+
+#proc setChannels*(clip: AnimationClipComponent, channels: seq[AnimationChannel]) = 
+#    clip.channels = channels
+#    recalculate(clip)
 
 proc sample*(clip: AnimationClipComponent, delta: float32) =
     if clip.animator.loop and clip.animator.time > clip.endTime:

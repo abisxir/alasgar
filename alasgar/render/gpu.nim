@@ -1,5 +1,5 @@
 
-import sdl2
+import ../ports/sdl2
 import ../ports/opengl
 
 import ../utils

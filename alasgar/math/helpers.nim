@@ -34,6 +34,9 @@ func `*=`*(v: var Vec3, f: float) =
     v.y *= f
     v.z *= f
 func `/`*(a: float32, b: Vec3): Vec3 = vec3(a / b.x, a / b.y, a / b.z)
+func `xz`*(v: Vec3): Vec2 = vec2(v.x, v.z)
+func `xy`*(v: Vec3): Vec2 = vec2(v.x, v.y)
+func `yz`*(v: Vec3): Vec2 = vec2(v.y, v.z)
 func caddr*(v: var Vec3): ptr float32 = v[0].addr
 func vec3*(p: ptr float32, offset: int=0): Vec3 =
     let 

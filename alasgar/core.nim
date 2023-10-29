@@ -58,6 +58,9 @@ type
         valid: bool
         localIsUpdated: bool
 
+    TransformGlobal* = object
+        transform: TransformComponent
+
     MaterialMapEnum = enum
         albedoMaterialMap =    0b000001
         normalMaterialMap =    0b000010
@@ -132,6 +135,7 @@ proc newTransform*(): TransformComponent
 proc `model`*(t: TransformComponent): var Mat4
 proc `dirty`*(t: TransformComponent): bool
 proc findEntityByTag*(scene: Scene, tag: string): seq[Entity]
+proc findEntity*(n: Entity, path: string): Entity
 func getComponent*[T: Component](e: Entity): T
 proc `inc`(c: Component)
 
@@ -303,7 +307,6 @@ proc setAttach(e: Entity, flag: bool) =
         setAttach(c, flag)
 
 proc addChild*(n: Entity, child: Entity) =
-    #echo &"Adding [{child}] to [{n}]"
     if child.parent == nil:
         add(n.children, child)
         child.parent = n
@@ -348,23 +351,26 @@ proc `visible`*(e: Entity): bool =
     else:
         e.visible and not e.wasted
 
+iterator `components`*(n: Entity): Component =
+    for c in n.components:
+        yield c[0]
+
 func getComponent*[T: Component](e: Entity): T = getComponent(e, result)
 func `[]`*[T](e: Entity, row: typedesc[T]): T = getComponent[T](e)
+func `[]`*[string](e: Entity, row: string): Entity = findEntity(e, row)
+func `[]=`*[T](e: Entity, row: typedesc[T], c: T) = addComponent[T](e, c)
 func getChildrenCount*(n: Entity): int = n.children.len
 func getChild*(n: Entity, i: int): Entity = n.children[i]
 func hasChild*(n: Entity, name: string): bool = getChild(n, name) != nil
 func `$`*(n: Entity): string = n.name
+func hash*(e: Entity): Hash = hash(cast[pointer](e))
+func `id`*(e: Entity): int = e.id
 proc `head`(n: Entity): Entity = result = if isNil(n.parent): n else: n.parent.head
 template `transform`*(e: Entity): TransformComponent = e.transform
 template `root`*(n: Entity): Entity = head n
 template `parent`*(n: Entity): Entity = n.parent
 template `scene`*(n: Entity): Scene = n.scene
 template `attached`*(n: Entity): bool = n.attached
-iterator `components`*(n: Entity): Component =
-    for c in n.components:
-        yield c[0]
-func hash*(e: Entity): Hash = hash(cast[pointer](e))
-func `id`*(e: Entity): int = e.id
 
 proc findEntity(n: Entity, names: openArray[string]): Entity =
     if names.len > 1:
@@ -384,10 +390,18 @@ proc findEntity*(n: Entity, path: string): Entity =
         elif startsWith(path, "./"):
             result = findEntity(n, names[1..names.high])
         else:
-            result = n.findEntity names
+            result = n.findEntity(names)
 
-proc findEntityByTag*(n: Entity, tag: string): seq[Entity] = findEntityByTag(
-        n.scene, tag)
+proc findEntityByTag*(n: Entity, tag: string): seq[Entity] = 
+    findEntityByTag(n.scene, tag)
+
+proc findComponent*[T](n: Entity): T =
+    result = getComponent[T](n)
+    if isNil(result):
+        for c in n.children:
+            result = findComponent[T](c)
+            if not isNil(result):
+                break
 
 # Component implementation
 proc `version`*(c: Component): int16 = c.version 
@@ -398,8 +412,16 @@ func `scene`*(c: Component): Scene = c.entity.scene
 func getComponent*[T: Component](c: Component): T = getComponent(c.entity, result)
 func `[]`*[T](c: Component, row: typedesc[T]): T = getComponent[T](c.entity)
 func hash*(c: Component): Hash = hash(unsafeAddr(c))
-method cleanup*(c: Component) {.base.} = discard
 
+method cleanup*(c: Component) {.base.} = discard
+method `$`*(c: Component): string {.base.} = $type(c)
+method `$`*(c: MaterialComponent): string = "MaterialComponent"
+method `$`*(c: MeshComponent): string = &"MeshComponent[{c.instance.count}]"
+method `$`*(c: ShaderComponent): string = "ShaderComponent"
+method `$`*(c: TransformComponent): string = &"TransformComponent[{c.position}-{c.scale}-{c.rotation}]"
+method `$`*(c: SpriteComponent): string = "SpriteComponent"
+method `$`*(c: SkinComponent): string = "SkinComponent"
+method `$`*(c: JointComponent): string = "JointComponent"
 
 # Scene implementation
 proc ensureContainer[T](scene: Scene): Container[T] =
@@ -426,7 +448,6 @@ proc newEntity*(scene: Scene, name: string, tag: string = "",
     result.wasted = false
     result.opacity = 1
     add(scene.entities, result)
-    echo &"Entity [{result.id}] with name [{result.name}] created!"
     result.transform = newTransform()
     addComponent(result, result.transform)
     if parent != nil:
@@ -546,6 +567,21 @@ proc `position=`*(t: TransformComponent, position: Vec3) =
     t.position = position
     markDirty(t)
 
+proc `positionXY`*(t: TransformComponent, v: Vec2) = 
+    t.position.x = v.x
+    t.position.y = v.y
+    markDirty(t)
+
+proc `positionXZ=`*(t: TransformComponent, v: Vec2) = 
+    t.position.x = v.x
+    t.position.z = v.y
+    markDirty(t)
+
+proc `positionYZ=`*(t: TransformComponent, v: Vec2) = 
+    t.position.y = v.x
+    t.position.z = v.y
+    markDirty(t)
+
 proc `positionX=`*(t: TransformComponent, x: float32) =
     t.position.x = x
     markDirty(t)
@@ -644,7 +680,9 @@ proc `globalRotation=`*(t: TransformComponent, r: Quat) =
     markDirty(t)
 
 proc lookAt*(t: TransformComponent, target: Vec3, up: Vec3 = VEC3_UP) =
-    t.globalRotation = quat(lookAt(t.globalPosition, target, up))
+    #let v = fromAngles(toAngles(t.globalPosition, target))
+    let v = lookAt(t.globalPosition, target, up)
+    t.globalRotation = quat(v)
 
 proc lookAt*(t: TransformComponent, target: TransformComponent, up: Vec3 = VEC3_UP) = lookAt(t, target.globalPosition, up)
 
@@ -654,16 +692,12 @@ proc `world=`*(t: TransformComponent, world: Mat4) =
 
 proc `rotation`*(t: TransformComponent): Quat = t.rotation
 proc `position`*(t: TransformComponent): Vec3 = t.position
-proc `positionX`*(t: TransformComponent): float32 = t.position.x
-proc `positionY`*(t: TransformComponent): float32 = t.position.y
-proc `positionZ`*(t: TransformComponent): float32 = t.position.z
 #proc `eulerX`*(t: Transform): float32 = t.euler.x
 #proc `eulerY`*(t: Transform): float32 = t.euler.y
 #proc `eulerZ`*(t: Transform): float32 = t.euler.z
 proc `scale`*(t: TransformComponent): Vec3 = t.scale
 proc `world`*(t: TransformComponent): var Mat4 = t.world
 proc `dirty`*(t: TransformComponent): bool = not t.valid
-proc `$`*(t: TransformComponent): string = &"pos:{t.position} rotation:{t.rotation} scale:{t.scale}"
 func hash*(t: TransformComponent): Hash = hash(cast[pointer](t))
 
 # Mesh implementation
@@ -706,7 +740,7 @@ func updateFrame(material: MaterialComponent) =
     if material.hframes > 0 and material.vframes > 0:
         let fxy = vec2(float32(material.frame mod material.hframes), float32(material.vframes - (material.frame div material.hframes) - 1))
         material.frameSize = vec2(1.float32 / material.hframes.float32, 1.float32 / material.vframes.float32)
-        material.frameOffset = vec2(fxy.x * material.frameSize.x, fxy.y * material.frameSize.y)    
+        material.frameOffset = vec2(fxy.x * material.frameSize.x, fxy.y * material.frameSize.y)   
         inc(material)
 
 func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
@@ -881,12 +915,6 @@ template `hframes=`*(material: MaterialComponent, value: int) =
 template `frameSize`*(material: MaterialComponent): Vec2 = material.frameSize
 template `frameOffset`*(material: MaterialComponent): Vec2 = material.frameOffset
 
-proc `$`*(m: MaterialComponent): string = 
-    if not isNil(m):
-        &"base:{m.diffuseColor} emissive:{m.emissiveColor}"
-    else:
-        &"nil"
-
 proc clone*(m: MaterialComponent): MaterialComponent =
     new(result)
     result.diffuseColor = m.diffuseColor
@@ -909,3 +937,10 @@ proc clone*(m: MaterialComponent): MaterialComponent =
     result.frameOffset = m.frameOffset
     result.castShadow = m.castShadow
     updateAvailableMaps(result)    
+
+proc reprTree*(e: Entity, tab="") =
+    echo tab & e.name
+    for c in e.components:
+        echo tab & "  " & $c[0]
+    for child in e.children:
+        reprTree(child, tab & "  ")

@@ -1,5 +1,6 @@
 import alasgar
 
+settings.exitOnEsc = true
 # Creates a window named Hello
 window("Hello", 640, 360)
 
@@ -27,8 +28,17 @@ addComponent(
 addChild(scene, cameraEntity)
 
 # Creates cube entity, by default position is 0, 0, 0
-var model = load("res://glTF-Sample-Models/2.0/Box/glTF-Binary/Box.glb")
-var cubeEntity = toEntity(model, scene)
+var 
+    model = load("res://glTF-Sample-Models/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb")
+    cubeEntity = toEntity(model, scene)
+    animator = findComponent[AnimatorComponent](cubeEntity)
+
+for c in clips(animator):
+    echo c
+
+animator.play("anim-1")
+animator.loop = true
+
 # Makes the cube enity child of the scene
 addChild(scene, cubeEntity)
 
@@ -36,11 +46,13 @@ addChild(scene, cubeEntity)
 # Creates light entity
 var lightEntity = newEntity(scene, "Light")
 # Sets light position
-lightEntity.transform.position = vec3(-5, 5, 5)
+lightEntity.transform.position = 10 * vec3(1)
 # Adds a point light component to entity
 addComponent(
     lightEntity, 
-    newPointLightComponent()
+    newPointLightComponent(
+        luminance=20
+    )
 )
 # Adds a script component to light entity
 addComponent(lightEntity, newScriptComponent(proc(script: ScriptComponent) =
@@ -55,3 +67,4 @@ addChild(scene, lightEntity)
 render(scene)
 # Runs game main loop
 loop()
+

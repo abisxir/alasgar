@@ -952,9 +952,8 @@ proc gatherFunction(
             elif impl.kind == nnkIntLit:
               defStr.add &"const int {n.strVal} = {impl.repr};"
             elif impl[2].kind != nnkEmpty:
-              defStr = getDeclartion(n)
-              defStr.add " = " & repr(impl[2])
-              defStr.addSmart ';'
+              # Constants
+              defStr = &"const {getDeclartion(n)} {impl[0].repr} = {impl[2].repr};"
 
             if defStr notin ["uniform Uniform = T;",
                 "attribute Attribute = T;"]:

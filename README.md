@@ -50,8 +50,8 @@ Table of Contents
 * [More lights](#more-lights)
 * [Access components](#access-components)
 * [Environment variables](#environment-variables)
-* [Normal maps](#normal-maps)
 * [Interactive objects](#interactive-objects)
+* [Physcally Based Rendering](#pbr)
 * [Shadows](#shadows)
 * [Effects](#effects)
 * [Custom effects](#custom-effects)
@@ -463,31 +463,6 @@ addCameraController(cameraEntity)
 ...
 ```
 As you [see](https://abisxir.github.io/alasgar/step11/build) in this demo, we also added an orbital camera controller to our camera so we can freely view our scene from differnt angles and distance. The panaroma image used in this example can be found [here](https://sketchfab.com/3d-models/free-skybox-forgotten-ruins-373864f2e84b4af6a02e23c529191004). 
-
-Normal maps
-===========
-It is easy to add a normal map, we need to specify it in material component:
-
-```nim
-...
-
-# Adds a material to cube
-addComponent(cubeEntity, 
-    newMaterialComponent(
-        diffuseColor=parseHtmlName("white"),
-        albedoMap=newTexture("res://stone-texture.png"),
-        normalMap=newTexture("res://stone-texture-normal.png")
-    )
-)
-# Makes the cube enity child of scene
-addChild(scene, cubeEntity)
-
-...
-```
-
-![](docs/files/cube-normal.gif)
-
-See normal sample [here](examples/normal.nim).
 
 
 Interactive objects

@@ -1,5 +1,4 @@
-import unicode
-import sdl2
+import ports/sdl2
 import utils
 
 type

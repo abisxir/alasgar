@@ -35,6 +35,9 @@ func newEnvironmentComponent*(): EnvironmentComponent =
     result.backgroundColor = color(0.0, 0.0, 0.0)
     result.sampleCount = 2048
 
+## Sets the environment intensity
+## @param env The environment component
+## @param value The intensity value
 func setEnvironmentIntensity*(env: EnvironmentComponent, value: float32) = env.environmentIntensity = value
 func setEnvironmentBlurrity*(env: EnvironmentComponent, value: float32) = env.environmentBlurrity = value
 func setSampleCount*(env: EnvironmentComponent, sampleCount: int) = env.sampleCount = sampleCount
@@ -69,11 +72,13 @@ proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
 
     return texture
 
+## Sets the given cubemap texture as skybox
 proc setSkybox*(env: EnvironmentComponent, cubemap: Texture, size: int) =
     env.environmentMap = cubemap
     #env.ggxMap = generateGGX(cubemap, env.sampleCount)
     #env.lutMap = generateLUT(cubemap, env.sampleCount)
 
+## Loads the given six images and sets it as skybox
 proc setSkybox*(env: EnvironmentComponent, px, nx, py, ny, pz, nz: string, size: int) = 
     let cubeTexture = newCubeTexture(
         px, 
@@ -89,16 +94,15 @@ proc setSkybox*(env: EnvironmentComponent, px, nx, py, ny, pz, nz: string, size:
         size
     )
 
+## Loads the given panaroma image and sets it as skybox
 proc setSkybox*(env: EnvironmentComponent, url: string, size: int) = 
     let 
         # Loads the given panaroma into a texture
         inTexture = newTexture(url)
         # Converts panaroma texture to cubemap
         cubemap = panoramaToCubemap(inTexture, size)
-
     # Destroys the created texture
     destroy(inTexture)
-
     # Sets the created cubemap from panaroma image as skybox
     setSkybox(env, cubemap, size)
 

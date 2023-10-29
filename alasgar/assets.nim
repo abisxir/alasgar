@@ -9,7 +9,7 @@ import os
 export streams
 
 when defined(android):
-    import sdl2
+    import ports/sdl2
     import jnim
     import android/ndk/aasset_manager
     import android/app/activity

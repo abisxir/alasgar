@@ -31,7 +31,7 @@ type
         joints: seq[(string, string, Mat4)]
         skins: seq[string]
         clips: Table[string, seq[string]]
-        channels: Table[string, seq[(string, AnimationChannelComponent)]]
+        channels: Table[string, Table[string, seq[AnimationChannel]]]
         nodes*: seq[ModelNode]
 
 proc ensure[V](c: var Table[string, V], key: string) =
@@ -78,12 +78,16 @@ proc addAnimationClip*(r: ModelResource, nodeName: string, clipName: string) =
     ensure(r.clips, nodeName)
     add(r.clips[nodeName], clipName)
 
-proc getAnimationChannel*(r: ModelResource, nodeName: string): seq[(string, AnimationChannelComponent)] = result = r.channels[nodeName]
 proc hasAnimationChannel*(r: ModelResource, nodeName: string): bool = hasKey(r.channels, nodeName)
-proc addAnimationChannel*(r: ModelResource, nodeName: string, clipName: string, channel: AnimationChannelComponent) = 
-    ensure(r.channels, nodeName)
-    let item = (clipName, channel)
-    add(r.channels[nodeName], item)
+proc addAnimationChannel*(r: ModelResource, nodeName: string, clipName: string, channel: AnimationChannel) = 
+    if not hasKey(r.channels, nodeName):
+        r.channels[nodeName] = initTable[string, seq[AnimationChannel]]()
+    if not hasKey(r.channels[nodeName], clipName):
+        r.channels[nodeName][clipName] = newSeq[AnimationChannel]()
+    r.channels[nodeName][clipName].add(channel)
+    #ensure(r.channels, nodeName)
+    #let item = (clipName, channel)
+    #add(r.channels[nodeName], item)
 
 
 proc addMaterial*(r: ModelResource, name: string): MaterialComponent = 
@@ -137,10 +141,11 @@ proc toEntity*(r: Resource, scene: Scene, castShadow=false, rootName=""): Entity
 
         # Sets node clips
         if hasAnimationChannel(mr, node.name):
-            for (clipName, channel) in getAnimationChannel(mr, node.name):
-                let c = clone(channel)
-                addComponent(e, c)
-                addChannel(clips[clipName], c)
+            for clipName in keys(mr.channels[node.name]):
+                #setChannels(clips[clipName], mr.channels[node.name][clipName])
+                for channel in mitems(mr.channels[node.name][clipName]):
+                    channel.entity = e
+                    addChannel(clips[clipName], channel)
 
         if not isEmptyOrWhitespace(node.mesh):
             if not hasMesh(mr, node.mesh):

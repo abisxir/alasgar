@@ -34,8 +34,7 @@ type
 
 
 # Component implementation
-func `$`*(c: CameraComponent): string =
-    result = &"direction={c.direction}, fov={c.fov}, aspect={c.aspect}, near={c.near} far={c.far}"
+method `$`*(c: CameraComponent): string = &"CameraComponent[direction={c.direction}, fov={c.fov}, aspect={c.aspect}, near={c.near} far={c.far}]"
 
 func `kind`*(c: CameraComponent): CameraType = c.kind
 

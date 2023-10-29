@@ -128,7 +128,7 @@ type
     AnimationChannelTarget = object
         node: Option[int]
         path: string
-    AnimationChannel = object
+    AnimationChannelDef = object
         sampler: int
         target: AnimationChannelTarget
     AnimationSampler = object
@@ -136,7 +136,7 @@ type
         interpolation: Option[string]
         output: int
     AnimationDef = object
-        channels: seq[AnimationChannel]
+        channels: seq[AnimationChannelDef]
         samplers: seq[AnimationSampler]
         name: Option[string]
     Document = object
@@ -342,7 +342,6 @@ proc loadAccessor(document: Document, aIndex: int, output: var seq[float32]) =
                 output
             )
         elif document.accessors[aIndex].componentType == typeUI16.int:
-            echo "It is uint16."
             copy[uint16, float32](
                 accessor, 
                 bufferView, 
@@ -489,7 +488,7 @@ proc loadJoints(document: Document, node: Node, skinName: string, model: ModelRe
         addJoint(model, jointNode.name.get, skinName, matrix)
 
 proc createAnimationTrack[T](document: Document, 
-                             channel: AnimationChannel, 
+                             channel: AnimationChannelDef, 
                              sampler: AnimationSampler, 
                              stride: int,
                              convert: ConvertFunction[T]): AnimationTrack[T] =
@@ -535,23 +534,33 @@ proc addAnimation(document: Document,
             var 
                 sampler = animation.samplers[channel.sampler]
                 node = getNode(document, channel.target.node.get)
-                component: AnimationChannelComponent
             
             if isEmptyOrWhitespace(firstModelName):
                 firstModelName = node.name.get
 
             if channel.target.path == "rotation":
-                component = newAnimationChannelComponent()
-                component.rotation = createAnimationTrack[Quat](document, channel, sampler, 4, quat)
+                addAnimationChannel(
+                    model, 
+                    node.name.get, 
+                    animationName, 
+                    AnimationChannel(rotation: createAnimationTrack[Quat](document, channel, sampler, 4, quat))
+                )
             elif channel.target.path == "scale":
-                component = newAnimationChannelComponent()
-                component.scale = createAnimationTrack[Vec3](document, channel, sampler, 3, vec3)
+                addAnimationChannel(
+                    model, 
+                    node.name.get, 
+                    animationName, 
+                    AnimationChannel(scale: createAnimationTrack[Vec3](document, channel, sampler, 3, vec3))
+                )
             elif channel.target.path == "translation":
-                component = newAnimationChannelComponent()
-                component.translation = createAnimationTrack[Vec3](document, channel, sampler, 3, vec3)
+                addAnimationChannel(
+                    model, 
+                    node.name.get, 
+                    animationName, 
+                    AnimationChannel(translation: createAnimationTrack[Vec3](document, channel, sampler, 3, vec3))
+                )
                 
-            if component != nil:
-                addAnimationChannel(model, node.name.get, animationName, component)
+    
     
     if not isEmptyOrWhitespace(firstModelName):
         addAnimationClip(model, firstModelName, animationName)

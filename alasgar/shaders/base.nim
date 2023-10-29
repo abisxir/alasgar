@@ -132,8 +132,6 @@ proc createProgram*(vs, fs: string): GLuint =
 
     let linked = isProgramLinked(result)
     if not linked:
-        #echo(vs)
-        #echo(fs)
         halt &"Could not link: {programInfoLog(result)}"
 
 
@@ -305,7 +303,6 @@ proc hasUniform*(shader: Shader, name: string): bool =
     result = location >= 0
 
 proc use*(shader: Shader, texture: Texture, name: string, slot: int) =
-    #echo &"Setting [{name}] to [{slot}] for shader [{shader.program}]"
     var location = getUniformLocation(shader, name)
     if location >= 0:
         shader[name] = slot

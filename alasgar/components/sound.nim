@@ -1,6 +1,6 @@
 import tables
 
-import sdl2/mixer
+import ../ports/sdl2_mixer as mixer
 
 import ../core
 import ../system
