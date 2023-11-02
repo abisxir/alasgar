@@ -401,5 +401,3 @@ template KMOD_SHIFT*:untyped = (KMOD_LSHIFT or KMOD_RSHIFT)
 template KMOD_ALT*: untyped = (KMOD_LALT or KMOD_RALT)
 template KMOD_GUI*: untyped = (KMOD_LGUI or KMOD_RGUI)
 
-{.deprecated: [TScancode: Scancode].}
-{.deprecated: [TKeymod: Keymod].}

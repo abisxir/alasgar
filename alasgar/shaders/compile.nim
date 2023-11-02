@@ -228,7 +228,7 @@ const glslFunctions = [
   "ivec2", "ivec3", "ivec4",
   "IVec2", "IVec3", "IVec4",
 
-  "abs", "clamp", "min", "max", "dot", "sqrt", "mix", "length", "cross", "reflect",
+  "abs", "clamp", "min", "max", "dot", "sqrt", "mix", "length", "cross", "reflect", "distance", "refract",
   "smoothstep", "step",
   "dFdx", "dFdy", 
   "texelFetch", "imageStore", "imageLoad", "texture", "textureLod",
@@ -1117,9 +1117,6 @@ proc texture*(sampler: Sampler2DShadow, P: Vec3): float = discard
 proc texture*(sampler: Sampler2DArray, P: Vec3): Vec4 = discard
 proc texture*(sampler: Sampler2DArrayShadow, P: Vec4): float = discard
 proc ivec2*(x, y: int): IVec2 = discard
-proc `-`*(a: float, b: Vec3): Vec3 = discard
-proc `*`*(x: Mat4, y: float32): Mat4 = discard
-proc `+`*(x: Mat4, y: Mat4): Mat4 = discard
 proc exp2*(v: float): float = discard
 proc dFdx*(v: Vec3): Vec3 = discard
 proc dFdy*(v: Vec3): Vec3 = discard
@@ -1127,18 +1124,3 @@ proc dFdx*(v: Vec2): Vec2 = discard
 proc dFdy*(v: Vec2): Vec2 = discard
 proc dFdx*(v: float): float = discard
 proc dFdy*(v: float): float = discard
-proc smoothstep*(a, b, v: float): float = discard
-proc smoothstep*(a, b, v: Vec2): Vec2 = discard
-proc reflect*(a, b: Vec3): Vec3 = discard
-proc max*(v: Vec3, f: float): Vec3 = discard
-proc inversesqrt*(v: float): float = discard
-proc atan*(a, b: float): float = arctan2(a, b)
-proc acos*(a: float): float = arccos(a)
-proc fract*(v: Vec3): Vec3 = discard
-proc fract*(v: Vec2): Vec2 = discard
-proc fract*(v: float): float = discard
-proc pow*(a, b: Vec3): Vec3 = discard
-proc log*(a: float): float = discard
-proc clamp*(v, min, max: Vec2): Vec2 = discard
-proc clamp*(v, min, max: Vec3): Vec3 = discard
-proc clamp*(v, min, max: Vec4): Vec4 = discard

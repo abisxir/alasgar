@@ -2,6 +2,7 @@ import sugar
 import sequtils
 import strutils
 import alasgar/core
+import alasgar/scene
 import alasgar/resources/image
 import alasgar/resources/obj
 import alasgar/resources/gltf
@@ -11,7 +12,6 @@ import alasgar/components/interactive
 import alasgar/components/collision
 import alasgar/components/line
 import alasgar/components/light
-import alasgar/components/environment
 import alasgar/components/script
 import alasgar/components/sprite
 import alasgar/components/sound
@@ -21,8 +21,6 @@ import alasgar/geometry/grid
 import alasgar/geometry/sphere
 import alasgar/geometry/plane
 import alasgar/engine
-import alasgar/shaders/base
-import alasgar/shaders/compile
 import alasgar/logger
 import alasgar/utils
 import alasgar/system
@@ -30,6 +28,9 @@ import alasgar/physics/collision as physics_collision
 import alasgar/physics/ray
 import alasgar/math/helpers
 import alasgar/misc/easing
+import alasgar/shaders/base
+import alasgar/shaders/compile
+import alasgar/shaders/common
 import alasgar/effects/fxaa
 import alasgar/effects/ssao
 import alasgar/effects/hbao
@@ -41,10 +42,10 @@ import alasgar/misc/camera as misc_camera
 
 export core,
        system,
+       scene,
        image,
        camera,
        line,
-       environment,
        light,
        script,
        sprite,
@@ -75,15 +76,16 @@ export core,
        sugar,
        sequtils,
        strutils,
+       base,
+       compile,
+       common,
        fxaa,
        bloom,
        ssao,
        hbao,
        config,
        gpu,
-       misc_camera,
-       compile,
-       base
+       misc_camera
 
 
 proc window*(title: string, width, height: int, fullscreen: bool=false, resizable: bool=false) =

@@ -154,8 +154,10 @@ proc addEffect*(camera: CameraComponent, name: string, shader: Shader) =
     removeEffect(camera, name)
     add(camera.effects, (name, shader, true))
 
-template addEffect*(camera: CameraComponent, name: string, fs: untyped) = addEffect(camera, name, newCanvasShader(fs))
-template addEffect*(camera: CameraComponent, name: string, vx, fx: untyped) = addEffect(camera, name, newCanvasShader(vx, fs))
+template addEffect*(camera: CameraComponent, name: string, fs: untyped) = 
+    addEffect(camera, name, newCanvasShader(fs))
+template addEffect*(camera: CameraComponent, name: string, vx, fx: untyped) = 
+    addEffect(camera, name, newCanvasShader(vx, fs))
 proc getEffect*(camera: CameraComponent, name: string): Shader =
     for (key, shader, enable) in camera.effects:
         if key == name and enable:

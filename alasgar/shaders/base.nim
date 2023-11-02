@@ -13,7 +13,8 @@ import compile, forward, effect
 type
     ShaderValueKind* = enum
         svUint, svInt, svFloat, svVec2, svVec3, svVec4, svColor, svMat3, svMat4, svTexture
-    ShaderValue {.union.} = object
+    # ShaderValue should be a union, but there is a bug in the compiler
+    ShaderValue = object
         uintVal: uint32
         intVal: int32
         floatVal: float32
@@ -24,7 +25,7 @@ type
         mat3Val: Mat3
         mat4Val: Mat4
         textureVal: Texture
-    ShaderParam = ref object
+    ShaderParam = object
         kind: ShaderValueKind
         value: ShaderValue
         extra: int
@@ -323,19 +324,18 @@ proc update(shader: Shader, key: string, p: ShaderParam) =
             use(shader, p.value.textureVal, key, p.extra)
 
 # In threading, this can cause a crash
-var lastAttributeCount = 0
-
-proc updateAttributes(shader: Shader) =
-    if lastAttributeCount < shader.attributeCount:
-        for i in lastAttributeCount..<shader.attributeCount:
-            glEnableVertexAttribArray(i.GLuint)
-    elif lastAttributeCount > shader.attributeCount:
-        for i in shader.attributeCount..<lastAttributeCount:
-            glDisableVertexAttribArray(i.GLuint)
-    if shader.attributeCount == 0:
-        glDisableVertexAttribArray(0)
-
-    lastAttributeCount = shader.attributeCount      
+#var lastAttributeCount = 0
+#proc updateAttributes(shader: Shader) =
+#    if lastAttributeCount < shader.attributeCount:
+#        for i in lastAttributeCount..<shader.attributeCount:
+#            glEnableVertexAttribArray(i.GLuint)
+#    elif lastAttributeCount > shader.attributeCount:
+#        for i in shader.attributeCount..<lastAttributeCount:
+#            glDisableVertexAttribArray(i.GLuint)
+#    if shader.attributeCount == 0:
+#        glDisableVertexAttribArray(0)
+#
+#    lastAttributeCount = shader.attributeCount      
 
 proc use*(shader: Shader) =
     #updateAttributes(shader)    

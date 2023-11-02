@@ -13,7 +13,7 @@ type
 
 # Component implementation
 proc newScriptComponent*(update: ScriptProc): ScriptComponent = ScriptComponent(update: update)
-proc program*(e: Entity, update: ScriptProc) = addComponent(e, newScriptComponent(update))
+proc program*(e: Entity, update: ScriptProc) = add(e, newScriptComponent(update))
 
 # System implementation
 proc newScriptSystem*(): ScriptSystem =

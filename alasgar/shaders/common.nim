@@ -2,9 +2,10 @@ import vmath
 
 import compile
 import types
+import base
 import ../math/helpers
 
-export HALF_PI, ONE_OVER_PI, LOG2, EPSILON, compile, types
+export vmath, HALF_PI, ONE_OVER_PI, LOG2, EPSILON, compile, types, base, helpers
 
 const OPACITY_CUTOFF* = 0.01
 const LIGHT_TYPE_DIRECTIONAL* = 0

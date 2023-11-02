@@ -56,5 +56,5 @@ proc newGrid*(scene: Scene, gridSize: int=1, tickness: float=0.02, color=rgb(0.5
     set(shader, "GRID_COLOR",  color.vec3)
 
     result = newEntity(scene, "Grid")
-    addComponent(result, newPlaneMesh(1, 1))
-    addComponent(result, newShaderComponent(shader))
+    add(result, newPlaneMesh(1, 1))
+    add(result, newShaderComponent(shader))

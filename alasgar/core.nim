@@ -33,6 +33,13 @@ type
         tags: Table[string, seq[Entity]]
         root* {.cursor.}: Entity
         drawables*: seq[Drawable]
+        background*: Color
+        ambient*: Color
+        fogDensity*: float32
+        fogGradient*: float32
+        environmentMap*: Texture
+        environmentIntensity*: float32
+        environmentBlurrity*: float32
 
     Entity* = ref object
         id: int
@@ -42,6 +49,7 @@ type
         opacity*: float32
         scene: Scene
         transform {.cursor.} : TransformComponent
+        material {.cursor.} : MaterialComponent
         parent {.cursor.} : Entity
         children: seq[Entity]
         components: seq[(Component, ContainerBase)]
@@ -57,9 +65,6 @@ type
         rotation: Quat
         valid: bool
         localIsUpdated: bool
-
-    TransformGlobal* = object
-        transform: TransformComponent
 
     MaterialMapEnum = enum
         albedoMaterialMap =    0b000001
@@ -130,13 +135,13 @@ type
 
 # Forward declarations
 proc ensureContainer[T](scene: Scene): Container[T]
-proc removeChild*(n: Entity, child: Entity)
+proc remove*(n: Entity, child: Entity)
 proc newTransform*(): TransformComponent
 proc `model`*(t: TransformComponent): var Mat4
 proc `dirty`*(t: TransformComponent): bool
-proc findEntityByTag*(scene: Scene, tag: string): seq[Entity]
-proc findEntity*(n: Entity, path: string): Entity
-func getComponent*[T: Component](e: Entity): T
+proc findByTag*(scene: Scene, tag: string): seq[Entity]
+proc find*(n: Entity, path: string): Entity
+func get*[T: Component](e: Entity): T
 proc `inc`(c: Component)
 
 # Shader implementation
@@ -166,36 +171,36 @@ proc updateDrawable(e: Entity, c: Component) =
             drawable = findDrawable(e.scene, mesh)
         if drawable != nil:
             drawable.mesh = mesh
-            drawable.material = getComponent[MaterialComponent](e)
-            drawable.skin = getComponent[SkinComponent](e)
-            drawable.shader = getComponent[ShaderComponent](e)
+            drawable.material = get[MaterialComponent](e)
+            drawable.skin = get[SkinComponent](e)
+            drawable.shader = get[ShaderComponent](e)
         else:
             add(e.scene.drawables, Drawable(
                 transform: e.transform,
                 mesh: cast[MeshComponent](c),
-                material: getComponent[MaterialComponent](e),
-                skin: getComponent[SkinComponent](e),
-                shader: getComponent[ShaderComponent](e),
+                material: get[MaterialComponent](e),
+                skin: get[SkinComponent](e),
+                shader: get[ShaderComponent](e),
                 transformVersion: -1.int16,
                 materialVersion: -1.int16
             ))
     elif c of MaterialComponent:
         let material = cast[MaterialComponent](c)
-        let mesh = getComponent[MeshComponent](e)
+        let mesh = get[MeshComponent](e)
         if mesh != nil:
             var drawable = findDrawable(e.scene, mesh)
             if drawable != nil:
                 drawable.material = material
     elif c of SkinComponent:
         let skin = cast[SkinComponent](c)
-        let mesh = getComponent[MeshComponent](e)
+        let mesh = get[MeshComponent](e)
         if mesh != nil:
             var drawable = findDrawable(e.scene, mesh)
             if drawable != nil:
                 drawable.skin = skin
     elif c of ShaderComponent:
         let shader = cast[ShaderComponent](c)
-        let mesh = getComponent[MeshComponent](e)
+        let mesh = get[MeshComponent](e)
         if mesh != nil:
             var drawable = findDrawable(e.scene, mesh)
             if drawable != nil:
@@ -220,7 +225,7 @@ iterator iterateComponents*[T: Component](scene: Scene): T =
         if c.entity.attached:
             yield cast[T](c)
 
-proc addComponent*[T](e: Entity, c: T) =
+proc add*[T](e: Entity, c: T) =
     var container: Container[T] = ensureContainer[T](e.scene)
     c.entity = e
     add(container.components, c)
@@ -229,7 +234,7 @@ proc addComponent*[T](e: Entity, c: T) =
     # Updates drawable
     updateDrawable(e, cast[Component](c))
 
-proc addComponent*[T](scene: Scene, c: T) = addComponent[T](scene.root, c)
+proc add*[T](scene: Scene, c: T) = add[T](scene.root, c)
 
 proc removeComponent*[T](e: Entity) =
     var toRemoveList = newSeq[(Component, ContainerBase)]()
@@ -275,7 +280,7 @@ proc destroy*(e: Entity) = e.wasted = true
 
 proc cleanup(e: Entity) =
     if e.parent != nil:
-        removeChild(e.parent, e)
+        remove(e.parent, e)
     if e.scene != nil:
         delete(e.scene.entities, e)
         removeComponents(e)
@@ -306,14 +311,14 @@ proc setAttach(e: Entity, flag: bool) =
     for c in e.children:
         setAttach(c, flag)
 
-proc addChild*(n: Entity, child: Entity) =
+proc add*(n: Entity, child: Entity) =
     if child.parent == nil:
         add(n.children, child)
         child.parent = n
         child.scene = n.scene
         setAttach(child, n.attached)
 
-proc removeChild*(n: Entity, child: Entity) =
+proc remove*(n: Entity, child: Entity) =
     let count = n.children.len()
     n.children = n.children.filter(c => c != child)
     if count > n.children.len:
@@ -323,9 +328,9 @@ proc removeChild*(n: Entity, child: Entity) =
 
 proc removeChildren*(n: Entity) =
     while len(n.children) > 0:
-        removeChild(n, n.children[0])
+        remove(n, n.children[0])
 
-proc getChild*(n: Entity, name: string): Entity =
+proc get*(n: Entity, name: string): Entity =
     for child in n.children:
         if child.name == name:
             result = child
@@ -335,7 +340,7 @@ iterator `children`*(n: Entity): Entity =
     for child in n.children:
         yield child
 
-proc getComponent*[T: Component](e: Entity, r: var T) =
+proc get*[T: Component](e: Entity, r: var T) =
     r = nil
     for i in low(e.components)..high(e.components):
         var c = e.components[i][0]
@@ -355,13 +360,14 @@ iterator `components`*(n: Entity): Component =
     for c in n.components:
         yield c[0]
 
-func getComponent*[T: Component](e: Entity): T = getComponent(e, result)
-func `[]`*[T](e: Entity, row: typedesc[T]): T = getComponent[T](e)
-func `[]`*[string](e: Entity, row: string): Entity = findEntity(e, row)
-func `[]=`*[T](e: Entity, row: typedesc[T], c: T) = addComponent[T](e, c)
+func get*[T: Component](e: Entity): T = get(e, result)
+func `[]`*[T](e: Entity, row: typedesc[T]): T = get[T](e)
+func `[]`*[string](e: Entity, name: string): Entity = find(e, name)
+func `[]=`*[T](e: Entity, row: typedesc[T], c: T) = add[T](e, c)
 func getChildrenCount*(n: Entity): int = n.children.len
-func getChild*(n: Entity, i: int): Entity = n.children[i]
-func hasChild*(n: Entity, name: string): bool = getChild(n, name) != nil
+func getChildAt*(n: Entity, i: int): Entity = n.children[i]
+func hasChild*(n: Entity, name: string): bool = get(n, name) != nil
+func hasMaterial*(n: Entity): bool = not isNil(n.material) and not isNil(get[MaterialComponent](n))
 func `$`*(n: Entity): string = n.name
 func hash*(e: Entity): Hash = hash(cast[pointer](e))
 func `id`*(e: Entity): int = e.id
@@ -372,15 +378,16 @@ template `parent`*(n: Entity): Entity = n.parent
 template `scene`*(n: Entity): Scene = n.scene
 template `attached`*(n: Entity): bool = n.attached
 
+
 proc findEntity(n: Entity, names: openArray[string]): Entity =
     if names.len > 1:
-        var child = getChild(n, names[0])
+        var child = get(n, names[0])
         if child != nil:
             result = findEntity(child, names[1..names.high])
     elif names.len == 1:
-        result = getChild(n, names[0])
+        result = get(n, names[0])
 
-proc findEntity*(n: Entity, path: string): Entity =
+proc find*(n: Entity, path: string): Entity =
     var names = path.split '/'
     if names.len > 0:
         if startsWith(path, "/"):
@@ -392,14 +399,13 @@ proc findEntity*(n: Entity, path: string): Entity =
         else:
             result = n.findEntity(names)
 
-proc findEntityByTag*(n: Entity, tag: string): seq[Entity] = 
-    findEntityByTag(n.scene, tag)
+proc findByTag*(n: Entity, tag: string): seq[Entity] = findByTag(n.scene, tag)
 
-proc findComponent*[T](n: Entity): T =
-    result = getComponent[T](n)
+proc find*[T](n: Entity): T =
+    result = get[T](n)
     if isNil(result):
         for c in n.children:
-            result = findComponent[T](c)
+            result = find[T](c)
             if not isNil(result):
                 break
 
@@ -409,8 +415,8 @@ proc `inc`(c: Component) = c.version = if c.version == high(int16): 0.int16 else
 func `transform`*(c: Component): TransformComponent = c.entity[].transform
 func `entity`*(c: Component): Entity = c.entity
 func `scene`*(c: Component): Scene = c.entity.scene
-func getComponent*[T: Component](c: Component): T = getComponent(c.entity, result)
-func `[]`*[T](c: Component, row: typedesc[T]): T = getComponent[T](c.entity)
+func get*[T: Component](c: Component): T = get(c.entity, result)
+func `[]`*[T](c: Component, row: typedesc[T]): T = get[T](c.entity)
 func hash*(c: Component): Hash = hash(unsafeAddr(c))
 
 method cleanup*(c: Component) {.base.} = discard
@@ -433,7 +439,6 @@ proc ensureContainer[T](scene: Scene): Container[T] =
         result = new(Container[T])
         add(scene.containers, result)
 
-
 proc newEntity*(scene: Scene, name: string, tag: string = "",
         parent: Entity = nil): Entity =
     var lastEntityId {.global.} = 0
@@ -449,18 +454,22 @@ proc newEntity*(scene: Scene, name: string, tag: string = "",
     result.opacity = 1
     add(scene.entities, result)
     result.transform = newTransform()
-    addComponent(result, result.transform)
+    add(result, result.transform)
     if parent != nil:
-        addChild(parent, result)
+        add(parent, result)
 
 proc newScene*(): Scene =
     result = new(Scene)
     result.root = newEntity(result, name = "Root")
     result.root.scene = result
     result.root.attached = true
+    result.environmentIntensity = 1.0
+    result.environmentBlurrity = 0.0
+    result.background = color(0.0, 0.0, 0.0)
 
-proc addChild*(scene: Scene, entity: Entity) =
-    addChild(scene.root, entity)
+
+proc add*(scene: Scene, entity: Entity) =
+    add(scene.root, entity)
 
 proc forEachComponent*[T: Component](scene: Scene, fn: proc(component: T)) =
     var container: Container[T] = ensureContainer[T](scene)
@@ -486,7 +495,7 @@ func getComponentsCount*[T: Component](scene: Scene): int =
     var container: Container[T] = ensureContainer[T](scene)
     result = len(container.components)
 
-proc findEntityByTag*(scene: Scene, tag: string): seq[Entity] =
+proc findByTag*(scene: Scene, tag: string): seq[Entity] =
     if hasKey(scene.tags, tag):
         result = scene.tags[tag]
 
@@ -746,12 +755,17 @@ func updateFrame(material: MaterialComponent) =
 func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
                            specularColor: Color=COLOR_WHITE, 
                            emissiveColor: Color=COLOR_BLACK,
-                           albedoMap, normalMap, metallicMap, roughnessMap, aoMap, emissiveMap: Texture = nil, 
-                           metallic: float32 = 0.0,
-                           roughness: float32 = 0.0,
-                           reflectance: float32 = 0.0,
-                           shininess: float32 = 128.0,
-                           ao: float32 = 1.0,
+                           albedoMap: Texture=nil, 
+                           normalMap: Texture=nil, 
+                           metallicMap: Texture=nil, 
+                           roughnessMap: Texture=nil, 
+                           aoMap: Texture=nil, 
+                           emissiveMap: Texture=nil, 
+                           metallic: float32=0.0,
+                           roughness: float32=0.0,
+                           reflectance: float32=0.0,
+                           shininess: float32=128.0,
+                           ao: float32=1.0,
                            frame: int=0,
                            vframes: int=1,
                            hframes: int=1,
@@ -787,9 +801,12 @@ func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE,
 func newLambertMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
                                   specularColor: Color=COLOR_WHITE, 
                                   emissiveColor: Color=COLOR_BLACK,
-                                  albedoMap, normalMap, aoMap, emissiveMap: Texture = nil, 
-                                  shininess: float32 = 128.0,
-                                  ao: float32 = 1.0,
+                                  albedoMap: Texture=nil, 
+                                  normalMap: Texture=nil, 
+                                  aoMap: Texture=nil, 
+                                  emissiveMap: Texture=nil, 
+                                  shininess: float32=128.0,
+                                  ao: float32=1.0,
                                   frame: int=0,
                                   vframes: int=1,
                                   hframes: int=1,
@@ -944,3 +961,11 @@ proc reprTree*(e: Entity, tab="") =
         echo tab & "  " & $c[0]
     for child in e.children:
         reprTree(child, tab & "  ")
+
+proc `material`*(n: Entity): MaterialComponent = 
+    if n.material == nil:
+        n.material = get[MaterialComponent](n)
+        if isNil(n.material):
+            n.material = newMaterialComponent()
+            add(n, n.material)
+    result = n.material

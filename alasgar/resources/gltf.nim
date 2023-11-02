@@ -15,7 +15,7 @@ export resource, model
 
 type
     NormalizeFunction[T] = proc(o: T): T
-    ConvertFunction[T] = proc(data: ptr float32, offset: int): T
+    ConvertFunction[T] = proc(data: openArray[float32], offset: int): T
     FilterType = enum
         filterTypeNearst = 9728
         filterTypeLinear = 9729
@@ -156,6 +156,7 @@ type
         skins: Option[seq[Skin]]
         animations: Option[seq[AnimationDef]]
         filename: Option[string]
+
 
 proc `path`(document: Document): string = splitFile(document.filename.get).dir
 proc toColor(v: array[4, float32]): Color = color(v[0], v[1], v[2], v[3])
@@ -510,17 +511,16 @@ proc createAnimationTrack[T](document: Document,
 
     var
         offset = 0
-        p = addr(values[0])
         isCubic = sampler.interpolation.get == "CUBICSPLINE"
     for i, frame in mpairs(result.frames):
         frame.time = timelines[i]
         if isCubic:
-            frame.dataIn = convert(p, offset)
+            frame.dataIn = convert(values, offset)
             offset += stride
-        frame.value = convert(p, offset)
+        frame.value = convert(values, offset)
         offset += stride
         if isCubic:
-            frame.dataOut = convert(p, offset)
+            frame.dataOut = convert(values, offset)
             offset += stride
 
 proc addAnimation(document: Document, 
@@ -660,6 +660,8 @@ proc loadGLB*(filename: string): Resource =
     # Closes file when the scope ends
     defer: close(fileStream)
 
+    if length <= 0:
+        raise newAlasgarError("Invalid length!")
     if magic != 0x46546C67:
         raise newAlasgarError("Invalid magic number!")
     if version != 2:

@@ -22,7 +22,6 @@ import components/script
 import components/camera
 import components/light
 import components/interactive
-import components/environment
 import components/skin
 import components/animation
 import components/catmull
@@ -147,7 +146,6 @@ proc initEngine*(windowWidth: int,
     addSystem(newSkinSystem())
     addSystem(newPrepareSystem())
     addSystem(newCameraSystem())
-    addSystem(newEnvironmentSystem())
     addSystem(newSoundSystem())
     addSystem(newLightSystem())
     addSystem(newRenderSystem())
@@ -238,7 +236,7 @@ proc handleFrame() =
     let eventStart = epochTime()
 
     # Set mouse position, even if there is not event.
-    updateMousePosition(addr runtime.input)
+    updateMousePosition(addr input)
 
     # Pulls SDL event and passes to the nodes that need event processing
     while pollEvent(evt):

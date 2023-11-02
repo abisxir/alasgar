@@ -14,11 +14,6 @@ alasgar is a pure nim game engine based on OpenGL. The main reason to start deve
 ## Experimental game engine
 alasgar is a basic game engine, and it is limited, so it is not ready for production use.
 
-## nimx and vmath
-Most of nimx build system has been copied here, just removed and reformed some parts. This part will be rewritten later to use nimble instead of nake. nimx is a UI library (and game framework) for nim, check it out [here](https://github.com/yglukhov/nimx). 
-
-For game mathematics, vmath is used. vmath has a good convention, check it out for more information [here](https://github.com/treeform/vmath). 
-
 ## Installation
 ```bash
 nimble install alasgar
@@ -39,9 +34,8 @@ Table of Contents
 =================
 
 * [Window and scene creation](#window-and-scene-creation)  
-* [Change background color](#background)  
-* [First mesh](#first-mesh)  
 * [Screen size](#screen-size)
+* [First mesh](#first-mesh)  
 * [Point light](#point-light)
 * [Scripts](#scripts)
 * [Rotation and transform](#rotation)
@@ -49,31 +43,32 @@ Table of Contents
 * [Texture](#texture)
 * [More lights](#more-lights)
 * [Access components](#access-components)
-* [Environment variables](#environment-variables)
 * [Interactive objects](#interactive-objects)
+* [Effects](#effects)
 * [Physcally Based Rendering](#pbr)
 * [Shadows](#shadows)
-* [Effects](#effects)
 * [Custom effects](#custom-effects)
 * [Shaders](#shaders)
+* [Dependencies](#deps)
 
 Window and scene creation
 =========================
 ```nim
 import alasgar
 
-# Creates a window named Hello
-window("Hello", 960, 540)
+# Creates a window named Step1
+window("Step1", 830, 415)
    
-# Creates a new scene
-let scene = newScene()
+let 
+    # Creates a new scene
+    scene = newScene()
+    # Creates camera entity
+    cameraEntity = newEntity(scene, "Camera")
 
-# Creates camera entity
-let cameraEntity = newEntity(scene, "Camera")
 # Sets camera position
 cameraEntity.transform.position = vec3(5, 5, 5)
 # Adds a perspective camera component to entity
-addComponent(
+add(
     cameraEntity, 
     newPerspectiveCamera(
         75, 
@@ -84,12 +79,7 @@ addComponent(
     )
 )
 # Makes the camera entity child of the scene
-addChild(scene, cameraEntity)
-
-# Renders an empty sceene
-render(scene)
-# Runs game main loop
-loop()
+add(scene, cameraEntity)
 ```
 
 As you see, we instantiate a scene, add a camera to that, and render the created scene. If everything goes right, you will see an empty window with the given size. Run it using the nim compiler:
@@ -100,52 +90,11 @@ nim c -r main.nim
 
 Check the [example](https://abisxir.github.io/alasgar/step1/build) here.
 
-When you create a window by defult it runs in window mode, you can easily enable fullscreen mode:
+When you create a window by default it runs in window mode, you can easily enable fullscreen mode:
 ```nim
 # Creates a window named Hello and enables fullscreen mode.
 window("Hello", 960, 540, fullscreen=true)
 ```
-
-Let us add a cube to our scene, but to see the cube, it is better if we give a brighter background to our window, it will make it easier to see our meshes before we add lights. To set the background color, we need to introduce the environment component:
-
-Background
-==========
-```nim
-...
-let 
-    # Creates a new scene
-    scene = newScene()
-    # Creates an environment component
-    env = newEnvironmentComponent()
-
-# Sets background color
-setBackground(env, parseHex("d7d1bf"))
-# Adds environment component to scene
-addComponent(scene, env)
-...
-```
-
-That was all you need to do. If you compile and execute it, you will see an empty window with a slightly better [color](https://abisxir.github.io/alasgar/step2/build).
-
-
-First mesh
-==========
-```nim
-...
-
-# Creates cube entity, by default position is 0, 0, 0
-let cubeEntity = newEntity(scene, "Cube")
-# Add a cube mesh component to entity
-addComponent(cubeEntity, newCubeMesh())
-# Makes the cube enity child of the scene
-addChild(scene, cubeEntity)
-# Scale it up
-cubeEntity.transform.scale = vec3(2)
-
-...
-```
-
-When you execute the program, you will see an ugly black [cube](https://abisxir.github.io/alasgar/step3/build). As you guess we need to have a light in our scene so let us add a point light to our scene:
 
 Screen size
 ===========
@@ -159,100 +108,78 @@ window("Hello", 640, 360)
 
 ...   
 ```
+*You need to specify it before creating window, after window creation there is no effect when setting the screen size.*
 
-You need to specify it before creating window, after window creation there is no effect when setting the screen size.
+Let us add a cube to our scene, but to see the cube, it is better if we give a brighter background to our window, it will make it easier to see our meshes before we add lights. So what we do we change scene background and add a cube mesh to our scene:
+
+First mesh
+==========
+```nim
+...
+let 
+    # Creates a new scene
+    scene = newScene()
+
+# Sets background color
+scene.background = parseHex("d7d1bf")
+...
+# Creates cube entity, by default position is 0, 0, 0
+let cubeEntity = newEntity(scene, "Cube")
+# Add a cube mesh component to entity
+add(cubeEntity, newCubeMesh())
+# Makes the cube enity child of the scene
+add(scene, cubeEntity)
+# Scale it up
+cubeEntity.transform.scale = vec3(2)
+...
+```
+
+That was all you need to do. If you compile and execute it, you will see an ugly black cube in a window with a slightly better [color](https://abisxir.github.io/alasgar/step2/build). As you guess we need to have a light in our scene to shade our cube. Let us add a point light to our scene:
+
 
 Point light
 ===========
 ```nim
 ...
-
-# Creates light entity
+# Creates the light entity
 let lightEntity = newEntity(scene, "Light")
-# Sets light position
-lightEntity.transform.position = vec3(-5, 5, 5)
-# Adds a point light component to entity
-addComponent(
+# Sets the light position
+lightEntity.transform.position = vec3(4, 5, 4)
+# Adds athe point light component to entity
+add(
     lightEntity, 
     newPointLightComponent()
 )
 # Makes the light entity child of the scene
-addChild(scene, lightEntity)
-
+add(scene, lightEntity)
 ...
 ```
 
-That is all we needed, our ugly cube maybe is [less ugly](https://abisxir.github.io/alasgar/step4/build) now. Lights have some properties, like color, luminance, etc. You change it and you will shade the cube differently.
+That is all we needed, now our cube maybe is [less ugly](https://abisxir.github.io/alasgar/step3/build) now. Lights have some properties, like color, luminance, etc. You change it and you will shade the cube differently.
 
 Scripts
 =======
-To program an entity, we need to add a ScriptComponent to our light entity. Each component has access to an entity, the entity's transform, and the component's data. We can add a script to any entity using the "program" function or directly by instantiating a ScriptComponent using the "newScriptComponent" function.
+To program an entity, we need to add a ScriptComponent to it. Each component has an access to its entity, the entity's transform and other components added to the entity. We can add a script to any entity using the "program" function or directly by instantiating a ScriptComponent using the "newScriptComponent" function.
 
 ```nim
 ...
-
-# Creates light entity
-let lightEntity = newEntity(scene, "Light")
-# Adds a point light component to entity
-addComponent(
-    lightEntity, 
-    newPointLightComponent()
-)
-# Adds a script component to light entity
-program(lightEntity, proc(script: ScriptComponent) =
-    const r = 7.0 
-    # Change position on transform
-    script.transform.position = r * vec3(
-        sin(runtime.age),
-        cos(runtime.age),
-        sin(runtime.age) * cos(runtime.age),
-    )
-)
-# Makes the light entity child of the scene
-addChild(scene, lightEntity)
-
-...
-```
-![](docs/files/step5.gif)
-
-[See](https://abisxir.github.io/alasgar/step5/build) now our light moves around our scene and lights our cube from different directions. As you see in the source code, we used an anonymous function to change light's position. You can define a function and use that here. Feel free to play with nim features. As you notice, we directly access transform component from script component. Each entity has a  reference to the transform component, and all entity components have a reference to that.
-In the script we used runtime variable, it is a readonly variable that gives us some good information about engine, also has an instance to engine inside it:
-
-```nim
-type 
-    Runtime = object
-        engine: Engine   # engine instance
-        age: float32     # total seconds engine is running
-        frames: int      # total frames rendered
-        fps: float32     # current fps
-        delta: float32   # delta between last two frames
-        input: Input     # last input state
-        ratio: float32   # screen ratio
-        windowSize: Vec2 # window size
-        screenSize: Vec2 # screen size
-
-```
-
-Rotation
-========
-Let us rotate the cube. To do that we need a script component attached to the cube entity:
-
-```nim
-...
-
-# Adds a script component to cube entity, we use this helpful function:
+# Adds a script component to the cube entity
 program(cubeEntity, proc(script: ScriptComponent) =
-    # We can rotate an object using euler also it is possible to directly set rotation property which is a quaternion.
+    let t = 2 * runtime.age
+    # Rotates the cube using euler angles
     script.transform.euler = vec3(
-        sin(runtime.age) * cos(runtime.age), 
-        cos(runtime.age), 
-        sin(runtime.age)
+        sin(t),
+        cos(t),
+        sin(t) * cos(t),
     )
 )
-
+# Makes the cube enity child of the scene
+add(scene, cubeEntity)
 ...
 ```
-As you [see](https://abisxir.github.io/alasgar/step6/build) our ugly cube is rotating and we used Euler angles to change rotation. But also rotation as quat is enabled in TransformComponent and you can use it if you are looking for troubles. Transform component has some useful functions and properties:
+![](https://abisxir.github.io/alasgar/step4/demo.png)
+
+[See](https://abisxir.github.io/alasgar/step4/build) now our cube rotates. As you see in the source code, we used an anonymous function to program the entity. You can define a function and use that here. Feel free to play with nim features. As you notice, we directly access transform component from script component. Each entity has a reference to the transform component, and all the components have a reference to their entity. We used Euler angles to change rotation. But also 'rotation' as a quat is available in TransformComponent and you can use it if you are looking for troubles:
 
 ```nim
 type
@@ -271,110 +198,132 @@ proc lookAt*(t: TransformComponent, target: TransformComponent)
 
 ```
 
+In the script we used runtime variable, it is a readonly property that gives us some good information about engine, also has a reference to the running engine's instance:
+
+```nim
+type 
+    Runtime = object
+        engine: Engine   # engine instance
+        age: float32     # total seconds engine is running
+        frames: int      # total frames rendered
+        fps: float32     # current fps
+        delta: float32   # delta between last two frames
+        input: Input     # last input state
+        ratio: float32   # screen ratio
+        windowSize: Vec2 # window size
+        screenSize: Vec2 # screen size
+
+```
 
 Material
 ========
-We can change the cube color using material components. So what we need is to add a material component to define the cube's material.
-I used the chroma library to manipulate colors, it is a great library, [here](https://abisxir.github.io/alasgar/step7/build) you can see how to use it.
+We can change the cube color using material components. So what we need is to add a material component to define the cube's material. There is a sugar member in entity that can automatically define a material for entity when it is called, thanks to nim's templates and powerful property functions.
+I used the chroma library to manipulate colors, it is a great library, [here](https://abisxir.github.io/alasgar/step5/build) you can see how to use it.
 
 ```nim
 ...
-
-# Adds a material to cube
-addComponent(cubeEntity, newMaterialComponent(diffuseColor=parseHtmlName("Tomato")))
-
+# Adds a material if it is not already added and sets the diffuse color
+cubeEntity.material.diffuseColor = parseHtmlName("Tomato") 
+# Also is possible to directly instantiate a component and add it to the cube
+# In the case that you like to write more code :)
+# addComponent(cubeEntity, newMaterialComponent(diffuseColor=parseHtmlName("Tomato")))
 ...
 ```
-Material component in alasgar is instantiated using "newMaterialComponent" that accepts these parameters:
+![](https://abisxir.github.io/alasgar/step5/demo.png)
+Material component contains the following properties:
 ```nim
-func newMaterialComponent*(diffuseColor: Color=COLOR_WHITE, 
-                           specularColor: Color=COLOR_WHITE, 
-                           emissiveColor: Color=COLOR_BLACK,
-                           albedoMap, 
-                           normalMap, 
-                           metallicMap, 
-                           roughnessMap, 
-                           aoMap, 
-                           emissiveMap: Texture = nil, 
-                           metallic: float32 = 0.0,
-                           roughness: float32 = 0.0,
-                           reflectance: float32 = 0.0,
-                           shininess: float32 = 128.0,
-                           ao: float32 = 1.0,
-                           frame: int=0,
-                           vframes: int=1,
-                           hframes: int=1,
-                           castShadow: bool=false)
+type 
+    MaterialComponent = ref object of Component
+        diffuseColor: Color
+        specularColor: Color
+        emissiveColor: Color
+        metallic: float32
+        roughness: float32
+        reflectance: float32
+        ao: float32
+        albedoMap: Texture
+        normalMap: Texture
+        metallicMap: Texture
+        roughnessMap: Texture
+        aoMap: Texture
+        emissiveMap: Texture
+        vframes: int
+        hframes: int
+        frame: int
+        castShadow: bool
+
+# Instantiate a material component
+func newMaterialComponent(diffuseColor: Color=COLOR_WHITE, 
+                          specularColor: Color=COLOR_WHITE, 
+                          emissiveColor: Color=COLOR_BLACK,
+                          albedoMap: Texture = nil, 
+                          normalMap: Texture = nil, 
+                          metallicMap: Texture = nil, 
+                          roughnessMap: Texture = nil, 
+                          aoMap: Texture = nil, 
+                          emissiveMap: Texture = nil, 
+                          metallic: float32 = 0.0,
+                          roughness: float32 = 0.0,
+                          reflectance: float32 = 0.0,
+                          shininess: float32 = 128.0,
+                          ao: float32 = 1.0,
+                          frame: int=0,
+                          vframes: int=1,
+                          hframes: int=1,
+                          castShadow: bool=false)
 ```
 If roughness and metallic factors are zero also there is no metallic map and roughness map provided then the shader will use shininess and shades with phong model otherwise will be PBR. vfames, hframes, and frame is used to offset texture, very helpful for sprites or animations, will discuss it later in the sprites section.
 
 Texture
 =======
-It is time to give texture to our cube. To make it multi-platform you need to make "res" folder in your project root and copy your assets inside.
-The assets are accessible using a relative path by res like "res://stone-texture.png". It applies to all other assets like obj files or audio files.
+It is time to give texture to our cube. To make it multi-platform you need to make "res" folder in your project root and copy all of your assets inside that folder with the desired heirarchy. Then the assets will be accessible using a relative path by res like "res://texture.png". It applies to all other assets like obj files, audio files or text files.
 
 ```nim
 ...
-
-# Adds a material to cube
-addComponent(cubeEntity, newMaterialComponent(
-    diffuseColor=parseHtmlName("white"),
-    specularColor=parseHtmlName("grey"),
-    albedoMap=newTexture("res://stone-texture.png")
-))
-
+# Sets the diffuse color
+cubeEntity.material.diffuseColor = parseHtmlName("White") 
+# Sets albedo map
+cubeEntity.material.albedoMap = newTexture("res://brickwall-albedo.jpg")
 ...
 ```
-If you run the sample, you will see a [textured](https://abisxir.github.io/alasgar/step8/build) cube which is not that much ugly this time but there are a lot to improve.
+![](https://abisxir.github.io/alasgar/step6/demo.png)
+If you run the sample, you will see a [textured](https://abisxir.github.io/alasgar/step6/build) cube which is not that much ugly this time but still there are a lot to improve.
 
-The texture used here grabbed from: https://opengameart.org/content/handpainted-stone-floor-texture
+The texture used here, grabbed from: https://publicdomaintextures.com/elementor-112/tiles08
 
 More lights
 ===========
-As you see our scene has just one light and the light is moving. Let us add a new light to try another type of lights:
+As you see our scene has just one point light but there are other types of lights:
+ - Direct lights
+ - Spot lights
 
 ```nim
-...
-
-# Creats spot point light entity
-let spotLightEntity = newEntity(scene, "SpotLight")
-# Sets position to (-6, 6, 6)
-spotLightEntity.transform.position = vec3(-6, 6, 6)
-# Adds a spot point light component
-addComponent(spotLightEntity, newSpotPointLightComponent(
-    vec3(0) - spotLightEntity.transform.position, # Light direction
-    color=parseHtmlName("Tomato")                 # Light color
-    luminance=100.0                               # Luminance amount
-    shadow=false,                                 # Casts shadow or not
-    innerCutoff=30,                               # Inner circle of light
-    outerCutoff=90                                # Outer circle of light
-))
-# Makes the new light child of the scene
-addChild(scene, spotLightEntity)
-
-# Creats direct light entity
-let directLightEntity = newEntity(scene, "DirectLight")
-# Adds a direct light component, and select camera direction for lighting
-addComponent(directLightEntity, newDirectLightComponent(
-    vec3(0) - cameraEntity.transform.position,    # Light direction
-    color=parseHtmlName("Aqua"),                  # Light color
-    luminance=150.0,                              # Light intensity
-    shadow=false,                                 # Casts shadow or not
-))
-# Makes the new light child of the scene
-addChild(scene, directLightEntity)
-
-...
+## Creates point lights
+proc newPointLightComponent*(color: Color=COLOR_MILK, luminance=100.0): PointLightComponent
+## Creates direct lights
+proc newDirectLightComponent*(direction: Vec3, 
+                              color: Color=COLOR_MILK, 
+                              luminance: float32=100.0, 
+                              shadow: bool=false,
+                              shadowBias: float32=0.001): DirectLightComponent
+## Creates spot point lights
+proc newSpotPointLightComponent*(direction: Vec3,
+                                 color: Color=COLOR_MILK, 
+                                 luminance: float32=50.0,
+                                 innerCutoff: float32=30, 
+                                 outerCutoff: float32=45,
+                                 shadow: bool=false,
+                                 shadowBias: float32=0.001): SpotPointLightComponent
 ```
-As you [see](https://abisxir.github.io/alasgar/step9/build) now, our cube is shaded by three different kinds of lights, not that much ugly anymore. However, our scene with just one cube is boring. Before we change some properties on the scene, let us see how we can access components when we program an entity.
+For now shadowing is just implemented for direct lights and spot point lights. Point lights are resource hungary and much heavy compared to direct lights, needs 6 times rendering the scene. Some tricks can applied but still heavy specially for webgl but will be implemented soon.
 
 
 Access components
 =================
-Let us program the direct light's entity and access to the direct light's component and just for fun change the light color and luminance. To access a component we can call getComponent[T] on an entity or a component. Also, it is possible to access it using the index operator on any entity or component:
+Let us program the point light's entity and access to the its component and just for fun change the light color and luminance. To access a component we can call get[T] on an entity or a component. Also, it is possible to access it using the index operator on any entity or component:
 
 ```nim
-let c = getComponent[MyComponent](e)
+let c = get[MyComponent](e)
 ```
 
 Or simply using an index operator:
@@ -383,143 +332,225 @@ Or simply using an index operator:
 let c = e[MyComponent]
 ```
 
-If there is no such a component, it will return nil. Let us try it by adding a script component to our spot light to program it:
+If there is no such a component, it will return nil. Let us try it by adding a script component to our point light to program it:
 
 ```nim
 ...
-
-# Adds a script component to direct light entity
-program(directLightEntity, proc(script: ScriptComponent) =
-    # Access to direct light component.
-    let light = script[DirectLightComponent]
+# Adds a script component to the point light entity
+program(lightEntity, proc(script: ScriptComponent) =
+    let 
+        t = runtime.age
+        # Access to the point light component.
+        light = script[PointLightComponent]
     # Or you can access it by calling getComponent function:
-    # let light = getComponent[DirectLightComponent](script)
+    # let light = get[PointLightComponent](script)
     # Changes light color
     light.color = color(
-        abs(sin(runtime.age)), 
-        abs(cos(runtime.age)), 
-        abs(sin(runtime.age) * cos(runtime.age))
-    )
-    # Change luminance, will be between 250 and 750
-    light.luminance = 500.0 + 250.0 * sin(runtime.age)
-)
-
-...
-```
-If you [execute](https://abisxir.github.io/alasgar/step10/build) the program, you will notice that the color is changing.
-
-Environment variables
-=====================
-We already used envionment variable to change background color. We can set these attributes:
-    - Background color
-    - Fog
-    - Ambient light color
-    - Skybox
-
-```nim
-# Sets background color
-func setBackground(env: EnvironmentComponent, color: Color) 
-# Sets ambient light color
-func setAmbient(env: EnvironmentComponent, color: Color, intense: float32)
-# Sets fog density
-func setFogDensity(env: EnvironmentComponent, density: float32)
-# Sets fog gradient
-func setFogGradient(env: EnvironmentComponent, gradient: float32) 
-# Sets skybox, for each side totally 6 images
-func setSkybox(env: EnvironmentComponent, px, nx, py, ny, pz, nz: string, size: int) 
-# Sets skybox, takes panroma image and converts it to a cube box texture, accepts hdr images
-func setSkybox(env: EnvironmentComponent, url: string, size: int)
-# Sets environment intensity, for IBL
-func setEnvironmentIntensity(env: EnvironmentComponent, value: float32)
-# Sets envirnoment blurrity, the higher it gets, skybox will get much blur 
-func setEnvironmentBlurrity(env: EnvironmentComponent, value: float32)
-```
-
-Let us set a skybox (cubebox) as environment map which will affect cube shading also as when there is an environment map available alasgar will automatically use IBL, even on none PBR materials. You can can of course change the shininess of material or reduce environment intensity to change the effects on each material:
-```nim
-...
-# Sets background color, but it is useless anymore as we fill the screen with skybox.
-# setBackground(env, parseHex("d7d1bf"))
-# Sets skybox, uses a panaorama image here
-setSkybox(env, "res://skybox.jpeg", 512)
-# Adds environment component to scene
-addComponent(scene, env)
-
-# Sets camera position
-cameraEntity.transform.position = vec3(5, 5, 5)
-# Adds a perspective camera component to entity
-addComponent(
-    cameraEntity, 
-    newPerspectiveCamera(
-        75, 
-        runtime.ratio, 
-        0.1, 
-        100.0, 
-        vec3(0) - cameraEntity.transform.position
+        abs(sin(t)), 
+        1, 
+        abs(cos(t))
     )
 )
-# Adds orbital camera controller to camera entity
-addCameraController(cameraEntity)
 ...
 ```
-As you [see](https://abisxir.github.io/alasgar/step11/build) in this demo, we also added an orbital camera controller to our camera so we can freely view our scene from differnt angles and distance. The panaroma image used in this example can be found [here](https://sketchfab.com/3d-models/free-skybox-forgotten-ruins-373864f2e84b4af6a02e23c529191004). 
+![](https://abisxir.github.io/alasgar/step7/demo.png)
+If you [execute](https://abisxir.github.io/alasgar/step7/build) the last example, you will notice that the color is changing.
 
 
 Interactive objects
 ===================
+There is a very simple implementation for interacting with objects in alasgar. As it always works with components, to interact with a game object we need to add an InteractiveComponent to our entity:
+```nim
+type
+    InteractionHandleProc* = proc(component: InteractiveComponent, collision: Collision)
+    OutHandleProc* = proc(component: InteractiveComponent)
+    InteractiveComponent* = ref object of Component
+        hover*: bool
+        pressed*: bool
+        pressStartTime*: float
+        pressEndTime*: float
+        input: Input
+        onHover: InteractionHandleProc
+        onOut: OutHandleProc
+        onMotion: InteractionHandleProc
+        onPress: InteractionHandleProc
+        onRelease: InteractionHandleProc
+```
 
-It is nice if we can select an object with mouse or by touch on mobile platforms, let us add a InteractiveComponent to our cube:
+So we can instantiate the component and with the hooks are available we can react to user interaction with objects. There is also some sugar functions to make our life easier:
+
+```nim
+proc `onHover=`*(e: Entity, f: InteractionHandleProc)
+proc `onOut=`*(e: Entity, f: OutHandleProc) 
+proc `onMotion=`*(e: Entity, f: InteractionHandleProc) 
+proc `onPress=`*(e: Entity, f: InteractionHandleProc)
+proc `onRelease=`*(e: Entity, f: InteractionHandleProc)
+```
+
+Let us define two functions and when user hovers on our cube change the emissive color:
 
 ```nim
 ...
-
 # Handles mouse hover in
-proc onCubeHover(interactive: InteractiveComponent, collision: Collision)=
-    let material = interactive[MaterialComponent]
-    material.diffuseColor = parseHtmlName("yellow")
-
+cubeEntity.onHover = proc(ic: InteractiveComponent, co: Collision) =
+    ic[MaterialComponent].emissiveColor = color(0.6, 0.6, 0.0)
 # Handles mouse hover out
-proc onCubeOut(interactive: InteractiveComponent)=
-    let material = interactive[MaterialComponent]
-    material.diffuseColor = parseHtmlName("green")
-
-# Creates cube entity, by default position is 0, 0, 0
-var cubeEntity = newEntity(scene, "Cube")
-# Set scale to 2
-cubeEntity.transform.scale = vec3(2)
-# Add a cube mesh component to entity
-addComponent(cubeEntity, newCubeMesh())
-# Adds a material to cube
-addComponent(cubeEntity, 
-    newMaterialComponent(
-        diffuseColor=parseHtmlName("green")
-    )
-)
-# Adds a collision compnent to cube entity
-addComponent(cubeEntity, newCollisionComponent(vec3(-1, -1, -1), vec3(1, 1, 1)))
-# Adds an interactive
-addComponent(
-    cubeEntity, 
-    newInteractiveComponent(
-        onHover=onCubeHover,
-        onOut=onCubeOut
-    )
-)
-# Makes the cube enity child of scene
-addChild(scene, cubeEntity)
-
+cubeEntity.onOut = proc(ic: InteractiveComponent)=
+    ic[MaterialComponent].emissiveColor = parseHtmlName("black")
+# Adds a bounding box component to the cube entity, uses mesh bounds
+addBoundingSphere(cubeEntity)
 ...
 ```
+![](https://abisxir.github.io/alasgar/step8/demo.png)
+That is all, as you [see](https://abisxir.github.io/alasgar/step8/build), we have two functions to handle mouse's in and out events. To make interactive components working, you need to add a collision component. Alsgar supports just two types, AABB and sphere. Here we used helper functions to code less but like everywhere else you can add components using the core functions to have more control over it.
+```nim
+## Instantiate a collision component with bounding sphere using radius
+proc newCollisionComponent*(radius: float32, offset: Vec3=VEC3_ZERO): CollisionComponent 
+## Instantiate a collision component with box bounding using min and max
+proc newCollisionComponent*(vMin, vMax: Vec3, offset: Vec3=VEC3_ZERO): CollisionComponent
+## Adds a collision component with bounding box to entity uses mesh information when available
+proc addBoundingBox*(e: Entity)
+## Adds a collision component with bounding sphere to entity uses mesh information when available
+proc addBoundingSphere*(e: Entity)
+```
 
-As you see, we have two functions to handle mouse's in and out (hover) functionalities. To make interactive components working, you need to add a collision component.
-Alsgar supports just two types, AABB and sphere. We also changed the spot light position, stopped point light moving and set our cube diffuse color to green. It is the final result:
+Effects
+=======
+Effects can be attached to a camera and are nim functions which will be translated to GLSL functions on compile time so you can fix errors before running the application, thanks to [shady](https://github.com/treeform/shady). Let us add a snow effect to our camera. First we create a nim module named snow.nim:
 
-![](docs/files/interactive.gif)
+```nim
+# snow.nim
+import alasgar
 
-When you add interactive component, you have: onPress, onRelease, onHover, onOut and onMotion. Except onOut, all of the functions pass collision information.
+# Direct translation of https://www.shadertoy.com/view/4sX3z2 to nim
+proc snowEffect*(CAMERA: Uniform[Camera],
+                 FRAME: Uniform[Frame],
+                 COLOR_CHANNEL: Layout[0, Uniform[Sampler2D]],
+                 NORMAL_CHANNEL: Layout[1, Uniform[Sampler2D]],
+                 DEPTH_CHANNEL: Layout[2, Uniform[Sampler2D]],
+                 UV: Vec2,
+                 COLOR: var Vec4) =
+    var 
+        fragCoord = UV * FRAME.RESOLUTION.xy
+        snow = 0.0
+        gradient = (1.0 - float(fragCoord.y / FRAME.RESOLUTION.x)) * 0.4
+        random = fract(sin(dot(fragCoord.xy, vec2(12.9898,78.233))) * 43758.5453)
+    for k in 0..5:
+        for i in 0..11:
+            var 
+                cellSize = 2.0 + (float(i) * 3.0)
+                downSpeed = 0.3 + (sin(FRAME.TIME * 0.4 + float(k + i * 20)) + 1.0) * 0.00008
+                uv = (fragCoord.xy / FRAME.RESOLUTION.x) + vec2(0.01 * sin((FRAME.TIME + float(k * 6185)) * 0.6 + float(i)) * (5.0 / float(i)), downSpeed * (FRAME.TIME + float(k*1352)) * (1.0 / float(i)))
+                uvStep = (ceil((uv) * cellSize - vec2(0.5,0.5)) / cellSize)
+                x = fract(sin(dot(uvStep, vec2(12.9898 + float(k) * 12.0, 78.233 + float(k) * 315.156))) * 43758.5453 + float(k) * 12.0) - 0.5
+                y = fract(sin(dot(uvStep, vec2(62.2364 + float(k) * 23.0, 94.674 + float(k) * 95.0))) * 62159.8432 + float(k) * 12.0) - 0.5
+                randomMagnitude1 = sin(FRAME.TIME * 2.5) * 0.7 / cellSize
+                randomMagnitude2 = cos(FRAME.TIME * 2.5) * 0.7 / cellSize
+                d = 5.0 * distance((uvStep.xy + vec2(x * sin(y), y) * randomMagnitude1 + vec2(y,x) * randomMagnitude2), uv.xy)
+                omiVal = fract(sin(dot(uvStep.xy, vec2(32.4691,94.615))) * 31572.1684)
+            
+            if omiVal < 0.08:
+                let newd = (x+1.0)*0.4*clamp(1.9-d*(15.0+(x*6.3))*(cellSize/1.4),0.0,1.0)
+                snow += newd
 
-See interactive sample [here](examples/interactive.nim).
+    COLOR = texture(COLOR_CHANNEL, UV) + vec4(snow) + gradient * vec4(0.4, 0.8, 1.0, 0.0) + random * 0.01
+```
+Now in main.nim, we import "snowEffect" and add it to our camera as an effect.
+```nim
+import alasgar
+from snow import snowEffect
+...
+addEffect(cameraEntity[CameraComponent], "snowEffect", newCanvasShader(snowEffect))
+...
+```
+![](https://abisxir.github.io/alasgar/step7/demo.png)
+That was all you need to do, if you [run](https://abisxir.github.io/alasgar/step9/build) the code you will see our beautiful snow. As you see in function signature, there are some unused variables:
 
+```nim
+proc snowEffect*(CAMERA: Uniform[Camera],
+                 FRAME: Uniform[Frame],
+                 COLOR_CHANNEL: Layout[0, Uniform[Sampler2D]],
+                 NORMAL_CHANNEL: Layout[1, Uniform[Sampler2D]],
+                 DEPTH_CHANNEL: Layout[2, Uniform[Sampler2D]],
+                 UV: Vec2,
+                 COLOR: var Vec4)
+```
+These variables will be provided by engine and you can use them when it is required:
+
+```nim
+type
+    Camera* = object
+        POSITION*: Vec3
+        VIEW_MATRIX*: Mat4
+        INV_VIEW_MATRIX*: Mat4
+        PROJECTION_MATRIX*: Mat4
+        INV_PROJECTION_MATRIX*: Mat4
+        EXPOSURE*: float
+        GAMMA*: float
+        NEAR*: float
+        FAR*: float
+    Frame* = object
+        RESOLUTION*: Vec3
+        TIME*: float
+        TIME_DELTA*: float
+        COUNT*: float
+        MOUSE*: Vec4
+        DATE*: Vec4
+``` 
+It is possible to provide uniform variables and textures if the shader's logic needs it. That is fairly easy, let us add a speed variable and control it from outside:
+
+```nim
+...
+proc snowEffect*(FRAME: Uniform[Frame],
+                 COLOR_CHANNEL: Layout[0, Uniform[Sampler2D]],
+                 SPEED: Uniform[float],                 
+                 UV: Vec2,
+                 COLOR: var Vec4) =
+    var 
+        fragCoord = UV * FRAME.RESOLUTION.xy
+        snow = 0.0
+        gradient = (1.0 - float(fragCoord.y / FRAME.RESOLUTION.x)) * 0.4
+        random = fract(sin(dot(fragCoord.xy, vec2(12.9898,78.233))) * 43758.5453)
+    for k in 0..5:
+        for i in 0..11:
+            var 
+                cellSize = 2.0 + (float(i) * 3.0)
+                downSpeed = SPEED + (sin(FRAME.TIME * 0.4 + float(k + i * 20)) + 1.0) * 0.00008
+...                
+```
+As you see, I removed the unused variables. Now we program our camera and change speed by time:
+```nim
+...
+addEffect(cameraEntity[CameraComponent], "snowEffect", newCanvasShader(snowEffect))
+program(cameraEntity, proc(script: ScriptComponent) =
+    let 
+        # Gets camera component
+        camera = script[CameraComponent]
+        # Gets effect shader
+        effect = getEffect(camera, "snowEffect")
+    # Updates new value in shader
+    set(effect, "SPEED", 2.0)
+)
+```
+That's it, now we have a shader param which we can update it based on our needs and alasgar will pass it to the shader when it is required. It was just the fragment shader that we programmed here, but also is possible to pass a function as vertex shader for some effects like camera shaking:
+```nim
+proc effectVertex*(CAMERA: Uniform[Camera],
+                   FRAME: Uniform[Frame],
+                   gl_VertexID: int,
+                   UV: var Vec2,
+                   gl_Position: var Vec4) =
+    let v1: int = gl_VertexID and 1
+    let v2: int = gl_VertexID and 2
+    let x: float = float(v1 shl 2)
+    let y: float = float(v2 shl 1)
+    UV.x = x * 0.5
+    UV.y = y * 0.5
+    gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0)                   
+```
+This is the current implementation, depends on shader requirements you can change it and like the fragment shader, it accepts custom parameters. Then create a canvas shader with both vertex and fragmend shader code and add it as a new effect to the camera component:
+```nim
+addEffect(cameraEntity[CameraComponent], "myEffect", newCanvasShader(vertex, fragment))
+```
 
 Shadows
 =======
@@ -888,3 +919,10 @@ addChild(scene, cubeEntity)
 ```
 
 As you see, we deleted the green channel from color.
+
+Dependencies
+============
+## nimx and vmath
+Most of nimx build system has been copied here, just removed and reformed some parts. This part will be rewritten later to use nimble instead of nake. nimx is a UI library (and game framework) for nim, check it out [here](https://github.com/yglukhov/nimx). 
+
+For game mathematics, vmath is used. vmath has a good convention, check it out for more information [here](https://github.com/treeform/vmath). 

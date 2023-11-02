@@ -28,24 +28,12 @@ let VEC3_UP* = vec3(0, 1, 0)
 let VEC3_DOWN* = vec3(0, -1, 0)
 let VEC3_FORWARD* = vec3(0, 0, -1)
 let VEC3_BACK* = vec3(0, 0, 1)
-func `*`*(a: float32, b: Vec3): Vec3 = b * a
-func `*=`*(v: var Vec3, f: float) = 
-    v.x *= f
-    v.y *= f
-    v.z *= f
-func `/`*(a: float32, b: Vec3): Vec3 = vec3(a / b.x, a / b.y, a / b.z)
 func `xz`*(v: Vec3): Vec2 = vec2(v.x, v.z)
 func `xy`*(v: Vec3): Vec2 = vec2(v.x, v.y)
 func `yz`*(v: Vec3): Vec2 = vec2(v.y, v.z)
 func caddr*(v: var Vec3): ptr float32 = v[0].addr
-func vec3*(p: ptr float32, offset: int=0): Vec3 =
-    let 
-        address = cast[ByteAddress](p)
-        x = cast[ptr float32](address + offset * sizeof(float32))
-        y = cast[ptr float32](address + (offset + 1) * sizeof(float32))
-        z = cast[ptr float32](address + (offset + 2) * sizeof(float32))
-    result = vec3(x[], y[], z[]) 
 func vec3*(v: array[3, float32]): Vec3 = vec3(v[0], v[1], v[2])
+func vec3*(v: openArray[float32], offset: int): Vec3 = vec3(v[offset], v[offset + 1], v[offset + 2])
 func vec3*(v: Vec3): Vec3 = v
 func vec3*(v: Vec2): Vec3 = vec3(v.x, v.y, 0.0)
 proc randomVec3*(): Vec3 =
@@ -61,24 +49,15 @@ proc randomVec3*(): Vec3 =
     )
 
 # Vec2
-func `*`*(a: float32, b: Vec2): Vec2 = b * a
-func `/`*(a: float32, b: Vec2): Vec2 = vec2(a / b.x, a / b.y)
 func caddr*(v: var Vec2): ptr float32 = v[0].addr
 func `iWidth`*(a: Vec2): int32 = a.x.int32
 func `iHeight`*(a: Vec2): int32 = a.y.int32
 func `width`*(a: Vec2): float32 = a.x
 func `height`*(a: Vec2): float32 = a.y
-func vec2*(p: ptr float32, offset: int=0): Vec2 =
-    let 
-        address = cast[ByteAddress](p)
-        x = cast[ptr float32](address + offset * sizeof(float32))
-        y = cast[ptr float32](address + (offset + 1) * sizeof(float32))
-    result = vec2(x[], y[]) 
+func vec2*(v: openArray[float32], offset: int): Vec2 = vec2(v[offset], v[offset + 1])
 
 # Vec4
 func vec4*(xy: Vec2, z: float32, w: float32): Vec4 = vec4(xy.x, xy.y, z, w)
-func `*`*(a: float32, b: Vec4): Vec4 = b * a
-func `/`*(a: float32, b: Vec4): Vec4 = vec4(a / b.x, a / b.y, a / b.z, a / b.w)
 func caddr*(v: var Vec4): ptr float32 = v[0].addr
 
 # Mat3
@@ -105,6 +84,126 @@ func mat4*(m: array[16, float32]): Mat4 =
 func mat4*(m: ptr float32): Mat4 = 
     var p = cast[ptr array[16, float32]](m)
     result = mat4(p[])
+func mat4*(f: float32): Mat4 =
+    result[0, 0] = f
+    result[0, 1] = f
+    result[0, 2] = f
+    result[0, 3] = f
+    result[1, 0] = f
+    result[1, 1] = f
+    result[1, 2] = f
+    result[1, 3] = f
+    result[2, 0] = f
+    result[2, 1] = f
+    result[2, 2] = f
+    result[2, 3] = f
+    result[3, 0] = f
+    result[3, 1] = f
+    result[3, 2] = f
+    result[3, 3] = f
+func `+`*(m1, m2: Mat4): Mat4 = 
+    result[0, 0] = m1[0, 0] + m2[0, 0]
+    result[0, 1] = m1[0, 1] + m2[0, 1]
+    result[0, 2] = m1[0, 2] + m2[0, 2]
+    result[0, 3] = m1[0, 3] + m2[0, 3]
+    result[1, 0] = m1[1, 0] + m2[1, 0]
+    result[1, 1] = m1[1, 1] + m2[1, 1]
+    result[1, 2] = m1[1, 2] + m2[1, 2]
+    result[1, 3] = m1[1, 3] + m2[1, 3]
+    result[2, 0] = m1[2, 0] + m2[2, 0]
+    result[2, 1] = m1[2, 1] + m2[2, 1]
+    result[2, 2] = m1[2, 2] + m2[2, 2]
+    result[2, 3] = m1[2, 3] + m2[2, 3]
+    result[3, 0] = m1[3, 0] + m2[3, 0]
+    result[3, 1] = m1[3, 1] + m2[3, 1]
+    result[3, 2] = m1[3, 2] + m2[3, 2]
+    result[3, 3] = m1[3, 3] + m2[3, 3]
+func `-`*(m1, m2: Mat4): Mat4 = 
+    result[0, 0] = m1[0, 0] - m2[0, 0]
+    result[0, 1] = m1[0, 1] - m2[0, 1]
+    result[0, 2] = m1[0, 2] - m2[0, 2]
+    result[0, 3] = m1[0, 3] - m2[0, 3]
+    result[1, 0] = m1[1, 0] - m2[1, 0]
+    result[1, 1] = m1[1, 1] - m2[1, 1]
+    result[1, 2] = m1[1, 2] - m2[1, 2]
+    result[1, 3] = m1[1, 3] - m2[1, 3]
+    result[2, 0] = m1[2, 0] - m2[2, 0]
+    result[2, 1] = m1[2, 1] - m2[2, 1]
+    result[2, 2] = m1[2, 2] - m2[2, 2]
+    result[2, 3] = m1[2, 3] - m2[2, 3]
+    result[3, 0] = m1[3, 0] - m2[3, 0]
+    result[3, 1] = m1[3, 1] - m2[3, 1]
+    result[3, 2] = m1[3, 2] - m2[3, 2]
+    result[3, 3] = m1[3, 3] - m2[3, 3]
+func `+`*(m: Mat4, f: float32): Mat4 = 
+    result[0, 0] = m[0, 0] + f
+    result[0, 1] = m[0, 1] + f
+    result[0, 2] = m[0, 2] + f
+    result[0, 3] = m[0, 3] + f
+    result[1, 0] = m[1, 0] + f
+    result[1, 1] = m[1, 1] + f
+    result[1, 2] = m[1, 2] + f
+    result[1, 3] = m[1, 3] + f
+    result[2, 0] = m[2, 0] + f
+    result[2, 1] = m[2, 1] + f
+    result[2, 2] = m[2, 2] + f
+    result[2, 3] = m[2, 3] + f
+    result[3, 0] = m[3, 0] + f
+    result[3, 1] = m[3, 1] + f
+    result[3, 2] = m[3, 2] + f
+    result[3, 3] = m[3, 3] + f
+func `*`*(m: Mat4, f: float32): Mat4 = 
+    result[0, 0] = m[0, 0] * f
+    result[0, 1] = m[0, 1] * f
+    result[0, 2] = m[0, 2] * f
+    result[0, 3] = m[0, 3] * f
+    result[1, 0] = m[1, 0] * f
+    result[1, 1] = m[1, 1] * f
+    result[1, 2] = m[1, 2] * f
+    result[1, 3] = m[1, 3] * f
+    result[2, 0] = m[2, 0] * f
+    result[2, 1] = m[2, 1] * f
+    result[2, 2] = m[2, 2] * f
+    result[2, 3] = m[2, 3] * f
+    result[3, 0] = m[3, 0] * f
+    result[3, 1] = m[3, 1] * f
+    result[3, 2] = m[3, 2] * f
+    result[3, 3] = m[3, 3] * f
+func `/`*(m: Mat4, f: float32): Mat4 = 
+    result[0, 0] = m[0, 0] / f
+    result[0, 1] = m[0, 1] / f
+    result[0, 2] = m[0, 2] / f
+    result[0, 3] = m[0, 3] / f
+    result[1, 0] = m[1, 0] / f
+    result[1, 1] = m[1, 1] / f
+    result[1, 2] = m[1, 2] / f
+    result[1, 3] = m[1, 3] / f
+    result[2, 0] = m[2, 0] / f
+    result[2, 1] = m[2, 1] / f
+    result[2, 2] = m[2, 2] / f
+    result[2, 3] = m[2, 3] / f
+    result[3, 0] = m[3, 0] / f
+    result[3, 1] = m[3, 1] / f
+    result[3, 2] = m[3, 2] / f
+    result[3, 3] = m[3, 3] / f
+func `-`*(m: Mat4, f: float32): Mat4 = 
+    result[0, 0] = m[0, 0] - f
+    result[0, 1] = m[0, 1] - f
+    result[0, 2] = m[0, 2] - f
+    result[0, 3] = m[0, 3] - f
+    result[1, 0] = m[1, 0] - f
+    result[1, 1] = m[1, 1] - f
+    result[1, 2] = m[1, 2] - f
+    result[1, 3] = m[1, 3] - f
+    result[2, 0] = m[2, 0] - f
+    result[2, 1] = m[2, 1] - f
+    result[2, 2] = m[2, 2] - f
+    result[2, 3] = m[2, 3] - f
+    result[3, 0] = m[3, 0] - f
+    result[3, 1] = m[3, 1] - f
+    result[3, 2] = m[3, 2] - f
+    result[3, 3] = m[3, 3] - f
+func `+`*(f: float32, m: Mat4): Mat4 = m + f
 func caddr*(m: var Mat4): ptr float32 = cast[ptr float32](m.addr)
 func scale*(b: Mat4): Vec3 = 
   let
@@ -135,14 +234,7 @@ func identity*(): Mat4 =
   result[3, 3] = 1 
 
 # Quat
-func quat*(p: ptr float32, offset: int=0): Quat =
-    let 
-        address = cast[ByteAddress](p)
-        x = cast[ptr float32](address + offset * sizeof(float32))
-        y = cast[ptr float32](address + (offset + 1) * sizeof(float32))
-        z = cast[ptr float32](address + (offset + 2) * sizeof(float32))
-        w = cast[ptr float32](address + (offset + 3) * sizeof(float32))
-    result = quat(x[], y[], z[], w[]) 
+func quat*(v: openArray[float32], offset: int): Quat = quat(v[offset], v[offset + 1], v[offset + 2], v[offset + 3])
 
 func `*`*(q, p: Quat): Quat =
     result.x =   p.x * q.w  + p.y * q.z - p.z * q.y + p.w * q.x
@@ -272,11 +364,100 @@ func step*(edge, x: float32): float32 =
     else:
         1.0
 
-func smoothstep*(edge0, edge1, x: float32): float32 =
-    if x < edge0:
-        result = 0.0
-    elif x > edge1:
-        result = 1.0
-    else:
-        var t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0)
-        result = t * t * (3.0 - 2.0 * t)
+# For shaders
+proc `-`*(f: float32, v: Vec2): Vec2 = vec2(f - v.x, f - v.y)
+proc `-`*(f: float32, v: Vec3): Vec3 = vec3(f - v.x, f - v.y, f - v.z)
+proc `-`*(f: float32, v: Vec4): Vec4 = vec4(f - v.x, f - v.y, f - v.z, f - v.w)
+proc `-`*(v: Vec2, f: float32): Vec2 = vec2(v.x - f, v.y - f)
+proc `-`*(v: Vec3, f: float32): Vec3 = vec3(v.x - f, v.y - f, v.z - f)
+proc `-`*(v: Vec4, f: float32): Vec4 = vec4(v.x - f, v.y - f, v.z - f, v.w - f)
+proc `+`*(f: float32, v: Vec2): Vec2 = vec2(f + v.x, f + v.y)
+proc `+`*(f: float32, v: Vec3): Vec3 = vec3(f + v.x, f + v.y, f + v.z)
+proc `+`*(f: float32, v: Vec4): Vec4 = vec4(f + v.x, f + v.y, f + v.z, f + v.w)
+proc `+`*(v: Vec2, f: float32): Vec2 = vec2(v.x + f, v.y + f)
+proc `+`*(v: Vec3, f: float32): Vec3 = vec3(v.x + f, v.y + f, v.z + f)
+proc `+`*(v: Vec4, f: float32): Vec4 = vec4(v.x + f, v.y + f, v.z + f, v.w + f)
+proc `/`*(f: float32, v: Vec2): Vec2 = vec2(f / v.x, f / v.y)
+proc `/`*(f: float32, v: Vec3): Vec3 = vec3(f / v.x, f / v.y, f / v.z)
+proc `/`*(f: float32, v: Vec4): Vec4 = vec4(f / v.x, f / v.y, f / v.z, f / v.w)
+proc `/`*(v: Vec2, f: float32): Vec2 = vec2(v.x / f, v.y / f)
+proc `/`*(v: Vec3, f: float32): Vec3 = vec3(v.x / f, v.y / f, v.z / f)
+proc `/`*(v: Vec4, f: float32): Vec4 = vec4(v.x / f, v.y / f, v.z / f, v.w / f)
+proc `*`*(f: float32, v: Vec2): Vec2 = vec2(f * v.x, f * v.y)
+proc `*`*(f: float32, v: Vec3): Vec3 = vec3(f * v.x, f * v.y, f * v.z)
+proc `*`*(f: float32, v: Vec4): Vec4 = vec4(f * v.x, f * v.y, f * v.z, f * v.w)
+proc clamp*(v, mi, mx: Vec2): Vec2 = min(max(v, mi), mx)
+proc clamp*(v, mi, mx: Vec3): Vec3 = min(max(v, mi), mx)
+proc clamp*(v, mi, mx: Vec4): Vec4 = min(max(v, mi), mx)
+proc smoothstep*(edge0, edge1, x: float32): float32 =
+  let t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0)
+  result = t * t * (3 - 2 * t)
+proc smoothstep*(edge0, edge1, x: Vec2): Vec2 = 
+  let t = clamp((x - edge0) / (edge1 - edge0), vec2(0.0), vec2(1.0))
+  result = t * t * (3.0 - 2.0 * t)
+proc refract*(i, n: Vec2; eta: float32): Vec2 =
+  # For a given incident vector ``i``, surface normal ``n`` and ratio of indices of refraction, ``eta``, refract returns the refraction vector.
+  let k = 1 - eta * eta * (1 - dot(n, i) * dot(n, i))
+  if k >= 0.0:
+    result = eta * i - (eta * dot(n, i) + sqrt(k)) * n
+proc refract*(i, n: Vec3; eta: float32): Vec3 =
+  # For a given incident vector ``i``, surface normal ``n`` and ratio of indices of refraction, ``eta``, refract returns the refraction vector.
+  let k = 1 - eta * eta * (1 - dot(n, i) * dot(n, i))
+  if k >= 0.0:
+    result = eta * i - (eta * dot(n, i) + sqrt(k)) * n
+proc refract*(i, n: Vec4; eta: float32): Vec4 =
+  # For a given incident vector ``i``, surface normal ``n`` and ratio of indices of refraction, ``eta``, refract returns the refraction vector.
+  let k = 1 - eta * eta * (1 - dot(n, i) * dot(n, i))
+  if k >= 0.0:
+    result = eta * i - (eta * dot(n, i) + sqrt(k)) * n
+proc reflect*(a, b: Vec2): Vec2 = a - 2 * dot(a, b) * b
+proc reflect*(a, b: Vec3): Vec3 = a - 2 * dot(a, b) * b
+proc reflect*(a, b: Vec4): Vec4 = a - 2 * dot(a, b) * b
+proc min*(v: Vec2, f: float32): Vec2 = vec2(min(v.x, f), min(v.y, f))
+proc min*(v: Vec3, f: float32): Vec3 = vec3(min(v.x, f), min(v.y, f), min(v.z, f))
+proc min*(v: Vec4, f: float32): Vec4 = vec4(min(v.x, f), min(v.y, f), min(v.z, f), min(v.w, f))
+proc max*(v: Vec2, f: float32): Vec2 = vec2(max(v.x, f), max(v.y, f))
+proc max*(v: Vec3, f: float32): Vec3 = vec3(max(v.x, f), max(v.y, f), max(v.z, f))
+proc max*(v: Vec4, f: float32): Vec4 = vec4(max(v.x, f), max(v.y, f), max(v.z, f), max(v.w, f))
+proc inversesqrt*(x: float32): float32 {.inline, noinit.} = 1 / sqrt(x)
+proc inversesqrt*(x: Vec2): Vec2 = vec2(inversesqrt(x.x), inversesqrt(x.y))
+proc inversesqrt*(x: Vec3): Vec3 = vec3(inversesqrt(x.x), inversesqrt(x.y), inversesqrt(x.z))
+proc inversesqrt*(x: Vec4): Vec4 = vec4(inversesqrt(x.x), inversesqrt(x.y), inversesqrt(x.z), inversesqrt(x.w))
+proc atan*(a, b: float32): float32 = arctan2(a, b)
+proc acos*(a: float32): float32 = arccos(a)
+proc fract*(v: float32): float32 = v - floor(v)
+proc fract*(v: Vec2): Vec2 = vec2(fract(v.x), fract(v.y))
+proc fract*(v: Vec3): Vec3 = vec3(fract(v.x), fract(v.y), fract(v.z))
+proc fract*(v: Vec4): Vec4 = vec4(fract(v.x), fract(v.y), fract(v.z), fract(v.w))
+proc log*(a: float32): float32 = log(a, E)
+proc pow*(a, b: Vec2): Vec2 = vec2(pow(a.x, b.x), pow(a.y, b.y))
+proc pow*(a, b: Vec3): Vec3 = vec3(pow(a.x, b.x), pow(a.y, b.y), pow(a.z, b.z))
+proc pow*(a, b: Vec4): Vec4 = vec4(pow(a.x, b.x), pow(a.y, b.y), pow(a.z, b.z), pow(a.w, b.w))
+proc distance*(a, b: Vec3): float32 = length(b - a)
+proc distance*(a, b: Vec2): float32 = length(b - a)
+proc distance*(a, b: Vec4): float32 = length(b - a)
+
+func `*=`*(v: var Vec2, f: float32) = 
+    v.x *= f
+    v.y *= f
+func `*=`*(v: var Vec3, f: float32) = 
+    v.x *= f
+    v.y *= f
+    v.z *= f
+func `*=`*(v: var Vec4, f: float32) = 
+    v.x *= f
+    v.y *= f
+    v.z *= f
+    v.w *= f
+func `*=`*(v: var Vec2, f: Vec2) =
+    v.x *= f.x
+    v.y *= f.y
+func `*=`*(v: var Vec3, f: Vec3) =
+    v.x *= f.x
+    v.y *= f.y
+    v.z *= f.z
+func `*=`*(v: var Vec4, f: Vec4) =
+    v.x *= f.x
+    v.y *= f.y
+    v.z *= f.z
+    v.w *= f.w

@@ -100,5 +100,5 @@ proc addCameraController*(e: Entity, distance= 10.0, theta=PI/4.0, phi=PI/4.0) =
     controller.speed = 10
     controller.theta = theta
     controller.phi = phi
-    addComponent(e, controller)
-    addComponent(e, newScriptComponent(handleCameraControler))
+    add(e, controller)
+    add(e, newScriptComponent(handleCameraControler))

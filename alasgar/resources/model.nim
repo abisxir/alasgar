@@ -137,7 +137,7 @@ proc toEntity*(r: Resource, scene: Scene, castShadow=false, rootName=""): Entity
         # Sets node clips
         if hasAnimationClip(mr, node.name):
             for clipName in mr.clips[node.name]:
-                addComponent(e, clips[clipName])
+                add(e, clips[clipName])
 
         # Sets node clips
         if hasAnimationChannel(mr, node.name):
@@ -152,13 +152,13 @@ proc toEntity*(r: Resource, scene: Scene, castShadow=false, rootName=""): Entity
                 echo &"Error: could not find mesh[{node.mesh}]."
             else:
                 let mesh = getMesh(mr, node.mesh)
-                addComponent(e, newMeshComponent(mesh)) 
+                add(e, newMeshComponent(mesh)) 
                 echo &"Mesh [{node.mesh}] attached to entity [{e.name}]."
 
                 # Sets nod skin
                 if hasSkin(mr, node.name):
                     skins[node.name] = newSkinComponent()
-                    addComponent(e, skins[node.name])
+                    add(e, skins[node.name])
 
                 if isEmptyOrWhitespace(node.material):
                     echo &"Mesh[{node.mesh}] has no material."
@@ -168,14 +168,14 @@ proc toEntity*(r: Resource, scene: Scene, castShadow=false, rootName=""): Entity
                     let material = getMaterial(mr, node.material)
                     if castShadow:
                         material.castShadow = true
-                    addComponent(e, clone(material))
+                    add(e, clone(material))
 
     # Handles joints
     for (nodeName, skinName, inverseMatrix) in mr.joints:
         let 
             entity = nameToEntities[nodeName]
             skin = skins[skinName]
-        addComponent(entity, newJointComponent(skin, inverseMatrix))
+        add(entity, newJointComponent(skin, inverseMatrix))
 
     proc findNode(name: string): Entity =
         for e in entities:
@@ -187,7 +187,7 @@ proc toEntity*(r: Resource, scene: Scene, castShadow=false, rootName=""): Entity
         let c = findNode(child)
         let p = findNode(parent)
         if not isNil(p):
-            addChild(p, c)
+            add(p, c)
         else:
             echo &"Error: could not find parent node [{parent}] for [{child}]."
 
@@ -204,12 +204,12 @@ proc toEntity*(r: Resource, scene: Scene, castShadow=false, rootName=""): Entity
     else:
         result = newEntity(scene, "Model")
         for c in results:
-            addChild(result, c)
+            add(result, c)
     
     if not isEmptyOrWhitespace(rootName):
         result.name = rootName
 
     if len(mr.clips) > 0:
-        addComponent(result, animator)
+        add(result, animator)
 
 

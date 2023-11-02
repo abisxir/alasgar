@@ -20,9 +20,6 @@
 
 ## Multi-channel audio mixer library.
 
-{.deadCodeElim: on.}
-# Dynamically link to the correct library for our system:
-
 when not defined(SDL_Static):
   when defined(windows):
     const LibName* = "SDL2_mixer.dll"

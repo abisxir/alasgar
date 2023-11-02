@@ -22,7 +22,7 @@ proc newTimerComponent*(timeout: float32, handler: TimerProc, autoStart=true): T
         lastTicks: 0.0,
         count: 0
     )
-proc timer*(e: Entity, timeout: float32, handler: TimerProc, autoStart=true) =  e.addComponent(newTimerComponent(timeout, handler, autoStart))
+proc timer*(e: Entity, timeout: float32, handler: TimerProc, autoStart=true) =  e.add(newTimerComponent(timeout, handler, autoStart))
 proc start*(timer: TimerComponent) = timer.inactive = false
 proc stop*(timer: TimerComponent) = timer.inactive = true
 proc `callCount`*(timer: TimerComponent): int = timer.count

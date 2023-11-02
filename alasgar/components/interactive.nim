@@ -10,7 +10,7 @@ import camera
 type
     InteractionHandleProc* = proc(component: InteractiveComponent, collision: Collision)
     OutHandleProc* = proc(component: InteractiveComponent)
-
+    
     InteractiveComponent* = ref object of Component
         hover*: bool
         pressed*: bool
@@ -66,6 +66,18 @@ proc handleMouseRelease*(ic: InteractiveComponent, collision: Collision) =
     if ic.onRelease != nil:
         ic.onRelease(ic, collision)
 
+proc `interactiveComponent`(e: Entity): InteractiveComponent =
+    result = e[InteractiveComponent]
+    if isNil(result):
+        result = newInteractiveComponent()
+        add(e, result)
+
+proc `onHover=`*(e: Entity, f: InteractionHandleProc) = e.interactiveComponent.onHover = f
+proc `onOut=`*(e: Entity, f: OutHandleProc) = e.interactiveComponent.onOut = f
+proc `onMotion=`*(e: Entity, f: InteractionHandleProc) = e.interactiveComponent.onMotion = f
+proc `onPress=`*(e: Entity, f: InteractionHandleProc) = e.interactiveComponent.onPress = f
+proc `onRelease=`*(e: Entity, f: InteractionHandleProc) = e.interactiveComponent.onRelease = f
+
 # System implementation
 func newInteractiveSystem*(): InteractiveSystem =
     new(result)
@@ -94,7 +106,7 @@ method process*(sys: InteractiveSystem, scene: Scene, input: Input, delta: float
         ic.input = input
         # Checks that entity is visible
         if ic.entity.visible:
-            var cc = getComponent[CollisionComponent](ic)
+            var cc = ic[CollisionComponent]
             if cc != nil:
                 var collision = intersects(cc, ray)
                 if collision != nil:

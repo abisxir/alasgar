@@ -171,29 +171,6 @@ proc renderToFrameBuffer(view, projection: Mat4, cubemap: Texture, drawables: va
 
 
 proc render*(view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
-    for shader in graphics.context.shaders:
-        use(shader)
-        if hasUniform(shader, "SKIN_MAP"):
-            shader["SKIN_MAP"] = 0
-        if hasUniform(shader, "ALBEDO_MAP"):
-            shader["ALBEDO_MAP"] = 1
-        if hasUniform(shader, "NORMAL_MAP"):
-            shader["NORMAL_MAP"] = 2
-        if hasUniform(shader, "METALLIC_MAP"):
-            shader["METALLIC_MAP"] = 3
-        if hasUniform(shader, "ROUGHNESS_MAP"):
-            shader["ROUGHNESS_MAP"] = 4
-        if hasUniform(shader, "AO_MAP"):
-            shader["AO_MAP"] = 5
-        if hasUniform(shader, "EMISSIVE_MAP"):
-            shader["EMISSIVE_MAP"] = 6
-        if hasUniform(shader, "SKYBOX_MAP"):
-            shader["SKYBOX_MAP"] = 7
-        if hasUniform(shader, "DEPTH_MAPS"):
-            shader["DEPTH_MAPS"] = 8
-        if hasUniform(shader, "DEPTH_CUBE_MAPS"):
-            shader["DEPTH_CUBE_MAPS"] = 9
-        
     # If there is shadow casters processes them
     if len(graphics.context.shadowCasters) > 0:
         process(graphics.shadow, graphics.context, drawables)
