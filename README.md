@@ -38,17 +38,12 @@ Table of Contents
 * [First mesh](#first-mesh)  
 * [Point light](#point-light)
 * [Scripts](#scripts)
-* [Rotation and transform](#rotation)
 * [Material](#material)
 * [Texture](#texture)
 * [More lights](#more-lights)
 * [Access components](#access-components)
 * [Interactive objects](#interactive-objects)
 * [Effects](#effects)
-* [Physcally Based Rendering](#pbr)
-* [Shadows](#shadows)
-* [Custom effects](#custom-effects)
-* [Shaders](#shaders)
 * [Dependencies](#deps)
 
 Window and scene creation
@@ -230,7 +225,9 @@ cubeEntity.material.diffuseColor = parseHtmlName("Tomato")
 ...
 ```
 ![](https://abisxir.github.io/alasgar/step5/demo.png)
+
 Material component contains the following properties:
+
 ```nim
 type 
     MaterialComponent = ref object of Component
@@ -287,6 +284,7 @@ cubeEntity.material.albedoMap = newTexture("res://brickwall-albedo.jpg")
 ...
 ```
 ![](https://abisxir.github.io/alasgar/step6/demo.png)
+
 If you run the sample, you will see a [textured](https://abisxir.github.io/alasgar/step6/build) cube which is not that much ugly this time but still there are a lot to improve.
 
 The texture used here, grabbed from: https://publicdomaintextures.com/elementor-112/tiles08
@@ -354,6 +352,7 @@ program(lightEntity, proc(script: ScriptComponent) =
 ...
 ```
 ![](https://abisxir.github.io/alasgar/step7/demo.png)
+
 If you [execute](https://abisxir.github.io/alasgar/step7/build) the last example, you will notice that the color is changing.
 
 
@@ -401,7 +400,9 @@ cubeEntity.onOut = proc(ic: InteractiveComponent)=
 addBoundingSphere(cubeEntity)
 ...
 ```
+
 ![](https://abisxir.github.io/alasgar/step8/demo.png)
+
 That is all, as you [see](https://abisxir.github.io/alasgar/step8/build), we have two functions to handle mouse's in and out events. To make interactive components working, you need to add a collision component. Alsgar supports just two types, AABB and sphere. Here we used helper functions to code less but like everywhere else you can add components using the core functions to have more control over it.
 ```nim
 ## Instantiate a collision component with bounding sphere using radius
@@ -463,7 +464,9 @@ from snow import snowEffect
 addEffect(cameraEntity[CameraComponent], "snowEffect", newCanvasShader(snowEffect))
 ...
 ```
-![](https://abisxir.github.io/alasgar/step7/demo.png)
+
+![](https://abisxir.github.io/alasgar/step9/demo.png)
+
 That was all you need to do, if you [run](https://abisxir.github.io/alasgar/step9/build) the code you will see our beautiful snow. As you see in function signature, there are some unused variables:
 
 ```nim
@@ -551,374 +554,16 @@ This is the current implementation, depends on shader requirements you can chang
 ```nim
 addEffect(cameraEntity[CameraComponent], "myEffect", newCanvasShader(vertex, fragment))
 ```
-
-Shadows
-=======
-
-For now, shadows are just implemented for SpotPointLight components, also it is limited to just one light.
-Let us setup our scene in a way that we can observe shadows, after setup window, scene and setting up our camera, we create a big platform:
-
-```nim
-...
-
-# Creates platform entity, by default position is (0, 0, 0)
-var platformEntity = newEntity(scene, "Platform")
-# Set scale to 20
-platformEntity.transform.scale = vec3(20)
-platformEntity.transform.euler = vec3(0, 0, -PI / 2)
-# Add a cube mesh component to entity
-addComponent(platformEntity, newPlaneMesh(1, 1))
-# Adds a material to cube
-addComponent(
-    platformEntity, 
-    newMaterialComponent(
-        diffuseColor=parseHtmlName("grey"),
-    )
-)
-# Makes the cube enity child of scene
-addChild(scene, platformEntity)
-
-...
-```
-
-As you see we created a plane mesh and scaled it to 20, and we rotated it as we want to see it from top. Then we make a simple function to add cubes, we need two cubes so this is our function:
-
-```nim
-...
-
-proc createCube(name: string, position: Vec3) =
-    # Creates cube entity
-    var cubeEntity = newEntity(scene, name)
-    # Positions cube to (0, 2, 0)
-    cubeEntity.transform.position = position
-    # Add a cube mesh component to entity
-    addComponent(cubeEntity, newCubeMesh())
-    # Adds a script component to cube entity
-    addComponent(cubeEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
-        # We can rotate an object using euler also we can directly set rotation property that is a quaternion.
-        script.transform.euler = vec3(
-            runtime.engine.age * 0.1, 
-            runtime.engine.age * 0.3, 
-            runtime.engine.age * 0.2,
-        )
-    ))
-    # Adds a material to cube and specifies that the cube casts shadow.
-    addComponent(
-        cubeEntity, 
-        newMaterialComponent(
-            diffuseColor=parseHtmlName("grey"),
-            castShadow=true,                    # Here we specify that this object casts shadow, default is false
-        )
-    )
-    # Makes the cube enity child of scene
-    addChild(scene, cubeEntity)
-
-
-createCube("Cube1", vec3(1, 4, 0))
-createCube("Cube2", vec3(-4, 2, 0))
-
-...
-```
-
-As you see, we created two cubes in different positions. The important part is that we need to define in object material that it casts shadow.
-Now we create a spot light component and we need to enable shadow for this light source:
-
-```nim
-...
-
-# Creats spot point light entity
-var spotLightEntity = newEntity(scene, "SpotLight")
-# Sets position to (-6, 6, 6)
-spotLightEntity.transform.position = vec3(12, 12, 0)
-# Adds a spot point light component
-addComponent(spotLightEntity, newSpotPointLightComponent(
-    vec3(0) - spotLightEntity.transform.position, # Light direction
-    color=parseHtmlName("LemonChiffon"),          # Light color
-    shadow=true,                                  # Enables shadow
-    innerCutoff=30,                               # Inner circle of light
-    outerCutoff=90                                # Outer circle of light
-    )
-)
-# Makes the new light child of the scene
-addChild(scene, spotLightEntity)
-
-...
-```
-
-![](docs/files/shadow.gif)
-
-
-That is all, if you run shadow sample you will see the effects. I hope you also notice the artifacts, light bleeding and so on, I like them :)
-Here I used variance shadow map, but this part needs many improvements specially batching is not enabled for shadow casting objects so the performance is not going to be satisfying. There are going to be many improvements in near future.
-
-See shadow sample [here](examples/shadow.nim).
-
-Effects
-=======
-
-There are some effects already developed to use in alasgar:
+There are also some predefined effects that you can use them:
  - FXAA
+ - BLOOM
  - SSAO
- - HBAO
- - Bloom
 
-To use them we need to import and add it to camera as a post processing effect:
-
-```nim
-...
-import alasgar/private/effects/fxaa
-
-...
-# Creates camera entity
-var 
-    cameraEntity = newEntity(scene, "Camera")
-
-# Sets camera position
-cameraEntity.transform.position = vec3(-5, 4, -5)
-
-# Creates a camera component to later add it to camera entity
-let 
-    camera = newPerspectiveCamera(
-        75, 
-        runtime.ratio, 
-        0.1, 
-        100.0, 
-        vec3(0) - cameraEntity.transform.position
-    )
-
-# Adds fxaa effect
-addEffect(camera, "FXAA", newFXAAEffect())
-
-# Adds a perspective camera component to entity
-addComponent(
-    cameraEntity, 
-    camera,
-)
-
-# Makes the camera entity child of scene
-addChild(scene, cameraEntity)
-
-...
-```
-
-This effects come with some parameters to adjust the result. Also you can write custom effects if you like. There are some functions to manipulate effects:
+There are some functions to manipulate effects:
  - removeEffect(c: CamereEntity, name: string)
  - disableEffect(c: CamereEntity, name: string)
  - enableEffect(c: CamereEntity, name: string)
  - getEffect(c: CamereEntity, name: string): Shader
-
-# Custom effects
-Adding post processing effect or custom effect is as easy as writing a glsl function. Predefined effects like bloom or FXAA are also custom effect that just provided to make it accessable for most of the use-cases. So what we need is a camera:
-
-```nim
-...
-import alasgar/private/effects/fxaa
-
-...
-# Creates camera entity
-var 
-    cameraEntity = newEntity(scene, "Camera")
-
-# Sets camera position
-cameraEntity.transform.position = vec3(-5, 4, -5)
-
-# Creates a camera component to later add it to camera entity
-let 
-    camera = newPerspectiveCamera(
-        75, 
-        runtime.ratio, 
-        0.1, 
-        100.0, 
-        vec3(0) - cameraEntity.transform.position
-    )
-
-# Adds custom effect
-addEffect(camera, "MY-EFFECT", """
-void fragment() {
-    COLOR.r = 1.0;
-}
-""")
-
-# Adds a perspective camera component to entity
-addComponent(
-    cameraEntity, 
-    camera,
-)
-
-# Makes the camera entity child of scene
-addChild(scene, cameraEntity)
-
-...
-```
-
-As you see we just set the red channel to 1.0, you can run and see how it works. Unfortunately alasgar is not mature to provide a compiling feature on adding effects, so you will get error if your function has any error. But there some good libraries for nim, like shady. Maybe someday it is integerated into alasgar. Back to the main topic, there are some variables provided here:
-
- - vec2 UV: readonly
- - vec4 COLOR: read/write
- - frame: readonly
- - camera: readonly
-
-Frame definition:
-
-struct {
-  vec3 resolution;
-  float time;
-  float time_delta;
-  float frame;
-  vec4 mouse;
-  vec4 date;
-}
-
-Camera definition:
-
-struct {
-  vec3 position;
-  mat4 view;
-  mat4 view_inversed;
-  mat4 projection;
-  mat4 projection_inversed;
-  float exposure;
-  float gamma;
-  float near;
-  float far;
-}
-
-There are also some function available like:
-
- - vec4 get_color(vec2)
- - vec3 get_normal(vec2)
- - vec3 get_position(vec2)
- - float snoise(vec2)
-
-The post-processing effect is a simple shader, so you can define your functions, variable and uniforms. Let us try to pass a uniform variable:
-
-```nim
-...
-# Adds custom effect
-addEffect(camera, "MY-EFFECT", """
-
-uniform vec3 u_add; 
-
-void fragment() {
-    COLOR.rgb += u_add;
-}
-""")
-
-# Adds a perspective camera component to entity
-addComponent(
-    cameraEntity, 
-    camera,
-)
-# Adds a script component to control camera effect
-addComponent(cameraEntity, newScriptComponent(proc(script: ScriptComponent, input: Input, delta: float32) =
-    # Access to camera component and get our effect.
-    let effect = getEffect(script[CameraEntity], "MY-EFFECT")
-    # Shader will keep this value and before render will pass it to gpu.
-    set(effect, "u_add", delta * vec3(0.9, 0.7, 0.5))
-))
-
-# Makes the camera entity child of scene
-addChild(scene, cameraEntity)
-
-...
-```
-
-Predefined textures are limited to 4 channels:
-
- - channel0
- - channel1
- - channel2
- - channel3
-
-They are exactly like uniform values but predefined so to set it we will need a texture:
-
-```nim
-...
-# Adds custom effect
-addEffect(camera, "MY-EFFECT", """
-void fragment() {
-    COLOR.rgb *= texture(channel0, UV);
-}
-""")
-
-# Create a texture
-let texture = newTexture("res://stone-texture.png")
-# Gets effect instance that is a shader
-let effect = getEffect(camera, "MY-EFFECT")
-# Attachs the texture to channel0
-set(effect, "channel0", texture, 0)
-
-# Adds a perspective camera component to entity
-addComponent(
-    cameraEntity, 
-    camera,
-)
-
-# Makes the camera entity child of scene
-addChild(scene, cameraEntity)
-
-...
-```
-
-If you like a different sampler like cube or you need extra samples you can still define them but you should start binding them from slot 8:
-
-```nim
-...
-# Adds custom effect
-addEffect(camera, "MY-EFFECT", """
-
-layout(binding = 8) uniform sampler2D my_channel;
-
-void fragment() {
-    ...
-}
-""")
-
-# Create a texture
-let texture = newTexture("res://stone-texture.png")
-# Gets effect instance that is a shader
-let effect = getEffect(camera, "MY-EFFECT")
-# Attachs the texture to my_channel at slot 8
-set(effect, "my_channel", texture, 8)
-
-```
-
-Shaders
-=======
-It is easy to define to customize the way that one mesh renders. However it needs to be used just in case that the default shader cannot do it. As each shader has it's own parameters and switching between shader when rendering will come with big performance cost when there a lot of meshes with custom shader.
-Adding a fragment shader to a mesh is possible using ShaderComponent:
-
-```nim
-...
-
-# Creates cube entity, by default position is 0, 0, 0
-var cubeEntity = newEntity(scene, "Cube")
-# Set scale to 2
-cubeEntity.transform.scale = vec3(2)
-# Add a cube mesh component to entity
-addComponent(cubeEntity, newCubeMesh())
-# Adds a material to cube
-addComponent(cubeEntity, 
-    newMaterialComponent(
-        diffuseColor=parseHtmlName("green")
-    )
-)
-# Adds a shader component
-addComponent(
-    cubeEntity, 
-    newFragmentShaderComponent("""
-    void fragment() {
-        COLOR.g = 0.0;
-    }
-""")
-)
-# Makes the cube enity child of scene
-addChild(scene, cubeEntity)
-
-...
-```
-
-As you see, we deleted the green channel from color.
 
 Dependencies
 ============
