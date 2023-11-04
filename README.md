@@ -44,6 +44,7 @@ Table of Contents
 * [Access components](#access-components)
 * [Interactive objects](#interactive-objects)
 * [Effects](#effects)
+* [Shadows](#shadows)
 * [Dependencies](#deps)
 
 Window and scene creation
@@ -220,7 +221,7 @@ I used the chroma library to manipulate colors, it is a great library, [here](ht
 # Adds a material if it is not already added and sets the diffuse color
 cubeEntity.material.diffuseColor = parseHtmlName("Tomato") 
 # Also is possible to directly instantiate a component and add it to the cube
-# In the case that you like to write more code :)
+# In the case that you prefer to write more code :)
 # addComponent(cubeEntity, newMaterialComponent(diffuseColor=parseHtmlName("Tomato")))
 ...
 ```
@@ -555,15 +556,41 @@ This is the current implementation, depends on shader requirements you can chang
 addEffect(cameraEntity[CameraComponent], "myEffect", newCanvasShader(vertex, fragment))
 ```
 There are also some predefined effects that you can use them:
+```nim
+# Creates bloom effect shader
+proc newBloomEffect*(): Shader
+# Creates FXAA effect shader 
+proc newFxaaEffect*(spanMax=8'f32, 
+                    reduceMul=1'f32 / 8'f32, 
+                    reduceMin=1'f32 / 128'f32, 
+                    split=0'f32): Shader
+# Creates SSAO effect shader
+proc newSSAOEffect*(samples=32'i32, 
+                    sampleRadius=0.02'f32, 
+                    intensity=1.0'f32, 
+                    scale=2.5'f32, 
+                    bias=0.05'f32, 
+                    maxDistance=0.07'f32, 
+                    noiseTexture: Texture)
+```
  - FXAA
  - BLOOM
  - SSAO
 
 There are some functions to manipulate effects:
- - removeEffect(c: CamereEntity, name: string)
- - disableEffect(c: CamereEntity, name: string)
- - enableEffect(c: CamereEntity, name: string)
- - getEffect(c: CamereEntity, name: string): Shader
+```nim
+proc addEffect*(camera: CameraComponent, name: string, shader: Shader)
+proc getEffect*(camera: CameraComponent, name: string): Shader
+proc hasEffect*(camera: CameraComponent, name: string): bool
+proc disableEffect*(camera: CameraComponent, name: string)
+proc enableEffect*(camera: CameraComponent, name: string)
+proc removeEffect*(camera: CameraComponent, name: string) = 
+```
+
+
+Shadows
+=======
+
 
 Dependencies
 ============

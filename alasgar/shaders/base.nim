@@ -15,16 +15,16 @@ type
         svUint, svInt, svFloat, svVec2, svVec3, svVec4, svColor, svMat3, svMat4, svTexture
     # ShaderValue should be a union, but there is a bug in the compiler
     ShaderValue = object
+        mat4Val: Mat4
+        mat3Val: Mat3
+        colorVal: Color
+        vec4Val: Vec4
+        vec3Val: Vec3
+        vec2Val: Vec2
+        textureVal: Texture
         uintVal: uint32
         intVal: int32
         floatVal: float32
-        vec2Val: Vec2
-        vec3Val: Vec3
-        vec4Val: Vec4
-        colorVal: Color
-        mat3Val: Mat3
-        mat4Val: Mat4
-        textureVal: Texture
     ShaderParam = object
         kind: ShaderValueKind
         value: ShaderValue

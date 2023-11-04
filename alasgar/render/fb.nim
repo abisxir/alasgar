@@ -18,7 +18,7 @@ type
 proc checkFramebuffer() =
     let fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER)
     if fbStatus != GL_FRAMEBUFFER_COMPLETE:
-        quit(&"ERROR::FRAMEBUFFER:: Framebuffer is incomplete, status: 0x{fbStatus.int:0x}")
+        raise newAlasgarError(&"ERROR::FRAMEBUFFER:: Framebuffer is incomplete, status: 0x{fbStatus.int:0x}")
 
 
 proc newRenderBuffer*(size: Vec2): FrameBuffer =

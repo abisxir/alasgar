@@ -47,6 +47,7 @@ proc provideTextures(shadow: Shadow, context: GraphicsContext) =
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL.GLint)
             
             allocate(shadow.textureArray, format=GL_DEPTH_COMPONENT)
+            echo "Shadow texture allocated!!!!!!!"
 
 proc renderDepthMap(drawables: var seq[Drawable]) =
     var i = 0

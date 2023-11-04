@@ -52,19 +52,18 @@ proc bloom(CAMERA: Uniform[Camera],
            NORMAL_CHANNEL: Layout[1, Uniform[Sampler2D]],
            DEPTH_CHANNEL: Layout[2, Uniform[Sampler2D]],
            INTENSITY: Uniform[float],
-           SAMPLE_RADIUS: Uniform[float],
-           SAMPLES: Uniform[int],
            UV: Vec2,
            COLOR: var Vec4) =
-    var color: Vec3 = blur(FRAME, COLOR_CHANNEL, UV, 2.0)
-    color += blur(FRAME, COLOR_CHANNEL, UV, 3.0)
-    color += blur(FRAME, COLOR_CHANNEL, UV, 5.0)
-    color += blur(FRAME, COLOR_CHANNEL, UV, 7.0)
-    color /= 4.0
-    color += samplef(COLOR_CHANNEL, UV)
-    COLOR.rgb = color
+    var 
+        a: Vec3 = blur(FRAME, COLOR_CHANNEL, UV, 2.0)
+        b: Vec3 = blur(FRAME, COLOR_CHANNEL, UV, 3.0)
+        c: Vec3 = blur(FRAME, COLOR_CHANNEL, UV, 5.0)
+        d: Vec3 = blur(FRAME, COLOR_CHANNEL, UV, 7.0)
+        color = (a + b + c + d) / 4.0 + samplef(COLOR_CHANNEL, UV)
+    COLOR.rgb = color * INTENSITY
     COLOR.a = texture(COLOR_CHANNEL, UV).a
 
-proc newBloomEffect*(): Shader = 
+proc newBloomEffect*(intensity: float32=1.0): Shader = 
     result = newCanvasShader(bloom)
+    set(result, "INTENSITY", intensity)
 

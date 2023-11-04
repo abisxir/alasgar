@@ -7,7 +7,7 @@ window("Hello", 640, 360)
    
 # Creates a new scene
 var scene = newScene() 
-scene.background = parseHex("ff00ff")
+#scene.background = parseHex("ff00ff")
 
 # Creates camera entity
 var cameraEntity = newEntity(scene, "Camera")
@@ -26,6 +26,8 @@ add(
 )
 # Makes the camera entity child of the scene
 add(scene, cameraEntity)
+
+cameraEntity[CameraComponent].addEffect("bloom", newBloomEffect())
 
 # Creates cube entity, by default position is 0, 0, 0
 var 
