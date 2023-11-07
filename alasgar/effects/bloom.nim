@@ -1,7 +1,8 @@
 import ../shaders/base
 import ../shaders/common
 
-proc samplef(COLOR_CHANNEL: Sampler2D, UV: Vec2): Vec3 = pow(texture(COLOR_CHANNEL, UV).xyz, vec3(2.2, 2.2, 2.2))
+proc samplef(COLOR_CHANNEL: Sampler2D, UV: Vec2): Vec3 = 
+    pow(texture(COLOR_CHANNEL, UV).xyz, vec3(2.2, 2.2, 2.2))
 
 proc highlights(pixel: Vec3, thres: float): Vec3 =
     let val = (pixel.x + pixel.y + pixel.z) / 3.0
@@ -59,9 +60,10 @@ proc bloom(CAMERA: Uniform[Camera],
         b: Vec3 = blur(FRAME, COLOR_CHANNEL, UV, 3.0)
         c: Vec3 = blur(FRAME, COLOR_CHANNEL, UV, 5.0)
         d: Vec3 = blur(FRAME, COLOR_CHANNEL, UV, 7.0)
-        color = (a + b + c + d) / 4.0 + samplef(COLOR_CHANNEL, UV)
+        base = texture(COLOR_CHANNEL, UV) 
+        color = (a + b + c + d) / 4.0 + pow(base.xyz, vec3(2.2, 2.2, 2.2))
     COLOR.rgb = color * INTENSITY
-    COLOR.a = texture(COLOR_CHANNEL, UV).a
+    COLOR.a = base.a
 
 proc newBloomEffect*(intensity: float32=1.0): Shader = 
     result = newCanvasShader(bloom)

@@ -108,18 +108,21 @@ proc setFaces(t: Texture,
 
 proc allocate*(t: Texture, format=GL_RGBA, dataType=GL_UNSIGNED_BYTE) =
     if t.target in [GL_TEXTURE_2D_ARRAY]:
-        glTexImage3D(
-            t.target, 
-            0, 
-            t.internalFormat.GLint, 
-            t.width.GLsizei, 
-            t.height.GLsizei, 
-            t.layers.GLsizei, 
-            0.GLint, 
-            format, 
-            dataType, 
-            nil
-        )
+        when defined(macosx):
+            glTexImage3D(
+                t.target, 
+                0, 
+                t.internalFormat.GLint, 
+                t.width.GLsizei, 
+                t.height.GLsizei, 
+                t.layers.GLsizei, 
+                0.GLint, 
+                format, 
+                dataType, 
+                nil
+            )
+        else:
+            glTexStorage3D(GL_TEXTURE_2D_ARRAY, t.levels, t.internalFormat, t.width, t.height, t.layers)
     else:
         when defined(macosx):
             glTexImage2D(

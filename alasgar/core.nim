@@ -36,7 +36,7 @@ type
         background*: Color
         ambient*: Color
         fogDensity*: float32
-        fogGradient*: float32
+        minFogDistance*: float32
         environmentMap*: Texture
         environmentIntensity*: float32
         environmentBlurrity*: float32

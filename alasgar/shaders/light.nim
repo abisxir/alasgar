@@ -45,15 +45,14 @@ proc getLight*(LIGHT: Light, FRAGMENT: Fragment, SURFACE: Surface, DEPTH_MAPS: S
         L: Vec3
         NoL: float
         intensity: float
-        shadow: float
         light: Vec3
 
     # Calculates    
     getLightProps(LIGHT, FRAGMENT, L, NoL, intensity)
     
     if intensity > 0.0:
-        shadow = sampleShadow(SURFACE.POSITION, LIGHT.SHADOW_MVP, LIGHT.SHADOW_BIAS, DEPTH_MAPS, LIGHT.DEPTH_MAP_LAYER)
         let
+            shadow = sampleShadow(SURFACE.POSITION, LIGHT.SHADOW_MVP, LIGHT.SHADOW_BIAS, DEPTH_MAPS, LIGHT.DEPTH_MAP_LAYER)
             H: Vec3 = normalize(FRAGMENT.V + L)
             NoH = max(dot(FRAGMENT.N, H), 0.0)
         if isPBR(FRAGMENT):

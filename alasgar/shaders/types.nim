@@ -25,7 +25,7 @@ type
         BACKGROUND_COLOR*: Vec4
         AMBIENT_COLOR*: Vec3
         FOG_DENSITY*: float
-        FOG_GRADIENT*: float
+        MIN_FOG_DISTANCE*: float
         MIP_COUNT*: float
         INTENSITY*: float
         HAS_ENV_MAP*: int

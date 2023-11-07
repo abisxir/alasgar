@@ -1,6 +1,6 @@
 import strformat
-
 import sdl2
+import enums
 
 when defined(windows):
     import gl460
@@ -13,6 +13,8 @@ else:
     export gles300
 
 when declared(glDebugMessageCallback):
+    type
+        OpenGLError = object of Defect
     proc printGlDebug(
         source, typ: GLenum,
         id: GLuint,
@@ -21,8 +23,11 @@ when declared(glDebugMessageCallback):
         message: ptr GLchar,
         userParam: pointer
         ) {.stdcall.} =
-        echo &"source={source.uint32:0x} type={typ.uint32:0x} id={id} severity={severity.uint32:0x}: {$message}"
-
+        let message = &"source=0x{source.uint32:0x} type=0x{typ.uint32:0x} id=0x{id.uint32:0x} severity=0x{severity.uint32:0x}: {$message}"
+        if severity == GL_DEBUG_SEVERITY_HIGH:
+            raise newException(OpenGLError, message)
+        else:
+            echo message
 
 proc logContextInfo() =
     echo "Device and render info:"
@@ -42,11 +47,30 @@ proc logContextInfo() =
     echo &"  Renderer: {renderer}"
     echo &"  Max varying vectors: {maxVaryingVectors}"
 
-const
-    OPENGL_PROFILE* = when defined(macosx) or defined(windows): SDL_GL_CONTEXT_PROFILE_CORE else: SDL_GL_CONTEXT_PROFILE_ES
-    OPENGL_MAJOR_VERSION* = when defined(macosx) or defined(windows): 4 else: 3
-    OPENGL_MINOR_VERSION* = when defined(macosx): 1 elif defined(windows): 6 else: 0
-    OPENGL_SHADER_VERSION* = when defined(macosx): "410" elif defined(windows): "460" else: "300 es"
+when defined(macosx):
+    const
+        OPENGL_PROFILE* = SDL_GL_CONTEXT_PROFILE_CORE
+        OPENGL_MAJOR_VERSION* = 4
+        OPENGL_MINOR_VERSION* = 1 
+        OPENGL_SHADER_VERSION* = "410"
+elif defined(windows):
+    const
+        OPENGL_PROFILE* = SDL_GL_CONTEXT_PROFILE_CORE
+        OPENGL_MAJOR_VERSION* = 4
+        OPENGL_MINOR_VERSION* = 6
+        OPENGL_SHADER_VERSION* = "460"
+elif defined(linux):
+    const
+        OPENGL_PROFILE* = SDL_GL_CONTEXT_PROFILE_ES
+        OPENGL_MAJOR_VERSION* = 3
+        OPENGL_MINOR_VERSION* = 0
+        OPENGL_SHADER_VERSION* = "300 es"        
+else:
+    const
+        OPENGL_PROFILE* = SDL_GL_CONTEXT_PROFILE_ES
+        OPENGL_MAJOR_VERSION* = 3
+        OPENGL_MINOR_VERSION* = 0
+        OPENGL_SHADER_VERSION* = "300 es"
 
 proc createOpenGLContext*(window: WindowPtr): GlContextPtr =
     # Initialize opengl context
@@ -66,11 +90,11 @@ proc createOpenGLContext*(window: WindowPtr): GlContextPtr =
     # Activates opengl context
     discard glMakeCurrent(window, result)
 
-    # Loads opengl es
-    when defined(windows) or defined(macosx):
-        discard gladLoadGL(glGetProcAddress)
-    else:
+    # Loads opengl functions
+    when declared(gladLoadGLES2):
         discard gladLoadGLES2(glGetProcAddress)
+    else:
+        discard gladLoadGL(glGetProcAddress)
 
     # Logs context info
     logContextInfo()
@@ -83,3 +107,11 @@ proc createOpenGLContext*(window: WindowPtr): GlContextPtr =
 
     when declared(GL_TEXTURE_CUBE_MAP_SEAMLESS):
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS)
+
+proc getOpenGLErrorString*(error: uint32): string = &"OpenGL error: {glEnumToString(error.uint32)}"
+
+proc debugOpenGL*() =
+    let 
+        error = glGetError()
+    if error.uint != GL_NO_ERROR:
+        echo getOpenGLErrorString(error.uint32)

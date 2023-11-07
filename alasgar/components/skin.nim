@@ -25,7 +25,7 @@ proc newJointSystem*(): JointSystem =
     new(result)
     result.name = "Joint System"
 
-method process*(sys: JointSystem, scene: Scene) = 
+method process*(sys: JointSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) = 
     for joint in iterateComponents[JointComponent](scene):
         if joint.entity.visible:
             joint.model = joint.transform.world * joint.inverseMatrix

@@ -89,8 +89,7 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
             if ENVIRONMENT.HAS_ENV_MAP > 0:
                 COLOR.rgb = COLOR.rgb + ENVIRONMENT.INTENSITY * getIBL(ENVIRONMENT, FRAGMENT, SKYBOX_MAP)
     
-    if FRAGMENT.FOG_AMOUNT > 0.0:
-        COLOR = mix(ENVIRONMENT.BACKGROUND_COLOR, COLOR, FRAGMENT.FOG_AMOUNT)
+    COLOR = mix(ENVIRONMENT.BACKGROUND_COLOR, COLOR, FRAGMENT.FOG_AMOUNT)
 
     when defined(DEBUG_ALBEDO):
         COLOR.rgb = vec3(FRAGMENT.ALBEDO)
@@ -124,6 +123,11 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
         let depth = texture(DEPTH_MAPS, vec4(SURFACE.UV.x, SURFACE.UV.y, 0.0, 0.0))
         COLOR.rgb = vec3(depth)
         COLOR.a = 1.0
+
+    when defined(DEBUG_FOG):
+        COLOR.rgb = vec3(FRAGMENT.FOG_AMOUNT)
+        COLOR.a = 1.0
+
 
     #COLOR.rgb = FRAGMENT.N
     #COLOR.a = 1.0

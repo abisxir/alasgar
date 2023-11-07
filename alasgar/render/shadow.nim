@@ -32,22 +32,20 @@ proc provideTextures(shadow: Shadow, context: GraphicsContext) =
         if shadow.textureArray != nil and shadow.textureArray.layers < lightCount:
             destroy(shadow.textureArray)
             shadow.textureArray = nil
-        if shadow.textureArray == nil:
+        if isNil(shadow.textureArray):
             shadow.textureArray = newTexture(
                 GL_TEXTURE_2D_ARRAY,
                 settings.depthMapSize, 
                 settings.depthMapSize, 
                 minFilter=GL_LINEAR,
                 magFilter=GL_LINEAR, 
-                internalFormat=GL_DEPTH_COMPONENT,
+                internalFormat=GL_DEPTH_COMPONENT32F,
                 layers=lightCount
-            )
-            
+            )            
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE.GLint)
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL.GLint)
+            allocate(shadow.textureArray, format=GL_DEPTH_COMPONENT, dataType=cGL_FLOAT)
             
-            allocate(shadow.textureArray, format=GL_DEPTH_COMPONENT)
-            echo "Shadow texture allocated!!!!!!!"
 
 proc renderDepthMap(drawables: var seq[Drawable]) =
     var i = 0
@@ -58,7 +56,7 @@ proc renderDepthMap(drawables: var seq[Drawable]) =
         # Limits instance count by max batch size
         var count = min(drawables[i].count, settings.maxBatchSize)
 
-        for ix in 0..count - 1:
+        for ix in 0..<count:
             if drawables[i + ix].material != nil and drawables[i + ix].material.castShadow:
                 # Renders count amount of instances
                 render(
@@ -90,7 +88,6 @@ proc process*(shadow: Shadow,
         use(shadow.shader)
         shadow.shader["SHADOW_MVP"] = caster.projection * caster.view
         renderDepthMap(drawables)
-        
         detach(shadow.fb)
 
     for shader in context.shaders:
@@ -105,3 +102,6 @@ proc destroy*(shadow: Shadow) =
         if shadow.fb != nil:
             destroy(shadow.fb)
             shadow.fb = nil
+        if shadow.textureArray != nil:
+            destroy(shadow.textureArray)
+            shadow.textureArray = nil

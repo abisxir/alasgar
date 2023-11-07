@@ -31,12 +31,12 @@ proc depthVertex*(POSITION: Layout[0, Vec3],
     DEPTH = 0.5 + (nz * 0.5)
     gl_Position = lightPosition
 
-proc depthFragment*(DEPTH: var float) = discard
-#proc depthFragment*(DEPTH: var float, COLOR) = discard
-#    let 
-#        dx: float = dFdx(DEPTH)   
-#        dy: float = dFdy(DEPTH) 
-#        y: float = DEPTH * DEPTH + 0.25 * (dx * dx + dy * dy)
-#    # Compute second moment over the pixel extents.   
-#    COLOR = vec2(DEPTH, y)
+#proc depthFragment*(DEPTH: var float, COLOR: var Vec2) = discard
+proc depthFragment*(DEPTH: float, COLOR: var Vec2) = 
+    let 
+        dx: float = dFdx(DEPTH)   
+        dy: float = dFdy(DEPTH) 
+        y: float = DEPTH * DEPTH + 0.25 * (dx * dx + dy * dy)
+    # Compute second moment over the pixel extents.   
+    COLOR = vec2(DEPTH, y)
 

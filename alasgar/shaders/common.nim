@@ -62,13 +62,14 @@ proc getNormalMap*(P, N: Vec3, UV: Vec2, NORMAL_MAP: Sampler2D): Vec3 =
         map: Vec3 = texture(NORMAL_MAP, UV).rgb * 2.0 - 1.0
     result = normalize(TBN * vec3(-map.x, map.y, map.z))
 
-proc getFogAmount*(density: float, position: Vec3): float =
+proc getFogAmount*(density: float, minDistance: float, position: Vec3, view: Vec3): float =
     result = 0.0
     if density > 0.0:
         let 
-            distance = length(position)
-        result = exp2(-density * density * distance * distance * LOG2)
-        result = clamp(result, 0.0, 1.0)
+            distance = length(position - view)
+            effective = clamp(distance - minDistance, 0.0, distance)
+        if distance >= minDistance:
+            result = exp2(-density * density * effective * effective * LOG2)
 
 proc getPosition*(CAMERA: Camera, UV: Vec2, DEPTH_CHANNEL: Sampler2D): Vec3 =
     let 

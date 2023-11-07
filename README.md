@@ -401,7 +401,6 @@ cubeEntity.onOut = proc(ic: InteractiveComponent)=
 addBoundingSphere(cubeEntity)
 ...
 ```
-
 ![](https://abisxir.github.io/alasgar/step8/demo.png)
 
 That is all, as you [see](https://abisxir.github.io/alasgar/step8/build), we have two functions to handle mouse's in and out events. To make interactive components working, you need to add a collision component. Alsgar supports just two types, AABB and sphere. Here we used helper functions to code less but like everywhere else you can add components using the core functions to have more control over it.
@@ -465,7 +464,6 @@ from snow import snowEffect
 addEffect(cameraEntity[CameraComponent], "snowEffect", newCanvasShader(snowEffect))
 ...
 ```
-
 ![](https://abisxir.github.io/alasgar/step9/demo.png)
 
 That was all you need to do, if you [run](https://abisxir.github.io/alasgar/step9/build) the code you will see our beautiful snow. As you see in function signature, there are some unused variables:
@@ -558,7 +556,7 @@ addEffect(cameraEntity[CameraComponent], "myEffect", newCanvasShader(vertex, fra
 There are also some predefined effects that you can use them:
 ```nim
 # Creates bloom effect shader
-proc newBloomEffect*(): Shader
+proc newBloomEffect*(intersity: float32=1.0): Shader
 # Creates FXAA effect shader 
 proc newFxaaEffect*(spanMax=8'f32, 
                     reduceMul=1'f32 / 8'f32, 
@@ -573,11 +571,7 @@ proc newSSAOEffect*(samples=32'i32,
                     maxDistance=0.07'f32, 
                     noiseTexture: Texture)
 ```
- - FXAA
- - BLOOM
- - SSAO
-
-There are some functions to manipulate effects:
+There are also some functions to manipulate effects:
 ```nim
 proc addEffect*(camera: CameraComponent, name: string, shader: Shader)
 proc getEffect*(camera: CameraComponent, name: string): Shader
@@ -587,10 +581,150 @@ proc enableEffect*(camera: CameraComponent, name: string)
 proc removeEffect*(camera: CameraComponent, name: string) = 
 ```
 
-
 Shadows
 =======
+Shadows are implemented only for spot and direct lights. Let us reset our example to a simpler scene to see how shadow works:
+```nim
+import alasgar
 
+# Creates a window named Step10
+window("Step10", 830, 415)
+   
+let 
+    # Creates a new scene
+    scene = newScene()
+    # Creates the camera entity
+    cameraEntity = newEntity(scene, "Camera")
+
+# Sets the background color
+scene.background = parseHex("d7d1bf")
+# Sets fog desnity to enable fog, fancy effect :)
+scene.fogDensity = 0.05
+
+# Sets the camera position
+cameraEntity.transform.position = 7.5 * vec3(1)
+# Adds a perspective camera component to entity
+add(
+    cameraEntity, 
+    newPerspectiveCamera(
+        75, 
+        runtime.ratio, 
+        0.1, 
+        100.0, 
+        vec3(0) - cameraEntity.transform.position
+    )
+)
+# Makes the camera entity child of the scene
+add(scene, cameraEntity)
+
+# Creates the cube entity, by default position is 0, 0, 0
+let cubeEntity = newEntity(scene, "Cube")
+# Add a cube mesh component to entity
+add(cubeEntity, newCubeMesh())
+# Adds a script component to the cube entity
+program(cubeEntity, proc(script: ScriptComponent) =
+    let t = 2 * runtime.age
+    # Rotates the cube using euler angles
+    script.transform.euler = vec3(
+        sin(t),
+        cos(t),
+        sin(t) * cos(t),
+    )
+)
+# Makes the cube enity child of the scene
+add(scene, cubeEntity)
+# Scale it up
+cubeEntity.transform.scale = vec3(2)
+# Enables shadows for the cube
+cubeEntity.material.castShadow = true
+
+# Creates the plane entity
+let planeEntity = newEntity(scene, "Ground")
+# Adds a plane mesh component to entity
+add(planeEntity, newPlaneMesh(1, 1))
+# Makes the plane entity child of the scene
+add(scene, planeEntity)
+# Sets the plane position and scale
+planeEntity.transform.position = vec3(0, -3, 0)
+planeEntity.transform.scale = vec3(200, 1, 200)
+# Marks the plane to not cast shadows
+planeEntity.material.castShadow = false
+
+# Creates the light entity
+let lightEntity = newEntity(scene, "Light")
+# Adds a point light component to entity, with enabled shadow
+add(
+    lightEntity, 
+    newDirectLightComponent(
+        direction=vec3(0) - vec3(-4, 5, 4),
+        shadow=true,
+    )
+)
+# Makes the light entity child of the scene
+add(scene, lightEntity)
+
+# Renders an empty scene
+render(scene)
+# Runs game main loop
+loop()
+```
+![](https://abisxir.github.io/alasgar/step10/demo.png)
+As you [see](https://abisxir.github.io/alasgar/step10/build), we enabled shadow casting for our cube using its material:
+```nim
+# Marks the plane to not cast shadows
+cubeEntity.material.castShadow = true
+```
+And then, on the light we set the shadow flag to true:
+```nim
+# Adds a point light component to entity, with enabled shadow
+add(
+    lightEntity, 
+    newDirectLightComponent(
+        direction=vec3(0) - vec3(-4, 5, 4),
+        shadow=true,
+    )
+)
+```
+That was everything needed to enable shadow for direct lights. The same apporach should happen to the spot lights:
+```nim
+## Creates a direct light component
+proc newDirectLightComponent*(direction: Vec3, 
+                              color: Color=COLOR_MILK, 
+                              luminance: float32=100.0, 
+                              shadow: bool=false,
+                              shadowBias: float32=0.001): DirectLightComponent
+## Creates a spot light component
+proc newSpotPointLightComponent*(direction: Vec3,
+                                 color: Color=COLOR_MILK, 
+                                 luminance: float32=50.0,
+                                 innerCutoff: float32=30, 
+                                 outerCutoff: float32=45,
+                                 shadow: bool=false,
+                                 shadowBias: float32=0.001): SpotPointLightComponent
+```
+One extra line was also enabling fog on our scene:
+```nim
+# Sets the background color
+scene.background = parseHex("d7d1bf")
+# Sets fog desnity to enable fog, fancy effect :)
+scene.fogDensity = 0.05
+```
+Fog automatically fades the scene to our background color. The scene object includes some other properties to change the environment effects:
+```nim
+type
+    Scene* = ref object
+        ## Background color, default is black
+        background*: Color
+        ## Ambient color which will affect all objects in the scene when lighting, default is black that means no effect
+        ambient*: Color
+        ## Fog density, default is 0
+        fogDensity*: float32
+        ## Minimum fog distance to apply fog effect, default is 0
+        minFogDistance*: float32
+        environmentMap*: Texture
+        environmentIntensity*: float32
+        environmentBlurrity*: float32
+```
 
 Dependencies
 ============
