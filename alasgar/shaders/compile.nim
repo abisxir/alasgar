@@ -390,7 +390,7 @@ proc toCode(n: NimNode, res: var string, level = 0) =
     n[0].toCode(res)
 
   of nnkCall, nnkCommand:
-    var procName = procRename(n[0].strVal)
+    var procName = procRename(n[0].repr)
     if procName in ignoreFunctions:
       return
     if procName == "[]=":
@@ -773,7 +773,7 @@ proc parseBracket(param: NimNode, res: var string, forceOut=false, attributeCoun
 proc toCodeTopLevel(topLevelNode: NimNode, res: var string, level = 0, attributeCount: var int) =
   ## Top level block such as in and out params.
   ## Generates the main function (which is not like all the other functions)
-  assert topLevelNode.kind == nnkProcDef
+  assert topLevelNode.kind == nnkProcDef or topLevelNode.kind == nnkTemplateDef
 
   for n in topLevelNode:
     case n.kind

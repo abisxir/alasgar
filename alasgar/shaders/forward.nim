@@ -89,7 +89,7 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
             if ENVIRONMENT.HAS_ENV_MAP > 0:
                 COLOR.rgb = COLOR.rgb + ENVIRONMENT.INTENSITY * getIBL(ENVIRONMENT, FRAGMENT, SKYBOX_MAP)
     
-    COLOR = mix(ENVIRONMENT.BACKGROUND_COLOR, COLOR, FRAGMENT.FOG_AMOUNT)
+    COLOR = mix(COLOR, ENVIRONMENT.BACKGROUND_COLOR, FRAGMENT.FOG_AMOUNT)
 
     when defined(DEBUG_ALBEDO):
         COLOR.rgb = vec3(FRAGMENT.ALBEDO)
@@ -128,6 +128,19 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
         COLOR.rgb = vec3(FRAGMENT.FOG_AMOUNT)
         COLOR.a = 1.0
 
+    when defined(DEBUG_ZW):
+        let 
+            z = SURFACE.PROJECTED_POSITION.z / SURFACE.PROJECTED_POSITION.w
+            c = CAMERA.FAR - CAMERA.NEAR
+        COLOR.rgb = vec3(abs(z) / c)
+        COLOR.a = 1.0
+
+    when defined(DEBUG_Z):
+        let 
+            z = abs(SURFACE.POSITION_RELATED_TO_VIEW.z / SURFACE.POSITION_RELATED_TO_VIEW.w)
+            c = CAMERA.FAR - CAMERA.NEAR
+        COLOR.rgb = vec3(z / c)
+        COLOR.a = 1.0        
 
     #COLOR.rgb = FRAGMENT.N
     #COLOR.a = 1.0

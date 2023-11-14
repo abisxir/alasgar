@@ -10,7 +10,7 @@ proc prepareFragment*(SURFACE: Surface,
                       ROUGHNESS_MAP: Sampler2D,
                       EMISSIVE_MAP: Sampler2D,
                       AO_MAP: Sampler2D): Fragment =
-    result.FOG_AMOUNT = getFogAmount(ENVIRONMENT.FOG_DENSITY, ENVIRONMENT.MIN_FOG_DISTANCE, SURFACE.POSITION_RELATED_TO_VIEW.xyz, CAMERA.POSITION)
+    result.FOG_AMOUNT = getFogAmount(ENVIRONMENT.FOG_DENSITY, ENVIRONMENT.FOG_MIN_DISTANCE, length(SURFACE.POSITION_RELATED_TO_VIEW.xyz))
     if result.FOG_AMOUNT < 1.0:
         if MATERIAL.HAS_ALBEDO_MAP:
             let c = texture(ALBEDO_MAP, SURFACE.UV)

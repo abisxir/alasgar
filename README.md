@@ -720,7 +720,7 @@ type
         ## Fog density, default is 0
         fogDensity*: float32
         ## Minimum fog distance to apply fog effect, default is 0
-        minFogDistance*: float32
+        fogMinDistance*: float32
         environmentMap*: Texture
         environmentIntensity*: float32
         environmentBlurrity*: float32

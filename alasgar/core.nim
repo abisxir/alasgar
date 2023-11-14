@@ -36,7 +36,7 @@ type
         background*: Color
         ambient*: Color
         fogDensity*: float32
-        minFogDistance*: float32
+        fogMinDistance*: float32
         environmentMap*: Texture
         environmentIntensity*: float32
         environmentBlurrity*: float32
@@ -962,10 +962,14 @@ proc reprTree*(e: Entity, tab="") =
     for child in e.children:
         reprTree(child, tab & "  ")
 
-proc `material`*(n: Entity): MaterialComponent = 
+
+proc provideMaterial(n: Entity): MaterialComponent =
     if n.material == nil:
         n.material = get[MaterialComponent](n)
         if isNil(n.material):
             n.material = newMaterialComponent()
             add(n, n.material)
     result = n.material
+
+proc `material`*(n: Entity): MaterialComponent = provideMaterial(n)
+proc `material`*(c: Component): MaterialComponent = provideMaterial(c.entity)

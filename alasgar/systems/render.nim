@@ -57,7 +57,7 @@ proc prepareShaders(scene: Scene) =
 
         if scene.fogDensity > 0.0:
             shader["ENVIRONMENT.FOG_DENSITY"] = scene.fogDensity
-            shader["ENVIRONMENT.MIN_FOG_DISTANCE"] = scene.minFogDistance
+            shader["ENVIRONMENT.FOG_MIN_DISTANCE"] = scene.fogMinDistance
         else:
             shader["ENVIRONMENT.FOG_DENSITY"] = 0.0
 

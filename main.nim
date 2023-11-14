@@ -1,5 +1,6 @@
 import alasgar
 
+
 settings.exitOnEsc = true
 # Creates a window named Hello
 window("Hello", 640, 360)
@@ -9,8 +10,8 @@ window("Hello", 640, 360)
 var scene = newScene() 
 
 scene.background = parseHex("d7b1a1")
-scene.fogDensity = 0.2
-scene.fogDistance = 5
+scene.fogDensity = 0.02
+#scene.minFogDistance = 0
 
 # Creates camera entity
 var cameraEntity = newEntity(scene, "Camera")
