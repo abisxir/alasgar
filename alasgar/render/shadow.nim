@@ -45,28 +45,25 @@ proc provideTextures(shadow: Shadow, context: GraphicsContext) =
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE.GLint)
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL.GLint)
             allocate(shadow.textureArray, format=GL_DEPTH_COMPONENT, dataType=cGL_FLOAT)
-            
 
 proc renderDepthMap(drawables: var seq[Drawable]) =
     var i = 0
-    while i < len(drawables) and drawables[i].visible:
-        # Selects mesh
-        var mesh = drawables[i].mesh.instance
+    while i < len(drawables) and drawables[i].visible and not isNil(drawables[i].material) and drawables[i].material.castShadow:
+        var 
+            # Selects mesh
+            mesh = drawables[i].mesh.instance
+            # Limits instance count by max batch size
+            count = min(drawables[i].count, settings.maxBatchSize)
 
-        # Limits instance count by max batch size
-        var count = min(drawables[i].count, settings.maxBatchSize)
-
-        for ix in 0..<count:
-            if drawables[i + ix].material != nil and drawables[i + ix].material.castShadow:
-                # Renders count amount of instances
-                render(
-                    mesh, 
-                    caddr(drawables[i + ix].modelPack), 
-                    addr(drawables[i + ix].materialPack[0]), 
-                    caddr(drawables[i + ix].spritePack), 
-                    caddr(drawables[i + ix].skinPack), 
-                    1
-                )
+        render(
+            mesh, 
+            caddr(drawables[i].modelPack), 
+            addr(drawables[i].materialPack[0]), 
+            caddr(drawables[i].spritePack), 
+            caddr(drawables[i].skinPack), 
+            count
+        )
+                
         # Moves to next chunk
         inc(i, count)    
 

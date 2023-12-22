@@ -26,7 +26,7 @@ proc newJointSystem*(): JointSystem =
     result.name = "Joint System"
 
 method process*(sys: JointSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) = 
-    for joint in iterateComponents[JointComponent](scene):
+    for joint in iterate[JointComponent](scene):
         if joint.entity.visible:
             joint.model = joint.transform.world * joint.inverseMatrix
 
@@ -52,7 +52,7 @@ method process*(sys: SkinSystem, scene: Scene, input: Input, delta: float32, fra
     var 
         offset = 0
         capacity = sys.width * sys.height
-    for skin in iterateComponents[SkinComponent](scene):
+    for skin in iterate[SkinComponent](scene):
         if skin.entity.visible:
             let size = len(skin.joints) * 16
             if offset + size < capacity:

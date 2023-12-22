@@ -92,7 +92,7 @@ proc newCatmullSystem*(): CatMullSystem =
 
 method process*(sys: CatMullSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     {.warning[LockLevel]:off.}
-    for c in iterateComponents[CatMullComponent](scene):
+    for c in iterate[CatMullComponent](scene):
         if c.playing:
             if c.current < c.curve.nodesCount:
                 let target = node(c.curve, c.current)

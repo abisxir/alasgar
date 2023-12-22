@@ -50,7 +50,7 @@ proc newPerspectiveCamera*(fov, aspect, near, far: float32, direction: Vec3,
     result.kind = perspectiveCamera
 
 
-proc newOrthographicCamera*(left, right, bottom, top, near, far: float32, direction: Vec3,
+proc newOrthoCamera*(left, right, bottom, top, near, far: float32, direction: Vec3,
         up: Vec3 = VEC3_UP): CameraComponent =
     new(result)
     result.left = left
@@ -181,7 +181,7 @@ proc newCameraSystem*(): CameraSystem =
 
 proc `activeCamera`*(scene: Scene): CameraComponent =
     result = nil
-    for c in iterateComponents[CameraComponent](scene):
+    for c in iterate[CameraComponent](scene):
         if result == nil or c.timestamp > result.timestamp:
             result = c
 

@@ -102,7 +102,7 @@ method process*(sys: InteractiveSystem, scene: Scene, input: Input, delta: float
     else:
         let rayDirection = normalize(worldCoords.xyz) * activeCamera.far
         ray = newRay(activeCamera.transform.globalPosition, rayDirection)
-    for ic in iterateComponents[InteractiveComponent](scene):
+    for ic in iterate[InteractiveComponent](scene):
         ic.input = input
         # Checks that entity is visible
         if ic.entity.visible:

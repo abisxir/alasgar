@@ -1,6 +1,6 @@
 # Package
 
-version     = "0.3"
+version     = "0.4"
 author      = "Abi Mohammadi"
 description = "Game Engine"
 license     = "MIT"

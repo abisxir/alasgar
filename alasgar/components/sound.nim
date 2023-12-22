@@ -103,7 +103,7 @@ method process*(sys: SoundSystem, scene: Scene, input: Input, delta: float32, fr
     let 
         activeCamera = scene.activeCamera 
         pos = activeCamera.transform.globalPosition
-    for c in iterateComponents[SoundEffectComponent](scene):
+    for c in iterate[SoundEffectComponent](scene):
         if isPlaying(c):
             adjustBy(c, pos)
 

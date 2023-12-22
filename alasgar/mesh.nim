@@ -365,3 +365,5 @@ proc cleanupMeshes*() =
     if len(cache) > 0:
         echo &"Cleaning up [{len(cache)}] meshes..."
         clear(cache)
+
+func `id`*(m: Mesh): uint32 = m.vertexBufferObject.uint32

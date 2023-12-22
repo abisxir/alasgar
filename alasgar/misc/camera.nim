@@ -37,7 +37,7 @@ proc handlePanning(controller: CameraControllerComponent, input: Input, delta: f
         controller.delta.y * delta, 
         0
     )
-    controller.target = lerp(
+    controller.target = mix(
         controller.target, 
         controller.target + offset, 
         controller.speed * delta * 2

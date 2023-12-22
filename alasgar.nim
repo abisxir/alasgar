@@ -25,7 +25,8 @@ import alasgar/logger
 import alasgar/utils
 import alasgar/system
 import alasgar/physics/collision as physics_collision
-import alasgar/physics/ray
+import alasgar/physics/ray as physics_ray
+import alasgar/physics/tools as physics_tools
 import alasgar/math/helpers
 import alasgar/misc/easing
 import alasgar/shaders/base
@@ -53,7 +54,6 @@ export core,
        timer,
        interactive,
        collision,
-       physics_collision,
        cube,
        sphere,
        plane,
@@ -63,7 +63,9 @@ export core,
        utils,
        color,
        engine,
-       ray,
+       physics_collision,
+       physics_ray,
+       physics_tools,
        helpers,
        image,
        quat,

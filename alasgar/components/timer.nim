@@ -34,7 +34,7 @@ proc newTimerSystem*(): TimerSystem =
 
 method process*(sys: TimerSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     {.warning[LockLevel]:off.}
-    for timer in iterateComponents[TimerComponent](scene):
+    for timer in iterate[TimerComponent](scene):
         if timer.handler != nil and not timer.inactive:
             if timer.lastTicks == 0.0:
                 timer.lastTicks = age

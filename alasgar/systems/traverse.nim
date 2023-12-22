@@ -35,7 +35,7 @@ method process*(sys: TraverseSystem, scene: Scene, input: Input, delta: float32,
         let world = identity()
         traverse(scene.root, world, false)
         #var cache = initTable[TransformComponent, Mat4]()
-        #for transform in iterateComponents[TransformComponent](scene):
+        #for transform in iterate[TransformComponent](scene):
         #    update(transform, cache)
 
 

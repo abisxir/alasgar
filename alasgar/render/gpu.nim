@@ -102,18 +102,10 @@ proc renderToFrameBuffer(view, projection: Mat4, cubemap: Texture, drawables: va
     graphics.totalBatches = 0
     graphics.drawCalls = 0
 
-    var 
-        lastShader: Shader = nil
-        lastAlbedo: Texture = nil
-        lastNormal: Texture = nil
-        lastMetallic: Texture = nil
-        lastRoughness: Texture = nil
-        lastAoMap: Texture = nil
-        lastEmissiveMap: Texture = nil
-
     var i = 0
     while i < len(drawables) and drawables[i].visible:
-        var 
+        let
+            count = drawables[i].count 
             shader = if drawables[i].shader == nil: graphics.shader else: drawables[i].shader.instance
             albedo = if drawables[i].material != nil: drawables[i].material.albedoMap else: nil
             normal = if drawables[i].material != nil: drawables[i].material.normalMap else: nil
@@ -123,36 +115,13 @@ proc renderToFrameBuffer(view, projection: Mat4, cubemap: Texture, drawables: va
             emissive = if drawables[i].material != nil: drawables[i].material.emissiveMap else: nil
             mesh = drawables[i].mesh.instance
 
-        if shader != lastShader:
-            lastShader = shader
-            use(lastShader)
-
-        if albedo != lastAlbedo:
-            lastAlbedo = albedo
-            use(lastShader, lastAlbedo, "ALBEDO_MAP", 1)
-
-        if normal != lastNormal:
-            lastNormal = normal
-            use(lastShader, lastNormal, "NORMAL_MAP", 2)
-
-        if metallic != lastMetallic:
-            lastMetallic = metallic
-            use(lastShader, lastMetallic, "METALLIC_MAP", 3)
-
-        if roughness != lastRoughness:
-            lastRoughness = roughness
-            use(lastShader, lastRoughness, "ROUGHNESS_MAP", 4)
-
-        if ao != lastAoMap:
-            lastAoMap = ao
-            use(lastShader, lastAoMap, "AO_MAP", 5)
-
-        if emissive != lastEmissiveMap:
-            lastEmissiveMap = emissive
-            use(lastShader, lastEmissiveMap, "EMISSIVE_MAP", 6)
-
-        # Limits instance count by max batch size
-        var count = min(drawables[i].count, settings.maxBatchSize)
+        use(shader)
+        use(shader, albedo, "ALBEDO_MAP", 1)
+        use(shader, normal, "NORMAL_MAP", 2)
+        use(shader, metallic, "METALLIC_MAP", 3)
+        use(shader, roughness, "ROUGHNESS_MAP", 4)
+        use(shader, ao, "AO_MAP", 5)
+        use(shader, emissive, "EMISSIVE_MAP", 6)
 
         # Renders count amount of instances
         render(
@@ -168,8 +137,6 @@ proc renderToFrameBuffer(view, projection: Mat4, cubemap: Texture, drawables: va
         inc(graphics.drawCalls)
         inc(i, count)
     
-
-
 proc render*(view, projection: Mat4, cubemap: Texture, drawables: var seq[Drawable]) =
     # If there is shadow casters processes them
     if len(graphics.context.shadowCasters) > 0:
@@ -221,10 +188,7 @@ proc swap*() =
     use(graphics.blitShader, graphics.fb.normal, "NORMAL_CHANNEL", 1)
     use(graphics.blitShader, graphics.fb.depth, "DEPTH_CHANNEL", 2)
     glDrawArrays(GL_TRIANGLES, 0, 3)
-
-
     glSwapWindow(graphics.window)
-
     glBindRenderbuffer(GL_RENDERBUFFER, 0)
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
     detach(blitTexture)
@@ -232,10 +196,8 @@ proc swap*() =
 proc cleanupGraphics*() =
     destroy(graphics.skybox)
     graphics.skybox = nil
-
     destroy(graphics.fb)
     graphics.fb = nil
-
     destroy(graphics.shadow)
     graphics.shadow = nil
 
@@ -246,7 +208,6 @@ proc cleanupGraphics*() =
     if graphics.window != nil:
         destroy(graphics.window)
         graphics.window = nil
-
 
 proc `screenSize`*(g: Graphics): Vec2 = g.screenSize
 #proc `context`*(g: Graphics): var GraphicContext = g.context

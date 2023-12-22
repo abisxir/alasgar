@@ -21,7 +21,11 @@ type
         minFilter: GLenum
         uvChannel*: int
 
-template `id`*(t: Texture): GLuint = t.buffer
+template `id`*(t: Texture): GLuint = 
+    if isNil(t): 
+        0.GLuint 
+    else: 
+        t.buffer
 template `levels`*(t: Texture): int32 = t.levels
 template `width`*(t: Texture): int32 = t.width
 template `height`*(t: Texture): int32 = t.height
@@ -464,7 +468,11 @@ proc detach*(t: Texture) =
 
 proc unit*(t: Texture, slot: int) = 
     glActiveTexture((GL_TEXTURE0.int + slot).GLenum)
-    glBindTexture(t.target, t.buffer)
+    if t != nil:
+        glBindTexture(t.target, t.buffer)
+    else:
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glBindTexture(GL_TEXTURE_2D_ARRAY, 0)
 
 #[
 proc use*(t: Texture, slot: int) = 

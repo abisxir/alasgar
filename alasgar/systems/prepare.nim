@@ -19,53 +19,7 @@ proc newPrepareSystem*(): PrepareSystem =
     new(result)
     result.name = "Prepare System"
 
-func cmp(a, b: MaterialComponent): int =
-    if a == b:
-        result = 0
-    elif a == nil:
-        if b.albedoMap == nil and b.normalMap == nil:
-            result = 0
-        else:
-            result = -1
-    elif b == nil:
-        if a.albedoMap == nil and a.normalMap == nil:
-            result = 0
-        else:
-            result = 1
-    else:
-        if a.albedoMap == b.albedoMap:
-            if a.normalMap == b.normalMap:
-                result = 0
-            else:
-                result = cmp(a.normalMap, b.normalMap)
-        else:
-            result = cmp(a.albedoMap, b.albedoMap)
-    if result == 0:
-        if a.castShadow and not b.castShadow:
-            result = -1
-        elif not a.castShadow and b.castShadow:
-            result = 1
-
-proc cmp(a, b: Drawable): int =
-    if a.visible != b.visible:
-        if a.visible:
-            return -1
-        return 1
-    if not a.visible:
-        return 0
-    if a.shader == b.shader:
-        if a.material == b.material:
-            if a.mesh.instance == b.mesh.instance:
-                if a.transform.globalPosition.z > b.transform.globalPosition.z:
-                    return 1
-                elif a.transform.globalPosition.z < b.transform.globalPosition.z:
-                    return -1
-                else:
-                    return 0
-            return cmp(a.mesh.instance, b.mesh.instance)
-        return cmp(a.material, b.material)
-    return cmp(a.shader, b.shader)
-
+func cmp(a, b: Drawable): int = cmp(a.id, b.id)
 
 proc isInSight*(planes: openArray[Plane], drawable: Drawable): bool =
     #drawable.mesh.instance.
@@ -120,7 +74,7 @@ func getTextureHash(d: ptr Drawable): Hash =
 method process*(sys: PrepareSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     if scene.root != nil:
         # Considers all the lines
-        for c in iterateComponents[LineComponent](scene):
+        for c in iterate[LineComponent](scene):
             if c.entity.visible:
                 updatePoints(c)
 
@@ -132,10 +86,9 @@ method process*(sys: PrepareSystem, scene: Scene, input: Input, delta: float32, 
         # Sorts using the custom compare function
         sort(scene.drawables, cmp)
 
-        var lastMeshHash = 0
-        var lastNormalHash = 0
-        var lastTextureHash = 0
-        var count = 0'i32
+        var 
+            lastId: string
+            count = 0'i32
         for i in countdown(high(scene.drawables), low(scene.drawables)):
             var drawable = addr(scene.drawables[i])
 
@@ -146,17 +99,12 @@ method process*(sys: PrepareSystem, scene: Scene, input: Input, delta: float32, 
             if drawable.shader != nil:
                 addShader(graphics.context, drawable.shader.instance)
 
-            # Checks mesh hash for counting
-            let meshHash = hash(drawable.mesh.instance)
-            let normalHash = getNormalHash(drawable)
-            let textureHash = getTextureHash(drawable)
-            if lastMeshHash != meshHash or lastNormalHash != normalHash or lastTextureHash != textureHash:
+            if lastId != drawable.id or count > settings.maxBatchSize:
                 count = 1
-                lastMeshHash = meshHash
-                lastTextureHash = textureHash
-                lastNormalHash = normalHash
+                lastId = drawable.id
             else:
                 count += 1
+            
             drawable.count = count
 
             # Handle transfer
@@ -166,9 +114,3 @@ method process*(sys: PrepareSystem, scene: Scene, input: Input, delta: float32, 
 
             # Handle material
             packMaterial(drawable)
-
-
-                
-                
-
-

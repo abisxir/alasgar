@@ -1,5 +1,6 @@
 import types
 import common
+import material
 import skin
 
 
@@ -28,15 +29,28 @@ proc depthVertex*(POSITION: Layout[0, Vec3],
         lightPosition = SHADOW_MVP * fragmentPosition
         nz = lightPosition.z / lightPosition.w
         
+    unpackMaterial(MATERIAL_DATA, MATERIAL)
+    SURFACE.UV = calculateUV(UV, SPRITE)
     DEPTH = 0.5 + (nz * 0.5)
     gl_Position = lightPosition
 
 #proc depthFragment*(DEPTH: var float, COLOR: var Vec2) = discard
-proc depthFragment*(DEPTH: float, COLOR: var Vec2) = 
-    let 
+proc depthFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
+                    ALBEDO_MAP: Layout[1, Uniform[Sampler2D]],
+                    SURFACE: Surface,
+                    MATERIAL: Material,
+                    DEPTH: float, 
+                    COLOR: var Vec2) = 
+    var 
         dx: float = dFdx(DEPTH)   
         dy: float = dFdy(DEPTH) 
         y: float = DEPTH * DEPTH + 0.25 * (dx * dx + dy * dy)
-    # Compute second moment over the pixel extents.   
-    COLOR = vec2(DEPTH, y)
+        alpha: float = MATERIAL.BASE_COLOR.a
+    if MATERIAL.HAS_ALBEDO_MAP:
+        alpha *= texture(ALBEDO_MAP, SURFACE.UV).a
+    if alpha > 0.1:
+        # Compute second moment over the pixel extents.   
+        COLOR = vec2(DEPTH, y)
+    else:
+        discard
 

@@ -260,7 +260,7 @@ func `*`*(q: Quat, v: Vec3): Vec3 =
     result.y = iy * qw + iw * -qy + iz * -qx - ix * -qz
     result.z = iz * qw + iw * -qz + ix * -qy - iy * -qx
 
-func fromEuler*(yaw, pitch, roll: float32): Quat =
+func euler*(yaw, pitch, roll: float32): Quat =
     let cy = cos(yaw * 0.5)
     let sy = sin(yaw * 0.5)
     let cp = cos(pitch * 0.5)
@@ -273,7 +273,7 @@ func fromEuler*(yaw, pitch, roll: float32): Quat =
     result.y = cr * sp * cy + sr * cp * sy
     result.z = cr * cp * sy - sr * sp * cy
 
-func fromEuler*(v: Vec3): Quat =
+func euler*(v: Vec3): Quat =
     let yaw = v.x
     let pitch = v.y
     let roll = v.z
@@ -301,7 +301,7 @@ func inverse*(quat: Quat): Quat =
     result.x = quat.x * recip
     result.y = quat.y * recip
     result.z = quat.z * recip
-    result.w = quat.w * -recip   
+    result.w = quat.w * -recip      
 
 func fromToRotation*(a, b: Vec3): Quat =
     var p0 = normalize(a)
@@ -461,3 +461,16 @@ func `*=`*(v: var Vec4, f: Vec4) =
     v.y *= f.y
     v.z *= f.z
     v.w *= f.w
+
+func slerp*(a, b: Quat, t: float32): Quat =
+    var 
+        aob = dot(a, b)
+        a1 = a
+    if aob < 0:
+        a1 = -a1        
+        aob = -aob
+    if aob > 0.9995:
+        result = (1.0 - t) * a + t * b
+    else:
+        let theta = arccos(aob)
+        result = (sin((1 - t) * theta) * a + sin(t * theta) * b) / sin(theta)

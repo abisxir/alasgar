@@ -40,6 +40,7 @@ type
         environmentMap*: Texture
         environmentIntensity*: float32
         environmentBlurrity*: float32
+        id: string
 
     Entity* = ref object
         id: int
@@ -127,10 +128,12 @@ type
         shader*: ShaderComponent
         skin*: SkinComponent
         count*: int32
-        visible*: bool
         meshVersion*: int16
         materialVersion*: int16
         transformVersion*: int16
+        shaderVersion*: int16
+        visible: bool
+        id*: string
 
 
 # Forward declarations
@@ -218,7 +221,7 @@ proc removeDrawable(scene: Scene, mesh: MeshComponent) =
     if found:
         del(scene.drawables, i)
 
-iterator iterateComponents*[T: Component](scene: Scene): T =
+iterator iterate*[T: Component](scene: Scene): T =
     var 
         container: Container[T] = ensureContainer[T](scene)
     for c in container.components:
@@ -624,7 +627,7 @@ proc `rotation=`*(t: TransformComponent, r: Quat) =
     markDirty(t)
 
 proc `euler=`*(t: TransformComponent, v: Vec3) =
-    t.rotation = fromEuler(v)
+    t.rotation = euler(v)
     markDirty(t)
 
 template `parent`*(t: TransformComponent): TransformComponent =
@@ -827,7 +830,6 @@ func newLambertMaterialComponent*(diffuseColor: Color=COLOR_WHITE,
         castShadow=castShadow
     )
 
-
 func `diffuseColor=`*(m: MaterialComponent, value: Color) =
     m.diffuseColor = value
     inc(m)
@@ -973,3 +975,34 @@ proc provideMaterial(n: Entity): MaterialComponent =
 
 proc `material`*(n: Entity): MaterialComponent = provideMaterial(n)
 proc `material`*(c: Component): MaterialComponent = provideMaterial(c.entity)
+
+proc makeMaterialId(m: MaterialComponent): string =
+    &"{m.albedoMap.id}-{m.normalMap.id}-{m.metallicMap.id}-{m.roughnessMap.id}-{m.aoMap.id}-{m.emissiveMap.id}"
+
+func hasIdChanged(d: Drawable): bool =
+    if isEmptyOrWhitespace(d.id):
+        true
+    elif not isNil(d.material) and d.materialVersion != d.material.version:
+        true
+    elif not isNil(d.mesh) and d.meshVersion != d.mesh.version:
+        true
+    elif not isNil(d.shader) and d.shaderVersion != d.shader.version:
+        true
+    else:
+        false
+
+proc updateId(d: var Drawable) =
+    let
+        meshId = if isNil(d.mesh): "0" else: &"{d.mesh.instance.id}"
+        shaderId = if isNil(d.shader): "0" else: &"{d.shader.instance.program}"
+        materialId = if isNil(d.material): "0" else: makeMaterialId(d.material)
+        visible = if d.visible: "1" else: "2"
+        shadow = if not isNil(d.material) and d.material.castShadow: "1" else: "2"
+    d.id = visible & shadow & meshId & shaderId & materialId
+
+template `visible`*(d: ptr Drawable): bool = d.visible
+template `visible`*(d: Drawable): bool = d.visible
+template `visible=`*(d: var Drawable, value: bool) = 
+    if d.visible != value or hasIdChanged(d):
+        d.visible = value        
+        updateId(d)

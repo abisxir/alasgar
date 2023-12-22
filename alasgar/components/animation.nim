@@ -258,7 +258,7 @@ proc newAnimationSystem*(): AnimationSystem =
 
 method process*(sys: AnimationSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     {.warning[LockLevel]:off.}
-    for c in iterateComponents[AnimationClipComponent](scene):
+    for c in iterate[AnimationClipComponent](scene):
         # Checks that entity is visible
         if c.entity.visible:
             if playing(c.animator, c.name):

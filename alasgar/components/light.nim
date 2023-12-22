@@ -127,7 +127,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
             # Keeps track of available point lights
             var lightCount = 0
 
-            for c in iterateComponents[DirectLightComponent](scene):
+            for c in iterate[DirectLightComponent](scene):
                 # Checks that entity is visible
                 if c.entity.visible and lightCount < settings.maxLights:
                     # Set shader params
@@ -144,7 +144,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
                     # Increments direct light count
                     inc(lightCount)
 
-            for c in iterateComponents[PointLightComponent](scene):
+            for c in iterate[PointLightComponent](scene):
                 # Checks that entity is visible
                 if c.entity.visible and lightCount < settings.maxLights:
                     shader[&"LIGHTS[{lightCount}].TYPE"] = ltPoint.int
@@ -155,7 +155,7 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
                     
                     inc(lightCount)
 
-            for c in iterateComponents[SpotPointLightComponent](scene):
+            for c in iterate[SpotPointLightComponent](scene):
                 # Checks that entity is visible
                 if c.entity.visible and lightCount < settings.maxLights:
                     shader[&"LIGHTS[{lightCount}].TYPE"] = ltSpot.int
