@@ -3,7 +3,6 @@ import math
 import strformat
 import strutils
 import sequtils
-import re
 import tables
 
 import chroma
@@ -55,8 +54,6 @@ let COLOR_BLUE*: Color = color(0, 0, 1)
 let COLOR_YELLOW*: Color = color(1, 1, 0)
 
 proc clear*[T](t: var seq[T]) = setLen[T](t, 0)
-        
-func isFilename*(fullpath: string): bool = not isEmptyOrWhitespace(fullpath) and match(fullpath, re"^[\w,\s-]+\.[A-Za-z]{3,4}$")
 
 template findIt*[T](s: openArray[T], pred: untyped): T = 
     for it {.inject.}  in s:

@@ -10,6 +10,8 @@ import resource
 
 export resource, model
 
+func isFilename(fullpath: string): bool = not isEmptyOrWhitespace(fullpath)
+
 proc openObjFile(filename: string): Stream =
     result = openAssetStream(filename)
 
