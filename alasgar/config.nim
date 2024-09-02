@@ -12,7 +12,7 @@ type
         exitOnEsc*: bool
 
 var settings* = Settings(
-    maxBatchSize: 1,
+    maxBatchSize: 10 * 1024,
     maxLights: 8,
     screenSize: vec2(0, 0),
     keepRatio: false,
