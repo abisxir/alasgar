@@ -12,7 +12,8 @@ proc hash12(p: Vec2): float =
 
 proc doAmbientOcclusion(CAMERA: Camera, DEPTH_CHANNEL: Sampler2D, COORD: Vec2, P, N: Vec3, SCALE, MAX_DISTANCE, BIAS: float): float =
     let 
-        diff = getPosition(CAMERA, COORD, DEPTH_CHANNEL) - P
+        depth = texture(DEPTH_CHANNEL, COORD).r
+        diff = constructWorldPosition(CAMERA, COORD, depth) - P
         l = length(diff)
         v = diff / l
         d = l * SCALE
@@ -33,8 +34,9 @@ proc ssao(CAMERA: Uniform[Camera],
           UV: Vec2,
           COLOR: var Vec4) =
     let 
-        p = getPosition(CAMERA, UV, DEPTH_CHANNEL)
-        n = texture(NORMAL_CHANNEL, UV).xyz
+        depth = texture(DEPTH_CHANNEL, UV).r
+        p = constructWorldPosition(CAMERA, UV, depth)
+        n = constructWorldNormal(CAMERA, UV, DEPTH_CHANNEL)
         rad = SAMPLE_RADIUS / p.z
         goldenAngle = 2.4
         inv = 1.0 / float(SAMPLES)
@@ -53,10 +55,11 @@ proc ssao(CAMERA: Uniform[Camera],
         ao += doAmbientOcclusion(CAMERA, DEPTH_CHANNEL, UV + spiralUV * radius, p, n, SCALE, MAX_DISTANCE, BIAS)
         rotatePhase += goldenAngle
 
-    ao *= inv
-    ao = 1.0 - (ao * INTENSITY)
+    ao = 1.0 - (ao * INTENSITY / SAMPLES.float)
 
+    COLOR = texture(COLOR_CHANNEL, UV)
     COLOR.rgb = COLOR.rgb * ao
+    #COLOR.rgb = vec3(ao)
 
 
 proc newSSAOEffect*(samples=32'i32, 
@@ -64,8 +67,7 @@ proc newSSAOEffect*(samples=32'i32,
                     intensity=1.0'f32, 
                     scale=2.5'f32, 
                     bias=0.05'f32, 
-                    maxDistance=0.07'f32, 
-                    noiseTexture: Texture): Shader = 
+                    maxDistance=0.07'f32): Shader = 
     result = newCanvasShader(ssao)
     set(result, "SAMPLES", samples)
     set(result, "SAMPLE_RADIUS", sampleRadius)

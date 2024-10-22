@@ -9,7 +9,6 @@ type
         fbo*: GLuint
         #rbo: GLuint
         color*: Texture 
-        normal*: Texture
         depth*: Texture
     
     EffectFrameBuffer* = ref object
@@ -40,20 +39,6 @@ proc newRenderBuffer*(size: Vec2): FrameBuffer =
     allocate(result.color)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, result.color.id, 0)
 
-    result.normal = newTexture2D(
-        width=size.iWidth, 
-        height=size.iHeight, 
-        internalFormat=GL_RGBA16F,
-        format=GL_RGBA,
-        minFilter=GL_LINEAR,
-        magFilter=GL_LINEAR,
-        wrapT=GL_CLAMP_TO_EDGE,
-        wrapS=GL_CLAMP_TO_EDGE,
-        dataType=cGL_FLOAT,
-    )
-    allocate(result.normal, GL_RGBA, cGL_FLOAT)
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, result.normal.id, 0)
-
     result.depth = newTexture2D(
         width=size.iWidth, 
         height=size.iHeight, 
@@ -68,18 +53,11 @@ proc newRenderBuffer*(size: Vec2): FrameBuffer =
     allocate(result.depth, GL_DEPTH_COMPONENT, cGL_FLOAT)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, result.depth.id, 0)
 
-    var buffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1]
-    glDrawBuffers(2, buffers[0].addr)
-
-    # Creates render buffer object
-    #glGenRenderbuffers(1, addr(result.rbo))
-    #glBindRenderbuffer(GL_RENDERBUFFER, result.rbo)
-    #glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, result.color.width, result.color.height)
-    #glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, result.rbo)
-    #glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, result.color.width, result.color.height)
-    #glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, result.rbo)
-
+    #var buffers = [GL_COLOR_ATTACHMENT0]
+    #glDrawBuffers(1, buffers[0].addr)
+    
     checkFramebuffer()
+    
     glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
 proc newFramebuffer*(): FrameBuffer =
@@ -111,14 +89,15 @@ proc use*(fb: FrameBuffer, texture: Texture, target, level, width, height: int) 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target.GLenum, texture.id, level.GLint)
     checkFramebuffer()
     glViewport(0, 0, width.GLsizei, height.GLsizei)
-    glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+    glClear(GL_COLOR_BUFFER_BIT or GL_STENCIL_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
 proc use*(fb: FrameBuffer, texture: Texture, attachment: GLenum) =
     glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo)
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture.target, texture.id, 0.GLint)
     checkFramebuffer()
     glViewport(0, 0, texture.width.GLsizei, texture.height.GLsizei)
-    glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+    glClear(GL_COLOR_BUFFER_BIT or GL_STENCIL_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+
 
 proc use*(fb: FrameBuffer, texture: Texture, attachment: GLenum, level, layer: int) =
     glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo)
@@ -126,7 +105,8 @@ proc use*(fb: FrameBuffer, texture: Texture, attachment: GLenum, level, layer: i
     glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, texture.id, level.GLint, layer.GLint)
     checkFramebuffer()
     glViewport(0, 0, texture.width.GLsizei, texture.height.GLsizei)
-    glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+    glClear(GL_COLOR_BUFFER_BIT or GL_STENCIL_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+
 
 proc draw*(fb: FrameBuffer) = glDrawArrays(GL_TRIANGLES, 0, 3)
 proc detach*(fb: FrameBuffer) = glBindFramebuffer(GL_FRAMEBUFFER, 0)
@@ -155,9 +135,6 @@ proc destroy*(fb: FrameBuffer) =
         if fb.color != nil:
             destroy(fb.color)
             fb.color = nil
-        if fb.normal != nil:
-            destroy(fb.normal)
-            fb.normal = nil
         if fb.depth != nil:
             destroy(fb.depth)
             fb.depth = nil

@@ -4,8 +4,7 @@ import ../shaders/common
 proc hbao(CAMERA: Uniform[Camera],
           FRAME: Uniform[Frame],
           COLOR_CHANNEL: Layout[0, Uniform[Sampler2D]],
-          NORMAL_CHANNEL: Layout[1, Uniform[Sampler2D]],
-          DEPTH_CHANNEL: Layout[2, Uniform[Sampler2D]],
+          DEPTH_CHANNEL: Layout[1, Uniform[Sampler2D]],
           INTENSITY: Uniform[float],
           SAMPLE_RADIUS: Uniform[float],
           SAMPLES: Uniform[int],
@@ -13,7 +12,7 @@ proc hbao(CAMERA: Uniform[Camera],
           COLOR: var Vec4) =
     var 
         pos = getPosition(CAMERA, UV, DEPTH_CHANNEL)
-        n = texture(NORMAL_CHANNEL, UV).rgb
+        n = getNormal(CAMERA, UV, DEPTH_CHANNEL)
         ao = 0.0
         RANDOM_DIRS: array[8, Vec3] = [
             vec3( 0.5381, 0.1856, 0.4290),

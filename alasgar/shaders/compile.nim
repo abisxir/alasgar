@@ -1,11 +1,11 @@
 # https://github.com/treeform/shady
 ## Shader macro, converts Nim code into GLSL
 
-import macros, strutils, tables, vmath, strformat
+import macros, strutils, tables, strformat
 import ../utils
 import ../ports/opengl
 
-export vmath, utils
+export utils
 
 var 
   useResult {.compiletime.}: bool
@@ -166,7 +166,7 @@ proc isBitwiseOp(n: NimNode): bool = n[0].strVal in bitOperations and n[1].getTy
 proc getBitwiseOp(n: NimNode): string = bitOperations[n[0].strVal]
 
 proc err(msg: string, n: NimNode) {.noreturn.} =
-  error(&"[GLSL] {msg}: {n.repr} -> {n.treeRepr}", n)
+  error(&"[GLSL] {msg}: {n.kind} {n.repr} -> {n.treeRepr}", n)
 
 proc typeRenamePrivate(t: string): string =
   ## Some GLSL type names don't match Nim names, rename here.
@@ -228,10 +228,10 @@ const glslFunctions = [
   "ivec2", "ivec3", "ivec4",
   "IVec2", "IVec3", "IVec4",
 
-  "abs", "clamp", "min", "max", "dot", "sqrt", "mix", "length", "cross", "reflect", "distance", "refract",
+  "abs", "clamp", "min", "max", "dot", "sqrt", "mix", "length", "cross", "reflect", "distance", "refract", "sign",
   "smoothstep", "step",
-  "dFdx", "dFdy", 
-  "texelFetch", "imageStore", "imageLoad", "texture", "textureLod",
+  "dFdx", "dFdy", "fwidth",
+  "texelFetch", "imageStore", "imageLoad", "texture", "textureLod", "textureSize",
   "normalize",
   "floor", "ceil", "round", "exp", "inversesqrt", "exp2", "log", "fract",
   "[]", "[]=",
@@ -388,6 +388,9 @@ proc toCode(n: NimNode, res: var string, level = 0) =
 
   of nnkHiddenDeref, nnkHiddenAddr:
     n[0].toCode(res)
+  
+  of nnkHiddenSubConv:
+    n[1].toCode(res)
 
   of nnkCall, nnkCommand:
     var procName = procRename(n[0].repr)
@@ -774,7 +777,6 @@ proc toCodeTopLevel(topLevelNode: NimNode, res: var string, level = 0, attribute
   ## Top level block such as in and out params.
   ## Generates the main function (which is not like all the other functions)
   assert topLevelNode.kind == nnkProcDef or topLevelNode.kind == nnkTemplateDef
-
   for n in topLevelNode:
     case n.kind
     of nnkEmpty:
@@ -1038,6 +1040,7 @@ macro toGLSL*(
   ## Converts proc to a glsl string.
   let r = newLit(toGLSLInner(s))
   result = r[0]
+  echo result
 
 #template toGLSL*(s: typed): string =
 #  ## Converts proc to a glsl string.
@@ -1116,7 +1119,12 @@ proc texture*(sampler: Sampler2D, P: Vec2): Vec4 = discard
 proc texture*(sampler: Sampler2DShadow, P: Vec3): float = discard
 proc texture*(sampler: Sampler2DArray, P: Vec3): Vec4 = discard
 proc texture*(sampler: Sampler2DArrayShadow, P: Vec4): float = discard
-proc ivec2*(x, y: int): IVec2 = discard
+proc textureSize*(sampler: Sampler1D, lod: int): int = discard
+proc textureSize*(sampler: Sampler2D, lod: int): IVec2 = discard
+proc textureSize*(sampler: Sampler3D, lod: int): IVec3 = discard
+proc textureSize*(sampler: Sampler1D): int = discard
+proc textureSize*(sampler: Sampler2D): IVec2 = discard
+proc textureSize*(sampler: Sampler3D): IVec3 = discard
 proc exp2*(v: float): float = discard
 proc dFdx*(v: Vec3): Vec3 = discard
 proc dFdy*(v: Vec3): Vec3 = discard
@@ -1124,3 +1132,8 @@ proc dFdx*(v: Vec2): Vec2 = discard
 proc dFdy*(v: Vec2): Vec2 = discard
 proc dFdx*(v: float): float = discard
 proc dFdy*(v: float): float = discard
+proc fwidth*(v: float): float = discard
+proc fwidth*(v: Vec2): Vec2 = discard
+proc fwidth*(v: Vec3): Vec3 = discard
+proc fwidth*(v: Vec4): Vec4 = discard
+proc ivec2*(x, y: int): IVec2 = discard

@@ -27,7 +27,6 @@ import alasgar/system
 import alasgar/physics/collision as physics_collision
 import alasgar/physics/ray as physics_ray
 import alasgar/physics/tools as physics_tools
-import alasgar/math/helpers
 import alasgar/misc/easing
 import alasgar/shaders/base
 import alasgar/shaders/compile

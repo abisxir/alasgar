@@ -4,6 +4,7 @@ import ../shaders/common
 proc fxaa(CAMERA: Uniform[Camera],
           FRAME: Uniform[Frame],
           COLOR_CHANNEL: Layout[0, Uniform[Sampler2D]],
+          DEPTH_CHANNEL: Layout[1, Uniform[Sampler2D]],
           FXAA_REDUCE_MIN: Uniform[float],
           FXAA_REDUCE_MUL: Uniform[float],
           FXAA_SPAN_MAX: Uniform[float],

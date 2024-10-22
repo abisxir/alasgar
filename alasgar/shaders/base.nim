@@ -10,6 +10,8 @@ import ../texture
 
 import compile, forward, effect
 
+export utils
+
 type
     ShaderValueKind* = enum
         svUint, svInt, svFloat, svVec2, svVec3, svVec4, svColor, svMat3, svMat4, svTexture

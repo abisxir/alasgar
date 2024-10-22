@@ -7,13 +7,12 @@ import tables
 
 import chroma
 
-import math/helpers
-import vmath
 import ports/opengl
 import logger
 import error
+import aljebra/[helpers, vector, matrix, types, quat, sugar]
 
-export logger, helpers, vmath, strformat, chroma, strutils, sequtils, opengl, error
+export logger, helpers, strformat, chroma, strutils, sequtils, opengl, error, helpers, vector, matrix, types, quat, sugar
 
 # Extracts data out of the given pointer
 template offsetOf*[T](p: ptr T, o: int): T = cast[ptr T](cast[ByteAddress](p) + (o * sizeof(T)))

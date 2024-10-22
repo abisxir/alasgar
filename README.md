@@ -728,7 +728,5 @@ type
 
 Dependencies
 ============
-## nimx and vmath
-Most of nimx build system has been copied here, just removed and reformed some parts. This part will be rewritten later to use nimble instead of nake. nimx is a UI library (and game framework) for nim, check it out [here](https://github.com/yglukhov/nimx). 
-
-For game mathematics, vmath is used. vmath has a good convention, check it out for more information [here](https://github.com/treeform/vmath). 
+## vmath, chroma, and nimx
+In the newer version of nim I had issue with compiling nim to GLSL using vmath, I removed it and provided a minimal implementation. Chroma is still a dependency. I also removed dependencies and also remaining build scripts that I borrow it from nimx. Some configs and sample projects will be provided to show how to import the application to android and webassembly.

@@ -165,8 +165,7 @@ proc applyEffects(): Texture =
             use(graphics.effectsFrameBuffer, target, GL_TEXTURE_2D.int, 0, graphics.screenSize.iWidth, graphics.screenSize.iHeight)
             use(shader)
             use(shader, source, "COLOR_CHANNEL", 0)
-            use(shader, graphics.fb.normal, "NORMAL_CHANNEL", 1)
-            use(shader, graphics.fb.depth, "DEPTH_CHANNEL", 2)
+            use(shader, graphics.fb.depth, "DEPTH_CHANNEL", 1)
             draw(graphics.effectsFrameBuffer)
         result = target
     else:
@@ -185,8 +184,7 @@ proc swap*() =
 
     use(graphics.blitShader)
     use(graphics.blitShader, blitTexture, "COLOR_CHANNEL", 0)
-    use(graphics.blitShader, graphics.fb.normal, "NORMAL_CHANNEL", 1)
-    use(graphics.blitShader, graphics.fb.depth, "DEPTH_CHANNEL", 2)
+    use(graphics.blitShader, graphics.fb.depth, "DEPTH_CHANNEL", 1)
     glDrawArrays(GL_TRIANGLES, 0, 3)
     glSwapWindow(graphics.window)
     glBindRenderbuffer(GL_RENDERBUFFER, 0)

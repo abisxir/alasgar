@@ -336,3 +336,4 @@ proc toEuler*(q1: Quat): Vec3 =
         result.z = arcsin(2 * test / unit)
         result.x = arctan2(2 * q1.x * q1.w - 2 * q1.y * q1.z , -sqx + sqy - sqz + sqw)    
 ]#
+

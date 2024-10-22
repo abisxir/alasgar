@@ -81,9 +81,9 @@ proc destroy*(skybox: Skybox) =
 
 proc render*(skybox: Skybox, cubemap: Texture, view, projection: Mat4, intensity, blurrity: float32) = 
     var normalizedView = view
-    normalizedView[3, 0] = 0
-    normalizedView[3, 1] = 0
-    normalizedView[3, 2] = 0
+    normalizedView.m30 = 0
+    normalizedView.m31 = 0
+    normalizedView.m32 = 0
 
     use(skybox.shader)
     skybox.shader["VIEW"] = normalizedView

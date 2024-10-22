@@ -3,9 +3,7 @@ import math
 import hashes
 import random
 
-import vmath
-
-export random, hashes, strformat, math
+export random, hashes, strformat, math, mat4, quat, vec2, vec3, vec4
 
 # Defines epsilon
 const EPSILON*: float32 = 0.0000001
@@ -59,6 +57,10 @@ func vec2*(v: openArray[float32], offset: int): Vec2 = vec2(v[offset], v[offset 
 # Vec4
 func vec4*(xy: Vec2, z: float32, w: float32): Vec4 = vec4(xy.x, xy.y, z, w)
 func caddr*(v: var Vec4): ptr float32 = v[0].addr
+func `rgb=`*(v: var Vec4, c: Vec3) = 
+    v.x = c.x
+    v.y = c.y
+    v.z = c.z
 
 # Mat3
 func caddr*(m: var Mat3): ptr float32 = cast[ptr float32](m.addr)
@@ -365,6 +367,7 @@ func step*(edge, x: float32): float32 =
         1.0
 
 # For shaders
+proc vec3*(xy: Vec2, z: float32): Vec3 = vec3(xy.x, xy.y, z)
 proc `-`*(f: float32, v: Vec2): Vec2 = vec2(f - v.x, f - v.y)
 proc `-`*(f: float32, v: Vec3): Vec3 = vec3(f - v.x, f - v.y, f - v.z)
 proc `-`*(f: float32, v: Vec4): Vec4 = vec4(f - v.x, f - v.y, f - v.z, f - v.w)
@@ -389,11 +392,26 @@ proc `*`*(f: float32, v: Vec4): Vec4 = vec4(f * v.x, f * v.y, f * v.z, f * v.w)
 proc clamp*(v, mi, mx: Vec2): Vec2 = min(max(v, mi), mx)
 proc clamp*(v, mi, mx: Vec3): Vec3 = min(max(v, mi), mx)
 proc clamp*(v, mi, mx: Vec4): Vec4 = min(max(v, mi), mx)
-proc smoothstep*(edge0, edge1, x: float32): float32 =
+proc smoothstep*(edge0, edge1: float32, x: float32): float32 =
   let t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0)
+  result = t * t * (3 - 2 * t)
+proc smoothstep*(edge0, edge1: float32, x: Vec2): Vec2 =
+  let t = clamp((x - edge0) / (edge1 - edge0), vec2(0.0), vec2(1.0))
+  result = t * t * (3 - 2 * t)
+proc smoothstep*(edge0, edge1: float32, x: Vec3): Vec3 =
+  let t = clamp((x - edge0) / (edge1 - edge0), vec3(0.0), vec3(1.0))
+  result = t * t * (3 - 2 * t)
+proc smoothstep*(edge0, edge1: float32, x: Vec4): Vec4 =
+  let t = clamp((x - edge0) / (edge1 - edge0), vec4(0.0), vec4(1.0))
   result = t * t * (3 - 2 * t)
 proc smoothstep*(edge0, edge1, x: Vec2): Vec2 = 
   let t = clamp((x - edge0) / (edge1 - edge0), vec2(0.0), vec2(1.0))
+  result = t * t * (3.0 - 2.0 * t)
+proc smoothstep*(edge0, edge1, x: Vec3): Vec3 = 
+  let t = clamp((x - edge0) / (edge1 - edge0), vec3(0.0), vec3(1.0))
+  result = t * t * (3.0 - 2.0 * t)
+proc smoothstep*(edge0, edge1, x: Vec4): Vec4 = 
+  let t = clamp((x - edge0) / (edge1 - edge0), vec4(0.0), vec4(1.0))
   result = t * t * (3.0 - 2.0 * t)
 proc refract*(i, n: Vec2; eta: float32): Vec2 =
   # For a given incident vector ``i``, surface normal ``n`` and ratio of indices of refraction, ``eta``, refract returns the refraction vector.
@@ -437,40 +455,3 @@ proc distance*(a, b: Vec3): float32 = length(b - a)
 proc distance*(a, b: Vec2): float32 = length(b - a)
 proc distance*(a, b: Vec4): float32 = length(b - a)
 
-func `*=`*(v: var Vec2, f: float32) = 
-    v.x *= f
-    v.y *= f
-func `*=`*(v: var Vec3, f: float32) = 
-    v.x *= f
-    v.y *= f
-    v.z *= f
-func `*=`*(v: var Vec4, f: float32) = 
-    v.x *= f
-    v.y *= f
-    v.z *= f
-    v.w *= f
-func `*=`*(v: var Vec2, f: Vec2) =
-    v.x *= f.x
-    v.y *= f.y
-func `*=`*(v: var Vec3, f: Vec3) =
-    v.x *= f.x
-    v.y *= f.y
-    v.z *= f.z
-func `*=`*(v: var Vec4, f: Vec4) =
-    v.x *= f.x
-    v.y *= f.y
-    v.z *= f.z
-    v.w *= f.w
-
-func slerp*(a, b: Quat, t: float32): Quat =
-    var 
-        aob = dot(a, b)
-        a1 = a
-    if aob < 0:
-        a1 = -a1        
-        aob = -aob
-    if aob > 0.9995:
-        result = (1.0 - t) * a + t * b
-    else:
-        let theta = arccos(aob)
-        result = (sin((1 - t) * theta) * a + sin(t * theta) * b) / sin(theta)

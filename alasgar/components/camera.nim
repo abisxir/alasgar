@@ -99,35 +99,35 @@ proc screenToWorldCoord*(pos: Vec2, windowSize: Vec2, camera: CameraComponent): 
 
 func extractFrustumPlanes*(camera: CameraComponent, planes: var array[6, Plane]) =
     let mvp = camera.projection * camera.transform.world
-    planes[0].x = mvp[3, 0] + mvp[0, 0]
-    planes[0].y = mvp[3, 1] + mvp[0, 1]
-    planes[0].z = mvp[3, 2] + mvp[0, 2]
-    planes[0].w = mvp[3, 3] + mvp[0, 3]
+    planes[0].x = mvp.m30 + mvp.m00
+    planes[0].y = mvp.m31 + mvp.m01
+    planes[0].z = mvp.m32 + mvp.m02
+    planes[0].w = mvp.m33 + mvp.m03
     # Right clipping plane
-    planes[1].x = mvp[3, 0] - mvp[0, 0]
-    planes[1].y = mvp[3, 1] - mvp[0, 1]
-    planes[1].z = mvp[3, 2] - mvp[0, 2]
-    planes[1].w = mvp[3, 3] - mvp[0, 3]
+    planes[1].x = mvp.m30 - mvp.m00
+    planes[1].y = mvp.m31 - mvp.m01
+    planes[1].z = mvp.m32 - mvp.m02
+    planes[1].w = mvp.m33 - mvp.m03
     # Top clipping plane
-    planes[2].x = mvp[3, 0] - mvp[1, 0]
-    planes[2].y = mvp[3, 1] - mvp[1, 1]
-    planes[2].z = mvp[3, 2] - mvp[1, 2]
-    planes[2].w = mvp[3, 3] - mvp[1, 3]
+    planes[2].x = mvp.m30 - mvp.m10
+    planes[2].y = mvp.m31 - mvp.m11
+    planes[2].z = mvp.m32 - mvp.m12
+    planes[2].w = mvp.m33 - mvp.m13
     # Bottom clipping plane
-    planes[3].x = mvp[3, 0] + mvp[1, 0]
-    planes[3].y = mvp[3, 1] + mvp[1, 1]
-    planes[3].z = mvp[3, 2] + mvp[1, 2]
-    planes[3].w = mvp[3, 3] + mvp[1, 3]
+    planes[3].x = mvp.m30 + mvp.m10
+    planes[3].y = mvp.m31 + mvp.m11
+    planes[3].z = mvp.m32 + mvp.m12
+    planes[3].w = mvp.m33 + mvp.m13
     # Near clipping plane
-    planes[4].x = mvp[3, 0] + mvp[2, 0]
-    planes[4].y = mvp[3, 1] + mvp[2, 1]
-    planes[4].z = mvp[3, 2] + mvp[2, 2]
-    planes[4].w = mvp[3, 3] + mvp[2, 3]
+    planes[4].x = mvp.m30 + mvp.m20
+    planes[4].y = mvp.m31 + mvp.m21
+    planes[4].z = mvp.m32 + mvp.m22
+    planes[4].w = mvp.m33 + mvp.m23
     # Far clipping plane
-    planes[5].x = mvp[3, 0] - mvp[2, 0]
-    planes[5].y = mvp[3, 1] - mvp[2, 1]
-    planes[5].z = mvp[3, 2] - mvp[2, 2]
-    planes[5].w = mvp[3, 3] - mvp[2, 3]
+    planes[5].x = mvp.m30 - mvp.m20
+    planes[5].y = mvp.m31 - mvp.m21
+    planes[5].z = mvp.m32 - mvp.m22
+    planes[5].w = mvp.m33 - mvp.m23
 
 
 proc calculateViewCenter*(camera: CameraComponent, vOut: var Vec3, rOut: var float32) =
@@ -200,6 +200,7 @@ proc updateShader(shader: Shader,
     shader["CAMERA.INV_PROJECTION_MATRIX"] = inverse(active.projection)
     shader["CAMERA.VIEW_MATRIX"] = active.view
     shader["CAMERA.INV_VIEW_MATRIX"] = inverse(active.view)
+    shader["CAMERA.INVERSE_VIEW_PROJECTION_MATRIX"] = inverse(active.view * active.projection)
     shader["CAMERA.POSITION"] = active.transform.globalPosition
     shader["CAMERA.NEAR"] = active.near
     shader["CAMERA.FAR"] = active.far

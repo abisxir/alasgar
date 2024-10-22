@@ -32,7 +32,7 @@ proc traverse(e: Entity, world: Mat4, dirty: bool) =
 
 method process*(sys: TraverseSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     if scene.root != nil:
-        let world = identity()
+        let world = mat4()
         traverse(scene.root, world, false)
         #var cache = initTable[TransformComponent, Mat4]()
         #for transform in iterate[TransformComponent](scene):

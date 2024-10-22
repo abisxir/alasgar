@@ -50,8 +50,7 @@ proc blur(FRAME: Frame, COLOR_CHANNEL: Sampler2D, UV: Vec2, offs: float): Vec3 =
 proc bloom(CAMERA: Uniform[Camera],
            FRAME: Uniform[Frame],
            COLOR_CHANNEL: Layout[0, Uniform[Sampler2D]],
-           NORMAL_CHANNEL: Layout[1, Uniform[Sampler2D]],
-           DEPTH_CHANNEL: Layout[2, Uniform[Sampler2D]],
+           DEPTH_CHANNEL: Layout[1, Uniform[Sampler2D]],
            INTENSITY: Uniform[float],
            UV: Vec2,
            COLOR: var Vec4) =

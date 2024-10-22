@@ -1,93 +1,77 @@
 import alasgar
 
-
 settings.exitOnEsc = true
-# Creates a window named Hello
-window("Hello", 640, 360)
-
+# Creates a window named Step4
+window("Alasgar", 1920, 1080)
    
-# Creates a new scene
-var scene = newScene() 
+let 
+    # Creates a new scene
+    scene = newScene()
+    # Creates the camera entity
+    cameraEntity = newEntity(scene, "Camera")
 
-scene.background = parseHex("d7b1a1")
-scene.fogDensity = 0.02
-#scene.minFogDistance = 0
+# Sets the background color
+scene.background = parseHex("909090")
 
-# Creates camera entity
-var cameraEntity = newEntity(scene, "Camera")
-# Sets camera position
-cameraEntity.transform.position = vec3(5, 2, 5)
+# Sets the camera position
+cameraEntity.transform.position = vec3(5, 5, 5)
 # Adds a perspective camera component to entity
 add(
     cameraEntity, 
     newPerspectiveCamera(
         75, 
-        runtime.engine.ratio, 
+        runtime.ratio, 
         0.1, 
         100.0, 
         vec3(0) - cameraEntity.transform.position
     )
 )
-#addCameraController(cameraEntity)
+addCameraController(cameraEntity)
 # Makes the camera entity child of the scene
 add(scene, cameraEntity)
 
-cameraEntity[CameraComponent].addEffect("bloom", newBloomEffect())
-
-# Creates cube entity, by default position is 0, 0, 0
-#var 
-#    model = load("res://glTF-Sample-Models/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb")
-#    cubeEntity = toEntity(model, scene)
-#    animator = find[AnimatorComponent](cubeEntity)
-#
-#for c in clips(animator):
-#    echo c
-#
-#animator.play("anim-1")
-#animator.loop = true
-
-var cubeEntity = newEntity(scene, "Cube")
+# Creates the cube entity, by default position is 0, 0, 0
+let cubeEntity = newEntity(scene, "Cube")
+# Add a cube mesh component to entity
 add(cubeEntity, newCubeMesh())
-cubeEntity.material.diffuseColor = parseHex("00ff00")
-cubeEntity.material.castShadow = true
+# Adds a script component to the cube entity
+program(cubeEntity, proc(script: ScriptComponent) =
+    let t = 2 * runtime.age
+    # Rotates the cube using euler angles
+    script.transform.euler = vec3(
+        sin(t),
+        cos(t),
+        sin(t) * cos(t),
+    )
+)
 # Makes the cube enity child of the scene
-add(scene, cubeEntity)
+#add(scene, cubeEntity)
+# Scale it up
+#cubeEntity.transform.scale = vec3(2)
 
-var planeEntity = newEntity(scene, "Plane")
-add(planeEntity, newPlaneMesh(1, 1))
-planeEntity.transform.position = vec3(0, -1, 0)
-planeEntity.transform.scale = vec3(100, 1, 100)
-planeEntity.material.diffuseColor = parseHex("ff0000")
-#planeEntity.material.castShadow = true
-add(scene, planeEntity)
-
-
-# Creates light entity
-var lightEntity = newEntity(scene, "Light")
+# Creates the light entity
+let lightEntity = newEntity(scene, "Light")
 # Sets light position
-lightEntity.transform.position = 10 * vec3(1)
+lightEntity.transform.position = vec3(4, 5, 4)
 # Adds a point light component to entity
 add(
     lightEntity, 
-    newDirectLightComponent(
-        direction=vec3(0) - lightEntity.transform.position,
-        luminance=1000.0,
-        shadow=true
-    )
+    newPointLightComponent()
 )
-# Adds a script component to light entity
-add(lightEntity, newScriptComponent(proc(script: ScriptComponent) =
-    const r = 10 
-    # Change position on transform
-    script.transform.position = r * vec3(sin(runtime.age), 1, cos(runtime.age))
-    script[DirectLightComponent].direction = vec3(0) - script.transform.position
-    #scene.fogDistance = 0.1 * runtime.age
-))
 # Makes the light entity child of the scene
 add(scene, lightEntity)
 
-# Renders an empty sceene
+let 
+    model = load("res://ibm_3278_terminal.glb")
+    terminalEntity = toEntity(model, scene)
+
+terminalEntity.transform.position = vec3(0)
+terminalEntity.transform.scale = vec3(1.0 / 24.0)
+#terminalEntity.transform.rotation = euler(PI, 0, 0)
+add(scene, terminalEntity)
+
+
+# Renders an empty scene
 render(scene)
 # Runs game main loop
 loop()
-

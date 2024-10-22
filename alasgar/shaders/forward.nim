@@ -44,7 +44,6 @@ proc mainVertex*(POSITION: Layout[0, Vec3],
         MATERIAL
     )
 
-
 proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
                    ALBEDO_MAP: Layout[1, Uniform[Sampler2D]],
                    NORMAL_MAP: Layout[2, Uniform[Sampler2D]],
@@ -61,8 +60,7 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
                    FRAME: Uniform[Frame],
                    SURFACE: Surface,
                    MATERIAL: Material,
-                   COLOR: var Layout[0, Vec4],
-                   NORMAL: var Layout[1, Vec4]) =
+                   COLOR: var Layout[0, Vec4]) =
     var FRAGMENT: Fragment = prepareFragment(
             SURFACE, 
             MATERIAL, 
@@ -145,4 +143,3 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
     #COLOR.rgb = FRAGMENT.N
     #COLOR.a = 1.0
 
-    NORMAL = vec4(FRAGMENT.N, 0.0)

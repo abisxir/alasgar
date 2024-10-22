@@ -18,7 +18,8 @@ export utils, input, mesh, texture, config
 type
     Component* = ref object of RootObj
         version: int16
-        entity {.cursor.} : Entity
+        entity {.cursor.}: Entity
+        container {.cursor.}: ContainerBase
 
     ContainerBase = ref object of RootObj
         entities: seq[Entity]
@@ -53,7 +54,8 @@ type
         material {.cursor.} : MaterialComponent
         parent {.cursor.} : Entity
         children: seq[Entity]
-        components: seq[(Component, ContainerBase)]
+        #components: seq[(Component, ContainerBase)]
+        components: seq[Component]
         visible: bool
         attached: bool
         wasted: bool
@@ -231,8 +233,9 @@ iterator iterate*[T: Component](scene: Scene): T =
 proc add*[T](e: Entity, c: T) =
     var container: Container[T] = ensureContainer[T](e.scene)
     c.entity = e
+    c.container = container
     add(container.components, c)
-    add(e.components, (c, container))
+    add(e.components, c)
 
     # Updates drawable
     updateDrawable(e, cast[Component](c))
@@ -273,11 +276,13 @@ proc removeComponent*[T](scene: Scene, c: T) = removeComponent[T](scene.root, c)
 
 proc removeComponents*(e: Entity) =
     while len(e.components) > 0:
-        var component = e.components[0][0]
-        var container = e.components[0][1]
-        delete(e.components, 0)
+        var 
+            component = e.components[0]
+            container = component.container
         delete(container.components, component)
+        delete(e.components, 0)
         component.entity = nil
+        component.container = nil
 
 proc destroy*(e: Entity) = e.wasted = true
 
@@ -346,7 +351,7 @@ iterator `children`*(n: Entity): Entity =
 proc get*[T: Component](e: Entity, r: var T) =
     r = nil
     for i in low(e.components)..high(e.components):
-        var c = e.components[i][0]
+        var c = e.components[i]
         if c of T:
             r = cast[T](c)
 
@@ -361,7 +366,7 @@ proc `visible`*(e: Entity): bool =
 
 iterator `components`*(n: Entity): Component =
     for c in n.components:
-        yield c[0]
+        yield c
 
 func get*[T: Component](e: Entity): T = get(e, result)
 func `[]`*[T](e: Entity, row: typedesc[T]): T = get[T](e)
@@ -442,8 +447,12 @@ proc ensureContainer[T](scene: Scene): Container[T] =
         result = new(Container[T])
         add(scene.containers, result)
 
-proc newEntity*(scene: Scene, name: string, tag: string = "",
-        parent: Entity = nil): Entity =
+proc newEntity*(
+    scene: Scene, 
+    name: string, 
+    tag: string = "",
+    parent: Entity = nil
+    ): Entity =
     var lastEntityId {.global.} = 0
     inc(lastEntityId)
     result = Entity.new
@@ -520,8 +529,9 @@ proc destroy*(scene: Scene) =
             e.parent = nil
             clear(e.children)
             for c in e.components:
-                cleanup(c[0])
-                c[0].entity = nil
+                cleanup(c)
+                c.entity = nil
+                c.container = nil
             clear(e.components)
 
         clear(scene.containers)
@@ -658,13 +668,13 @@ proc getActualWorld*(t: TransformComponent): Mat4 =
 
 proc `globalPosition`*(t: TransformComponent): Vec3 =
     var world = getActualWorld(t)
-    vec3(world[3, 0], world[3, 1], world[3, 2])
+    vec3(world.m30, world.m31, world.m32)
 
 proc `globalScale`*(t: TransformComponent): Vec3 =
     var world = getActualWorld(t)
-    result.x = length(vec3(world[0, 0], world[1, 0], world[2, 0]))
-    result.y = length(vec3(world[0, 1], world[1, 1], world[2, 1]))
-    result.z = length(vec3(world[0, 2], world[1, 2], world[2, 2]))
+    result.x = length(vec3(world.m00, world.m10, world.m20))
+    result.y = length(vec3(world.m01, world.m11, world.m21))
+    result.z = length(vec3(world.m02, world.m12, world.m22))
 
 proc `globalRotation`*(t: TransformComponent): Quat =
     var world = getActualWorld(t)
@@ -678,7 +688,7 @@ proc `globalPosition=`*(t: TransformComponent, position: Vec3) =
 
 proc `globalScale=`*(t: TransformComponent, scale: Vec3) =
     var world = getActualWorld(t)
-    var ratio = vec3(world[0, 0] / scale.x, world[1, 1] / scale.y, world[2, 2] / scale.z)
+    var ratio = vec3(world.m00 / scale.x, world.m11 / scale.y, world.m22 / scale.z)
     t.scale = t.scale * ratio
     markDirty(t)
 
@@ -960,7 +970,7 @@ proc clone*(m: MaterialComponent): MaterialComponent =
 proc reprTree*(e: Entity, tab="") =
     echo tab & e.name
     for c in e.components:
-        echo tab & "  " & $c[0]
+        echo tab & "  " & $c
     for child in e.children:
         reprTree(child, tab & "  ")
 

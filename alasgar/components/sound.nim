@@ -79,9 +79,10 @@ proc isPlaying*(c: SoundEffectComponent): bool =
 
 
 proc adjustBy(c: SoundEffectComponent, pos: Vec3) =
-    var cpos = c.transform.globalPosition
-    var distance = max(1, min(255, distSq(cpos, pos)))
-    var angle = abs(radToDeg(angle(cpos, pos)))
+    let 
+        cpos = c.transform.globalPosition
+        distance = max(1, min(255, distanceSq(cpos, pos)))
+        angle = abs(radToDeg(angle(cpos, pos)))
     discard setPosition(c.channel, angle.int16, distance.uint8)
 
 

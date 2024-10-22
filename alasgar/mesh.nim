@@ -7,7 +7,6 @@ import container
 
 
 type
-    Vertex* = array[18, float32]
     Mesh* = ref object
         vertexArrayObject: GLuint
         vertexBufferObject: GLuint
@@ -22,35 +21,7 @@ type
         drawMode: GLenum
         bufferMode: GLenum
         indices: seq[uint32]
-
-proc destroyMesh(mesh: Mesh) =
-    if mesh.vertexBufferObject != 0:
-        echo &"Destroying mesh[{mesh.vertexBufferObject}]..."
-        glDeleteBuffers(1, mesh.skinBufferObject.addr)
-        glDeleteBuffers(1, mesh.spriteBufferObject.addr)
-        glDeleteBuffers(1, mesh.materialBufferObject.addr)
-        glDeleteBuffers(1, mesh.modelBufferObject.addr)
-        glDeleteVertexArrays(1, mesh.vertexArrayObject.addr)
-        glDeleteBuffers(1, mesh.vertexBufferObject.addr)
-
-        mesh.skinBufferObject = 0
-        mesh.spriteBufferObject = 0
-        mesh.materialBufferObject = 0
-        mesh.modelBufferObject = 0
-        mesh.vertexArrayObject = 0
-        mesh.vertexBufferObject = 0
-
-var 
-    cache = newCachedContainer[Mesh](destroyMesh)
-    bufferSizeOf: int = 0 # Drawable size as stride
-
-proc setBufferSizeOf*(size: int) = bufferSizeOf = size
-
-template loadData(v: var Vertex, buffer: openArray[float32], index: var int, offset, count: int) = 
-    if len(buffer) > 0:
-        for i in 0..count - 1:
-            v[offset + i] = buffer[index]
-            inc(index)
+    Vertex* = array[18, float32]
 
 template `position`*(v: Vertex): Vec3 = vec3(v[0], v[1], v[2])
 template `normal`*(v: Vertex): Vec3 = vec3(v[3], v[4], v[5])
@@ -91,13 +62,6 @@ template `weight=`*(v: var Vertex, value: Vec4) =
     v[16] = value.z
     v[17] = value.w
 
-proc loadPosition(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 0, 3)
-proc loadNormal(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 3, 3)
-proc loadUv0(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 6, 2)
-proc loadUv1(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 8, 2)
-proc loadJoint(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 10, 4)
-proc loadWeight(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 14, 4)
-
 func newVertex*(position:Vec3): Vertex =
     result.position = position
 
@@ -107,6 +71,44 @@ func newVertex*(position: Vec3, normal:Vec3, uv0: Vec2): Vertex =
     result.uv0 = uv0
 
 func caddr*(v: var Vertex): ptr float32 = v[0].addr
+
+proc destroyMesh(mesh: Mesh) =
+    if mesh.vertexBufferObject != 0:
+        echo &"Destroying mesh[{mesh.vertexBufferObject}]..."
+        glDeleteBuffers(1, mesh.skinBufferObject.addr)
+        glDeleteBuffers(1, mesh.spriteBufferObject.addr)
+        glDeleteBuffers(1, mesh.materialBufferObject.addr)
+        glDeleteBuffers(1, mesh.modelBufferObject.addr)
+        glDeleteVertexArrays(1, mesh.vertexArrayObject.addr)
+        glDeleteBuffers(1, mesh.vertexBufferObject.addr)
+
+        mesh.skinBufferObject = 0
+        mesh.spriteBufferObject = 0
+        mesh.materialBufferObject = 0
+        mesh.modelBufferObject = 0
+        mesh.vertexArrayObject = 0
+        mesh.vertexBufferObject = 0
+
+var 
+    cache = newCachedContainer[Mesh](destroyMesh)
+    bufferSizeOf: int = 0 # Drawable size as stride
+
+proc setBufferSizeOf*(size: int) = bufferSizeOf = size
+
+template loadData(v: var Vertex, buffer: openArray[float32], index: var int, offset, count: int) = 
+    if len(buffer) > 0:
+        for i in 0..count - 1:
+            v[offset + i] = buffer[index]
+            inc(index)
+
+proc loadPosition(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 0, 3)
+proc loadNormal(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 3, 3)
+proc loadUv0(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 6, 2)
+proc loadUv1(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 8, 2)
+proc loadJoint(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 10, 4)
+proc loadWeight(v: var Vertex, buffer: openArray[float32], index: var int) = loadData(v, buffer, index, 14, 4)
+
+
 func `$`*(v: Mesh): string = &"Vertices: [{v.count / 3}] triangles"
 
 proc createAttribute[T](index, offset: var int, dataType: GLenum, count: int) =

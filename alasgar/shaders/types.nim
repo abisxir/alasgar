@@ -17,6 +17,7 @@ type
         INV_VIEW_MATRIX*: Mat4
         PROJECTION_MATRIX*: Mat4
         INV_PROJECTION_MATRIX*: Mat4
+        INVERSE_VIEW_PROJECTION_MATRIX*: Mat4
         EXPOSURE*: float
         GAMMA*: float
         NEAR*: float

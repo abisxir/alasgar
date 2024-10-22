@@ -278,7 +278,7 @@ proc prepare(document: Document, buffer: var Buffer) =
             elif startsWith(uri, "data:application/gltf-buffer;base64,"):
                 data = decode(uri.replace("data:application/gltf-buffer;base64,", ""))
             else:
-                let filename = &"{path}/{buffer.uri}"
+                let filename = &"{path}/{uri}"
                 data = readAsset(filename)
             
             buffer.data = some(cast[seq[uint8]](data))
