@@ -12,9 +12,10 @@ let
 
 # Sets the background color
 scene.background = parseHex("909090")
+scene.ambient = parseHex("ffffff")
 
 # Sets the camera position
-cameraEntity.transform.position = vec3(5, 5, 5)
+cameraEntity.transform.position = vec3(2)
 # Adds a perspective camera component to entity
 add(
     cameraEntity, 
@@ -45,14 +46,14 @@ program(cubeEntity, proc(script: ScriptComponent) =
     )
 )
 # Makes the cube enity child of the scene
-#add(scene, cubeEntity)
+add(scene, cubeEntity)
 # Scale it up
-#cubeEntity.transform.scale = vec3(2)
+cubeEntity.transform.scale = vec3(2)
 
 # Creates the light entity
 let lightEntity = newEntity(scene, "Light")
 # Sets light position
-lightEntity.transform.position = vec3(4, 5, 4)
+lightEntity.transform.position = vec3(10)
 # Adds a point light component to entity
 add(
     lightEntity, 
@@ -60,16 +61,6 @@ add(
 )
 # Makes the light entity child of the scene
 add(scene, lightEntity)
-
-let 
-    model = load("res://ibm_3278_terminal.glb")
-    terminalEntity = toEntity(model, scene)
-
-terminalEntity.transform.position = vec3(0)
-terminalEntity.transform.scale = vec3(1.0 / 24.0)
-#terminalEntity.transform.rotation = euler(PI, 0, 0)
-add(scene, terminalEntity)
-
 
 # Renders an empty scene
 render(scene)

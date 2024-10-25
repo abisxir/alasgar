@@ -408,6 +408,15 @@ proc find*(n: Entity, path: string): Entity =
             result = n.findEntity(names)
 
 proc findByTag*(n: Entity, tag: string): seq[Entity] = findByTag(n.scene, tag)
+proc getByName*(n: Entity, name: string): Entity = 
+    if n.name == name:
+        result = n
+    else:
+        for child in children(n):
+            result = getByName(child, name)
+            if not isNil(result):
+                break
+
 
 proc find*[T](n: Entity): T =
     result = get[T](n)

@@ -216,13 +216,129 @@ proc `position`(node: Node): Vec3 =
     else:
         result = VEC3_ZERO
 
+proc matToScale(matrix: array[16, float32]): Vec3 =
+    let
+        row0 = vec3(matrix[0], matrix[1], matrix[2])
+        row1 = vec3(matrix[4], matrix[5], matrix[6])
+        row2 = vec3(matrix[8], matrix[9], matrix[10])
+    
+    result = vec3(length(row0), length(row1), length(row2))
+    if dot(row0, cross(row1, row2)) < 0:
+        result = result * -1
+
+proc matToRotation(matrix: array[16, float32]): Quat =
+    let
+        s = matToScale(matrix)
+        m00 = matrix[0] * s[0]
+        m01 = matrix[1] * s[1]
+        m02 = matrix[2] * s[2]
+        m10 = matrix[4] * s[0]
+        m11 = matrix[5] * s[1]
+        m12 = matrix[6] * s[2]
+        m20 = matrix[8] * s[0]
+        m21 = matrix[9] * s[1]
+        m22 = matrix[10] * s[2]
+        fourXSquaredMinus1 = m00 - m11 - m22
+        fourYSquaredMinus1 = m11 - m00 - m22
+        fourZSquaredMinus1 = m22 - m00 - m11
+        fourWSquaredMinus1 = m00 + m11 + m22
+
+    var
+        biggestIndex = 0
+        fourBiggestSquaredMinus1 = fourWSquaredMinus1
+    if fourXSquaredMinus1 > fourBiggestSquaredMinus1:
+        fourBiggestSquaredMinus1 = fourXSquaredMinus1
+        biggestIndex = 1
+    if fourYSquaredMinus1 > fourBiggestSquaredMinus1:
+        fourBiggestSquaredMinus1 = fourYSquaredMinus1
+        biggestIndex = 2
+    if fourZSquaredMinus1 > fourBiggestSquaredMinus1:
+        fourBiggestSquaredMinus1 = fourZSquaredMinus1
+        biggestIndex = 3
+
+    var
+        biggestVal = sqrt(fourBiggestSquaredMinus1 + 1) * 0.5
+        mult = 0.25 / biggestVal
+        w = 1'f32
+        x = 0'f32
+        y = 0'f32
+        z = 0'f32
+
+    if biggestIndex == 0:
+        w = biggestVal
+        x = (m12 - m21) * mult
+        y = (m20 - m02) * mult
+        z = (m01 - m10) * mult
+    elif biggestIndex == 1:
+        w = (m12 - m21) * mult
+        x = biggestVal
+        y = (m01 + m10) * mult
+        z = (m20 + m02) * mult
+    elif biggestIndex == 2:
+        w = (m20 - m02) * mult
+        x = (m01 + m10) * mult 
+        y = biggestVal
+        z = (m12 + m21) * mult
+    elif biggestIndex == 3:
+        w = (m01 - m10) * mult 
+        x = (m20 + m02) * mult
+        y = (m12 + m21) * mult
+        z = biggestVal
+
+    result = normalize(quat(x, y, z, w))
+
+proc getScaling(matrix: array[16, float32]): Vec3 =
+    let
+        row0 = vec3(matrix[0], matrix[1], matrix[2])
+        row1 = vec3(matrix[4], matrix[5], matrix[6])
+        row2 = vec3(matrix[8], matrix[9], matrix[10])
+    vec3(length(row0), length(row1), length(row2))
+
+proc getRotation(mat: array[16, float32]): Quat =
+    let 
+        scaling = getScaling(mat)
+        is1 = 1 / scaling[0]
+        is2 = 1 / scaling[1]
+        is3 = 1 / scaling[2]
+        sm11 = mat[0] * is1
+        sm12 = mat[1] * is2
+        sm13 = mat[2] * is3
+        sm21 = mat[4] * is1
+        sm22 = mat[5] * is2
+        sm23 = mat[6] * is3
+        sm31 = mat[8] * is1
+        sm32 = mat[9] * is2
+        sm33 = mat[10] * is3
+
+    var 
+        trace = sm11 + sm22 + sm33
+        S: float32 = 0
+
+    if trace > 0:
+        S = sqrt(trace + 1.0) * 2
+        result = quat((sm23 - sm32) / S, (sm31 - sm13) / S, (sm12 - sm21) / S, 0.25 * S)
+    elif sm11 > sm22 and sm11 > sm33:
+        S = sqrt(1.0 + sm11 - sm22 - sm33) * 2;
+        result = quat(0.25 * S, (sm12 + sm21) / S, (sm31 + sm13) / S, (sm23 - sm32) / S)
+    elif sm22 > sm33:
+        S = sqrt(1.0 + sm22 - sm11 - sm33) * 2
+        result = quat((sm12 + sm21) / S, 0.25 * S, (sm23 + sm32) / S, (sm31 - sm13) / S)
+    else:
+        S = sqrt(1.0 + sm33 - sm11 - sm22) * 2;
+        result = quat((sm31 + sm13) / S, (sm23 + sm32) / S, 0.25 * S, (sm12 - sm21) / S)
+    
+    result = normalize(result)
+    
+
 proc `quat`(node: Node): Quat =
     if node.rotation.isSome:
         let r = node.rotation.get
         result = quat(r[0], r[1], r[2], r[3])
     elif node.matrix.isSome:
-        let m = mat4(node.matrix.get)
-        result = quat(m)
+        #result = quat(mat4(node.matrix.get))
+        #result = normalize(getRotation(node.matrix.get))
+        result = getRotation(node.matrix.get)
+        #result = matToRotation(node.matrix.get)
     else:
         result = quat()
 
@@ -230,8 +346,9 @@ proc getScale(node: Node): Vec3 =
     if node.scale.isSome:
         result = vec3(node.scale.get)
     elif node.matrix.isSome:
-        let m = mat4(node.matrix.get)
-        result = scale(m)
+        #result = scale(mat4(node.matrix.get))
+        result = getScaling(node.matrix.get)
+        #result = matToScale(node.matrix.get)
     else:
         result = VEC3_ONE
 
@@ -448,12 +565,14 @@ proc loadTexture(document: Document, sampler: Option[Sampler]): Texture =
             if image.uri.isSome:
                 let uri = if startsWith(image.uri.get, "data:image/"): image.uri.get else: &"{document.path}/{image.uri.get}"
                 result = newTexture(uri, wrapT=wrapT, wrapS=wrapS, wrapR=wrapR, minFilter=minFilter, magFilter=magFilter)
+                echo "Texture created with uri..."
             elif image.bufferView.isSome:
                 var 
                     bufferView = document.bufferViews[image.bufferView.get]
                     buffer = document.buffers[bufferView.buffer]
                     byteSeq: seq[byte]
                 extract(bufferView, buffer, byteSeq)
+                echo "Texture created with byte array..."
                 result = newTexture(byteSeq, wrapT=wrapT, wrapS=wrapS, wrapR=wrapR, minFilter=minFilter, magFilter=magFilter)
             else:
                 raise newAlasgarError("Image is not supported!")
@@ -467,6 +586,7 @@ proc loadMaterials(document: Document, model: ModelResource) =
                 if m.pbrMetallicRoughness.get.baseColorFactor.isSome:
                     material.diffuseColor = toColor(m.pbrMetallicRoughness.get.baseColorFactor.get)
                 material.albedoMap = loadTexture(document, m.pbrMetallicRoughness.get.baseColorTexture)
+                echo "Texture created with id: ", material.albedoMap.id
                 material.metallicMap = loadTexture(document, m.pbrMetallicRoughness.get.metallicRoughnessTexture)
                 material.roughnessMap = material.metallicMap
                 material.aoMap = loadTexture(document, m.occlusionTexture)
@@ -676,6 +796,7 @@ proc loadGLB*(filename: string): Resource =
         if chunkType == 0x4E4F534A:
             var str = newString(data.len)
             copyMem(str[0].addr, data[0].addr, data.len)
+            echo str
             document = to(parseJson(str), Document)
         elif chunkType == 0x004E4942:
             binary = data

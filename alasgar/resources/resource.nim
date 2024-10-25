@@ -10,7 +10,7 @@ type
         destroy: ResourceDestroyFunc
 
     Resource* {.inheritable.} = ref object 
-        url: string
+        url*: string
         kind: string
 
 func `url`*(r: Resource): string = r.url

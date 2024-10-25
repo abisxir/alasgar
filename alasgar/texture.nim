@@ -2,8 +2,10 @@
 import hashes
 import tables
 import strutils
-import ports/opengl
+import base64
+import checksums/md5
 
+import ports/opengl
 import resources/image
 import utils
 import container
@@ -392,8 +394,10 @@ proc newTexture*(url: string, wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wr
         magFilter,
     )
 
+
 proc newTexture*(byteSeq: var seq[byte], wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture = 
     let resource = new(ImageResource)
+    resource.url = getMD5(encode(byteSeq))
     loadImage(byteSeq, resource)
     result = newTexture(
         resource, 

@@ -18,6 +18,8 @@ type
         pixels*: seq[byte]
         bits*: int
 
+setFlipVerticallyOnLoad(false)
+
 proc prepareBuffer(url: string): string =
     if startsWith(url, "data:image/"):
         let data = split(url, "base64,")
@@ -30,7 +32,6 @@ proc prepareBuffer(url: string): string =
         result = readAll(stream)
 
 proc loadImage*(byteSeq: var seq[byte], r: ImageResource) =
-    setFlipVerticallyOnLoad(false)
     r.pixels = loadFromMemory(
         byteSeq, 
         r.width, 

@@ -1,6 +1,6 @@
 # Package
 
-version     = "0.4"
+version     = "0.4.1"
 author      = "Abi Mohammadi"
 description = "Game Engine"
 license     = "MIT"
@@ -11,6 +11,7 @@ installFiles = @["alasgar.nim"]
 
 
 # Dependencies
+requires "checksums"
 requires "chroma"
 requires "stb_image"
 requires "jnim" # For android target
