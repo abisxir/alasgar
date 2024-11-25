@@ -194,7 +194,6 @@ proc toEntity*(r: Resource, scene: Scene, castShadow=false, rootName=""): Entity
     var results = newSeq[Entity]()
     for node in mr.nodes:
         if not isEmptyOrWhitespace(node.parent):
-            echo &"Adding model[{node.name}] as child of [{node.parent}]..."
             addNode(node.name, node.parent)
         else:
             add(results, findNode(node.name))

@@ -103,6 +103,8 @@ proc loadShaderSource(src: cstring, kind: GLenum): GLuint =
     let info = shaderInfoLog(result)
     if not compiled:
         echo formatSource(&"{src}")
+        when defined(linux):
+            writeFile("/tmp/error.glsl", &"{src}")
         logi "Shader compile error: ", info
         glDeleteShader(result)
     elif info.len > 0:

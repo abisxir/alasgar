@@ -87,7 +87,9 @@ proc adjustBy(c: SoundEffectComponent, pos: Vec3) =
 
 
 # System implementation
-proc newSoundSystem*(): SoundSystem = new(result)
+proc newSoundSystem*(): SoundSystem = 
+    new(result)
+    result.name = "Sound"
 
 
 method init*(sys: SoundSystem) = 

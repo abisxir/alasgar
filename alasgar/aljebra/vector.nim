@@ -123,7 +123,7 @@ func cross*(a, b: Vec2): float32 = a.x * b.y - b.x * a.y
 func clamp*(v, a, b: Vec2): Vec2 = Vec2(x: clamp(v.x, a.x, b.x), y: clamp(v.y, a.y, b.y))
 func min*(v1, v2: Vec2): Vec2 = vec2(min(v1.x, v2.x), min(v1.y, v2.y))
 func max*(v1, v2: Vec2): Vec2 = vec2(max(v1.x, v2.x), max(v1.y, v2.y))
-
+func sign*(a: Vec2): Vec2 = vec2(sgn(a.x).float32, sgn(a.y).float32)
 
 func quantize*(v: Vec2, n: float32): Vec2 =
     result.x = sgn(v.x).float32 * floor(abs(v.x) / n) * n
@@ -305,7 +305,7 @@ func cross*[T: Vec3|IVec3|UVec3](a, b: T): T = vec3(a.y*b.z - a.z*b.y, a.z*b.x -
 func clamp*(v, a, b: Vec3): Vec3 = Vec3(x: clamp(v.x, a.x, b.x), y: clamp(v.y, a.y, b.y), z: clamp(v.z, a.z, b.z))
 func min*(v1, v2: Vec3): Vec3 = vec3(min(v1.x, v2.x), min(v1.y, v2.y), min(v1.z, v2.z))
 func max*(v1, v2: Vec3): Vec3 = vec3(max(v1.x, v2.x), max(v1.y, v2.y), max(v1.z, v2.z))
-
+func sign*(a: Vec3): Vec3 = vec3(sgn(a.x).float32, sgn(a.y).float32, sgn(a.z).float32)
 
 func quantize*(v: Vec3, n: float32): Vec3 =
     result.x = sgn(v.x).float32 * floor(abs(v.x) / n) * n
@@ -520,7 +520,7 @@ func cross*[T: Vec4|IVec4|UVec4](a, b: T): T = vec4(a.y*b.z - a.z*b.y, a.z*b.x -
 func clamp*(v, a, b: Vec4): Vec4 = Vec4(x: clamp(v.x, a.x, b.x), y: clamp(v.y, a.y, b.y), z: clamp(v.z, a.z, b.z), w: clamp(v.w, a.w, b.w))
 func min*(v1, v2: Vec4): Vec4 = vec4(min(v1.x, v2.x), min(v1.y, v2.y), min(v1.z, v2.z), min(v1.w, v2.w))
 func max*(v1, v2: Vec4): Vec4 = vec4(max(v1.x, v2.x), max(v1.y, v2.y), max(v1.z, v2.z), max(v1.w, v2.w))
-
+func sign*(a: Vec4): Vec4 = vec4(sgn(a.x).float32, sgn(a.y).float32, sgn(a.z).float32, sgn(a.w).float32)
 
 func quantize*(v: Vec4, n: float32): Vec4 =
     result.x = sgn(v.x).float32 * floor(abs(v.x) / n) * n
@@ -597,9 +597,9 @@ func `-`*[T:Vec2|IVec2|UVec2|Vec3|IVec3|UVec3|Vec4|IVec4|UVec4](a: T): T = -1 * 
 func length*[T:Vec2|Vec3|Vec4](a: T): float32 = sqrt(lengthSq(a))
 func distance*[T:Vec2|IVec2|UVec2|Vec3|IVec3|UVec3|Vec4|IVec4|UVec4](at, to: T): float32 = length(at - to).float32
 func distanceSq*[T:Vec2|IVec2|UVec2|Vec3|IVec3|UVec3|Vec4|IVec4|UVec4](at, to: T): float32 = lengthSq(at - to).float32
-func lerp*[T:Vec2|Vec3|Vec4](a, b: T, v: float32): T = a * (1 - v) + b * v
-func lerp*[T:IVec2|IVec3|IVec4](a, b: T, v: int32): T = a * (1 - v) + b * v
-func lerp*[T:UVec2|UVec3|UVec4](a, b: T, v: uint32): T = a * (1 - v) + b * v
+func lerp*[T:float32|Vec2|Vec3|Vec4](a, b: T, v: float32): T = a * (1 - v) + b * v
+func lerp*[T:int32|IVec2|IVec3|IVec4](a, b: T, v: int32): T = a * (1 - v) + b * v
+func lerp*[T:uint32|UVec2|UVec3|UVec4](a, b: T, v: uint32): T = a * (1 - v) + b * v
 func clamp[T:Vec2|IVec2|UVec2|Vec3|IVec3|UVec3|Vec4|IVec4|UVec4](a, b, c: T): T =
     if a < b:
         result = b
@@ -611,12 +611,6 @@ func saturate*(v: Vec3): Vec3 = clamp(v, vec3(EPSILON), vec3(1.0))
 func saturate*(v: Vec4): Vec4 = clamp(v, vec4(EPSILON), vec4(1.0))
 func mix*[T:Vec2|Vec3|Vec4](a, b: T, v: float32): T = v * (b - a) + a
 func mix*(a, b, v: float32): float32 = v * (b - a) + a
-
-func step*(edge, x: float32): float32 =
-    if x < edge:
-        0.0
-    else:
-        1.0
 
 func normalize*[T:Vec2|Vec3|Vec4](a: T): T = 
     let l = length(a)

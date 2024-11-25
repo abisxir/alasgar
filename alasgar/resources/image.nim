@@ -18,18 +18,14 @@ type
         pixels*: seq[byte]
         bits*: int
 
-setFlipVerticallyOnLoad(false)
+#setFlipVerticallyOnLoad(false)
 
 proc prepareBuffer(url: string): string =
     if startsWith(url, "data:image/"):
         let data = split(url, "base64,")
         result = decode(data[1])
     else:
-        var stream = openAssetStream(url)
-        defer: close(stream)
-        if stream == nil:
-            halt &"Could not open [{url}]."
-        result = readAll(stream)
+        result = readAsset(url)
 
 proc loadImage*(byteSeq: var seq[byte], r: ImageResource) =
     r.pixels = loadFromMemory(
@@ -45,7 +41,7 @@ proc loadImage(url: string): Resource =
     var 
         r = new(ImageResource)
         buffer = prepareBuffer(url)
-        byteSeq = cast[seq[byte]](buffer)
+        byteSeq = toSeq(buffer.mapIt(it.byte))
     
     loadImage(byteSeq, r)
     r.hdr = url.endsWith(".hdr")

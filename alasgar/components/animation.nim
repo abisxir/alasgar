@@ -254,7 +254,7 @@ proc sample*(clip: AnimationClipComponent, delta: float32) =
 # System implementation
 proc newAnimationSystem*(): AnimationSystem =
     new(result)
-    result.name = "Animation System"
+    result.name = "Animation"
 
 method process*(sys: AnimationSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     {.warning[LockLevel]:off.}

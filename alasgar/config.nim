@@ -11,6 +11,7 @@ type
         maxFPS*: int
         depthMapSize*: int
         exitOnEsc*: bool
+        maxSkinTextureSize*: int
 
 var settings* = Settings(
     maxBatchSize: 10 * 1024,
@@ -20,5 +21,6 @@ var settings* = Settings(
     verbose: false,
     maxFPS: 60,
     depthMapSize: 1024,
+    maxSkinTextureSize: 1024,
     exitOnEsc: false,
 )

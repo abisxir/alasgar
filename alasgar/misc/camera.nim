@@ -18,10 +18,10 @@ type
         rotating: bool
         panning: bool
 
-proc handleRotating(controller: CameraControllerComponent, input: Input, delta: float32) =
+proc handleRotating(controller: CameraControllerComponent) =
     var 
-        theta = controller.theta - controller.delta.x * delta
-        phi = controller.phi + controller.delta.y * delta
+        theta = controller.theta - controller.delta.x * runtime.delta
+        phi = controller.phi + controller.delta.y * runtime.delta
 
     if phi > PI / 2:
         phi = PI / 2
@@ -31,16 +31,16 @@ proc handleRotating(controller: CameraControllerComponent, input: Input, delta: 
     controller.theta = theta
     controller.phi = phi      
 
-proc handlePanning(controller: CameraControllerComponent, input: Input, delta: float32) =
+proc handlePanning(controller: CameraControllerComponent) =
     let offset = vec3(
-        controller.delta.x * delta, 
-        controller.delta.y * delta, 
+        controller.delta.x * runtime.delta, 
+        controller.delta.y * runtime.delta, 
         0
     )
     controller.target = mix(
         controller.target, 
         controller.target + offset, 
-        controller.speed * delta * 2
+        controller.speed * runtime.delta * 2
     )
 
 #proc handlePanning(controller: CameraControllerComponent) =
@@ -52,17 +52,10 @@ proc handlePanning(controller: CameraControllerComponent, input: Input, delta: f
 #        target = controller.target + right * amount.x * 0.01 + up * amount.y * 0.01
 #    controller.target = target
 
-proc handleCameraControler(script: ScriptComponent) =
+proc handleInput(component: InputComponent, input: Input) =
     let 
-        input = runtime.input
-        delta = runtime.delta
-        camera = script[CameraComponent]
-        controller = script[CameraControllerComponent]
+        controller = component[CameraControllerComponent]
         mouseDelta = input.mouse.position - controller.lastMousePos
-
-    controller.delta = vec2(clamp(mouseDelta.x, -MAX_STEP, MAX_STEP), clamp(mouseDelta.y, -MAX_STEP, MAX_STEP))
-    controller.lastMousePos = input.mouse.position
-
     if getMouseButtonDown(input, mouseButtonLeft):
         controller.rotating = true
     elif getMouseButtonUp(input, mouseButtonLeft):
@@ -72,12 +65,22 @@ proc handleCameraControler(script: ScriptComponent) =
     elif getMouseButtonUp(input, mouseButtonRight):
         controller.panning = false
     elif input.mouse.scrolling:
-        controller.distance -= input.mouse.wheel.y * delta * controller.speed * 2
-    
+        controller.distance -= input.mouse.wheel.y * runtime.delta * controller.speed * 2
+
+    controller.delta = vec2(clamp(mouseDelta.x, -MAX_STEP, MAX_STEP), clamp(mouseDelta.y, -MAX_STEP, MAX_STEP))
+    controller.lastMousePos = input.mouse.position
+
+
+proc updateCameraControler(script: ScriptComponent) =
+    let 
+        delta = runtime.delta
+        camera = script[CameraComponent]
+        controller = script[CameraControllerComponent]
+   
     if controller.rotating:
-        handleRotating(controller, input, delta)
+        handleRotating(controller)
     elif controller.panning:
-        handlePanning(controller, input, delta)
+        handlePanning(controller)
 
     let 
         radius = controller.distance
@@ -101,4 +104,5 @@ proc addCameraController*(e: Entity, distance= 10.0, theta=PI/4.0, phi=PI/4.0) =
     controller.theta = theta
     controller.phi = phi
     add(e, controller)
-    add(e, newScriptComponent(handleCameraControler))
+    add(e, newInputComponent(handleInput))
+    add(e, newScriptComponent(updateCameraControler))

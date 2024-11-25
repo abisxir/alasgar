@@ -29,6 +29,7 @@ import components/sound
 import components/timer
 import resources/resource
 import shaders/base
+import physics/ray
 
 when defined(emscripten):
     proc handleFrameWhenEmscripten() {.cdecl.}
@@ -38,12 +39,13 @@ type
         title: string
         primary*: Scene
         systems: seq[System]
+        inputSystems: seq[System]
         ratio: float32
         newPrimary: Scene
         oldPrimary: Scene
     Runtime* = object
+        evt: Event
         engine: Engine
-        input: Input
         runGame: bool
         age: float32
         frames: int
@@ -138,7 +140,6 @@ proc initEngine*(windowWidth: int,
     # Create systems
     addSystem(newTimerSystem())
     addSystem(newScriptSystem())
-    addSystem(newInteractiveSystem())
     addSystem(newCatmullSystem())
     addSystem(newAnimationSystem())
     addSystem(newTraverseSystem())
@@ -149,6 +150,9 @@ proc initEngine*(windowWidth: int,
     addSystem(newSoundSystem())
     addSystem(newLightSystem())
     addSystem(newRenderSystem())
+
+    add(runtime.engine.inputSystems, newInputSystem())
+    add(runtime.engine.inputSystems, newInteractiveSystem())
 
     for e in runtime.engine.systems:
         init(e)
@@ -183,17 +187,16 @@ proc destroy*() =
 proc handleFrame() =
     # Calculates delta time between current frame and the last drawn frame
     var 
-        evt = sdl2.defaultEvent
-        input: Input
         now = epochTime()
         delta = now - runtime.lastTicks
         age = 0'f32
         sleepTime = 0'f32
         frameLimit = if settings.maxFPS > 0: 1'f32 / settings.maxFPS.float32 else: 0'f32
+        scene = runtime.engine.primary
 
-    if not isNil(runtime.engine.primary):
+    if not isNil(scene):
         # Cleans up the scene, removes dangling entities
-        cleanup(runtime.engine.primary)
+        cleanup(scene)
 
     when not defined(emscripten):
         if delta > 0 and delta < frameLimit:
@@ -217,7 +220,7 @@ proc handleFrame() =
         if settings.verbose:
             echo &"Counted frames: {runtime.frames}"
             echo &"FPS: {1.0 / delta}"
-            echo &"  Drawable objects: {len(runtime.engine.primary.drawables)}"
+            echo &"  Drawable objects: {len(scene.drawables)}"
             echo &"  Visible objects: {graphics.totalObjects}"
             echo &"  Draw calls: {graphics.drawCalls}"
 
@@ -235,38 +238,44 @@ proc handleFrame() =
     # Marks start of processing events
     let eventStart = epochTime()
 
-    # Set mouse position, even if there is not event.
-    updateMousePosition(addr input)
-
     # Pulls SDL event and passes to the nodes that need event processing
-    while pollEvent(evt):
-        if evt.kind == QuitEvent:
+    while pollEvent(runtime.evt):
+        var input: Input
+        # Set mouse position, even if there is not event.
+        updateMousePosition(addr input)
+        if runtime.evt.kind == QuitEvent:
             runtime.runGame = false
-        elif settings.exitOnEsc and evt.kind == KeyDown and (evt.evKeyboard.keysym.scancode == SDL_SCANCODE_ESCAPE or evt.evKeyboard.keysym.scancode == SDL_SCANCODE_Q):
+        elif settings.exitOnEsc and runtime.evt.kind == KeyDown and (runtime.evt.evKeyboard.keysym.scancode == SDL_SCANCODE_ESCAPE or runtime.evt.evKeyboard.keysym.scancode == SDL_SCANCODE_Q):
             runtime.runGame = false
-        elif evt.kind == WindowEvent:
-            var windowEvent = cast[WindowEventPtr](addr(evt))
+        elif runtime.evt.kind == WindowEvent:
+            var windowEvent = cast[WindowEventPtr](addr(runtime.evt))
             if windowEvent.event == WindowEvent_Resized:
                 let width = windowEvent.data1
                 let height = windowEvent.data2
                 resizeGraphics(vec2(width.float32, height.float32))
                 logi &"Window resized: ({width}, {height})"
-        else:
-            # Maps SDL event to alasgar event object
-            parseEvent(addr evt, graphics.windowSize, addr input)
-    # Updates input in runtime so all scripts can access it
-    runtime.input = input
+        # Maps SDL event to alasgar event object
+        parseEvent(addr runtime.evt, graphics.windowSize, addr input)
+        if not isNil(scene):
+            for system in runtime.engine.inputSystems:
+                process(system, runtime.engine.primary, input, runtime.delta, runtime.frames, runtime.age)
     
     # Calculates event processing elapsed time 
     runtime.eventProcessTime = epochTime() - eventStart
 
     if isNil(runtime.engine.newPrimary):
-        # Clear scene
-        clear()
-        if runtime.engine.primary != nil and runtime.engine.primary.activeCamera != nil:
+        if isNil(scene):
+            echo "No scene to render!"
+        elif isNil(scene.activeCamera):
+            echo "No active camera!"
+        else:
+            # Clear scene
+            clear()
             for system in runtime.engine.systems:
-                let start = epochTime()
-                process(system, runtime.engine.primary, runtime.input, delta, runtime.frames, runtime.age)
+                var 
+                    start = epochTime()
+                    input: Input
+                process(system, runtime.engine.primary, input, delta, runtime.frames, runtime.age)
                 runtime.systemBenchmark[system.name] = epochTime() - start
     else:
         destroy(runtime.engine.primary)
@@ -320,6 +329,7 @@ template `input`*(r: Runtime): Input = r.input
 template `ratio`*(r: Runtime): float32 = r.engine.ratio
 template `windowSize`*(r: Runtime): Vec2 = graphics.windowSize
 template `screenSize`*(r: Runtime): Vec2 = graphics.screenSize
+template `rayToMousePosition`*(e: Runtime): Ray = getRayToScreenPosition(runtime.camera, getMousePosition(runtime.input))
 template `ratio`*(e: Engine): float32 = e.ratio
 
 when defined(android) or defined(ios):

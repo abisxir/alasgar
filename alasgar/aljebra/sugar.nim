@@ -1,5 +1,8 @@
-import helpers, types, vector, matrix, quat
+import helpers, types, vector
 
+# Scalar
+func inverseLerp*(a, b, v: float32): float32 = (v - a) / (b - a)
+func map*(x, A, B, C, D: float32): float32 = (x - A) / (B - A) * (D - C) + C
 
 # Vec2
 proc randomVec2*(): Vec2 =
@@ -50,6 +53,8 @@ func `a=`*(v: var Vec4, a: float32) = v.w = a
 func `yzx`*(v: Vec3|Vec4): Vec3 = Vec3(x: v.z, y: v.z, z: v.y)
 func `xyz`*(v: Vec3|Vec4): Vec3 = Vec3(x: v.x, y: v.y, z: v.z)
 func `xyz=`*(v: var Vec4, o: Vec3) = (v.x = o.x;v.y = o.y;v.z = o.z)
+func `zyx`*(v: Vec3|Vec4): Vec3 = Vec3(x: v.z, y: v.y, z: v.x)
+func `zxy`*(v: Vec3|Vec4): Vec3 = Vec3(x: v.z, y: v.x, z: v.y)
 func `xyx`*(v: Vec2|Vec3|Vec4): Vec3 = Vec3(x: v.x, y: v.y, z: v.x)
 func `xyx=`*(v: var Vec4, o: Vec3) = (v.x = o.x;v.y = o.y;v.z = o.x)
 func `rgba`*(v: Vec4): Vec4 = v
@@ -77,6 +82,10 @@ func `rgb=`*(v: var Vec4, o: Vec3) = v.xyz = o
 
 
 # GLSL
+func step*(edge, x: float32): float32 = (if x < edge: 0.0 else: 1.0)
+func step*(e1, e2: Vec2): Vec2 = vec2(step(e1.x, e2.x), step(e1.y, e2.y))
+func step*(e1, e2: Vec3): Vec3 = vec3(step(e1.x, e2.x), step(e1.y, e2.y), step(e1.z, e2.z))
+func step*(e1, e2: Vec4): Vec4 = vec4(step(e1.x, e2.x), step(e1.y, e2.y), step(e1.z, e2.z), step(e1.w, e2.w))
 proc smoothstep*(edge0, edge1: float32, x: float32): float32 =
   let t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0)
   result = t * t * (3 - 2 * t)
@@ -139,3 +148,6 @@ proc pow*(a, b: Vec4): Vec4 = vec4(pow(a.x, b.x), pow(a.y, b.y), pow(a.z, b.z), 
 proc sqrt*(a: Vec2): Vec2 = vec2(sqrt(a.x), sqrt(a.y))
 proc sqrt*(a: Vec3): Vec3 = vec3(sqrt(a.x), sqrt(a.y), sqrt(a.z))
 proc sqrt*(a: Vec4): Vec4 = vec4(sqrt(a.x), sqrt(a.y), sqrt(a.z), sqrt(a.w))
+proc abs*(a: Vec2): Vec2 = vec2(abs(a.x), abs(a.y))
+proc abs*(a: Vec3): Vec3 = vec3(abs(a.x), abs(a.y), abs(a.z))
+proc abs*(a: Vec4): Vec4 = vec4(abs(a.x), abs(a.y), abs(a.z), abs(a.w))

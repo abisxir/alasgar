@@ -9,7 +9,7 @@ type
 
 proc newRenderSystem*(): RenderSystem =
     new(result)
-    result.name = "Render System"
+    result.name = "Render"
 
 proc prepareShaders(scene: Scene) =
     graphics.context.environmentIntensity = scene.environmentIntensity

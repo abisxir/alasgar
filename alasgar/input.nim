@@ -52,14 +52,13 @@ type
         keyDown: bool
         keyUp: bool
         keyName: string
-        repeated: bool
+        repeat: bool
 
     Input* = object
+        event*: Event
         keyboard*: Keyboard
         mouse*: Mouse
         touch*: Touch
-
-func `keyName`*(i: Input): string = i.keyName
 
 proc updateMousePosition*(outInput: ptr Input) =
     var x, y: cint
@@ -67,15 +66,9 @@ proc updateMousePosition*(outInput: ptr Input) =
     outInput.mouse.position.x = x.float32
     outInput.mouse.position.y = y.float32
 
-
 proc parseEvent*(pEvent: ptr Event, windowSize: Vec2, outInput: ptr Input) =
-    if pEvent[].kind == KeyDown or pEvent[].kind == KeyUp:
-        outInput.keyboard.keyDown = pEvent[].kind == KeyDown
-        outInput.keyboard.keyUp = pEvent[].kind == KeyUp
-        var name = getKeyName(pEvent[].evKeyboard.keysym.sym)
-        outInput.keyboard.keyName = $name
-        outInput.keyboard.repeated = pEvent[].evKeyboard.repeat
-    
+    outInput.event = pEvent[]
+
     # Updates mouse state
     updateMousePosition(outInput)
 
@@ -85,12 +78,38 @@ proc parseEvent*(pEvent: ptr Event, windowSize: Vec2, outInput: ptr Input) =
     #outInput.mouseWheelState = mouseWheelStateNone
     #outInput.mouseClicks = 0
     case pEvent[].kind:
+        of KeyDown, KeyUp:
+            let 
+                event = cast[KeyboardEventPtr](pEvent)
+                name = getKeyName(event.keysym.sym)
+            outInput.keyboard.keyDown = event.kind == KeyDown
+            outInput.keyboard.keyUp = event.kind == KeyUp
+            outInput.keyboard.repeat = event.repeat.bool
+            outInput.keyboard.keyName = $name
+        of MouseMotion:
+            let mouseMotionEvent = cast[MouseButtonEventPtr](pEvent)
+            if mouseMotionEvent.which != SDL_TOUCH_MOUSEID:
+                outInput.mouse.clicks = mouseMotionEvent.clicks.uint8
+                if mouseMotionEvent.state.KeyState == KeyPressed:
+                    outInput.mouse.state = mouseStateDown
+                elif mouseMotionEvent.state.KeyState == KeyReleased:
+                    outInput.mouse.state = mouseStateUp
+                outInput.mouse.button = case mouseMotionEvent.button:
+                    of sdl2.BUTTON_LEFT: mouseButtonLeft
+                    of sdl2.BUTTON_MIDDLE: mouseButtonMiddle
+                    of sdl2.BUTTON_RIGHT: mouseButtonRight
+                    of sdl2.BUTTON_X1: mouseButtonX1
+                    of sdl2.BUTTON_X2: mouseButtonX2
+                    else: mouseButtonUnknown
+                outInput.mouse.state = if outInput.mouse.button == mouseButtonUnknown: mouseStateUp else: mouseStateDown
+                outInput.mouse.position.x = mouseMotionEvent.x.float32
+                outInput.mouse.position.y = mouseMotionEvent.y.float32
         of MouseButtonDown, MouseButtonUp:
-            when not defined(ios) and not defined(android):
-                if pEvent[].kind == MouseButtonDown:
-                    discard sdl2.captureMouse(True32)
-                else:
-                    discard sdl2.captureMouse(False32)
+            #when not defined(ios) and not defined(android):
+            #    if pEvent[].kind == MouseButtonDown:
+            #        discard sdl2.captureMouse(True32)
+            #    else:
+            #        discard sdl2.captureMouse(False32)
             
             # Casts to SDL mouse event object, to extract information
             let mouseEvent = cast[MouseButtonEventPtr](pEvent)
@@ -109,7 +128,8 @@ proc parseEvent*(pEvent: ptr Event, windowSize: Vec2, outInput: ptr Input) =
                     of sdl2.BUTTON_X1: mouseButtonX1
                     of sdl2.BUTTON_X2: mouseButtonX2
                     else: mouseButtonUnknown
-
+                outInput.mouse.position.x = mouseEvent.x.float32
+                outInput.mouse.position.y = mouseEvent.y.float32
         of FingerMotion, FingerDown, FingerUp:
             outInput.touch.state = case pEvent[].kind
                 of FingerDown: touchStateFingerDown
@@ -146,16 +166,24 @@ proc parseEvent*(pEvent: ptr Event, windowSize: Vec2, outInput: ptr Input) =
         else:
             discard
 
-func isKeyDown*(i: Input, name: string=""): bool = i.keyboard.keyDown and (toLower(name) == toLower(i.keyboard.keyName) or len(name) == 0)
-func isKeyUp*(i: Input, name: string=""): bool = i.keyboard.keyUp and (toLower(name) == toLower(i.keyboard.keyName) or len(name) == 0)
-func getKey*(i: Input): string = i.keyName
+func hasKeyboardEvent*(i: Input): bool = i.event.kind == KeyUp or i.event.kind == KeyDown
+func isKeyDown*(i: Input, name: string): bool = i.keyboard.keyDown and toLower(name) == toLower(i.keyboard.keyName)
+func isKeyUp*(i: Input, name: string): bool = i.keyboard.keyUp and toLower(name) == toLower(i.keyboard.keyName)
+func isKeyDown*(i: Input): bool = i.keyboard.keyDown
+func isKeyUp*(i: Input): bool = i.keyboard.keyUp
+func getKey*(i: Input): string = i.keyboard.keyName
+func hasMouseEvent*(i: Input): bool = i.event.kind == FingerMotion or i.event.kind == FingerUp or i.event.kind == FingerDown
 func getMousePosition*(i: Input): Vec2 = i.mouse.position
+func getMousePosition*(): Vec2 = 
+    var x, y: cint
+    discard getMouseState(x, y)
+    result.x = x.float32
+    result.y = y.float32
 func getMouseButtonDown*(i: Input, btn: MouseButton): bool = i.mouse.state == mouseStateDown and i.mouse.button == btn
 func getMouseButtonUp*(i: Input, btn: MouseButton): bool = i.mouse.state == mouseStateUp and i.mouse.button == btn
 func getMouseClicks*(i: Input): uint8 = i.mouse.clicks
+func hasTouchEvent*(i: Input): bool = i.event.kind == MouseButtonDown or i.event.kind == MouseButtonUp or i.event.kind == MouseMotion or i.event.kind == MouseWheel
 func getTouchCount*(i: Input): int = len(i.touch.data)
-
-
 func getTouchPosition*(i: Input, pos: var Vec2): bool =
     result = len(i.touch.data) > 0
     if result:
@@ -181,7 +209,7 @@ func `scrolling`*(m: Mouse): bool = m.wheel.state == mouseWheelStateScroll
 func `keyboard`*(i: Input): Keyboard = i.keyboard
 func `touch`*(i: Input): Touch = i.touch
 func `$`*(mouse: Mouse): string = &"Mouse\n\tposition: [{mouse.position}]\n\tstate: [{mouse.state}]\n\tbutton: [{mouse.button}]\n\tclicks: [{mouse.clicks}]\n\twheel state: [{mouse.wheel.state}]\n\twheel data: [{mouse.wheel.x}, {mouse.wheel.y}]"
-func `$`*(keyboard: Keyboard): string = &"Keyboard\n\tkey down: [{keyboard.keyDown}]\n\tkey up: [{keyboard.keyUp}]\n\tkey name: [{keyboard.keyName}]\n\trepeated: [{keyboard.repeated}]"
+func `$`*(keyboard: Keyboard): string = &"Keyboard\n\tkey down: [{keyboard.keyDown}]\n\tkey up: [{keyboard.keyUp}]\n\tkey name: [{keyboard.keyName}]\n\trepeated: [{keyboard.repeat}]"
 func `$`*(touch: Touch): string = &"Touch\n\tstate: [{touch.state}]\n\tdata: [{touch.data}]"
 func `$`*(i: Input): string =
     result = &"{i.keyboard}\n{i.mouse}\n{i.touch}"

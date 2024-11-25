@@ -30,7 +30,7 @@ proc `callCount`*(timer: TimerComponent): int = timer.count
 # System implementation
 proc newTimerSystem*(): TimerSystem =
     new(result)
-    result.name = "Timer System"
+    result.name = "Timer"
 
 method process*(sys: TimerSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     {.warning[LockLevel]:off.}

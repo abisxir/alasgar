@@ -88,7 +88,7 @@ func hasNode*(c: CatMull, i: int): bool = len(c.nodes) - 1 >= i
 # System implementation
 proc newCatmullSystem*(): CatMullSystem =
     new(result)
-    result.name = "Catmull System"
+    result.name = "Catmull"
 
 method process*(sys: CatMullSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     {.warning[LockLevel]:off.}

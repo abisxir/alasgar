@@ -151,6 +151,63 @@ var
     "float": "0.0",
     "int": "0",
   }.toTable()
+  reservedDeclarations {.compileTime.} = [
+    "Layout",
+    "Uniform",
+    "UniformWriteOnly",
+    "Attribute",
+    "SamplerBuffer",
+    "Sampler1D",
+    "Sampler1DArray",
+    "Sampler2D",
+    "Sampler2DArray",
+    "Sampler2DRect",
+    "Sampler3D",
+    "SamplerCube",
+    "SamplerCubeArray",
+    "Sampler1DShadow",
+    "Sampler1DArrayShadow",
+    "Sampler2DShadow",
+    "Sampler2DArrayShadow",
+    "Sampler2DRectShadow",
+    "SamplerCubeShadow",
+    "SamplerCubeArrayShadow",
+    "ImageBuffer",
+    "ISamplerBuffer",
+    "ISampler1D",
+    "ISampler1DArray",
+    "ISampler2D",
+    "ISampler2DArray",
+    "ISampler2DRect",
+    "ISampler3D",
+    "ISamplerCube",
+    "ISamplerCubeArray",
+    "ISampler1DShadow",
+    "ISampler1DArrayShadow",
+    "ISampler2DShadow",
+    "ISampler2DArrayShadow",
+    "ISampler2DRectShadow",
+    "ISamplerCubeShadow",
+    "ISamplerCubeArrayShadow",
+    "IImageBuffer",
+    "USamplerBuffer",
+    "USampler1D",
+    "USampler1DArray",
+    "USampler2D",
+    "USampler2DArray",
+    "USampler2DRect",
+    "USampler3D",
+    "USamplerCube",
+    "USamplerCubeArray",
+    "USampler1DShadow",
+    "USampler1DArrayShadow",
+    "USampler2DShadow",
+    "USampler2DArrayShadow",
+    "USampler2DRectShadow",
+    "USamplerCubeShadow",
+    "USamplerCubeArrayShadow",
+    "UImageBuffer"
+  ]
 
 proc isInternalType(t: string): bool = t in samplers or t in metaDataTypes
 proc isSampler(sampler: string): bool = sampler in samplers
@@ -202,13 +259,6 @@ proc typeString(n: NimNode): string =
 #    parseLayoutType(n)
   else:
     err "can't figure out type", n
-
-## Default constructor for different GLSL types.
-proc typeDefault(t: string, n: NimNode): string = 
-  if t in typeDefaults:
-    result = typeDefaults[t]
-  else:
-    err "no typeDefault " & t, n
 
 const glslGlobals = [
   "gl_Position", 
@@ -589,9 +639,9 @@ proc toCode(n: NimNode, res: var string, level = 0) =
         if n[j + 2].kind != nnkEmpty:
           res.add " = "
           n[j + 2].toCode(res)
-        else:
+        elif typeStr in typeDefaults:
           res.add " = "
-          res.add typeDefault(typeStr, n[j])
+          res.add typeDefaults[typeStr]
 
   of nnkReturnStmt:
     res.addIndent level
@@ -937,7 +987,7 @@ proc gatherFunction(
               let key = impl[2].lineInfo
               if hasKey(declareCache, key):
                 defStr = declareCache[key]
-              else:
+              elif n.repr notin reservedDeclarations:
                 defStr = getDeclartion(n)
                 defStr.add "{ \n"
                 for item in impl[2]:
@@ -1040,7 +1090,6 @@ macro toGLSL*(
   ## Converts proc to a glsl string.
   let r = newLit(toGLSLInner(s))
   result = r[0]
-  echo result
 
 #template toGLSL*(s: typed): string =
 #  ## Converts proc to a glsl string.

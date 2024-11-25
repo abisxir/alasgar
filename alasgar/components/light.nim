@@ -93,7 +93,7 @@ proc getProjectionMatrix*(light: LightComponent, camera: CameraComponent): Mat4 
 # System implementation
 proc newLightSystem*(): LightSystem =
     new(result)
-    result.name = "Light System"
+    result.name = "Light"
 
 proc prepareShadow(camera: CameraComponent, shader: Shader, light: LightComponent, index: int) =
     if light.shadow:
@@ -101,9 +101,9 @@ proc prepareShadow(camera: CameraComponent, shader: Shader, light: LightComponen
             view = getViewMatrix(light, camera)
             projection = getProjectionMatrix(light, camera)
             mvp = projection * view
-        shader[&"LIGHTS[{index}].SHADOW_MVP"] = mvp
-        shader[&"LIGHTS[{index}].SHADOW_BIAS"] = light.shadowBias
-        shader[&"LIGHTS[{index}].DEPTH_MAP_LAYER"] = len(graphics.context.shadowCasters)
+        shader["LIGHTS[" & $index & "].SHADOW_MVP"] = mvp
+        shader["LIGHTS[" & $index & "].SHADOW_BIAS"] = light.shadowBias
+        shader["LIGHTS[" & $index & "].DEPTH_MAP_LAYER"] = len(graphics.context.shadowCasters)
         add(
             graphics.context.shadowCasters,
             ShadowCaster(
@@ -113,7 +113,6 @@ proc prepareShadow(camera: CameraComponent, shader: Shader, light: LightComponen
                 point: light of PointLightComponent,
             )
         )
-
 
 method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     {.warning[LockLevel]:off.}
@@ -131,12 +130,12 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
                 # Checks that entity is visible
                 if c.entity.visible and lightCount < settings.maxLights:
                     # Set shader params
-                    shader[&"LIGHTS[{lightCount}].TYPE"] = ltDirectional.int
-                    shader[&"LIGHTS[{lightCount}].COLOR"] = c.color.vec3
-                    shader[&"LIGHTS[{lightCount}].LUMINANCE"] = c.luminance
-                    shader[&"LIGHTS[{lightCount}].DIRECTION"] = c.direction
-                    shader[&"LIGHTS[{lightCount}].NORMALIZED_DIRECTION"] = normalize(c.direction)
-                    shader[&"LIGHTS[{lightCount}].DEPTH_MAP_LAYER"] = -1
+                    shader["LIGHTS[" & $lightCount & "].TYPE"] = ltDirectional.int
+                    shader["LIGHTS[" & $lightCount & "].COLOR"] = c.color.vec3
+                    shader["LIGHTS[" & $lightCount & "].LUMINANCE"] = c.luminance
+                    shader["LIGHTS[" & $lightCount & "].DIRECTION"] = c.direction
+                    shader["LIGHTS[" & $lightCount & "].NORMALIZED_DIRECTION"] = normalize(c.direction)
+                    shader["LIGHTS[" & $lightCount & "].DEPTH_MAP_LAYER"] = -1
 
                     # Takes care of shadow
                     prepareShadow(camera, shader, c, lightCount)
@@ -147,26 +146,26 @@ method process*(sys: LightSystem, scene: Scene, input: Input, delta: float32, fr
             for c in iterate[PointLightComponent](scene):
                 # Checks that entity is visible
                 if c.entity.visible and lightCount < settings.maxLights:
-                    shader[&"LIGHTS[{lightCount}].TYPE"] = ltPoint.int
-                    shader[&"LIGHTS[{lightCount}].COLOR"] = c.color.vec3
-                    shader[&"LIGHTS[{lightCount}].POSITION"] = c.transform.globalPosition
-                    shader[&"LIGHTS[{lightCount}].LUMINANCE"] = c.luminance
-                    shader[&"LIGHTS[{lightCount}].DEPTH_MAP_LAYER"] = -1
+                    shader["LIGHTS[" & $lightCount & "].TYPE"] = ltPoint.int
+                    shader["LIGHTS[" & $lightCount & "].COLOR"] = c.color.vec3
+                    shader["LIGHTS[" & $lightCount & "].POSITION"] = c.transform.globalPosition
+                    shader["LIGHTS[" & $lightCount & "].LUMINANCE"] = c.luminance
+                    shader["LIGHTS[" & $lightCount & "].DEPTH_MAP_LAYER"] = -1
                     
                     inc(lightCount)
 
             for c in iterate[SpotPointLightComponent](scene):
                 # Checks that entity is visible
                 if c.entity.visible and lightCount < settings.maxLights:
-                    shader[&"LIGHTS[{lightCount}].TYPE"] = ltSpot.int
-                    shader[&"LIGHTS[{lightCount}].COLOR"] = c.color.vec3
-                    shader[&"LIGHTS[{lightCount}].LUMINANCE"] = c.luminance 
-                    shader[&"LIGHTS[{lightCount}].POSITION"] = c.transform.globalPosition
-                    shader[&"LIGHTS[{lightCount}].DIRECTION"] = c.direction
-                    shader[&"LIGHTS[{lightCount}].NORMALIZED_DIRECTION"] = normalize(c.direction)
-                    shader[&"LIGHTS[{lightCount}].INNER_CUTOFF_COS"] = cos(degToRad(c.innerCutoff))
-                    shader[&"LIGHTS[{lightCount}].OUTER_CUTOFF_COS"] = cos(degToRad(c.outerCutoff))
-                    shader[&"LIGHTS[{lightCount}].DEPTH_MAP_LAYER"] = -1
+                    shader["LIGHTS[" & $lightCount & "].TYPE"] = ltSpot.int
+                    shader["LIGHTS[" & $lightCount & "].COLOR"] = c.color.vec3
+                    shader["LIGHTS[" & $lightCount & "].LUMINANCE"] = c.luminance 
+                    shader["LIGHTS[" & $lightCount & "].POSITION"] = c.transform.globalPosition
+                    shader["LIGHTS[" & $lightCount & "].DIRECTION"] = c.direction
+                    shader["LIGHTS[" & $lightCount & "].NORMALIZED_DIRECTION"] = normalize(c.direction)
+                    shader["LIGHTS[" & $lightCount & "].INNER_CUTOFF_COS"] = cos(degToRad(c.innerCutoff))
+                    shader["LIGHTS[" & $lightCount & "].OUTER_CUTOFF_COS"] = cos(degToRad(c.outerCutoff))
+                    shader["LIGHTS[" & $lightCount & "].DEPTH_MAP_LAYER"] = -1
                     
                     # Takes care of shadow
                     prepareShadow(camera, shader, c, lightCount)

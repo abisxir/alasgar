@@ -216,77 +216,6 @@ proc `position`(node: Node): Vec3 =
     else:
         result = VEC3_ZERO
 
-proc matToScale(matrix: array[16, float32]): Vec3 =
-    let
-        row0 = vec3(matrix[0], matrix[1], matrix[2])
-        row1 = vec3(matrix[4], matrix[5], matrix[6])
-        row2 = vec3(matrix[8], matrix[9], matrix[10])
-    
-    result = vec3(length(row0), length(row1), length(row2))
-    if dot(row0, cross(row1, row2)) < 0:
-        result = result * -1
-
-proc matToRotation(matrix: array[16, float32]): Quat =
-    let
-        s = matToScale(matrix)
-        m00 = matrix[0] * s[0]
-        m01 = matrix[1] * s[1]
-        m02 = matrix[2] * s[2]
-        m10 = matrix[4] * s[0]
-        m11 = matrix[5] * s[1]
-        m12 = matrix[6] * s[2]
-        m20 = matrix[8] * s[0]
-        m21 = matrix[9] * s[1]
-        m22 = matrix[10] * s[2]
-        fourXSquaredMinus1 = m00 - m11 - m22
-        fourYSquaredMinus1 = m11 - m00 - m22
-        fourZSquaredMinus1 = m22 - m00 - m11
-        fourWSquaredMinus1 = m00 + m11 + m22
-
-    var
-        biggestIndex = 0
-        fourBiggestSquaredMinus1 = fourWSquaredMinus1
-    if fourXSquaredMinus1 > fourBiggestSquaredMinus1:
-        fourBiggestSquaredMinus1 = fourXSquaredMinus1
-        biggestIndex = 1
-    if fourYSquaredMinus1 > fourBiggestSquaredMinus1:
-        fourBiggestSquaredMinus1 = fourYSquaredMinus1
-        biggestIndex = 2
-    if fourZSquaredMinus1 > fourBiggestSquaredMinus1:
-        fourBiggestSquaredMinus1 = fourZSquaredMinus1
-        biggestIndex = 3
-
-    var
-        biggestVal = sqrt(fourBiggestSquaredMinus1 + 1) * 0.5
-        mult = 0.25 / biggestVal
-        w = 1'f32
-        x = 0'f32
-        y = 0'f32
-        z = 0'f32
-
-    if biggestIndex == 0:
-        w = biggestVal
-        x = (m12 - m21) * mult
-        y = (m20 - m02) * mult
-        z = (m01 - m10) * mult
-    elif biggestIndex == 1:
-        w = (m12 - m21) * mult
-        x = biggestVal
-        y = (m01 + m10) * mult
-        z = (m20 + m02) * mult
-    elif biggestIndex == 2:
-        w = (m20 - m02) * mult
-        x = (m01 + m10) * mult 
-        y = biggestVal
-        z = (m12 + m21) * mult
-    elif biggestIndex == 3:
-        w = (m01 - m10) * mult 
-        x = (m20 + m02) * mult
-        y = (m12 + m21) * mult
-        z = biggestVal
-
-    result = normalize(quat(x, y, z, w))
-
 proc getScaling(matrix: array[16, float32]): Vec3 =
     let
         row0 = vec3(matrix[0], matrix[1], matrix[2])
@@ -363,14 +292,15 @@ func getComponentCount(name: string): int =
         of "MAT4": 16
         else: 0
 
-#func getComponentSize(t: int): int =
-#    case t.ComponentType:
-#        of typeI8: 1
-#        of typeUI8: 1
-#        of typeI16: 2
-#        of typeUI16: 2
-#        else: 4
-
+#[
+func getComponentSize(t: int): int =
+    case t.ComponentType:
+        of typeI8: 1
+        of typeUI8: 1
+        of typeI16: 2
+        of typeUI16: 2
+        else: 4
+]#
 func toGLDrawMode(mode: DrawMode): GLenum =
     result = case mode:
         of drawModePoints: GL_POINTS
@@ -380,7 +310,6 @@ func toGLDrawMode(mode: DrawMode): GLenum =
         of drawModeTriangles: GL_TRIANGLES
         of drawModeTriangleStrip: GL_TRIANGLE_STRIP
         of drawModeTriangleFan: GL_TRIANGLE_FAN
-
 
 proc prepare(document: Document, buffer: var Buffer) =
     if buffer.uri.isSome:
@@ -397,7 +326,7 @@ proc prepare(document: Document, buffer: var Buffer) =
             else:
                 let filename = &"{path}/{uri}"
                 data = readAsset(filename)
-            
+                            
             buffer.data = some(cast[seq[uint8]](data))
 
 proc openFile(url: string): Stream =
@@ -413,6 +342,7 @@ proc copy[R, O](accessor: Accessor, bufferView: BufferView, buffer: var Buffer, 
         accessorOffset = if accessor.byteOffset.isSome: accessor.byteOffset.get else: 0
         offset = bufferViewOffset + accessorOffset
         stride = if bufferView.byteStride.isSome: bufferView.byteStride.get else: sizeof(R) * componentCount
+    
     var 
         data = buffer.data.get
         element = offset
@@ -549,7 +479,8 @@ proc loadMeshes(document: var Document, model: ModelResource) =
         for j, primitive in mpairs(mesh.primitives):
             if isNone(primitive.name):
                 primitive.name = some(&"{mesh.name.get}-{i}-{j}")
-            discard addMesh(model, primitive.name.get, loadPrimitive(document, primitive))
+            let instance = loadPrimitive(document, primitive)
+            discard addMesh(model, primitive.name.get, instance)
 
 proc loadTexture(document: Document, sampler: Option[Sampler]): Texture =
     if sampler.isSome and document.textures.isSome:
@@ -565,14 +496,12 @@ proc loadTexture(document: Document, sampler: Option[Sampler]): Texture =
             if image.uri.isSome:
                 let uri = if startsWith(image.uri.get, "data:image/"): image.uri.get else: &"{document.path}/{image.uri.get}"
                 result = newTexture(uri, wrapT=wrapT, wrapS=wrapS, wrapR=wrapR, minFilter=minFilter, magFilter=magFilter)
-                echo "Texture created with uri..."
             elif image.bufferView.isSome:
                 var 
                     bufferView = document.bufferViews[image.bufferView.get]
                     buffer = document.buffers[bufferView.buffer]
                     byteSeq: seq[byte]
                 extract(bufferView, buffer, byteSeq)
-                echo "Texture created with byte array..."
                 result = newTexture(byteSeq, wrapT=wrapT, wrapS=wrapS, wrapR=wrapR, minFilter=minFilter, magFilter=magFilter)
             else:
                 raise newAlasgarError("Image is not supported!")
@@ -586,7 +515,6 @@ proc loadMaterials(document: Document, model: ModelResource) =
                 if m.pbrMetallicRoughness.get.baseColorFactor.isSome:
                     material.diffuseColor = toColor(m.pbrMetallicRoughness.get.baseColorFactor.get)
                 material.albedoMap = loadTexture(document, m.pbrMetallicRoughness.get.baseColorTexture)
-                echo "Texture created with id: ", material.albedoMap.id
                 material.metallicMap = loadTexture(document, m.pbrMetallicRoughness.get.metallicRoughnessTexture)
                 material.roughnessMap = material.metallicMap
                 material.aoMap = loadTexture(document, m.occlusionTexture)

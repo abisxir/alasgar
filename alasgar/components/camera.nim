@@ -6,6 +6,7 @@ import ../shaders/base
 import ../core
 import ../system
 import ../physics/plane
+import ../physics/ray
 import ../render/gpu
 
 type
@@ -97,6 +98,22 @@ proc screenToWorldCoord*(pos: Vec2, windowSize: Vec2, camera: CameraComponent): 
     # Puts in world coordinate
     result = inverse(view) * eyeCoords
 
+proc getRayToScreenPosition*(camera: CameraComponent, position: Vec2): Ray =
+    let
+        worldCoords = screenToWorldCoord(
+            position,
+            graphics.windowSize, 
+            camera
+        )
+    if camera.kind == orthographicCamera:
+        let 
+            near = vec3(worldCoords.x, worldCoords.y, camera.near)
+            far = vec3(worldCoords.x, worldCoords.y, camera.far)
+        result = newRay(near, far - near)
+    else:
+        let rayDirection = normalize(worldCoords.xyz) * camera.far
+        result = newRay(camera.transform.globalPosition, rayDirection)    
+
 func extractFrustumPlanes*(camera: CameraComponent, planes: var array[6, Plane]) =
     let mvp = camera.projection * camera.transform.world
     planes[0].x = mvp.m30 + mvp.m00
@@ -177,7 +194,7 @@ proc enableEffect*(camera: CameraComponent, name: string) =
 # System implementation
 proc newCameraSystem*(): CameraSystem =
     new(result)
-    result.name = "Camera System"
+    result.name = "Camera"
 
 proc `activeCamera`*(scene: Scene): CameraComponent =
     result = nil
@@ -202,6 +219,7 @@ proc updateShader(shader: Shader,
     shader["CAMERA.INV_VIEW_MATRIX"] = inverse(active.view)
     shader["CAMERA.INVERSE_VIEW_PROJECTION_MATRIX"] = inverse(active.view * active.projection)
     shader["CAMERA.POSITION"] = active.transform.globalPosition
+    shader["CAMERA.DIRECTION"] = active.direction
     shader["CAMERA.NEAR"] = active.near
     shader["CAMERA.FAR"] = active.far
 

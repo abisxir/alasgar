@@ -8,7 +8,7 @@ type
 
 proc newTraverseSystem*(): TraverseSystem =
     new(result)
-    result.name = "Traverse System"
+    result.name = "Traverse"
 
 proc traverse(e: Entity, world: Mat4, dirty: bool) =
     let isEntityDirty = dirty or e.transform.dirty

@@ -127,8 +127,6 @@ func `*`*(v: Vec3, q: Quat): Vec3 =
 
 func rotate*(v: Vec3, q: Quat): Vec3 = v * q
 
-
-
 func almostEquals*(left, right: Quat): bool =
     result = 
         abs(left.x - right.x) <= EPSILON and 
@@ -195,12 +193,49 @@ func pow*(q: Quat, power: float32): Quat =
     result.x = axis.z * halfSin
     result.x = halfCos 
 
-func slerp*(a, b: Quat, t: float32): Quat =
-    var s = a
-    var e = b
+func slerp1*(a, b: Quat, t: float32): Quat =
+    var 
+        s = normalize(a)
+        e = normalize(b)
     if dot(a, b) < 0:
         e = -1 * e
     return pow(e * inverse(s), t) * s
+
+func slerp*(a, b: Quat, t: float32): Quat =
+    var 
+        q1 = normalize(a)
+        q2 = normalize(b)
+        aob = dot(q1, q2)
+        THRESHOLD = 0.9995'f32
+
+    # If the dot product is negative, invert one quaternion to take the shortest path
+    if aob < 0.0:
+        q2 = -1 * q2
+        aob = -aob
+
+    # If the dot product is close to 1, use linear interpolation to avoid division by zero
+    if aob > THRESHOLD:
+        # Perform a simple linear interpolation
+        result.w = q1.w + t * (q2.w - q1.w)
+        result.x = q1.x + t * (q2.x - q1.x)
+        result.y = q1.y + t * (q2.y - q1.y)
+        result.z = q1.z + t * (q2.z - q1.z)
+    else:
+        # Calculate the angle between the quaternions
+        let 
+            theta_0 = arccos(aob)         # theta_0 is the angle between input quaternions
+            theta = theta_0 * t           # theta is the angle after interpolation
+            sin_theta = sin(theta)        # Compute sin(theta)
+            sin_theta_0 = sin(theta_0)    # Compute sin(theta_0)
+            # Calculate the two interpolated quaternions
+            s1 = cos(theta) - aob * sin_theta / sin_theta_0
+            s2 = sin_theta / sin_theta_0
+        result.w = (q1.w * s1) + (q2.w * s2)
+        result.x = (q1.x * s1) + (q2.x * s2)
+        result.y = (q1.y * s1) + (q2.y * s2)
+        result.z = (q1.z * s1) + (q2.z * s2)
+
+    result = normalize(result)
 
 func angleAxis*(radians: float32, axis: Vec3): Quat =
     var half: float32 = radians * 0.5'f32
@@ -296,12 +331,17 @@ func quat*(m: Mat4): Quat =
 
 
 func quat*(p: ptr float32, offset: int=0): Quat =
-    let 
-        address = cast[ByteAddress](p)
-        x = cast[ptr float32](address + offset * sizeof(float32))
-        y = cast[ptr float32](address + (offset + 1) * sizeof(float32))
-        z = cast[ptr float32](address + (offset + 2) * sizeof(float32))
-        w = cast[ptr float32](address + (offset + 3) * sizeof(float32))
+    var 
+        address = cast[uint](p)
+        size = sizeof(float32).uint
+        start = address + offset.uint * sizeof(float32).uint
+    var x = cast[ptr float32](start)
+    start += size
+    var y = cast[ptr float32](start)
+    start += size
+    var z = cast[ptr float32](start)
+    start += size
+    var w = cast[ptr float32](start)
     result = quat(x[], y[], z[], w[])    
 
 func quat*(v: openArray[float32], offset: int): Quat = quat(v[offset], v[offset + 1], v[offset + 2], v[offset + 3])

@@ -13,6 +13,7 @@ const
 type 
     Camera* = object
         POSITION*: Vec3
+        DIRECTION*: Vec3
         VIEW_MATRIX*: Mat4
         INV_VIEW_MATRIX*: Mat4
         PROJECTION_MATRIX*: Mat4

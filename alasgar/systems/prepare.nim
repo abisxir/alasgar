@@ -1,5 +1,4 @@
 import algorithm
-import hashes
 #import threadpool
 #{.experimental: "parallel".}
 
@@ -17,7 +16,7 @@ type
 
 proc newPrepareSystem*(): PrepareSystem =
     new(result)
-    result.name = "Prepare System"
+    result.name = "Prepare"
 
 func cmp(a, b: Drawable): int = cmp(a.id, b.id)
 
@@ -60,16 +59,6 @@ proc packMaterial*(drawable: ptr Drawable) =
         drawable.skinPack = vec4(drawable.skin.count.float32, drawable.skin.offset.float32, 0, 0)
     else:
         drawable.skinPack = vec4(0, 0, 0, 0)
-
-func getNormalHash(d: ptr Drawable): Hash =
-    result = 0
-    if d.material != nil and d.material.normalMap != nil:
-        result = hash(d.material.normalMap)
-
-func getTextureHash(d: ptr Drawable): Hash =
-    result = 0
-    if d.material != nil and d.material.albedoMap != nil:
-        result = hash(d.material.albedoMap)
 
 method process*(sys: PrepareSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
     if scene.root != nil:

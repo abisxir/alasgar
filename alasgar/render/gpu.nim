@@ -32,6 +32,8 @@ type
         screenSize: Vec2
         windowSize*: Vec2
         context*: GraphicsContext
+        emptyTexture: Texture
+        skinTexture*: Texture
 
 var
     graphics*: Graphics
@@ -48,6 +50,9 @@ proc initGraphics*(window: WindowPtr,
         graphics.screenSize = screenSize
         graphics.windowSize = windowSize
         graphics.glContext = createOpenGLContext(window)
+        graphics.emptyTexture = newTexture(COLOR_BLACK)
+        graphics.skinTexture = newTexture2D(settings.maxSkinTextureSize, settings.maxSkinTextureSize, internalFormat=GL_RGBA32F)
+        allocate(graphics.skinTexture)
         graphics.shader = newSpatialShader()
         graphics.blitShader = newCanvasShader()
         graphics.fb = newRenderBuffer(graphics.screenSize)
@@ -61,6 +66,7 @@ proc initGraphics*(window: WindowPtr,
         when not defined(emscripten):
             if not graphics.vsync:
                 discard glSetSwapInterval(0.cint)
+
 
         echo "* Graphics initialized!"
 
@@ -107,15 +113,17 @@ proc renderToFrameBuffer(view, projection: Mat4, cubemap: Texture, drawables: va
         let
             count = drawables[i].count 
             shader = if drawables[i].shader == nil: graphics.shader else: drawables[i].shader.instance
-            albedo = if drawables[i].material != nil: drawables[i].material.albedoMap else: nil
-            normal = if drawables[i].material != nil: drawables[i].material.normalMap else: nil
-            metallic = if drawables[i].material != nil: drawables[i].material.metallicMap else: nil
-            roughness = if drawables[i].material != nil: drawables[i].material.roughnessMap else: nil
-            ao = if drawables[i].material != nil: drawables[i].material.aoMap else: nil
-            emissive = if drawables[i].material != nil: drawables[i].material.emissiveMap else: nil
+            albedo = if drawables[i].material != nil: drawables[i].material.albedoMap else: graphics.emptyTexture
+            normal = if drawables[i].material != nil: drawables[i].material.normalMap else: graphics.emptyTexture
+            metallic = if drawables[i].material != nil: drawables[i].material.metallicMap else: graphics.emptyTexture
+            roughness = if drawables[i].material != nil: drawables[i].material.roughnessMap else: graphics.emptyTexture
+            ao = if drawables[i].material != nil: drawables[i].material.aoMap else: graphics.emptyTexture
+            emissive = if drawables[i].material != nil: drawables[i].material.emissiveMap else: graphics.emptyTexture
             mesh = drawables[i].mesh.instance
 
         use(shader)
+        use(shader, graphics.skinTexture, "SKIN_MAP", 0)
+        shader["ENVIRONMENT.SKIN_SAMPLER_WIDTH"] = graphics.skinTexture.width
         use(shader, albedo, "ALBEDO_MAP", 1)
         use(shader, normal, "NORMAL_MAP", 2)
         use(shader, metallic, "METALLIC_MAP", 3)
@@ -198,6 +206,8 @@ proc cleanupGraphics*() =
     graphics.fb = nil
     destroy(graphics.shadow)
     graphics.shadow = nil
+    destroy(graphics.emptyTexture)
+    destroy(graphics.skinTexture)
 
     if graphics.glContext != nil:
         glDeleteContext(graphics.glContext)

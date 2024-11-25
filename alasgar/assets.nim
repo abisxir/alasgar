@@ -1,10 +1,9 @@
 import streams
 import strutils
-import logger
 import strformat
 import os
 
-#import error
+import error
 
 export streams
 
@@ -38,13 +37,17 @@ proc openAssetStream*(url: string): Stream =
             logi &"File [{filename}] opened."
         logi &"Loading [{filename}] for windows ..."        
     else:
-        logi &"Loading [{filename}] ..."
+        echo "Loading [", filename, "] ..."
         result = newFileStream(filename, fmRead)
 
 proc readAsset*(url: string): string =
     let stream = openAssetStream(url)
-    defer: close(stream)
-    result = readAll(stream)
+    if stream != nil:
+        defer: close(stream)
+        result = readAll(stream)
+        echo "[", result.len , "] bytes read from [", url, "]"
+    else:
+        raise newAlasgarError(&"Could not open [{url}]")
 
 proc exists*(url: string): bool =
     when defined(android):

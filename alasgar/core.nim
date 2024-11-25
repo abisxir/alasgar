@@ -555,7 +555,8 @@ proc cleanup*(scene: Scene) =
 # Transform implementation
 proc newTransform*(): TransformComponent =
     new(result)
-    result.scale = VEC3_ONE
+    result.position = vec3(0)
+    result.scale = vec3(1)
     result.rotation = quat(0, 0, 0, 1)
     result.world = mat4()
 
@@ -767,7 +768,7 @@ func updateAvailableMaps(m: MaterialComponent) =
         if m.emissiveMap.uvChannel == 1:
             m.uvChannels = m.uvChannels or emissiveMaterialMap.uint32
 
-func updateFrame(material: MaterialComponent) =
+proc updateFrame(material: MaterialComponent) =
     if material.hframes > 0 and material.vframes > 0:
         let fxy = vec2(float32(material.frame mod material.hframes), float32(material.vframes - (material.frame div material.hframes) - 1))
         material.frameSize = vec2(1.float32 / material.hframes.float32, 1.float32 / material.vframes.float32)
@@ -931,14 +932,17 @@ template `hframes`*(material: MaterialComponent): int = material.hframes
 template `availableMaps`*(material: MaterialComponent): uint32 = material.availableMaps
 template `uvChannels`*(material: MaterialComponent): uint32 = material.uvChannels
 
-template `frame=`*(material: MaterialComponent, value: int) =
+
+func setFrame(material: MaterialComponent, value: int) =
     material.frame = value
     if material.frame < 0:
         material.frame = 0
     let framesCount = max(0, (material.hframes * material.vframes) - 1)
     if material.frame > framesCount:
-        material.frame = framesCount
+        material.frame = 0
     updateFrame(material)
+
+template `frame=`*(material: MaterialComponent, value: int) = setFrame(material, value)
 
 template `vframes=`*(material: MaterialComponent, value: int) =
     if value > 0:
