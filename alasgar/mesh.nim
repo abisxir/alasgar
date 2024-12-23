@@ -10,17 +10,19 @@ type
     Mesh* = ref object
         vertexArrayObject: GLuint
         vertexBufferObject: GLuint
+        indexBufferObject: GLuint
         modelBufferObject: GLuint
         materialBufferObject: GLuint
         spriteBufferObject: GLuint
         skinBufferObject: GLuint
+
         count*: GLsizei
         vMin*: Vec3
         vMax*: Vec3
         vRadius*: float32
+        indicesCount: int
         drawMode: GLenum
         bufferMode: GLenum
-        indices: seq[uint32]
     Vertex* = array[18, float32]
 
 template `position`*(v: Vertex): Vec3 = vec3(v[0], v[1], v[2])
@@ -137,10 +139,7 @@ proc newMesh*(data: var openArray[Vertex],
     new(result)
     result.drawMode = drawMode
     result.bufferMode = bufferMode
-
-    # Copies indices
-    if len(indices) > 0:
-        result.indices = toSeq[indices]
+    result.indicesCount = len(indices)
 
     for v in data:
         if v.position.x < result.vMin.x:
@@ -181,6 +180,11 @@ proc newMesh*(data: var openArray[Vertex],
     if len(data) > 0:
         let size: GLsizeiptr = (sizeof(Vertex) * data.len).GLsizeiptr
         glBufferData(GL_ARRAY_BUFFER, size, cast[pointer](data[0].caddr), bufferMode)
+
+    # Creates index buffer object and binds data to it
+    glGenBuffers(1, result.indexBufferObject.addr)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.indexBufferObject)
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(indices) * sizeof(uint32)).GLsizeiptr, cast[pointer](indices[0].addr), bufferMode);
 
     glGenBuffers(1, result.modelBufferObject.addr)
     glBindBuffer(GL_ARRAY_BUFFER, result.modelBufferObject)
@@ -310,7 +314,9 @@ proc newMesh*(vertices,
     result = newMesh(data, indices, drawMode, bufferMode)
 
 proc newMesh*(data: var openArray[Vertex], drawMode: GLenum = GL_TRIANGLES, bufferMode: GLenum = GL_STATIC_DRAW): Mesh =
-    var indices = newSeq[uint32]() 
+    var indices = newSeq[uint32]()
+    for i in data.low..data.high:
+        indices.add(i.uint32)
     result = newMesh(data, indices, drawMode, bufferMode) 
 
 proc newLinesMesh*(data: var openArray[Vertex], strip: bool = false,
@@ -349,16 +355,10 @@ proc render*(mesh: Mesh, model: ptr float32, material: ptr uint32, sprite: ptr f
     glBindBuffer(GL_ARRAY_BUFFER, mesh.skinBufferObject)
     glBufferData(GL_ARRAY_BUFFER, (count * bufferSizeOf).GLsizeiptr, skin, GL_DYNAMIC_DRAW)
 
-    if len(mesh.indices) > 0:
-        if count > 1:
-            glDrawElementsInstanced(mesh.drawMode, len(mesh.indices).GLsizei, GL_UNSIGNED_INT, addr mesh.indices[0], count.GLsizei)
-        else:
-            glDrawElements(mesh.drawMode, len(mesh.indices).GLsizei, GL_UNSIGNED_INT, addr mesh.indices[0]) 
+    if count > 1:
+        glDrawElementsInstanced(mesh.drawMode, mesh.indicesCount.GLsizei, GL_UNSIGNED_INT, cast[pointer](0), count.GLsizei)
     else:
-        if count > 1:
-            glDrawArraysInstanced(mesh.drawMode, 0, mesh.count, count.GLsizei)
-        else:
-            glDrawArrays(mesh.drawMode, 0, mesh.count)
+        glDrawElements(mesh.drawMode, mesh.indicesCount.GLsizei, GL_UNSIGNED_INT, cast[pointer](0)) 
 
     glBindBuffer(GL_ARRAY_BUFFER, 0)
 

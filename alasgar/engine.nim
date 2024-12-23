@@ -256,7 +256,7 @@ proc handleFrame() =
                 logi &"Window resized: ({width}, {height})"
         # Maps SDL event to alasgar event object
         parseEvent(addr runtime.evt, graphics.windowSize, addr input)
-        if not isNil(scene):
+        if not isNil(scene) and not isNil(scene.activeCamera):
             for system in runtime.engine.inputSystems:
                 process(system, runtime.engine.primary, input, runtime.delta, runtime.frames, runtime.age)
     

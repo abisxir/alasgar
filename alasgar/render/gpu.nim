@@ -131,6 +131,7 @@ proc renderToFrameBuffer(view, projection: Mat4, cubemap: Texture, drawables: va
         use(shader, ao, "AO_MAP", 5)
         use(shader, emissive, "EMISSIVE_MAP", 6)
 
+        echo "render:", i
         # Renders count amount of instances
         render(
             mesh, 
