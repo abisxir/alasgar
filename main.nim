@@ -2,7 +2,7 @@ import alasgar
 
 settings.exitOnEsc = true
 # Creates a window named Step4
-window("Alasgar", 1920, 1080)
+window("Alasgar", 800, 600)
    
 let 
     # Creates a new scene

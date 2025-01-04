@@ -4,11 +4,12 @@
 alasgar is a pure nim game engine based on OpenGL. The main reason to start developing a new game engine, was to learn graphics programming (first challenge) using nim programming language (second challenge). You can write the whole game logic and also shaders in nim. It supports a few platforms including mobile, web, and desktop. It performs well in the performance tests. It is the journey of a backend/system developer through graphics/game programming.
 
 # Platforms
- - Linux
- - Windows
- - Android
- - WebAssembly
- - Mac (work in progress)
+ - FreeBSD (tested on 14.0, probably works also on NetBSD and OpenBSD also)
+ - Linux (tested on various distros like void and arch)
+ - Windows (tested on Windows 11)
+ - Android (tested on some old samsung devices)
+ - WebAssembly (tested on firefox and chrome)
+ - macOS (tested on macOS Ventura)
  - iOS (not supoorted)
 
 ## Experimental game engine
@@ -729,4 +730,4 @@ type
 Dependencies
 ============
 ## vmath, chroma, and nimx
-In the newer version of nim I had issue with compiling nim to GLSL using vmath, I removed it and provided a minimal implementation. Chroma is still a dependency. I also removed dependencies and also remaining build scripts that I borrow it from nimx. Some configs and sample projects will be provided to show how to import the application to android and webassembly.
+In the newer version of nim I had issue with compiling nim to GLSL because of vmath dependency, I removed it and provided a minimal implementation. Chroma is still a dependency. I also removed most of the dependencies and also all remaining build scripts that I borrow it from nimx. Some configs and sample projects will be provided to show how to import the application to android and webassembly.

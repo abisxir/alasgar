@@ -49,7 +49,6 @@ htmldocs/
 *.dSYM/
 
 # Local files
-res/
 Makefile
 main
 shadow
