@@ -2,16 +2,16 @@ import utils
 
 
 type
-    Settings = object
-        maxBatchSize*: int
-        maxLights*: int
-        screenSize*: Vec2
-        keepRatio*: bool
-        verbose*: bool
-        maxFPS*: int
-        depthMapSize*: int
-        exitOnEsc*: bool
-        maxSkinTextureSize*: int
+  Settings = object
+    maxBatchSize*: int
+    maxLights*: int
+    screenSize*: Vec2
+    keepRatio*: bool
+    verbose*: bool
+    maxFPS*: int
+    depthMapSize*: int
+    exitOnEsc*: bool
+    maxSkinTextureSize*: int
 
 var settings* = Settings(
     maxBatchSize: 10 * 1024,

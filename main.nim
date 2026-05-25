@@ -3,12 +3,12 @@ import alasgar
 settings.exitOnEsc = true
 # Creates a window named Step4
 window("Alasgar", 800, 600)
-   
-let 
-    # Creates a new scene
-    scene = newScene()
-    # Creates the camera entity
-    cameraEntity = newEntity(scene, "Camera")
+
+let
+  # Creates a new scene
+  scene = newScene()
+  # Creates the camera entity
+  cameraEntity = newEntity(scene, "Camera")
 
 # Sets the background color
 scene.background = parseHex("909090")
@@ -18,14 +18,14 @@ scene.ambient = parseHex("ffffff")
 cameraEntity.transform.position = vec3(2)
 # Adds a perspective camera component to entity
 add(
-    cameraEntity, 
+    cameraEntity,
     newPerspectiveCamera(
-        75, 
-        runtime.ratio, 
-        0.1, 
-        100.0, 
+        75,
+        runtime.ratio,
+        0.1,
+        100.0,
         vec3(0) - cameraEntity.transform.position
-    )
+  )
 )
 addCameraController(cameraEntity)
 # Makes the camera entity child of the scene
@@ -37,13 +37,13 @@ let cubeEntity = newEntity(scene, "Cube")
 add(cubeEntity, newCubeMesh())
 # Adds a script component to the cube entity
 program(cubeEntity, proc(script: ScriptComponent) =
-    let t = 2 * runtime.age
-    # Rotates the cube using euler angles
-    script.transform.euler = vec3(
-        sin(t),
-        cos(t),
-        sin(t) * cos(t),
-    )
+  let t = 2 * runtime.age
+  # Rotates the cube using euler angles
+  script.transform.euler = vec3(
+      sin(t),
+      cos(t),
+      sin(t) * cos(t),
+  )
 )
 # Makes the cube enity child of the scene
 add(scene, cubeEntity)
@@ -56,7 +56,7 @@ let lightEntity = newEntity(scene, "Light")
 lightEntity.transform.position = vec3(10)
 # Adds a point light component to entity
 add(
-    lightEntity, 
+    lightEntity,
     newPointLightComponent()
 )
 # Makes the light entity child of the scene

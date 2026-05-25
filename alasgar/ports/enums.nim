@@ -6877,7 +6877,7 @@ const glEnumToStringTable = toTable([
 ])
 
 proc glEnumToString*(value: uint32): string =
-    if hasKey(glEnumToStringTable, value):
-        glEnumToStringTable[value]
-    else:
-        &"Unknown [{value:x}]"
+  if hasKey(glEnumToStringTable, value):
+    glEnumToStringTable[value]
+  else:
+    &"Unknown [{value:x}]"

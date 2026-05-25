@@ -18,7 +18,7 @@ proc inOutQuad*(t, b, c, d: float32): float32 =
   else:
     return -c / 2 * ((t_hat - 1) * (t_hat - 3) - 1) + b
 
-proc inCubic* (t, b, c, d: float32): float32 =
+proc inCubic*(t, b, c, d: float32): float32 =
   let t_hat = t / d
   return c * pow(t_hat, 3) + b
 
@@ -104,4 +104,5 @@ proc inOutCirc*(t, b, c, d: float32): float32 =
     return c / 2 * (sqrt(1 - t_hat * t_hat) + 1) + b
 
 proc cubicBezier*(t, P0, P1, P2, P3: float32): float32 =
-    result = pow((1-t), 3) * P0 + 3 * t * (1 - t) * (1 - t) * P1 + 3 * t * t * (1 - t) * P2 + t * t * t * P3 
+  result = pow((1-t), 3) * P0 + 3 * t * (1 - t) * (1 - t) * P1 + 3 * t * t * (
+      1 - t) * P2 + t * t * t * P3

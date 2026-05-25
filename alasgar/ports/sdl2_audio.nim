@@ -40,10 +40,10 @@ type
     ## There are templates in SDL 2.0 and later to query these bits.
 
 const
-  SDL_AUDIO_MASK_BITSIZE*  = uint32(0x000000FF)
+  SDL_AUDIO_MASK_BITSIZE* = uint32(0x000000FF)
   SDL_AUDIO_MASK_DATATYPE* = uint32(1 shl 8)
-  SDL_AUDIO_MASK_ENDIAN*   = uint32(1 shl 12)
-  SDL_AUDIO_MASK_SIGNED*   = uint32(1 shl 15)
+  SDL_AUDIO_MASK_ENDIAN* = uint32(1 shl 12)
+  SDL_AUDIO_MASK_SIGNED* = uint32(1 shl 15)
 
 template SDL_AUDIO_BITSIZE*(x: uint32): uint32 =
   (x and SDL_AUDIO_MASK_BITSIZE)
@@ -120,7 +120,8 @@ const
 
 # Audio flags
 type
-  AudioCallback* = proc (userdata: pointer; stream: ptr uint8; len: cint) {.cdecl.}
+  AudioCallback* = proc (userdata: pointer; stream: ptr uint8;
+      len: cint) {.cdecl.}
     ## This procedure is called when the audio device needs more data.
     ##
     ## `userdata` An application-specific parameter
@@ -148,13 +149,13 @@ type
     ## * 6:  FL FR FC LFE SL SR        (5.1 surround - last two can also be BL BR)
     ## * 7:  FL FR FC LFE BC SL SR     (6.1 surround)
     ## * 8:  FL FR FC LFE BL BR SL SR  (7.1 surround)
-    freq*: cint             ## DSP frequency -- samples per second
-    format*: AudioFormat    ## Audio data format
-    channels*: uint8        ## Number of channels: 1 mono, 2 stereo
-    silence*: uint8         ## Audio buffer silence value (calculated)
-    samples*: uint16        ## Audio buffer size in samples (power of 2)
-    padding*: uint16        ## Necessary for some compile environments
-    size*: uint32           ## Audio buffer size in bytes (calculated)
+    freq*: cint ## DSP frequency -- samples per second
+    format*: AudioFormat ## Audio data format
+    channels*: uint8 ## Number of channels: 1 mono, 2 stereo
+    silence*: uint8 ## Audio buffer silence value (calculated)
+    samples*: uint16 ## Audio buffer size in samples (power of 2)
+    padding*: uint16 ## Necessary for some compile environments
+    size*: uint32 ## Audio buffer size in bytes (calculated)
     callback*: AudioCallback
       ## Callback that feeds the audio device (`nil` to use `queueAudio()`).
     userdata*: pointer
@@ -174,17 +175,17 @@ type
     ## doesn't pad it out to 88 bytes to guarantee ABI compatibility between
     ## compilers. The next time we rev the ABI, make sure to size the ints
     ## and add padding.
-    needed*: cint           ## Set to 1 if conversion possible
+    needed*: cint ## Set to 1 if conversion possible
     src_format*: AudioFormat ## Source audio format
     dst_format*: AudioFormat ## Target audio format
-    rate_incr*: cdouble     ## Rate conversion increment
-    buf*: ptr uint8         ## Buffer to hold entire audio data
-    len*: cint              ## Length of original audio buffer
-    len_cvt*: cint          ## Length of converted audio buffer
-    len_mult*: cint         ## buffer must be len*len_mult big
-    len_ratio*: cdouble     ## Given len, final size is len*len_ratio
+    rate_incr*: cdouble ## Rate conversion increment
+    buf*: ptr uint8 ## Buffer to hold entire audio data
+    len*: cint ## Length of original audio buffer
+    len_cvt*: cint ## Length of converted audio buffer
+    len_mult*: cint ## buffer must be len*len_mult big
+    len_ratio*: cdouble ## Given len, final size is len*len_ratio
     filters*: array[10, AudioFilter] ## Filter list
-    filter_index*: cint     ## Current audio conversion function
+    filter_index*: cint ## Current audio conversion function
 
   AudioFilter* = proc (cvt: ptr AudioCVT; format: AudioFormat){.cdecl.}
 
@@ -206,7 +207,7 @@ type
     staging_buffer*: ptr uint8
     staging_buffer_size*: cint
     staging_buffer_filled*: cint
-    work_buffer_base*: ptr uint8  # maybe unaligned pointer from SDL_realloc().
+    work_buffer_base*: ptr uint8 # maybe unaligned pointer from SDL_realloc().
     work_buffer_len*: cint
     src_sample_frame_size*: cint
     src_format*: AudioFormat
@@ -222,16 +223,16 @@ type
     resampler_padding_samples*: cint
     resampler_padding*: ptr cfloat
     resampler_state*: pointer
-    resampler_func*: proc(stream: AudioStreamPtr,
-                          inbuf: pointer, inbuflen: cint,
-                          outbuf: pointer, outbuflen: cint): cint
+    resampler_func*: proc(stream: AudioStreamPtr;
+                          inbuf: pointer; inbuflen: cint;
+                          outbuf: pointer; outbuflen: cint): cint
     reset_resampler_func*: proc(stream: AudioStreamPtr)
     cleanup_resampler_func*: proc(stream: AudioStreamPtr)
-  
+
   AudioStreamPtr* = ptr AudioStream
     ## (Available since SDL 2.0.7)
     ## A pointer to an `AudioStream`. Audio streams were added to SDL2
-    ## in version 2.0.7, to provide an easier-to-use alternative to 
+    ## in version 2.0.7, to provide an easier-to-use alternative to
     ## `AudioCVT`.
     ##
     ## .. _SDL_AudioStream: https://wiki.libsdl.org/Tutorials/AudioStream
@@ -249,14 +250,14 @@ type
 
 when false:
 
-  when defined(GNUC):#__GNUC__):
+  when defined(GNUC): #__GNUC__):
     # This structure is 84 bytes on 32-bit architectures, make sure GCC doesn't
     #   pad it out to 88 bytes to guarantee ABI compatibility between compilers.
     #   vvv
     #   The next time we rev the ABI, make sure to size the ints and add padding.
     #
     const
-      AudioCVT_PACKED* = x#__attribute__((packed))
+      AudioCVT_PACKED* = x #__attribute__((packed))
   else:
     const
       AudioCVT_PACKED* = true
@@ -453,7 +454,7 @@ proc getQueuedAudioSize*(dev: AudioDeviceID): uint32 {.
   ## **See also:**
   ## * `queueAudio proc<#queueAudio,AudioDeviceID,pointer,uint32>`_
 
-proc queueAudio*(dev: AudioDeviceID, data: pointer, len: uint32): cint {.
+proc queueAudio*(dev: AudioDeviceID; data: pointer; len: uint32): cint {.
   importc: "SDL_QueueAudio".}
   ## Queue more audio on non-callback devices.
   ##
@@ -496,7 +497,7 @@ proc queueAudio*(dev: AudioDeviceID, data: pointer, len: uint32): cint {.
   ## **See also:**
   ## * `getQueuedAudioSize proc<#getQueuedAudioSize,AudioDeviceID>`_
 
-proc dequeueAudio*(dev: AudioDeviceID, data: pointer, len: uint32): cint {.
+proc dequeueAudio*(dev: AudioDeviceID; data: pointer; len: uint32): cint {.
   importc: "SDL_DequeueAudio".}
   ## Dequeue more audio on non-callback devices.
   ##
@@ -563,7 +564,8 @@ proc pauseAudioDevice*(dev: AudioDeviceID; pause_on: cint) {.
   ## data for your callback procedure after opening the audio device.
   ## Silence will be written to the audio device during the pause.
 
-template loadWAV*(file: string, spec: ptr AudioSpec, audio_buf: ptr ptr uint8, audio_len: ptr uint32): ptr AudioSpec =
+template loadWAV*(file: string; spec: ptr AudioSpec; audio_buf: ptr ptr uint8;
+    audio_len: ptr uint32): ptr AudioSpec =
   ## Loads a WAV from a file.
   ## Compatibility convenience template.
   loadWAV_RW(rwFromFile(file, "rb"), 1, spec, audio_buf, audio_len)
@@ -661,7 +663,7 @@ proc newAudioStream*(
   ## (Available since SDL 2.0.7)
   ## Create a new audio stream. return 0 on success, or -1
   ## on error.
-  ## 
+  ##
   ## Parameters:
   ## * `src_format` The format of the source audio
   ## * `src_channels` The number of channels of the source audio
@@ -686,8 +688,8 @@ proc newAudioStream*(srcSpec, destSpec: AudioSpec): AudioStreamPtr =
     destSpec.format, destSpec.channels, destSpec.freq)
 
 proc put*(
-  stream: AudioStreamPtr,
-  buf: pointer,
+  stream: AudioStreamPtr;
+  buf: pointer;
   len: cint): cint {.importc: "SDL_AudioStreamPut".}
   ## (Available since SDL 2.0.7)
   ## Add data to be converted/resampled to the stream.Returns 0 on success, or -1 on error.
@@ -703,13 +705,13 @@ proc put*(
   ## * `AudioStreamPtr type<#AudioStreamPtr>`_
 
 proc get*(
-  stream: AudioStreamPtr,
-  buf: pointer,
+  stream: AudioStreamPtr;
+  buf: pointer;
   len: cint): cint {.importc: "SDL_AudioStreamGet".}
   ## (Available since SDL 2.0.7)
   ## Get converted/resampled data from the stream.
   ## Returns the number of bytes read from the stream, or -1 on error.
-  ## 
+  ##
   ## Parameters:
   ## * `stream` The stream the audio is being requested from
   ## * `buf` A buffer to fill with audio data

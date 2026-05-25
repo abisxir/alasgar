@@ -31,7 +31,7 @@ else:
   static: echo "SDL_Static option is deprecated and will soon be removed. Instead please use --dynlibOverride:SDL2."
 
 when not defined(SDL_Static):
-  {.push callConv:cdecl, dynlib: LibName.}
+  {.push callConv: cdecl, dynlib: LibName.}
 
 import sdl2, sdl2_audio
 
@@ -55,17 +55,17 @@ proc linkedVersion*(): ptr SDL_version {.importc: "Mix_Linked_Version".}
   # should use the `version()` template.
 
 const
-    MIX_INIT_FLAC*       : cint = 0x00000001
-    ## (.flac) requiring the FLAC library on system
-    ## also any command-line player, which is not mixed by `mixer`
-    MIX_INIT_MOD*        : cint = 0x00000002
-    ## (.mod .xm .s3m .669 .it .med and more) requiring libmikmod on system
-    MIX_INIT_MODPLUG*    : cint = 0x00000004
-    MIX_INIT_MP3*        : cint = 0x00000008
-    ## (.mp3) requiring SMPEG or MAD library on system
-    MIX_INIT_OGG*        : cint = 0x00000010
-    ## (.ogg) requiring ogg/vorbis libraries on system
-    MIX_INIT_FLUIDSYNTH* : cint = 0x00000020
+  MIX_INIT_FLAC*: cint = 0x00000001
+  ## (.flac) requiring the FLAC library on system
+  ## also any command-line player, which is not mixed by `mixer`
+  MIX_INIT_MOD*: cint = 0x00000002
+  ## (.mod .xm .s3m .669 .it .med and more) requiring libmikmod on system
+  MIX_INIT_MODPLUG*: cint = 0x00000004
+  MIX_INIT_MP3*: cint = 0x00000008
+  ## (.mp3) requiring SMPEG or MAD library on system
+  MIX_INIT_OGG*: cint = 0x00000010
+  ## (.ogg) requiring ogg/vorbis libraries on system
+  MIX_INIT_FLUIDSYNTH*: cint = 0x00000020
 
 
 proc init*(flags: cint): cint {.importc: "Mix_Init".}
@@ -147,7 +147,7 @@ type
       ## which is in the output format and sample rate.
     alen*: uint32 ## Length of abuf in bytes.
     volume*: uint8 ## Per-sample volume,
-      ## `0` = silent, `128` = max volume. This takes effect when mixing.
+                     ## `0` = silent, `128` = max volume. This takes effect when mixing.
 
 
 # The different fading types supported
@@ -317,7 +317,8 @@ proc loadMUS_RW*(src: RWopsPtr; freesrc: cint): ptr Music {.
   ## Matt Campbell (matt@campbellhome.dhs.org) April 2000
 
 
-proc loadMUSType_RW*(src: RWopsPtr; `type`: MusicType; freesrc: cint): ptr Music {.
+proc loadMUSType_RW*(src: RWopsPtr; `type`: MusicType;
+    freesrc: cint): ptr Music {.
     importc: "Mix_LoadMUSType_RW".}
   ## Load a music file from an RWop object assuming a specific format.
 

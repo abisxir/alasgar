@@ -446,7 +446,7 @@ const
   GL_ELEMENT_ARRAY_BUFFER* = 0x8893.GLenum
   GL_ARRAY_BUFFER_BINDING* = 0x8894.GLenum
   GL_ELEMENT_ARRAY_BUFFER_BINDING* = 0x8895.GLenum
-  GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING* = 0x889F.GLenum
+  GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING * = 0x889F.GLenum
   GL_READ_ONLY* = 0x88B8.GLenum
   GL_WRITE_ONLY* = 0x88B9.GLenum
   GL_READ_WRITE* = 0x88BA.GLenum
@@ -576,7 +576,7 @@ const
   GL_CONTEXT_FLAGS* = 0x821E.GLenum
   GL_COMPRESSED_RED* = 0x8225.GLenum
   GL_COMPRESSED_RG* = 0x8226.GLenum
-  GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT* = 0x00000001.GLbitfield
+  GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT * = 0x00000001.GLbitfield
   GL_RGBA32F* = 0x8814.GLenum
   GL_RGB32F* = 0x8815.GLenum
   GL_RGBA16F* = 0x881A.GLenum
@@ -599,21 +599,21 @@ const
   GL_RGB9_E5* = 0x8C3D.GLenum
   GL_UNSIGNED_INT_5_9_9_9_REV* = 0x8C3E.GLenum
   GL_TEXTURE_SHARED_SIZE* = 0x8C3F.GLenum
-  GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH* = 0x8C76.GLenum
+  GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH * = 0x8C76.GLenum
   GL_TRANSFORM_FEEDBACK_BUFFER_MODE* = 0x8C7F.GLenum
-  GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS* = 0x8C80.GLenum
+  GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS * = 0x8C80.GLenum
   GL_TRANSFORM_FEEDBACK_VARYINGS* = 0x8C83.GLenum
   GL_TRANSFORM_FEEDBACK_BUFFER_START* = 0x8C84.GLenum
   GL_TRANSFORM_FEEDBACK_BUFFER_SIZE* = 0x8C85.GLenum
   GL_PRIMITIVES_GENERATED* = 0x8C87.GLenum
-  GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN* = 0x8C88.GLenum
+  GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN * = 0x8C88.GLenum
   GL_RASTERIZER_DISCARD* = 0x8C89.GLenum
-  GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS* = 0x8C8A.GLenum
-  GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS* = 0x8C8B.GLenum
+  GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS * = 0x8C8A.GLenum
+  GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS * = 0x8C8B.GLenum
   GL_INTERLEAVED_ATTRIBS* = 0x8C8C.GLenum
   GL_SEPARATE_ATTRIBS* = 0x8C8D.GLenum
   GL_TRANSFORM_FEEDBACK_BUFFER* = 0x8C8E.GLenum
-  GL_TRANSFORM_FEEDBACK_BUFFER_BINDING* = 0x8C8F.GLenum
+  GL_TRANSFORM_FEEDBACK_BUFFER_BINDING * = 0x8C8F.GLenum
   GL_RGBA32UI* = 0x8D70.GLenum
   GL_RGB32UI* = 0x8D71.GLenum
   GL_RGBA16UI* = 0x8D76.GLenum
@@ -664,14 +664,14 @@ const
   GL_DEPTH32F_STENCIL8* = 0x8CAD.GLenum
   GL_FLOAT_32_UNSIGNED_INT_24_8_REV* = 0x8DAD.GLenum
   GL_INVALID_FRAMEBUFFER_OPERATION* = 0x0506.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING* = 0x8210.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE* = 0x8211.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING * = 0x8210.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE * = 0x8211.GLenum
   GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE* = 0x8212.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE* = 0x8213.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE * = 0x8213.GLenum
   GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE* = 0x8214.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE* = 0x8215.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE* = 0x8216.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE* = 0x8217.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE * = 0x8215.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE * = 0x8216.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE * = 0x8217.GLenum
   GL_FRAMEBUFFER_DEFAULT* = 0x8218.GLenum
   GL_FRAMEBUFFER_UNDEFINED* = 0x8219.GLenum
   GL_DEPTH_STENCIL_ATTACHMENT* = 0x821A.GLenum
@@ -693,16 +693,16 @@ const
   GL_DRAW_FRAMEBUFFER* = 0x8CA9.GLenum
   GL_READ_FRAMEBUFFER_BINDING* = 0x8CAA.GLenum
   GL_RENDERBUFFER_SAMPLES* = 0x8CAB.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE* = 0x8CD0.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME* = 0x8CD1.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL* = 0x8CD2.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE* = 0x8CD3.GLenum
-  GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER* = 0x8CD4.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE * = 0x8CD0.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME * = 0x8CD1.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL * = 0x8CD2.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE * = 0x8CD3.GLenum
+  GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER * = 0x8CD4.GLenum
   GL_FRAMEBUFFER_COMPLETE* = 0x8CD5.GLenum
-  GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT* = 0x8CD6.GLenum
-  GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT* = 0x8CD7.GLenum
-  GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER* = 0x8CDB.GLenum
-  GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER* = 0x8CDC.GLenum
+  GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT * = 0x8CD6.GLenum
+  GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT * = 0x8CD7.GLenum
+  GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER * = 0x8CDB.GLenum
+  GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER * = 0x8CDC.GLenum
   GL_FRAMEBUFFER_UNSUPPORTED* = 0x8CDD.GLenum
   GL_MAX_COLOR_ATTACHMENTS* = 0x8CDF.GLenum
   GL_COLOR_ATTACHMENT0* = 0x8CE0.GLenum
@@ -754,7 +754,7 @@ const
   GL_RENDERBUFFER_ALPHA_SIZE* = 0x8D53.GLenum
   GL_RENDERBUFFER_DEPTH_SIZE* = 0x8D54.GLenum
   GL_RENDERBUFFER_STENCIL_SIZE* = 0x8D55.GLenum
-  GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE* = 0x8D56.GLenum
+  GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE * = 0x8D56.GLenum
   GL_MAX_SAMPLES* = 0x8D57.GLenum
   GL_FRAMEBUFFER_SRGB* = 0x8DB9.GLenum
   GL_HALF_FLOAT* = 0x140B.GLenum
@@ -801,7 +801,7 @@ const
   GL_TEXTURE_BUFFER* = 0x8C2A.GLenum
   GL_MAX_TEXTURE_BUFFER_SIZE* = 0x8C2B.GLenum
   GL_TEXTURE_BINDING_BUFFER* = 0x8C2C.GLenum
-  GL_TEXTURE_BUFFER_DATA_STORE_BINDING* = 0x8C2D.GLenum
+  GL_TEXTURE_BUFFER_DATA_STORE_BINDING * = 0x8C2D.GLenum
   GL_TEXTURE_RECTANGLE* = 0x84F5.GLenum
   GL_TEXTURE_BINDING_RECTANGLE* = 0x84F6.GLenum
   GL_PROXY_TEXTURE_RECTANGLE* = 0x84F7.GLenum
@@ -829,11 +829,11 @@ const
   GL_MAX_COMBINED_UNIFORM_BLOCKS* = 0x8A2E.GLenum
   GL_MAX_UNIFORM_BUFFER_BINDINGS* = 0x8A2F.GLenum
   GL_MAX_UNIFORM_BLOCK_SIZE* = 0x8A30.GLenum
-  GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS* = 0x8A31.GLenum
-  GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS* = 0x8A32.GLenum
-  GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS* = 0x8A33.GLenum
+  GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS * = 0x8A31.GLenum
+  GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS * = 0x8A32.GLenum
+  GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS * = 0x8A33.GLenum
   GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT* = 0x8A34.GLenum
-  GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH* = 0x8A35.GLenum
+  GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH * = 0x8A35.GLenum
   GL_ACTIVE_UNIFORM_BLOCKS* = 0x8A36.GLenum
   GL_UNIFORM_TYPE* = 0x8A37.GLenum
   GL_UNIFORM_SIZE* = 0x8A38.GLenum
@@ -847,12 +847,12 @@ const
   GL_UNIFORM_BLOCK_DATA_SIZE* = 0x8A40.GLenum
   GL_UNIFORM_BLOCK_NAME_LENGTH* = 0x8A41.GLenum
   GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS* = 0x8A42.GLenum
-  GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES* = 0x8A43.GLenum
-  GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER* = 0x8A44.GLenum
-  GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER* = 0x8A45.GLenum
-  GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER* = 0x8A46.GLenum
+  GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES * = 0x8A43.GLenum
+  GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER * = 0x8A44.GLenum
+  GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER * = 0x8A45.GLenum
+  GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER * = 0x8A46.GLenum
   GL_CONTEXT_CORE_PROFILE_BIT* = 0x00000001.GLbitfield
-  GL_CONTEXT_COMPATIBILITY_PROFILE_BIT* = 0x00000002.GLbitfield
+  GL_CONTEXT_COMPATIBILITY_PROFILE_BIT * = 0x00000002.GLbitfield
   GL_LINES_ADJACENCY* = 0x000A.GLenum
   GL_LINE_STRIP_ADJACENCY* = 0x000B.GLenum
   GL_TRIANGLES_ADJACENCY* = 0x000C.GLenum
@@ -860,21 +860,21 @@ const
   GL_PROGRAM_POINT_SIZE* = 0x8642.GLenum
   GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS* = 0x8C29.GLenum
   GL_FRAMEBUFFER_ATTACHMENT_LAYERED* = 0x8DA7.GLenum
-  GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS* = 0x8DA8.GLenum
+  GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS * = 0x8DA8.GLenum
   GL_GEOMETRY_SHADER* = 0x8DD9.GLenum
   GL_GEOMETRY_VERTICES_OUT* = 0x8916.GLenum
   GL_GEOMETRY_INPUT_TYPE* = 0x8917.GLenum
   GL_GEOMETRY_OUTPUT_TYPE* = 0x8918.GLenum
   GL_MAX_GEOMETRY_UNIFORM_COMPONENTS* = 0x8DDF.GLenum
   GL_MAX_GEOMETRY_OUTPUT_VERTICES* = 0x8DE0.GLenum
-  GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS* = 0x8DE1.GLenum
+  GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS * = 0x8DE1.GLenum
   GL_MAX_VERTEX_OUTPUT_COMPONENTS* = 0x9122.GLenum
   GL_MAX_GEOMETRY_INPUT_COMPONENTS* = 0x9123.GLenum
   GL_MAX_GEOMETRY_OUTPUT_COMPONENTS* = 0x9124.GLenum
   GL_MAX_FRAGMENT_INPUT_COMPONENTS* = 0x9125.GLenum
   GL_CONTEXT_PROFILE_MASK* = 0x9126.GLenum
   GL_DEPTH_CLAMP* = 0x864F.GLenum
-  GL_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION* = 0x8E4C.GLenum
+  GL_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION * = 0x8E4C.GLenum
   GL_FIRST_VERTEX_CONVENTION* = 0x8E4D.GLenum
   GL_LAST_VERTEX_CONVENTION* = 0x8E4E.GLenum
   GL_PROVOKING_VERTEX* = 0x8E4F.GLenum
@@ -900,17 +900,17 @@ const
   GL_TEXTURE_2D_MULTISAMPLE* = 0x9100.GLenum
   GL_PROXY_TEXTURE_2D_MULTISAMPLE* = 0x9101.GLenum
   GL_TEXTURE_2D_MULTISAMPLE_ARRAY* = 0x9102.GLenum
-  GL_PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY* = 0x9103.GLenum
+  GL_PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY * = 0x9103.GLenum
   GL_TEXTURE_BINDING_2D_MULTISAMPLE* = 0x9104.GLenum
-  GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY* = 0x9105.GLenum
+  GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY * = 0x9105.GLenum
   GL_TEXTURE_SAMPLES* = 0x9106.GLenum
   GL_TEXTURE_FIXED_SAMPLE_LOCATIONS* = 0x9107.GLenum
   GL_SAMPLER_2D_MULTISAMPLE* = 0x9108.GLenum
   GL_INT_SAMPLER_2D_MULTISAMPLE* = 0x9109.GLenum
-  GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE* = 0x910A.GLenum
+  GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE * = 0x910A.GLenum
   GL_SAMPLER_2D_MULTISAMPLE_ARRAY* = 0x910B.GLenum
   GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY* = 0x910C.GLenum
-  GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY* = 0x910D.GLenum
+  GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY * = 0x910D.GLenum
   GL_MAX_COLOR_TEXTURE_SAMPLES* = 0x910E.GLenum
   GL_MAX_DEPTH_TEXTURE_SAMPLES* = 0x910F.GLenum
   GL_MAX_INTEGER_SAMPLES* = 0x9110.GLenum
@@ -932,22 +932,22 @@ const
   GL_INT_2_10_10_10_REV* = 0x8D9F.GLenum
   GL_SAMPLE_SHADING* = 0x8C36.GLenum
   GL_MIN_SAMPLE_SHADING_VALUE* = 0x8C37.GLenum
-  GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET* = 0x8E5E.GLenum
-  GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET* = 0x8E5F.GLenum
+  GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET * = 0x8E5E.GLenum
+  GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET * = 0x8E5F.GLenum
   GL_TEXTURE_CUBE_MAP_ARRAY* = 0x9009.GLenum
   GL_TEXTURE_BINDING_CUBE_MAP_ARRAY* = 0x900A.GLenum
   GL_PROXY_TEXTURE_CUBE_MAP_ARRAY* = 0x900B.GLenum
   GL_SAMPLER_CUBE_MAP_ARRAY* = 0x900C.GLenum
   GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW* = 0x900D.GLenum
   GL_INT_SAMPLER_CUBE_MAP_ARRAY* = 0x900E.GLenum
-  GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY* = 0x900F.GLenum
+  GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY * = 0x900F.GLenum
   GL_DRAW_INDIRECT_BUFFER* = 0x8F3F.GLenum
   GL_DRAW_INDIRECT_BUFFER_BINDING* = 0x8F43.GLenum
   GL_GEOMETRY_SHADER_INVOCATIONS* = 0x887F.GLenum
   GL_MAX_GEOMETRY_SHADER_INVOCATIONS* = 0x8E5A.GLenum
-  GL_MIN_FRAGMENT_INTERPOLATION_OFFSET* = 0x8E5B.GLenum
-  GL_MAX_FRAGMENT_INTERPOLATION_OFFSET* = 0x8E5C.GLenum
-  GL_FRAGMENT_INTERPOLATION_OFFSET_BITS* = 0x8E5D.GLbitfield
+  GL_MIN_FRAGMENT_INTERPOLATION_OFFSET * = 0x8E5B.GLenum
+  GL_MAX_FRAGMENT_INTERPOLATION_OFFSET * = 0x8E5C.GLenum
+  GL_FRAGMENT_INTERPOLATION_OFFSET_BITS * = 0x8E5D.GLbitfield
   GL_MAX_VERTEX_STREAMS* = 0x8E71.GLenum
   GL_DOUBLE_VEC2* = 0x8FFC.GLenum
   GL_DOUBLE_VEC3* = 0x8FFD.GLenum
@@ -963,9 +963,9 @@ const
   GL_DOUBLE_MAT4x3* = 0x8F4E.GLenum
   GL_ACTIVE_SUBROUTINES* = 0x8DE5.GLenum
   GL_ACTIVE_SUBROUTINE_UNIFORMS* = 0x8DE6.GLenum
-  GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS* = 0x8E47.GLenum
+  GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS * = 0x8E47.GLenum
   GL_ACTIVE_SUBROUTINE_MAX_LENGTH* = 0x8E48.GLenum
-  GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH* = 0x8E49.GLenum
+  GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH * = 0x8E49.GLenum
   GL_MAX_SUBROUTINES* = 0x8DE7.GLenum
   GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS* = 0x8DE8.GLenum
   GL_NUM_COMPATIBLE_SUBROUTINES* = 0x8E4A.GLenum
@@ -985,22 +985,22 @@ const
   GL_FRACTIONAL_EVEN* = 0x8E7C.GLenum
   GL_MAX_PATCH_VERTICES* = 0x8E7D.GLenum
   GL_MAX_TESS_GEN_LEVEL* = 0x8E7E.GLenum
-  GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS* = 0x8E7F.GLenum
-  GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS* = 0x8E80.GLenum
-  GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS* = 0x8E81.GLenum
-  GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS* = 0x8E82.GLenum
-  GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS* = 0x8E83.GLenum
+  GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS * = 0x8E7F.GLenum
+  GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS * = 0x8E80.GLenum
+  GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS * = 0x8E81.GLenum
+  GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS * = 0x8E82.GLenum
+  GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS * = 0x8E83.GLenum
   GL_MAX_TESS_PATCH_COMPONENTS* = 0x8E84.GLenum
-  GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS* = 0x8E85.GLenum
-  GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS* = 0x8E86.GLenum
+  GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS * = 0x8E85.GLenum
+  GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS * = 0x8E86.GLenum
   GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS* = 0x8E89.GLenum
-  GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS* = 0x8E8A.GLenum
-  GL_MAX_TESS_CONTROL_INPUT_COMPONENTS* = 0x886C.GLenum
-  GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS* = 0x886D.GLenum
-  GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS* = 0x8E1E.GLenum
-  GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS* = 0x8E1F.GLenum
-  GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER* = 0x84F0.GLenum
-  GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER* = 0x84F1.GLenum
+  GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS * = 0x8E8A.GLenum
+  GL_MAX_TESS_CONTROL_INPUT_COMPONENTS * = 0x886C.GLenum
+  GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS * = 0x886D.GLenum
+  GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS * = 0x8E1E.GLenum
+  GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS * = 0x8E1F.GLenum
+  GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER * = 0x84F0.GLenum
+  GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER * = 0x84F1.GLenum
   GL_TESS_EVALUATION_SHADER* = 0x8E87.GLenum
   GL_TESS_CONTROL_SHADER* = 0x8E88.GLenum
   GL_TRANSFORM_FEEDBACK* = 0x8E22.GLenum
@@ -1068,20 +1068,31 @@ var
   glLineWidth*: proc (width: GLfloat) {.stdcall.}
   glPointSize*: proc (size: GLfloat) {.stdcall.}
   glPolygonMode*: proc (face: GLenum, mode: GLenum) {.stdcall.}
-  glScissor*: proc (x: GLint, y: GLint, width: GLsizei, height: GLsizei) {.stdcall.}
-  glTexParameterf*: proc (target: GLenum, pname: GLenum, param: GLfloat) {.stdcall.}
-  glTexParameterfv*: proc (target: GLenum, pname: GLenum, params: ptr GLfloat) {.stdcall.}
-  glTexParameteri*: proc (target: GLenum, pname: GLenum, param: GLint) {.stdcall.}
-  glTexParameteriv*: proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glTexImage1D*: proc (target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, border: GLint, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}
-  glTexImage2D*: proc (target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, border: GLint, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}
+  glScissor*: proc (x: GLint, y: GLint, width: GLsizei,
+      height: GLsizei) {.stdcall.}
+  glTexParameterf*: proc (target: GLenum, pname: GLenum,
+      param: GLfloat) {.stdcall.}
+  glTexParameterfv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLfloat) {.stdcall.}
+  glTexParameteri*: proc (target: GLenum, pname: GLenum,
+      param: GLint) {.stdcall.}
+  glTexParameteriv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glTexImage1D*: proc (target: GLenum, level: GLint, internalformat: GLint,
+      width: GLsizei, border: GLint, format: GLenum, `type`: GLenum,
+      pixels: pointer) {.stdcall.}
+  glTexImage2D*: proc (target: GLenum, level: GLint, internalformat: GLint,
+      width: GLsizei, height: GLsizei, border: GLint, format: GLenum,
+      `type`: GLenum, pixels: pointer) {.stdcall.}
   glDrawBuffer*: proc (buf: GLenum) {.stdcall.}
   glClear*: proc (mask: GLbitfield) {.stdcall.}
-  glClearColor*: proc (red: GLfloat, green: GLfloat, blue: GLfloat, alpha: GLfloat) {.stdcall.}
+  glClearColor*: proc (red: GLfloat, green: GLfloat, blue: GLfloat,
+      alpha: GLfloat) {.stdcall.}
   glClearStencil*: proc (s: GLint) {.stdcall.}
   glClearDepth*: proc (depth: GLdouble) {.stdcall.}
   glStencilMask*: proc (mask: GLuint) {.stdcall.}
-  glColorMask*: proc (red: GLboolean, green: GLboolean, blue: GLboolean, alpha: GLboolean) {.stdcall.}
+  glColorMask*: proc (red: GLboolean, green: GLboolean, blue: GLboolean,
+      alpha: GLboolean) {.stdcall.}
   glDepthMask*: proc (flag: GLboolean) {.stdcall.}
   glDisable*: proc (cap: GLenum) {.stdcall.}
   glEnable*: proc (cap: GLenum) {.stdcall.}
@@ -1095,82 +1106,138 @@ var
   glPixelStoref*: proc (pname: GLenum, param: GLfloat) {.stdcall.}
   glPixelStorei*: proc (pname: GLenum, param: GLint) {.stdcall.}
   glReadBuffer*: proc (src: GLenum) {.stdcall.}
-  glReadPixels*: proc (x: GLint, y: GLint, width: GLsizei, height: GLsizei, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}
+  glReadPixels*: proc (x: GLint, y: GLint, width: GLsizei, height: GLsizei,
+      format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}
   glGetBooleanv*: proc (pname: GLenum, data: ptr GLboolean) {.stdcall.}
   glGetDoublev*: proc (pname: GLenum, data: ptr GLdouble) {.stdcall.}
   glGetError*: proc (): GLenum {.stdcall.}
   glGetFloatv*: proc (pname: GLenum, data: ptr GLfloat) {.stdcall.}
   glGetIntegerv*: proc (pname: GLenum, data: ptr GLint) {.stdcall.}
   glGetString*: proc (name: GLenum): ptr GLubyte {.stdcall.}
-  glGetTexImage*: proc (target: GLenum, level: GLint, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}
-  glGetTexParameterfv*: proc (target: GLenum, pname: GLenum, params: ptr GLfloat) {.stdcall.}
-  glGetTexParameteriv*: proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetTexLevelParameterfv*: proc (target: GLenum, level: GLint, pname: GLenum, params: ptr GLfloat) {.stdcall.}
-  glGetTexLevelParameteriv*: proc (target: GLenum, level: GLint, pname: GLenum, params: ptr GLint) {.stdcall.}
+  glGetTexImage*: proc (target: GLenum, level: GLint, format: GLenum,
+      `type`: GLenum, pixels: pointer) {.stdcall.}
+  glGetTexParameterfv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLfloat) {.stdcall.}
+  glGetTexParameteriv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetTexLevelParameterfv*: proc (target: GLenum, level: GLint, pname: GLenum,
+      params: ptr GLfloat) {.stdcall.}
+  glGetTexLevelParameteriv*: proc (target: GLenum, level: GLint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
   glIsEnabled*: proc (cap: GLenum): GLboolean {.stdcall.}
   glDepthRange*: proc (n: GLdouble, f: GLdouble) {.stdcall.}
-  glViewport*: proc (x: GLint, y: GLint, width: GLsizei, height: GLsizei) {.stdcall.}
+  glViewport*: proc (x: GLint, y: GLint, width: GLsizei,
+      height: GLsizei) {.stdcall.}
   glDrawArrays*: proc (mode: GLenum, first: GLint, count: GLsizei) {.stdcall.}
-  glDrawElements*: proc (mode: GLenum, count: GLsizei, `type`: GLenum, indices: pointer) {.stdcall.}
+  glDrawElements*: proc (mode: GLenum, count: GLsizei, `type`: GLenum,
+      indices: pointer) {.stdcall.}
   glPolygonOffset*: proc (factor: GLfloat, units: GLfloat) {.stdcall.}
-  glCopyTexImage1D*: proc (target: GLenum, level: GLint, internalformat: GLenum, x: GLint, y: GLint, width: GLsizei, border: GLint) {.stdcall.}
-  glCopyTexImage2D*: proc (target: GLenum, level: GLint, internalformat: GLenum, x: GLint, y: GLint, width: GLsizei, height: GLsizei, border: GLint) {.stdcall.}
-  glCopyTexSubImage1D*: proc (target: GLenum, level: GLint, xoffset: GLint, x: GLint, y: GLint, width: GLsizei) {.stdcall.}
-  glCopyTexSubImage2D*: proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, x: GLint, y: GLint, width: GLsizei, height: GLsizei) {.stdcall.}
-  glTexSubImage1D*: proc (target: GLenum, level: GLint, xoffset: GLint, width: GLsizei, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}
-  glTexSubImage2D*: proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, width: GLsizei, height: GLsizei, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}
+  glCopyTexImage1D*: proc (target: GLenum, level: GLint, internalformat: GLenum,
+      x: GLint, y: GLint, width: GLsizei, border: GLint) {.stdcall.}
+  glCopyTexImage2D*: proc (target: GLenum, level: GLint, internalformat: GLenum,
+      x: GLint, y: GLint, width: GLsizei, height: GLsizei,
+      border: GLint) {.stdcall.}
+  glCopyTexSubImage1D*: proc (target: GLenum, level: GLint, xoffset: GLint,
+      x: GLint, y: GLint, width: GLsizei) {.stdcall.}
+  glCopyTexSubImage2D*: proc (target: GLenum, level: GLint, xoffset: GLint,
+      yoffset: GLint, x: GLint, y: GLint, width: GLsizei,
+      height: GLsizei) {.stdcall.}
+  glTexSubImage1D*: proc (target: GLenum, level: GLint, xoffset: GLint,
+      width: GLsizei, format: GLenum, `type`: GLenum,
+      pixels: pointer) {.stdcall.}
+  glTexSubImage2D*: proc (target: GLenum, level: GLint, xoffset: GLint,
+      yoffset: GLint, width: GLsizei, height: GLsizei, format: GLenum,
+      `type`: GLenum, pixels: pointer) {.stdcall.}
   glBindTexture*: proc (target: GLenum, texture: GLuint) {.stdcall.}
   glDeleteTextures*: proc (n: GLsizei, textures: ptr GLuint) {.stdcall.}
   glGenTextures*: proc (n: GLsizei, textures: ptr GLuint) {.stdcall.}
   glIsTexture*: proc (texture: GLuint): GLboolean {.stdcall.}
-  glDrawRangeElements*: proc (mode: GLenum, start: GLuint, `end`: GLuint, count: GLsizei, `type`: GLenum, indices: pointer) {.stdcall.}
-  glTexImage3D*: proc (target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}
-  glTexSubImage3D*: proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}
-  glCopyTexSubImage3D*: proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, x: GLint, y: GLint, width: GLsizei, height: GLsizei) {.stdcall.}
+  glDrawRangeElements*: proc (mode: GLenum, start: GLuint, `end`: GLuint,
+      count: GLsizei, `type`: GLenum, indices: pointer) {.stdcall.}
+  glTexImage3D*: proc (target: GLenum, level: GLint, internalformat: GLint,
+      width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint,
+      format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}
+  glTexSubImage3D*: proc (target: GLenum, level: GLint, xoffset: GLint,
+      yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei,
+      depth: GLsizei, format: GLenum, `type`: GLenum,
+      pixels: pointer) {.stdcall.}
+  glCopyTexSubImage3D*: proc (target: GLenum, level: GLint, xoffset: GLint,
+      yoffset: GLint, zoffset: GLint, x: GLint, y: GLint, width: GLsizei,
+      height: GLsizei) {.stdcall.}
   glActiveTexture*: proc (texture: GLenum) {.stdcall.}
   glSampleCoverage*: proc (value: GLfloat, invert: GLboolean) {.stdcall.}
-  glCompressedTexImage3D*: proc (target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, imageSize: GLsizei, data: pointer) {.stdcall.}
-  glCompressedTexImage2D*: proc (target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, height: GLsizei, border: GLint, imageSize: GLsizei, data: pointer) {.stdcall.}
-  glCompressedTexImage1D*: proc (target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, border: GLint, imageSize: GLsizei, data: pointer) {.stdcall.}
-  glCompressedTexSubImage3D*: proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, imageSize: GLsizei, data: pointer) {.stdcall.}
-  glCompressedTexSubImage2D*: proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, width: GLsizei, height: GLsizei, format: GLenum, imageSize: GLsizei, data: pointer) {.stdcall.}
-  glCompressedTexSubImage1D*: proc (target: GLenum, level: GLint, xoffset: GLint, width: GLsizei, format: GLenum, imageSize: GLsizei, data: pointer) {.stdcall.}
-  glGetCompressedTexImage*: proc (target: GLenum, level: GLint, img: pointer) {.stdcall.}
-  glBlendFuncSeparate*: proc (sfactorRGB: GLenum, dfactorRGB: GLenum, sfactorAlpha: GLenum, dfactorAlpha: GLenum) {.stdcall.}
-  glMultiDrawArrays*: proc (mode: GLenum, first: ptr GLint, count: ptr GLsizei, drawcount: GLsizei) {.stdcall.}
-  glMultiDrawElements*: proc (mode: GLenum, count: ptr GLsizei, `type`: GLenum, indices: ptr pointer, drawcount: GLsizei) {.stdcall.}
+  glCompressedTexImage3D*: proc (target: GLenum, level: GLint,
+      internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei,
+      border: GLint, imageSize: GLsizei, data: pointer) {.stdcall.}
+  glCompressedTexImage2D*: proc (target: GLenum, level: GLint,
+      internalformat: GLenum, width: GLsizei, height: GLsizei, border: GLint,
+      imageSize: GLsizei, data: pointer) {.stdcall.}
+  glCompressedTexImage1D*: proc (target: GLenum, level: GLint,
+      internalformat: GLenum, width: GLsizei, border: GLint, imageSize: GLsizei,
+      data: pointer) {.stdcall.}
+  glCompressedTexSubImage3D*: proc (target: GLenum, level: GLint,
+      xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei,
+      height: GLsizei, depth: GLsizei, format: GLenum, imageSize: GLsizei,
+      data: pointer) {.stdcall.}
+  glCompressedTexSubImage2D*: proc (target: GLenum, level: GLint,
+      xoffset: GLint, yoffset: GLint, width: GLsizei, height: GLsizei,
+      format: GLenum, imageSize: GLsizei, data: pointer) {.stdcall.}
+  glCompressedTexSubImage1D*: proc (target: GLenum, level: GLint,
+      xoffset: GLint, width: GLsizei, format: GLenum, imageSize: GLsizei,
+      data: pointer) {.stdcall.}
+  glGetCompressedTexImage*: proc (target: GLenum, level: GLint,
+      img: pointer) {.stdcall.}
+  glBlendFuncSeparate*: proc (sfactorRGB: GLenum, dfactorRGB: GLenum,
+      sfactorAlpha: GLenum, dfactorAlpha: GLenum) {.stdcall.}
+  glMultiDrawArrays*: proc (mode: GLenum, first: ptr GLint, count: ptr GLsizei,
+      drawcount: GLsizei) {.stdcall.}
+  glMultiDrawElements*: proc (mode: GLenum, count: ptr GLsizei, `type`: GLenum,
+      indices: ptr pointer, drawcount: GLsizei) {.stdcall.}
   glPointParameterf*: proc (pname: GLenum, param: GLfloat) {.stdcall.}
   glPointParameterfv*: proc (pname: GLenum, params: ptr GLfloat) {.stdcall.}
   glPointParameteri*: proc (pname: GLenum, param: GLint) {.stdcall.}
   glPointParameteriv*: proc (pname: GLenum, params: ptr GLint) {.stdcall.}
-  glBlendColor*: proc (red: GLfloat, green: GLfloat, blue: GLfloat, alpha: GLfloat) {.stdcall.}
+  glBlendColor*: proc (red: GLfloat, green: GLfloat, blue: GLfloat,
+      alpha: GLfloat) {.stdcall.}
   glBlendEquation*: proc (mode: GLenum) {.stdcall.}
   glGenQueries*: proc (n: GLsizei, ids: ptr GLuint) {.stdcall.}
   glDeleteQueries*: proc (n: GLsizei, ids: ptr GLuint) {.stdcall.}
   glIsQuery*: proc (id: GLuint): GLboolean {.stdcall.}
   glBeginQuery*: proc (target: GLenum, id: GLuint) {.stdcall.}
   glEndQuery*: proc (target: GLenum) {.stdcall.}
-  glGetQueryiv*: proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetQueryObjectiv*: proc (id: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetQueryObjectuiv*: proc (id: GLuint, pname: GLenum, params: ptr GLuint) {.stdcall.}
+  glGetQueryiv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetQueryObjectiv*: proc (id: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetQueryObjectuiv*: proc (id: GLuint, pname: GLenum,
+      params: ptr GLuint) {.stdcall.}
   glBindBuffer*: proc (target: GLenum, buffer: GLuint) {.stdcall.}
   glDeleteBuffers*: proc (n: GLsizei, buffers: ptr GLuint) {.stdcall.}
   glGenBuffers*: proc (n: GLsizei, buffers: ptr GLuint) {.stdcall.}
   glIsBuffer*: proc (buffer: GLuint): GLboolean {.stdcall.}
-  glBufferData*: proc (target: GLenum, size: GLsizeiptr, data: pointer, usage: GLenum) {.stdcall.}
-  glBufferSubData*: proc (target: GLenum, offset: GLintptr, size: GLsizeiptr, data: pointer) {.stdcall.}
-  glGetBufferSubData*: proc (target: GLenum, offset: GLintptr, size: GLsizeiptr, data: pointer) {.stdcall.}
+  glBufferData*: proc (target: GLenum, size: GLsizeiptr, data: pointer,
+      usage: GLenum) {.stdcall.}
+  glBufferSubData*: proc (target: GLenum, offset: GLintptr, size: GLsizeiptr,
+      data: pointer) {.stdcall.}
+  glGetBufferSubData*: proc (target: GLenum, offset: GLintptr, size: GLsizeiptr,
+      data: pointer) {.stdcall.}
   glMapBuffer*: proc (target: GLenum, access: GLenum): pointer {.stdcall.}
   glUnmapBuffer*: proc (target: GLenum): GLboolean {.stdcall.}
-  glGetBufferParameteriv*: proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetBufferPointerv*: proc (target: GLenum, pname: GLenum, params: ptr pointer) {.stdcall.}
-  glBlendEquationSeparate*: proc (modeRGB: GLenum, modeAlpha: GLenum) {.stdcall.}
+  glGetBufferParameteriv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetBufferPointerv*: proc (target: GLenum, pname: GLenum,
+      params: ptr pointer) {.stdcall.}
+  glBlendEquationSeparate*: proc (modeRGB: GLenum,
+      modeAlpha: GLenum) {.stdcall.}
   glDrawBuffers*: proc (n: GLsizei, bufs: ptr GLenum) {.stdcall.}
-  glStencilOpSeparate*: proc (face: GLenum, sfail: GLenum, dpfail: GLenum, dppass: GLenum) {.stdcall.}
-  glStencilFuncSeparate*: proc (face: GLenum, `func`: GLenum, `ref`: GLint, mask: GLuint) {.stdcall.}
+  glStencilOpSeparate*: proc (face: GLenum, sfail: GLenum, dpfail: GLenum,
+      dppass: GLenum) {.stdcall.}
+  glStencilFuncSeparate*: proc (face: GLenum, `func`: GLenum, `ref`: GLint,
+      mask: GLuint) {.stdcall.}
   glStencilMaskSeparate*: proc (face: GLenum, mask: GLuint) {.stdcall.}
   glAttachShader*: proc (program: GLuint, shader: GLuint) {.stdcall.}
-  glBindAttribLocation*: proc (program: GLuint, index: GLuint, name: cstring) {.stdcall.}
+  glBindAttribLocation*: proc (program: GLuint, index: GLuint,
+      name: cstring) {.stdcall.}
   glCompileShader*: proc (shader: GLuint) {.stdcall.}
   glCreateProgram*: proc (): GLuint {.stdcall.}
   glCreateShader*: proc (`type`: GLenum): GLuint {.stdcall.}
@@ -1179,46 +1246,79 @@ var
   glDetachShader*: proc (program: GLuint, shader: GLuint) {.stdcall.}
   glDisableVertexAttribArray*: proc (index: GLuint) {.stdcall.}
   glEnableVertexAttribArray*: proc (index: GLuint) {.stdcall.}
-  glGetActiveAttrib*: proc (program: GLuint, index: GLuint, bufSize: GLsizei, length: ptr GLsizei, size: ptr GLint, `type`: ptr GLenum, name: cstring) {.stdcall.}
-  glGetActiveUniform*: proc (program: GLuint, index: GLuint, bufSize: GLsizei, length: ptr GLsizei, size: ptr GLint, `type`: ptr GLenum, name: cstring) {.stdcall.}
-  glGetAttachedShaders*: proc (program: GLuint, maxCount: GLsizei, count: ptr GLsizei, shaders: ptr GLuint) {.stdcall.}
+  glGetActiveAttrib*: proc (program: GLuint, index: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, size: ptr GLint, `type`: ptr GLenum,
+      name: cstring) {.stdcall.}
+  glGetActiveUniform*: proc (program: GLuint, index: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, size: ptr GLint, `type`: ptr GLenum,
+      name: cstring) {.stdcall.}
+  glGetAttachedShaders*: proc (program: GLuint, maxCount: GLsizei,
+      count: ptr GLsizei, shaders: ptr GLuint) {.stdcall.}
   glGetAttribLocation*: proc (program: GLuint, name: cstring): GLint {.stdcall.}
-  glGetProgramiv*: proc (program: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetProgramInfoLog*: proc (program: GLuint, bufSize: GLsizei, length: ptr GLsizei, infoLog: cstring) {.stdcall.}
-  glGetShaderiv*: proc (shader: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetShaderInfoLog*: proc (shader: GLuint, bufSize: GLsizei, length: ptr GLsizei, infoLog: cstring) {.stdcall.}
-  glGetShaderSource*: proc (shader: GLuint, bufSize: GLsizei, length: ptr GLsizei, source: cstring) {.stdcall.}
-  glGetUniformLocation*: proc (program: GLuint, name: cstring): GLint {.stdcall.}
-  glGetUniformfv*: proc (program: GLuint, location: GLint, params: ptr GLfloat) {.stdcall.}
-  glGetUniformiv*: proc (program: GLuint, location: GLint, params: ptr GLint) {.stdcall.}
-  glGetVertexAttribdv*: proc (index: GLuint, pname: GLenum, params: ptr GLdouble) {.stdcall.}
-  glGetVertexAttribfv*: proc (index: GLuint, pname: GLenum, params: ptr GLfloat) {.stdcall.}
-  glGetVertexAttribiv*: proc (index: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetVertexAttribPointerv*: proc (index: GLuint, pname: GLenum, pointer: ptr pointer) {.stdcall.}
+  glGetProgramiv*: proc (program: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetProgramInfoLog*: proc (program: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, infoLog: cstring) {.stdcall.}
+  glGetShaderiv*: proc (shader: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetShaderInfoLog*: proc (shader: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, infoLog: cstring) {.stdcall.}
+  glGetShaderSource*: proc (shader: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, source: cstring) {.stdcall.}
+  glGetUniformLocation*: proc (program: GLuint,
+      name: cstring): GLint {.stdcall.}
+  glGetUniformfv*: proc (program: GLuint, location: GLint,
+      params: ptr GLfloat) {.stdcall.}
+  glGetUniformiv*: proc (program: GLuint, location: GLint,
+      params: ptr GLint) {.stdcall.}
+  glGetVertexAttribdv*: proc (index: GLuint, pname: GLenum,
+      params: ptr GLdouble) {.stdcall.}
+  glGetVertexAttribfv*: proc (index: GLuint, pname: GLenum,
+      params: ptr GLfloat) {.stdcall.}
+  glGetVertexAttribiv*: proc (index: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetVertexAttribPointerv*: proc (index: GLuint, pname: GLenum,
+      pointer: ptr pointer) {.stdcall.}
   glIsProgram*: proc (program: GLuint): GLboolean {.stdcall.}
   glIsShader*: proc (shader: GLuint): GLboolean {.stdcall.}
   glLinkProgram*: proc (program: GLuint) {.stdcall.}
-  glShaderSource*: proc (shader: GLuint, count: GLsizei, string: cstringArray, length: ptr GLint) {.stdcall.}
+  glShaderSource*: proc (shader: GLuint, count: GLsizei, string: cstringArray,
+      length: ptr GLint) {.stdcall.}
   glUseProgram*: proc (program: GLuint) {.stdcall.}
   glUniform1f*: proc (location: GLint, v0: GLfloat) {.stdcall.}
   glUniform2f*: proc (location: GLint, v0: GLfloat, v1: GLfloat) {.stdcall.}
-  glUniform3f*: proc (location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat) {.stdcall.}
-  glUniform4f*: proc (location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat, v3: GLfloat) {.stdcall.}
+  glUniform3f*: proc (location: GLint, v0: GLfloat, v1: GLfloat,
+      v2: GLfloat) {.stdcall.}
+  glUniform4f*: proc (location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat,
+      v3: GLfloat) {.stdcall.}
   glUniform1i*: proc (location: GLint, v0: GLint) {.stdcall.}
   glUniform2i*: proc (location: GLint, v0: GLint, v1: GLint) {.stdcall.}
-  glUniform3i*: proc (location: GLint, v0: GLint, v1: GLint, v2: GLint) {.stdcall.}
-  glUniform4i*: proc (location: GLint, v0: GLint, v1: GLint, v2: GLint, v3: GLint) {.stdcall.}
-  glUniform1fv*: proc (location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}
-  glUniform2fv*: proc (location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}
-  glUniform3fv*: proc (location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}
-  glUniform4fv*: proc (location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}
-  glUniform1iv*: proc (location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}
-  glUniform2iv*: proc (location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}
-  glUniform3iv*: proc (location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}
-  glUniform4iv*: proc (location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}
-  glUniformMatrix2fv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glUniformMatrix3fv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glUniformMatrix4fv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glUniform3i*: proc (location: GLint, v0: GLint, v1: GLint,
+      v2: GLint) {.stdcall.}
+  glUniform4i*: proc (location: GLint, v0: GLint, v1: GLint, v2: GLint,
+      v3: GLint) {.stdcall.}
+  glUniform1fv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}
+  glUniform2fv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}
+  glUniform3fv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}
+  glUniform4fv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}
+  glUniform1iv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}
+  glUniform2iv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}
+  glUniform3iv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}
+  glUniform4iv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}
+  glUniformMatrix2fv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glUniformMatrix3fv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glUniformMatrix4fv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
   glValidateProgram*: proc (program: GLuint) {.stdcall.}
   glVertexAttrib1d*: proc (index: GLuint, x: GLdouble) {.stdcall.}
   glVertexAttrib1dv*: proc (index: GLuint, v: ptr GLdouble) {.stdcall.}
@@ -1232,63 +1332,92 @@ var
   glVertexAttrib2fv*: proc (index: GLuint, v: ptr GLfloat) {.stdcall.}
   glVertexAttrib2s*: proc (index: GLuint, x: GLshort, y: GLshort) {.stdcall.}
   glVertexAttrib2sv*: proc (index: GLuint, v: ptr GLshort) {.stdcall.}
-  glVertexAttrib3d*: proc (index: GLuint, x: GLdouble, y: GLdouble, z: GLdouble) {.stdcall.}
+  glVertexAttrib3d*: proc (index: GLuint, x: GLdouble, y: GLdouble,
+      z: GLdouble) {.stdcall.}
   glVertexAttrib3dv*: proc (index: GLuint, v: ptr GLdouble) {.stdcall.}
-  glVertexAttrib3f*: proc (index: GLuint, x: GLfloat, y: GLfloat, z: GLfloat) {.stdcall.}
+  glVertexAttrib3f*: proc (index: GLuint, x: GLfloat, y: GLfloat,
+      z: GLfloat) {.stdcall.}
   glVertexAttrib3fv*: proc (index: GLuint, v: ptr GLfloat) {.stdcall.}
-  glVertexAttrib3s*: proc (index: GLuint, x: GLshort, y: GLshort, z: GLshort) {.stdcall.}
+  glVertexAttrib3s*: proc (index: GLuint, x: GLshort, y: GLshort,
+      z: GLshort) {.stdcall.}
   glVertexAttrib3sv*: proc (index: GLuint, v: ptr GLshort) {.stdcall.}
   glVertexAttrib4Nbv*: proc (index: GLuint, v: ptr GLbyte) {.stdcall.}
   glVertexAttrib4Niv*: proc (index: GLuint, v: ptr GLint) {.stdcall.}
   glVertexAttrib4Nsv*: proc (index: GLuint, v: ptr GLshort) {.stdcall.}
-  glVertexAttrib4Nub*: proc (index: GLuint, x: GLubyte, y: GLubyte, z: GLubyte, w: GLubyte) {.stdcall.}
+  glVertexAttrib4Nub*: proc (index: GLuint, x: GLubyte, y: GLubyte, z: GLubyte,
+      w: GLubyte) {.stdcall.}
   glVertexAttrib4Nubv*: proc (index: GLuint, v: ptr GLubyte) {.stdcall.}
   glVertexAttrib4Nuiv*: proc (index: GLuint, v: ptr GLuint) {.stdcall.}
   glVertexAttrib4Nusv*: proc (index: GLuint, v: ptr GLushort) {.stdcall.}
   glVertexAttrib4bv*: proc (index: GLuint, v: ptr GLbyte) {.stdcall.}
-  glVertexAttrib4d*: proc (index: GLuint, x: GLdouble, y: GLdouble, z: GLdouble, w: GLdouble) {.stdcall.}
+  glVertexAttrib4d*: proc (index: GLuint, x: GLdouble, y: GLdouble, z: GLdouble,
+      w: GLdouble) {.stdcall.}
   glVertexAttrib4dv*: proc (index: GLuint, v: ptr GLdouble) {.stdcall.}
-  glVertexAttrib4f*: proc (index: GLuint, x: GLfloat, y: GLfloat, z: GLfloat, w: GLfloat) {.stdcall.}
+  glVertexAttrib4f*: proc (index: GLuint, x: GLfloat, y: GLfloat, z: GLfloat,
+      w: GLfloat) {.stdcall.}
   glVertexAttrib4fv*: proc (index: GLuint, v: ptr GLfloat) {.stdcall.}
   glVertexAttrib4iv*: proc (index: GLuint, v: ptr GLint) {.stdcall.}
-  glVertexAttrib4s*: proc (index: GLuint, x: GLshort, y: GLshort, z: GLshort, w: GLshort) {.stdcall.}
+  glVertexAttrib4s*: proc (index: GLuint, x: GLshort, y: GLshort, z: GLshort,
+      w: GLshort) {.stdcall.}
   glVertexAttrib4sv*: proc (index: GLuint, v: ptr GLshort) {.stdcall.}
   glVertexAttrib4ubv*: proc (index: GLuint, v: ptr GLubyte) {.stdcall.}
   glVertexAttrib4uiv*: proc (index: GLuint, v: ptr GLuint) {.stdcall.}
   glVertexAttrib4usv*: proc (index: GLuint, v: ptr GLushort) {.stdcall.}
-  glVertexAttribPointer*: proc (index: GLuint, size: GLint, `type`: GLenum, normalized: GLboolean, stride: GLsizei, pointer: pointer) {.stdcall.}
-  glUniformMatrix2x3fv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glUniformMatrix3x2fv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glUniformMatrix2x4fv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glUniformMatrix4x2fv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glUniformMatrix3x4fv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glUniformMatrix4x3fv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glColorMaski*: proc (index: GLuint, r: GLboolean, g: GLboolean, b: GLboolean, a: GLboolean) {.stdcall.}
-  glGetBooleani_v*: proc (target: GLenum, index: GLuint, data: ptr GLboolean) {.stdcall.}
-  glGetIntegeri_v*: proc (target: GLenum, index: GLuint, data: ptr GLint) {.stdcall.}
+  glVertexAttribPointer*: proc (index: GLuint, size: GLint, `type`: GLenum,
+      normalized: GLboolean, stride: GLsizei, pointer: pointer) {.stdcall.}
+  glUniformMatrix2x3fv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glUniformMatrix3x2fv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glUniformMatrix2x4fv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glUniformMatrix4x2fv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glUniformMatrix3x4fv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glUniformMatrix4x3fv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glColorMaski*: proc (index: GLuint, r: GLboolean, g: GLboolean, b: GLboolean,
+      a: GLboolean) {.stdcall.}
+  glGetBooleani_v*: proc (target: GLenum, index: GLuint,
+      data: ptr GLboolean) {.stdcall.}
+  glGetIntegeri_v*: proc (target: GLenum, index: GLuint,
+      data: ptr GLint) {.stdcall.}
   glEnablei*: proc (target: GLenum, index: GLuint) {.stdcall.}
   glDisablei*: proc (target: GLenum, index: GLuint) {.stdcall.}
   glIsEnabledi*: proc (target: GLenum, index: GLuint): GLboolean {.stdcall.}
   glBeginTransformFeedback*: proc (primitiveMode: GLenum) {.stdcall.}
   glEndTransformFeedback*: proc () {.stdcall.}
-  glBindBufferRange*: proc (target: GLenum, index: GLuint, buffer: GLuint, offset: GLintptr, size: GLsizeiptr) {.stdcall.}
-  glBindBufferBase*: proc (target: GLenum, index: GLuint, buffer: GLuint) {.stdcall.}
-  glTransformFeedbackVaryings*: proc (program: GLuint, count: GLsizei, varyings: cstringArray, bufferMode: GLenum) {.stdcall.}
-  glGetTransformFeedbackVarying*: proc (program: GLuint, index: GLuint, bufSize: GLsizei, length: ptr GLsizei, size: ptr GLsizei, `type`: ptr GLenum, name: cstring) {.stdcall.}
+  glBindBufferRange*: proc (target: GLenum, index: GLuint, buffer: GLuint,
+      offset: GLintptr, size: GLsizeiptr) {.stdcall.}
+  glBindBufferBase*: proc (target: GLenum, index: GLuint,
+      buffer: GLuint) {.stdcall.}
+  glTransformFeedbackVaryings*: proc (program: GLuint, count: GLsizei,
+      varyings: cstringArray, bufferMode: GLenum) {.stdcall.}
+  glGetTransformFeedbackVarying*: proc (program: GLuint, index: GLuint,
+      bufSize: GLsizei, length: ptr GLsizei, size: ptr GLsizei,
+      `type`: ptr GLenum, name: cstring) {.stdcall.}
   glClampColor*: proc (target: GLenum, clamp: GLenum) {.stdcall.}
   glBeginConditionalRender*: proc (id: GLuint, mode: GLenum) {.stdcall.}
   glEndConditionalRender*: proc () {.stdcall.}
-  glVertexAttribIPointer*: proc (index: GLuint, size: GLint, `type`: GLenum, stride: GLsizei, pointer: pointer) {.stdcall.}
-  glGetVertexAttribIiv*: proc (index: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetVertexAttribIuiv*: proc (index: GLuint, pname: GLenum, params: ptr GLuint) {.stdcall.}
+  glVertexAttribIPointer*: proc (index: GLuint, size: GLint, `type`: GLenum,
+      stride: GLsizei, pointer: pointer) {.stdcall.}
+  glGetVertexAttribIiv*: proc (index: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetVertexAttribIuiv*: proc (index: GLuint, pname: GLenum,
+      params: ptr GLuint) {.stdcall.}
   glVertexAttribI1i*: proc (index: GLuint, x: GLint) {.stdcall.}
   glVertexAttribI2i*: proc (index: GLuint, x: GLint, y: GLint) {.stdcall.}
-  glVertexAttribI3i*: proc (index: GLuint, x: GLint, y: GLint, z: GLint) {.stdcall.}
-  glVertexAttribI4i*: proc (index: GLuint, x: GLint, y: GLint, z: GLint, w: GLint) {.stdcall.}
+  glVertexAttribI3i*: proc (index: GLuint, x: GLint, y: GLint,
+      z: GLint) {.stdcall.}
+  glVertexAttribI4i*: proc (index: GLuint, x: GLint, y: GLint, z: GLint,
+      w: GLint) {.stdcall.}
   glVertexAttribI1ui*: proc (index: GLuint, x: GLuint) {.stdcall.}
   glVertexAttribI2ui*: proc (index: GLuint, x: GLuint, y: GLuint) {.stdcall.}
-  glVertexAttribI3ui*: proc (index: GLuint, x: GLuint, y: GLuint, z: GLuint) {.stdcall.}
-  glVertexAttribI4ui*: proc (index: GLuint, x: GLuint, y: GLuint, z: GLuint, w: GLuint) {.stdcall.}
+  glVertexAttribI3ui*: proc (index: GLuint, x: GLuint, y: GLuint,
+      z: GLuint) {.stdcall.}
+  glVertexAttribI4ui*: proc (index: GLuint, x: GLuint, y: GLuint, z: GLuint,
+      w: GLuint) {.stdcall.}
   glVertexAttribI1iv*: proc (index: GLuint, v: ptr GLint) {.stdcall.}
   glVertexAttribI2iv*: proc (index: GLuint, v: ptr GLint) {.stdcall.}
   glVertexAttribI3iv*: proc (index: GLuint, v: ptr GLint) {.stdcall.}
@@ -1301,111 +1430,194 @@ var
   glVertexAttribI4sv*: proc (index: GLuint, v: ptr GLshort) {.stdcall.}
   glVertexAttribI4ubv*: proc (index: GLuint, v: ptr GLubyte) {.stdcall.}
   glVertexAttribI4usv*: proc (index: GLuint, v: ptr GLushort) {.stdcall.}
-  glGetUniformuiv*: proc (program: GLuint, location: GLint, params: ptr GLuint) {.stdcall.}
-  glBindFragDataLocation*: proc (program: GLuint, color: GLuint, name: cstring) {.stdcall.}
-  glGetFragDataLocation*: proc (program: GLuint, name: cstring): GLint {.stdcall.}
+  glGetUniformuiv*: proc (program: GLuint, location: GLint,
+      params: ptr GLuint) {.stdcall.}
+  glBindFragDataLocation*: proc (program: GLuint, color: GLuint,
+      name: cstring) {.stdcall.}
+  glGetFragDataLocation*: proc (program: GLuint,
+      name: cstring): GLint {.stdcall.}
   glUniform1ui*: proc (location: GLint, v0: GLuint) {.stdcall.}
   glUniform2ui*: proc (location: GLint, v0: GLuint, v1: GLuint) {.stdcall.}
-  glUniform3ui*: proc (location: GLint, v0: GLuint, v1: GLuint, v2: GLuint) {.stdcall.}
-  glUniform4ui*: proc (location: GLint, v0: GLuint, v1: GLuint, v2: GLuint, v3: GLuint) {.stdcall.}
-  glUniform1uiv*: proc (location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}
-  glUniform2uiv*: proc (location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}
-  glUniform3uiv*: proc (location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}
-  glUniform4uiv*: proc (location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}
-  glTexParameterIiv*: proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glTexParameterIuiv*: proc (target: GLenum, pname: GLenum, params: ptr GLuint) {.stdcall.}
-  glGetTexParameterIiv*: proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetTexParameterIuiv*: proc (target: GLenum, pname: GLenum, params: ptr GLuint) {.stdcall.}
-  glClearBufferiv*: proc (buffer: GLenum, drawbuffer: GLint, value: ptr GLint) {.stdcall.}
-  glClearBufferuiv*: proc (buffer: GLenum, drawbuffer: GLint, value: ptr GLuint) {.stdcall.}
-  glClearBufferfv*: proc (buffer: GLenum, drawbuffer: GLint, value: ptr GLfloat) {.stdcall.}
-  glClearBufferfi*: proc (buffer: GLenum, drawbuffer: GLint, depth: GLfloat, stencil: GLint) {.stdcall.}
+  glUniform3ui*: proc (location: GLint, v0: GLuint, v1: GLuint,
+      v2: GLuint) {.stdcall.}
+  glUniform4ui*: proc (location: GLint, v0: GLuint, v1: GLuint, v2: GLuint,
+      v3: GLuint) {.stdcall.}
+  glUniform1uiv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}
+  glUniform2uiv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}
+  glUniform3uiv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}
+  glUniform4uiv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}
+  glTexParameterIiv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glTexParameterIuiv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLuint) {.stdcall.}
+  glGetTexParameterIiv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetTexParameterIuiv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLuint) {.stdcall.}
+  glClearBufferiv*: proc (buffer: GLenum, drawbuffer: GLint,
+      value: ptr GLint) {.stdcall.}
+  glClearBufferuiv*: proc (buffer: GLenum, drawbuffer: GLint,
+      value: ptr GLuint) {.stdcall.}
+  glClearBufferfv*: proc (buffer: GLenum, drawbuffer: GLint,
+      value: ptr GLfloat) {.stdcall.}
+  glClearBufferfi*: proc (buffer: GLenum, drawbuffer: GLint, depth: GLfloat,
+      stencil: GLint) {.stdcall.}
   glGetStringi*: proc (name: GLenum, index: GLuint): ptr GLubyte {.stdcall.}
   glIsRenderbuffer*: proc (renderbuffer: GLuint): GLboolean {.stdcall.}
   glBindRenderbuffer*: proc (target: GLenum, renderbuffer: GLuint) {.stdcall.}
-  glDeleteRenderbuffers*: proc (n: GLsizei, renderbuffers: ptr GLuint) {.stdcall.}
+  glDeleteRenderbuffers*: proc (n: GLsizei,
+      renderbuffers: ptr GLuint) {.stdcall.}
   glGenRenderbuffers*: proc (n: GLsizei, renderbuffers: ptr GLuint) {.stdcall.}
-  glRenderbufferStorage*: proc (target: GLenum, internalformat: GLenum, width: GLsizei, height: GLsizei) {.stdcall.}
-  glGetRenderbufferParameteriv*: proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}
+  glRenderbufferStorage*: proc (target: GLenum, internalformat: GLenum,
+      width: GLsizei, height: GLsizei) {.stdcall.}
+  glGetRenderbufferParameteriv*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
   glIsFramebuffer*: proc (framebuffer: GLuint): GLboolean {.stdcall.}
   glBindFramebuffer*: proc (target: GLenum, framebuffer: GLuint) {.stdcall.}
   glDeleteFramebuffers*: proc (n: GLsizei, framebuffers: ptr GLuint) {.stdcall.}
   glGenFramebuffers*: proc (n: GLsizei, framebuffers: ptr GLuint) {.stdcall.}
   glCheckFramebufferStatus*: proc (target: GLenum): GLenum {.stdcall.}
-  glFramebufferTexture1D*: proc (target: GLenum, attachment: GLenum, textarget: GLenum, texture: GLuint, level: GLint) {.stdcall.}
-  glFramebufferTexture2D*: proc (target: GLenum, attachment: GLenum, textarget: GLenum, texture: GLuint, level: GLint) {.stdcall.}
-  glFramebufferTexture3D*: proc (target: GLenum, attachment: GLenum, textarget: GLenum, texture: GLuint, level: GLint, zoffset: GLint) {.stdcall.}
-  glFramebufferRenderbuffer*: proc (target: GLenum, attachment: GLenum, renderbuffertarget: GLenum, renderbuffer: GLuint) {.stdcall.}
-  glGetFramebufferAttachmentParameteriv*: proc (target: GLenum, attachment: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}
+  glFramebufferTexture1D*: proc (target: GLenum, attachment: GLenum,
+      textarget: GLenum, texture: GLuint, level: GLint) {.stdcall.}
+  glFramebufferTexture2D*: proc (target: GLenum, attachment: GLenum,
+      textarget: GLenum, texture: GLuint, level: GLint) {.stdcall.}
+  glFramebufferTexture3D*: proc (target: GLenum, attachment: GLenum,
+      textarget: GLenum, texture: GLuint, level: GLint,
+      zoffset: GLint) {.stdcall.}
+  glFramebufferRenderbuffer*: proc (target: GLenum, attachment: GLenum,
+      renderbuffertarget: GLenum, renderbuffer: GLuint) {.stdcall.}
+  glGetFramebufferAttachmentParameteriv*: proc (target: GLenum,
+      attachment: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}
   glGenerateMipmap*: proc (target: GLenum) {.stdcall.}
-  glBlitFramebuffer*: proc (srcX0: GLint, srcY0: GLint, srcX1: GLint, srcY1: GLint, dstX0: GLint, dstY0: GLint, dstX1: GLint, dstY1: GLint, mask: GLbitfield, filter: GLenum) {.stdcall.}
-  glRenderbufferStorageMultisample*: proc (target: GLenum, samples: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei) {.stdcall.}
-  glFramebufferTextureLayer*: proc (target: GLenum, attachment: GLenum, texture: GLuint, level: GLint, layer: GLint) {.stdcall.}
-  glMapBufferRange*: proc (target: GLenum, offset: GLintptr, length: GLsizeiptr, access: GLbitfield): pointer {.stdcall.}
-  glFlushMappedBufferRange*: proc (target: GLenum, offset: GLintptr, length: GLsizeiptr) {.stdcall.}
+  glBlitFramebuffer*: proc (srcX0: GLint, srcY0: GLint, srcX1: GLint,
+      srcY1: GLint, dstX0: GLint, dstY0: GLint, dstX1: GLint, dstY1: GLint,
+      mask: GLbitfield, filter: GLenum) {.stdcall.}
+  glRenderbufferStorageMultisample*: proc (target: GLenum, samples: GLsizei,
+      internalformat: GLenum, width: GLsizei, height: GLsizei) {.stdcall.}
+  glFramebufferTextureLayer*: proc (target: GLenum, attachment: GLenum,
+      texture: GLuint, level: GLint, layer: GLint) {.stdcall.}
+  glMapBufferRange*: proc (target: GLenum, offset: GLintptr, length: GLsizeiptr,
+      access: GLbitfield): pointer {.stdcall.}
+  glFlushMappedBufferRange*: proc (target: GLenum, offset: GLintptr,
+      length: GLsizeiptr) {.stdcall.}
   glBindVertexArray*: proc (array: GLuint) {.stdcall.}
   glDeleteVertexArrays*: proc (n: GLsizei, arrays: ptr GLuint) {.stdcall.}
   glGenVertexArrays*: proc (n: GLsizei, arrays: ptr GLuint) {.stdcall.}
   glIsVertexArray*: proc (array: GLuint): GLboolean {.stdcall.}
-  glDrawArraysInstanced*: proc (mode: GLenum, first: GLint, count: GLsizei, instancecount: GLsizei) {.stdcall.}
-  glDrawElementsInstanced*: proc (mode: GLenum, count: GLsizei, `type`: GLenum, indices: pointer, instancecount: GLsizei) {.stdcall.}
-  glTexBuffer*: proc (target: GLenum, internalformat: GLenum, buffer: GLuint) {.stdcall.}
+  glDrawArraysInstanced*: proc (mode: GLenum, first: GLint, count: GLsizei,
+      instancecount: GLsizei) {.stdcall.}
+  glDrawElementsInstanced*: proc (mode: GLenum, count: GLsizei, `type`: GLenum,
+      indices: pointer, instancecount: GLsizei) {.stdcall.}
+  glTexBuffer*: proc (target: GLenum, internalformat: GLenum,
+      buffer: GLuint) {.stdcall.}
   glPrimitiveRestartIndex*: proc (index: GLuint) {.stdcall.}
-  glCopyBufferSubData*: proc (readTarget: GLenum, writeTarget: GLenum, readOffset: GLintptr, writeOffset: GLintptr, size: GLsizeiptr) {.stdcall.}
-  glGetUniformIndices*: proc (program: GLuint, uniformCount: GLsizei, uniformNames: cstringArray, uniformIndices: ptr GLuint) {.stdcall.}
-  glGetActiveUniformsiv*: proc (program: GLuint, uniformCount: GLsizei, uniformIndices: ptr GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetActiveUniformName*: proc (program: GLuint, uniformIndex: GLuint, bufSize: GLsizei, length: ptr GLsizei, uniformName: cstring) {.stdcall.}
-  glGetUniformBlockIndex*: proc (program: GLuint, uniformBlockName: cstring): GLuint {.stdcall.}
-  glGetActiveUniformBlockiv*: proc (program: GLuint, uniformBlockIndex: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetActiveUniformBlockName*: proc (program: GLuint, uniformBlockIndex: GLuint, bufSize: GLsizei, length: ptr GLsizei, uniformBlockName: cstring) {.stdcall.}
-  glUniformBlockBinding*: proc (program: GLuint, uniformBlockIndex: GLuint, uniformBlockBinding: GLuint) {.stdcall.}
-  glDrawElementsBaseVertex*: proc (mode: GLenum, count: GLsizei, `type`: GLenum, indices: pointer, basevertex: GLint) {.stdcall.}
-  glDrawRangeElementsBaseVertex*: proc (mode: GLenum, start: GLuint, `end`: GLuint, count: GLsizei, `type`: GLenum, indices: pointer, basevertex: GLint) {.stdcall.}
-  glDrawElementsInstancedBaseVertex*: proc (mode: GLenum, count: GLsizei, `type`: GLenum, indices: pointer, instancecount: GLsizei, basevertex: GLint) {.stdcall.}
-  glMultiDrawElementsBaseVertex*: proc (mode: GLenum, count: ptr GLsizei, `type`: GLenum, indices: ptr pointer, drawcount: GLsizei, basevertex: ptr GLint) {.stdcall.}
+  glCopyBufferSubData*: proc (readTarget: GLenum, writeTarget: GLenum,
+      readOffset: GLintptr, writeOffset: GLintptr, size: GLsizeiptr) {.stdcall.}
+  glGetUniformIndices*: proc (program: GLuint, uniformCount: GLsizei,
+      uniformNames: cstringArray, uniformIndices: ptr GLuint) {.stdcall.}
+  glGetActiveUniformsiv*: proc (program: GLuint, uniformCount: GLsizei,
+      uniformIndices: ptr GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
+  glGetActiveUniformName*: proc (program: GLuint, uniformIndex: GLuint,
+      bufSize: GLsizei, length: ptr GLsizei, uniformName: cstring) {.stdcall.}
+  glGetUniformBlockIndex*: proc (program: GLuint,
+      uniformBlockName: cstring): GLuint {.stdcall.}
+  glGetActiveUniformBlockiv*: proc (program: GLuint, uniformBlockIndex: GLuint,
+      pname: GLenum, params: ptr GLint) {.stdcall.}
+  glGetActiveUniformBlockName*: proc (program: GLuint,
+      uniformBlockIndex: GLuint, bufSize: GLsizei, length: ptr GLsizei,
+      uniformBlockName: cstring) {.stdcall.}
+  glUniformBlockBinding*: proc (program: GLuint, uniformBlockIndex: GLuint,
+      uniformBlockBinding: GLuint) {.stdcall.}
+  glDrawElementsBaseVertex*: proc (mode: GLenum, count: GLsizei, `type`: GLenum,
+      indices: pointer, basevertex: GLint) {.stdcall.}
+  glDrawRangeElementsBaseVertex*: proc (mode: GLenum, start: GLuint,
+      `end`: GLuint, count: GLsizei, `type`: GLenum, indices: pointer,
+      basevertex: GLint) {.stdcall.}
+  glDrawElementsInstancedBaseVertex*: proc (mode: GLenum, count: GLsizei,
+      `type`: GLenum, indices: pointer, instancecount: GLsizei,
+      basevertex: GLint) {.stdcall.}
+  glMultiDrawElementsBaseVertex*: proc (mode: GLenum, count: ptr GLsizei,
+      `type`: GLenum, indices: ptr pointer, drawcount: GLsizei,
+      basevertex: ptr GLint) {.stdcall.}
   glProvokingVertex*: proc (mode: GLenum) {.stdcall.}
   glFenceSync*: proc (condition: GLenum, flags: GLbitfield): GLsync {.stdcall.}
   glIsSync*: proc (sync: GLsync): GLboolean {.stdcall.}
   glDeleteSync*: proc (sync: GLsync) {.stdcall.}
-  glClientWaitSync*: proc (sync: GLsync, flags: GLbitfield, timeout: GLuint64): GLenum {.stdcall.}
-  glWaitSync*: proc (sync: GLsync, flags: GLbitfield, timeout: GLuint64) {.stdcall.}
+  glClientWaitSync*: proc (sync: GLsync, flags: GLbitfield,
+      timeout: GLuint64): GLenum {.stdcall.}
+  glWaitSync*: proc (sync: GLsync, flags: GLbitfield,
+      timeout: GLuint64) {.stdcall.}
   glGetInteger64v*: proc (pname: GLenum, data: ptr GLint64) {.stdcall.}
-  glGetSynciv*: proc (sync: GLsync, pname: GLenum, count: GLsizei, length: ptr GLsizei, values: ptr GLint) {.stdcall.}
-  glGetInteger64i_v*: proc (target: GLenum, index: GLuint, data: ptr GLint64) {.stdcall.}
-  glGetBufferParameteri64v*: proc (target: GLenum, pname: GLenum, params: ptr GLint64) {.stdcall.}
-  glFramebufferTexture*: proc (target: GLenum, attachment: GLenum, texture: GLuint, level: GLint) {.stdcall.}
-  glTexImage2DMultisample*: proc (target: GLenum, samples: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei, fixedsamplelocations: GLboolean) {.stdcall.}
-  glTexImage3DMultisample*: proc (target: GLenum, samples: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei, fixedsamplelocations: GLboolean) {.stdcall.}
-  glGetMultisamplefv*: proc (pname: GLenum, index: GLuint, val: ptr GLfloat) {.stdcall.}
+  glGetSynciv*: proc (sync: GLsync, pname: GLenum, count: GLsizei,
+      length: ptr GLsizei, values: ptr GLint) {.stdcall.}
+  glGetInteger64i_v*: proc (target: GLenum, index: GLuint,
+      data: ptr GLint64) {.stdcall.}
+  glGetBufferParameteri64v*: proc (target: GLenum, pname: GLenum,
+      params: ptr GLint64) {.stdcall.}
+  glFramebufferTexture*: proc (target: GLenum, attachment: GLenum,
+      texture: GLuint, level: GLint) {.stdcall.}
+  glTexImage2DMultisample*: proc (target: GLenum, samples: GLsizei,
+      internalformat: GLenum, width: GLsizei, height: GLsizei,
+      fixedsamplelocations: GLboolean) {.stdcall.}
+  glTexImage3DMultisample*: proc (target: GLenum, samples: GLsizei,
+      internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei,
+      fixedsamplelocations: GLboolean) {.stdcall.}
+  glGetMultisamplefv*: proc (pname: GLenum, index: GLuint,
+      val: ptr GLfloat) {.stdcall.}
   glSampleMaski*: proc (maskNumber: GLuint, mask: GLbitfield) {.stdcall.}
-  glBindFragDataLocationIndexed*: proc (program: GLuint, colorNumber: GLuint, index: GLuint, name: cstring) {.stdcall.}
+  glBindFragDataLocationIndexed*: proc (program: GLuint, colorNumber: GLuint,
+      index: GLuint, name: cstring) {.stdcall.}
   glGetFragDataIndex*: proc (program: GLuint, name: cstring): GLint {.stdcall.}
   glGenSamplers*: proc (count: GLsizei, samplers: ptr GLuint) {.stdcall.}
   glDeleteSamplers*: proc (count: GLsizei, samplers: ptr GLuint) {.stdcall.}
   glIsSampler*: proc (sampler: GLuint): GLboolean {.stdcall.}
   glBindSampler*: proc (unit: GLuint, sampler: GLuint) {.stdcall.}
-  glSamplerParameteri*: proc (sampler: GLuint, pname: GLenum, param: GLint) {.stdcall.}
-  glSamplerParameteriv*: proc (sampler: GLuint, pname: GLenum, param: ptr GLint) {.stdcall.}
-  glSamplerParameterf*: proc (sampler: GLuint, pname: GLenum, param: GLfloat) {.stdcall.}
-  glSamplerParameterfv*: proc (sampler: GLuint, pname: GLenum, param: ptr GLfloat) {.stdcall.}
-  glSamplerParameterIiv*: proc (sampler: GLuint, pname: GLenum, param: ptr GLint) {.stdcall.}
-  glSamplerParameterIuiv*: proc (sampler: GLuint, pname: GLenum, param: ptr GLuint) {.stdcall.}
-  glGetSamplerParameteriv*: proc (sampler: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetSamplerParameterIiv*: proc (sampler: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glGetSamplerParameterfv*: proc (sampler: GLuint, pname: GLenum, params: ptr GLfloat) {.stdcall.}
-  glGetSamplerParameterIuiv*: proc (sampler: GLuint, pname: GLenum, params: ptr GLuint) {.stdcall.}
+  glSamplerParameteri*: proc (sampler: GLuint, pname: GLenum,
+      param: GLint) {.stdcall.}
+  glSamplerParameteriv*: proc (sampler: GLuint, pname: GLenum,
+      param: ptr GLint) {.stdcall.}
+  glSamplerParameterf*: proc (sampler: GLuint, pname: GLenum,
+      param: GLfloat) {.stdcall.}
+  glSamplerParameterfv*: proc (sampler: GLuint, pname: GLenum,
+      param: ptr GLfloat) {.stdcall.}
+  glSamplerParameterIiv*: proc (sampler: GLuint, pname: GLenum,
+      param: ptr GLint) {.stdcall.}
+  glSamplerParameterIuiv*: proc (sampler: GLuint, pname: GLenum,
+      param: ptr GLuint) {.stdcall.}
+  glGetSamplerParameteriv*: proc (sampler: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetSamplerParameterIiv*: proc (sampler: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glGetSamplerParameterfv*: proc (sampler: GLuint, pname: GLenum,
+      params: ptr GLfloat) {.stdcall.}
+  glGetSamplerParameterIuiv*: proc (sampler: GLuint, pname: GLenum,
+      params: ptr GLuint) {.stdcall.}
   glQueryCounter*: proc (id: GLuint, target: GLenum) {.stdcall.}
-  glGetQueryObjecti64v*: proc (id: GLuint, pname: GLenum, params: ptr GLint64) {.stdcall.}
-  glGetQueryObjectui64v*: proc (id: GLuint, pname: GLenum, params: ptr GLuint64) {.stdcall.}
+  glGetQueryObjecti64v*: proc (id: GLuint, pname: GLenum,
+      params: ptr GLint64) {.stdcall.}
+  glGetQueryObjectui64v*: proc (id: GLuint, pname: GLenum,
+      params: ptr GLuint64) {.stdcall.}
   glVertexAttribDivisor*: proc (index: GLuint, divisor: GLuint) {.stdcall.}
-  glVertexAttribP1ui*: proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: GLuint) {.stdcall.}
-  glVertexAttribP1uiv*: proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: ptr GLuint) {.stdcall.}
-  glVertexAttribP2ui*: proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: GLuint) {.stdcall.}
-  glVertexAttribP2uiv*: proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: ptr GLuint) {.stdcall.}
-  glVertexAttribP3ui*: proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: GLuint) {.stdcall.}
-  glVertexAttribP3uiv*: proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: ptr GLuint) {.stdcall.}
-  glVertexAttribP4ui*: proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: GLuint) {.stdcall.}
-  glVertexAttribP4uiv*: proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: ptr GLuint) {.stdcall.}
+  glVertexAttribP1ui*: proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: GLuint) {.stdcall.}
+  glVertexAttribP1uiv*: proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: ptr GLuint) {.stdcall.}
+  glVertexAttribP2ui*: proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: GLuint) {.stdcall.}
+  glVertexAttribP2uiv*: proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: ptr GLuint) {.stdcall.}
+  glVertexAttribP3ui*: proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: GLuint) {.stdcall.}
+  glVertexAttribP3uiv*: proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: ptr GLuint) {.stdcall.}
+  glVertexAttribP4ui*: proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: GLuint) {.stdcall.}
+  glVertexAttribP4uiv*: proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: ptr GLuint) {.stdcall.}
   glVertexP2ui*: proc (`type`: GLenum, value: GLuint) {.stdcall.}
   glVertexP2uiv*: proc (`type`: GLenum, value: ptr GLuint) {.stdcall.}
   glVertexP3ui*: proc (`type`: GLenum, value: GLuint) {.stdcall.}
@@ -1420,14 +1632,22 @@ var
   glTexCoordP3uiv*: proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}
   glTexCoordP4ui*: proc (`type`: GLenum, coords: GLuint) {.stdcall.}
   glTexCoordP4uiv*: proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}
-  glMultiTexCoordP1ui*: proc (texture: GLenum, `type`: GLenum, coords: GLuint) {.stdcall.}
-  glMultiTexCoordP1uiv*: proc (texture: GLenum, `type`: GLenum, coords: ptr GLuint) {.stdcall.}
-  glMultiTexCoordP2ui*: proc (texture: GLenum, `type`: GLenum, coords: GLuint) {.stdcall.}
-  glMultiTexCoordP2uiv*: proc (texture: GLenum, `type`: GLenum, coords: ptr GLuint) {.stdcall.}
-  glMultiTexCoordP3ui*: proc (texture: GLenum, `type`: GLenum, coords: GLuint) {.stdcall.}
-  glMultiTexCoordP3uiv*: proc (texture: GLenum, `type`: GLenum, coords: ptr GLuint) {.stdcall.}
-  glMultiTexCoordP4ui*: proc (texture: GLenum, `type`: GLenum, coords: GLuint) {.stdcall.}
-  glMultiTexCoordP4uiv*: proc (texture: GLenum, `type`: GLenum, coords: ptr GLuint) {.stdcall.}
+  glMultiTexCoordP1ui*: proc (texture: GLenum, `type`: GLenum,
+      coords: GLuint) {.stdcall.}
+  glMultiTexCoordP1uiv*: proc (texture: GLenum, `type`: GLenum,
+      coords: ptr GLuint) {.stdcall.}
+  glMultiTexCoordP2ui*: proc (texture: GLenum, `type`: GLenum,
+      coords: GLuint) {.stdcall.}
+  glMultiTexCoordP2uiv*: proc (texture: GLenum, `type`: GLenum,
+      coords: ptr GLuint) {.stdcall.}
+  glMultiTexCoordP3ui*: proc (texture: GLenum, `type`: GLenum,
+      coords: GLuint) {.stdcall.}
+  glMultiTexCoordP3uiv*: proc (texture: GLenum, `type`: GLenum,
+      coords: ptr GLuint) {.stdcall.}
+  glMultiTexCoordP4ui*: proc (texture: GLenum, `type`: GLenum,
+      coords: GLuint) {.stdcall.}
+  glMultiTexCoordP4uiv*: proc (texture: GLenum, `type`: GLenum,
+      coords: ptr GLuint) {.stdcall.}
   glNormalP3ui*: proc (`type`: GLenum, coords: GLuint) {.stdcall.}
   glNormalP3uiv*: proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}
   glColorP3ui*: proc (`type`: GLenum, color: GLuint) {.stdcall.}
@@ -1438,37 +1658,66 @@ var
   glSecondaryColorP3uiv*: proc (`type`: GLenum, color: ptr GLuint) {.stdcall.}
   glMinSampleShading*: proc (value: GLfloat) {.stdcall.}
   glBlendEquationi*: proc (buf: GLuint, mode: GLenum) {.stdcall.}
-  glBlendEquationSeparatei*: proc (buf: GLuint, modeRGB: GLenum, modeAlpha: GLenum) {.stdcall.}
+  glBlendEquationSeparatei*: proc (buf: GLuint, modeRGB: GLenum,
+      modeAlpha: GLenum) {.stdcall.}
   glBlendFunci*: proc (buf: GLuint, src: GLenum, dst: GLenum) {.stdcall.}
-  glBlendFuncSeparatei*: proc (buf: GLuint, srcRGB: GLenum, dstRGB: GLenum, srcAlpha: GLenum, dstAlpha: GLenum) {.stdcall.}
+  glBlendFuncSeparatei*: proc (buf: GLuint, srcRGB: GLenum, dstRGB: GLenum,
+      srcAlpha: GLenum, dstAlpha: GLenum) {.stdcall.}
   glDrawArraysIndirect*: proc (mode: GLenum, indirect: pointer) {.stdcall.}
-  glDrawElementsIndirect*: proc (mode: GLenum, `type`: GLenum, indirect: pointer) {.stdcall.}
+  glDrawElementsIndirect*: proc (mode: GLenum, `type`: GLenum,
+      indirect: pointer) {.stdcall.}
   glUniform1d*: proc (location: GLint, x: GLdouble) {.stdcall.}
   glUniform2d*: proc (location: GLint, x: GLdouble, y: GLdouble) {.stdcall.}
-  glUniform3d*: proc (location: GLint, x: GLdouble, y: GLdouble, z: GLdouble) {.stdcall.}
-  glUniform4d*: proc (location: GLint, x: GLdouble, y: GLdouble, z: GLdouble, w: GLdouble) {.stdcall.}
-  glUniform1dv*: proc (location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}
-  glUniform2dv*: proc (location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}
-  glUniform3dv*: proc (location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}
-  glUniform4dv*: proc (location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}
-  glUniformMatrix2dv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glUniformMatrix3dv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glUniformMatrix4dv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glUniformMatrix2x3dv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glUniformMatrix2x4dv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glUniformMatrix3x2dv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glUniformMatrix3x4dv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glUniformMatrix4x2dv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glUniformMatrix4x3dv*: proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glGetUniformdv*: proc (program: GLuint, location: GLint, params: ptr GLdouble) {.stdcall.}
-  glGetSubroutineUniformLocation*: proc (program: GLuint, shadertype: GLenum, name: cstring): GLint {.stdcall.}
-  glGetSubroutineIndex*: proc (program: GLuint, shadertype: GLenum, name: cstring): GLuint {.stdcall.}
-  glGetActiveSubroutineUniformiv*: proc (program: GLuint, shadertype: GLenum, index: GLuint, pname: GLenum, values: ptr GLint) {.stdcall.}
-  glGetActiveSubroutineUniformName*: proc (program: GLuint, shadertype: GLenum, index: GLuint, bufSize: GLsizei, length: ptr GLsizei, name: cstring) {.stdcall.}
-  glGetActiveSubroutineName*: proc (program: GLuint, shadertype: GLenum, index: GLuint, bufSize: GLsizei, length: ptr GLsizei, name: cstring) {.stdcall.}
-  glUniformSubroutinesuiv*: proc (shadertype: GLenum, count: GLsizei, indices: ptr GLuint) {.stdcall.}
-  glGetUniformSubroutineuiv*: proc (shadertype: GLenum, location: GLint, params: ptr GLuint) {.stdcall.}
-  glGetProgramStageiv*: proc (program: GLuint, shadertype: GLenum, pname: GLenum, values: ptr GLint) {.stdcall.}
+  glUniform3d*: proc (location: GLint, x: GLdouble, y: GLdouble,
+      z: GLdouble) {.stdcall.}
+  glUniform4d*: proc (location: GLint, x: GLdouble, y: GLdouble, z: GLdouble,
+      w: GLdouble) {.stdcall.}
+  glUniform1dv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}
+  glUniform2dv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}
+  glUniform3dv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}
+  glUniform4dv*: proc (location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}
+  glUniformMatrix2dv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glUniformMatrix3dv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glUniformMatrix4dv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glUniformMatrix2x3dv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glUniformMatrix2x4dv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glUniformMatrix3x2dv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glUniformMatrix3x4dv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glUniformMatrix4x2dv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glUniformMatrix4x3dv*: proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glGetUniformdv*: proc (program: GLuint, location: GLint,
+      params: ptr GLdouble) {.stdcall.}
+  glGetSubroutineUniformLocation*: proc (program: GLuint, shadertype: GLenum,
+      name: cstring): GLint {.stdcall.}
+  glGetSubroutineIndex*: proc (program: GLuint, shadertype: GLenum,
+      name: cstring): GLuint {.stdcall.}
+  glGetActiveSubroutineUniformiv*: proc (program: GLuint, shadertype: GLenum,
+      index: GLuint, pname: GLenum, values: ptr GLint) {.stdcall.}
+  glGetActiveSubroutineUniformName*: proc (program: GLuint, shadertype: GLenum,
+      index: GLuint, bufSize: GLsizei, length: ptr GLsizei,
+      name: cstring) {.stdcall.}
+  glGetActiveSubroutineName*: proc (program: GLuint, shadertype: GLenum,
+      index: GLuint, bufSize: GLsizei, length: ptr GLsizei,
+      name: cstring) {.stdcall.}
+  glUniformSubroutinesuiv*: proc (shadertype: GLenum, count: GLsizei,
+      indices: ptr GLuint) {.stdcall.}
+  glGetUniformSubroutineuiv*: proc (shadertype: GLenum, location: GLint,
+      params: ptr GLuint) {.stdcall.}
+  glGetProgramStageiv*: proc (program: GLuint, shadertype: GLenum,
+      pname: GLenum, values: ptr GLint) {.stdcall.}
   glPatchParameteri*: proc (pname: GLenum, value: GLint) {.stdcall.}
   glPatchParameterfv*: proc (pname: GLenum, values: ptr GLfloat) {.stdcall.}
   glBindTransformFeedback*: proc (target: GLenum, id: GLuint) {.stdcall.}
@@ -1478,98 +1727,174 @@ var
   glPauseTransformFeedback*: proc () {.stdcall.}
   glResumeTransformFeedback*: proc () {.stdcall.}
   glDrawTransformFeedback*: proc (mode: GLenum, id: GLuint) {.stdcall.}
-  glDrawTransformFeedbackStream*: proc (mode: GLenum, id: GLuint, stream: GLuint) {.stdcall.}
-  glBeginQueryIndexed*: proc (target: GLenum, index: GLuint, id: GLuint) {.stdcall.}
+  glDrawTransformFeedbackStream*: proc (mode: GLenum, id: GLuint,
+      stream: GLuint) {.stdcall.}
+  glBeginQueryIndexed*: proc (target: GLenum, index: GLuint,
+      id: GLuint) {.stdcall.}
   glEndQueryIndexed*: proc (target: GLenum, index: GLuint) {.stdcall.}
-  glGetQueryIndexediv*: proc (target: GLenum, index: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
+  glGetQueryIndexediv*: proc (target: GLenum, index: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
   glReleaseShaderCompiler*: proc () {.stdcall.}
-  glShaderBinary*: proc (count: GLsizei, shaders: ptr GLuint, binaryFormat: GLenum, binary: pointer, length: GLsizei) {.stdcall.}
-  glGetShaderPrecisionFormat*: proc (shadertype: GLenum, precisiontype: GLenum, range: ptr GLint, precision: ptr GLint) {.stdcall.}
+  glShaderBinary*: proc (count: GLsizei, shaders: ptr GLuint,
+      binaryFormat: GLenum, binary: pointer, length: GLsizei) {.stdcall.}
+  glGetShaderPrecisionFormat*: proc (shadertype: GLenum, precisiontype: GLenum,
+      range: ptr GLint, precision: ptr GLint) {.stdcall.}
   glDepthRangef*: proc (n: GLfloat, f: GLfloat) {.stdcall.}
   glClearDepthf*: proc (d: GLfloat) {.stdcall.}
-  glGetProgramBinary*: proc (program: GLuint, bufSize: GLsizei, length: ptr GLsizei, binaryFormat: ptr GLenum, binary: pointer) {.stdcall.}
-  glProgramBinary*: proc (program: GLuint, binaryFormat: GLenum, binary: pointer, length: GLsizei) {.stdcall.}
-  glProgramParameteri*: proc (program: GLuint, pname: GLenum, value: GLint) {.stdcall.}
-  glUseProgramStages*: proc (pipeline: GLuint, stages: GLbitfield, program: GLuint) {.stdcall.}
+  glGetProgramBinary*: proc (program: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, binaryFormat: ptr GLenum,
+      binary: pointer) {.stdcall.}
+  glProgramBinary*: proc (program: GLuint, binaryFormat: GLenum,
+      binary: pointer, length: GLsizei) {.stdcall.}
+  glProgramParameteri*: proc (program: GLuint, pname: GLenum,
+      value: GLint) {.stdcall.}
+  glUseProgramStages*: proc (pipeline: GLuint, stages: GLbitfield,
+      program: GLuint) {.stdcall.}
   glActiveShaderProgram*: proc (pipeline: GLuint, program: GLuint) {.stdcall.}
-  glCreateShaderProgramv*: proc (`type`: GLenum, count: GLsizei, strings: cstringArray): GLuint {.stdcall.}
+  glCreateShaderProgramv*: proc (`type`: GLenum, count: GLsizei,
+      strings: cstringArray): GLuint {.stdcall.}
   glBindProgramPipeline*: proc (pipeline: GLuint) {.stdcall.}
-  glDeleteProgramPipelines*: proc (n: GLsizei, pipelines: ptr GLuint) {.stdcall.}
+  glDeleteProgramPipelines*: proc (n: GLsizei,
+      pipelines: ptr GLuint) {.stdcall.}
   glGenProgramPipelines*: proc (n: GLsizei, pipelines: ptr GLuint) {.stdcall.}
   glIsProgramPipeline*: proc (pipeline: GLuint): GLboolean {.stdcall.}
-  glGetProgramPipelineiv*: proc (pipeline: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}
-  glProgramUniform1i*: proc (program: GLuint, location: GLint, v0: GLint) {.stdcall.}
-  glProgramUniform1iv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}
-  glProgramUniform1f*: proc (program: GLuint, location: GLint, v0: GLfloat) {.stdcall.}
-  glProgramUniform1fv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}
-  glProgramUniform1d*: proc (program: GLuint, location: GLint, v0: GLdouble) {.stdcall.}
-  glProgramUniform1dv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}
-  glProgramUniform1ui*: proc (program: GLuint, location: GLint, v0: GLuint) {.stdcall.}
-  glProgramUniform1uiv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}
-  glProgramUniform2i*: proc (program: GLuint, location: GLint, v0: GLint, v1: GLint) {.stdcall.}
-  glProgramUniform2iv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}
-  glProgramUniform2f*: proc (program: GLuint, location: GLint, v0: GLfloat, v1: GLfloat) {.stdcall.}
-  glProgramUniform2fv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}
-  glProgramUniform2d*: proc (program: GLuint, location: GLint, v0: GLdouble, v1: GLdouble) {.stdcall.}
-  glProgramUniform2dv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}
-  glProgramUniform2ui*: proc (program: GLuint, location: GLint, v0: GLuint, v1: GLuint) {.stdcall.}
-  glProgramUniform2uiv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}
-  glProgramUniform3i*: proc (program: GLuint, location: GLint, v0: GLint, v1: GLint, v2: GLint) {.stdcall.}
-  glProgramUniform3iv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}
-  glProgramUniform3f*: proc (program: GLuint, location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat) {.stdcall.}
-  glProgramUniform3fv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}
-  glProgramUniform3d*: proc (program: GLuint, location: GLint, v0: GLdouble, v1: GLdouble, v2: GLdouble) {.stdcall.}
-  glProgramUniform3dv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}
-  glProgramUniform3ui*: proc (program: GLuint, location: GLint, v0: GLuint, v1: GLuint, v2: GLuint) {.stdcall.}
-  glProgramUniform3uiv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}
-  glProgramUniform4i*: proc (program: GLuint, location: GLint, v0: GLint, v1: GLint, v2: GLint, v3: GLint) {.stdcall.}
-  glProgramUniform4iv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}
-  glProgramUniform4f*: proc (program: GLuint, location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat, v3: GLfloat) {.stdcall.}
-  glProgramUniform4fv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}
-  glProgramUniform4d*: proc (program: GLuint, location: GLint, v0: GLdouble, v1: GLdouble, v2: GLdouble, v3: GLdouble) {.stdcall.}
-  glProgramUniform4dv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}
-  glProgramUniform4ui*: proc (program: GLuint, location: GLint, v0: GLuint, v1: GLuint, v2: GLuint, v3: GLuint) {.stdcall.}
-  glProgramUniform4uiv*: proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}
-  glProgramUniformMatrix2fv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glProgramUniformMatrix3fv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glProgramUniformMatrix4fv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glProgramUniformMatrix2dv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glProgramUniformMatrix3dv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glProgramUniformMatrix4dv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glProgramUniformMatrix2x3fv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glProgramUniformMatrix3x2fv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glProgramUniformMatrix2x4fv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glProgramUniformMatrix4x2fv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glProgramUniformMatrix3x4fv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glProgramUniformMatrix4x3fv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
-  glProgramUniformMatrix2x3dv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glProgramUniformMatrix3x2dv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glProgramUniformMatrix2x4dv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glProgramUniformMatrix4x2dv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glProgramUniformMatrix3x4dv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
-  glProgramUniformMatrix4x3dv*: proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glGetProgramPipelineiv*: proc (pipeline: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}
+  glProgramUniform1i*: proc (program: GLuint, location: GLint,
+      v0: GLint) {.stdcall.}
+  glProgramUniform1iv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}
+  glProgramUniform1f*: proc (program: GLuint, location: GLint,
+      v0: GLfloat) {.stdcall.}
+  glProgramUniform1fv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}
+  glProgramUniform1d*: proc (program: GLuint, location: GLint,
+      v0: GLdouble) {.stdcall.}
+  glProgramUniform1dv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}
+  glProgramUniform1ui*: proc (program: GLuint, location: GLint,
+      v0: GLuint) {.stdcall.}
+  glProgramUniform1uiv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}
+  glProgramUniform2i*: proc (program: GLuint, location: GLint, v0: GLint,
+      v1: GLint) {.stdcall.}
+  glProgramUniform2iv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}
+  glProgramUniform2f*: proc (program: GLuint, location: GLint, v0: GLfloat,
+      v1: GLfloat) {.stdcall.}
+  glProgramUniform2fv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}
+  glProgramUniform2d*: proc (program: GLuint, location: GLint, v0: GLdouble,
+      v1: GLdouble) {.stdcall.}
+  glProgramUniform2dv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}
+  glProgramUniform2ui*: proc (program: GLuint, location: GLint, v0: GLuint,
+      v1: GLuint) {.stdcall.}
+  glProgramUniform2uiv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}
+  glProgramUniform3i*: proc (program: GLuint, location: GLint, v0: GLint,
+      v1: GLint, v2: GLint) {.stdcall.}
+  glProgramUniform3iv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}
+  glProgramUniform3f*: proc (program: GLuint, location: GLint, v0: GLfloat,
+      v1: GLfloat, v2: GLfloat) {.stdcall.}
+  glProgramUniform3fv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}
+  glProgramUniform3d*: proc (program: GLuint, location: GLint, v0: GLdouble,
+      v1: GLdouble, v2: GLdouble) {.stdcall.}
+  glProgramUniform3dv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}
+  glProgramUniform3ui*: proc (program: GLuint, location: GLint, v0: GLuint,
+      v1: GLuint, v2: GLuint) {.stdcall.}
+  glProgramUniform3uiv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}
+  glProgramUniform4i*: proc (program: GLuint, location: GLint, v0: GLint,
+      v1: GLint, v2: GLint, v3: GLint) {.stdcall.}
+  glProgramUniform4iv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}
+  glProgramUniform4f*: proc (program: GLuint, location: GLint, v0: GLfloat,
+      v1: GLfloat, v2: GLfloat, v3: GLfloat) {.stdcall.}
+  glProgramUniform4fv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}
+  glProgramUniform4d*: proc (program: GLuint, location: GLint, v0: GLdouble,
+      v1: GLdouble, v2: GLdouble, v3: GLdouble) {.stdcall.}
+  glProgramUniform4dv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}
+  glProgramUniform4ui*: proc (program: GLuint, location: GLint, v0: GLuint,
+      v1: GLuint, v2: GLuint, v3: GLuint) {.stdcall.}
+  glProgramUniform4uiv*: proc (program: GLuint, location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}
+  glProgramUniformMatrix2fv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glProgramUniformMatrix3fv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glProgramUniformMatrix4fv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glProgramUniformMatrix2dv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glProgramUniformMatrix3dv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glProgramUniformMatrix4dv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glProgramUniformMatrix2x3fv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glProgramUniformMatrix3x2fv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glProgramUniformMatrix2x4fv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glProgramUniformMatrix4x2fv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glProgramUniformMatrix3x4fv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glProgramUniformMatrix4x3fv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}
+  glProgramUniformMatrix2x3dv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glProgramUniformMatrix3x2dv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glProgramUniformMatrix2x4dv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glProgramUniformMatrix4x2dv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glProgramUniformMatrix3x4dv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
+  glProgramUniformMatrix4x3dv*: proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}
   glValidateProgramPipeline*: proc (pipeline: GLuint) {.stdcall.}
-  glGetProgramPipelineInfoLog*: proc (pipeline: GLuint, bufSize: GLsizei, length: ptr GLsizei, infoLog: cstring) {.stdcall.}
+  glGetProgramPipelineInfoLog*: proc (pipeline: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, infoLog: cstring) {.stdcall.}
   glVertexAttribL1d*: proc (index: GLuint, x: GLdouble) {.stdcall.}
   glVertexAttribL2d*: proc (index: GLuint, x: GLdouble, y: GLdouble) {.stdcall.}
-  glVertexAttribL3d*: proc (index: GLuint, x: GLdouble, y: GLdouble, z: GLdouble) {.stdcall.}
-  glVertexAttribL4d*: proc (index: GLuint, x: GLdouble, y: GLdouble, z: GLdouble, w: GLdouble) {.stdcall.}
+  glVertexAttribL3d*: proc (index: GLuint, x: GLdouble, y: GLdouble,
+      z: GLdouble) {.stdcall.}
+  glVertexAttribL4d*: proc (index: GLuint, x: GLdouble, y: GLdouble,
+      z: GLdouble, w: GLdouble) {.stdcall.}
   glVertexAttribL1dv*: proc (index: GLuint, v: ptr GLdouble) {.stdcall.}
   glVertexAttribL2dv*: proc (index: GLuint, v: ptr GLdouble) {.stdcall.}
   glVertexAttribL3dv*: proc (index: GLuint, v: ptr GLdouble) {.stdcall.}
   glVertexAttribL4dv*: proc (index: GLuint, v: ptr GLdouble) {.stdcall.}
-  glVertexAttribLPointer*: proc (index: GLuint, size: GLint, `type`: GLenum, stride: GLsizei, pointer: pointer) {.stdcall.}
-  glGetVertexAttribLdv*: proc (index: GLuint, pname: GLenum, params: ptr GLdouble) {.stdcall.}
-  glViewportArrayv*: proc (first: GLuint, count: GLsizei, v: ptr GLfloat) {.stdcall.}
-  glViewportIndexedf*: proc (index: GLuint, x: GLfloat, y: GLfloat, w: GLfloat, h: GLfloat) {.stdcall.}
+  glVertexAttribLPointer*: proc (index: GLuint, size: GLint, `type`: GLenum,
+      stride: GLsizei, pointer: pointer) {.stdcall.}
+  glGetVertexAttribLdv*: proc (index: GLuint, pname: GLenum,
+      params: ptr GLdouble) {.stdcall.}
+  glViewportArrayv*: proc (first: GLuint, count: GLsizei,
+      v: ptr GLfloat) {.stdcall.}
+  glViewportIndexedf*: proc (index: GLuint, x: GLfloat, y: GLfloat, w: GLfloat,
+      h: GLfloat) {.stdcall.}
   glViewportIndexedfv*: proc (index: GLuint, v: ptr GLfloat) {.stdcall.}
-  glScissorArrayv*: proc (first: GLuint, count: GLsizei, v: ptr GLint) {.stdcall.}
-  glScissorIndexed*: proc (index: GLuint, left: GLint, bottom: GLint, width: GLsizei, height: GLsizei) {.stdcall.}
+  glScissorArrayv*: proc (first: GLuint, count: GLsizei,
+      v: ptr GLint) {.stdcall.}
+  glScissorIndexed*: proc (index: GLuint, left: GLint, bottom: GLint,
+      width: GLsizei, height: GLsizei) {.stdcall.}
   glScissorIndexedv*: proc (index: GLuint, v: ptr GLint) {.stdcall.}
-  glDepthRangeArrayv*: proc (first: GLuint, count: GLsizei, v: ptr GLdouble) {.stdcall.}
-  glDepthRangeIndexed*: proc (index: GLuint, n: GLdouble, f: GLdouble) {.stdcall.}
-  glGetFloati_v*: proc (target: GLenum, index: GLuint, data: ptr GLfloat) {.stdcall.}
-  glGetDoublei_v*: proc (target: GLenum, index: GLuint, data: ptr GLdouble) {.stdcall.}
+  glDepthRangeArrayv*: proc (first: GLuint, count: GLsizei,
+      v: ptr GLdouble) {.stdcall.}
+  glDepthRangeIndexed*: proc (index: GLuint, n: GLdouble,
+      f: GLdouble) {.stdcall.}
+  glGetFloati_v*: proc (target: GLenum, index: GLuint,
+      data: ptr GLfloat) {.stdcall.}
+  glGetDoublei_v*: proc (target: GLenum, index: GLuint,
+      data: ptr GLdouble) {.stdcall.}
 
 
 # Extensions
@@ -1627,20 +1952,31 @@ proc load_GL_VERSION_1_0(load: proc) =
   glLineWidth = cast[proc (width: GLfloat) {.stdcall.}](load("glLineWidth"))
   glPointSize = cast[proc (size: GLfloat) {.stdcall.}](load("glPointSize"))
   glPolygonMode = cast[proc (face: GLenum, mode: GLenum) {.stdcall.}](load("glPolygonMode"))
-  glScissor = cast[proc (x: GLint, y: GLint, width: GLsizei, height: GLsizei) {.stdcall.}](load("glScissor"))
-  glTexParameterf = cast[proc (target: GLenum, pname: GLenum, param: GLfloat) {.stdcall.}](load("glTexParameterf"))
-  glTexParameterfv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLfloat) {.stdcall.}](load("glTexParameterfv"))
-  glTexParameteri = cast[proc (target: GLenum, pname: GLenum, param: GLint) {.stdcall.}](load("glTexParameteri"))
-  glTexParameteriv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glTexParameteriv"))
-  glTexImage1D = cast[proc (target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, border: GLint, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}](load("glTexImage1D"))
-  glTexImage2D = cast[proc (target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, border: GLint, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}](load("glTexImage2D"))
+  glScissor = cast[proc (x: GLint, y: GLint, width: GLsizei,
+      height: GLsizei) {.stdcall.}](load("glScissor"))
+  glTexParameterf = cast[proc (target: GLenum, pname: GLenum,
+      param: GLfloat) {.stdcall.}](load("glTexParameterf"))
+  glTexParameterfv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLfloat) {.stdcall.}](load("glTexParameterfv"))
+  glTexParameteri = cast[proc (target: GLenum, pname: GLenum,
+      param: GLint) {.stdcall.}](load("glTexParameteri"))
+  glTexParameteriv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glTexParameteriv"))
+  glTexImage1D = cast[proc (target: GLenum, level: GLint, internalformat: GLint,
+      width: GLsizei, border: GLint, format: GLenum, `type`: GLenum,
+      pixels: pointer) {.stdcall.}](load("glTexImage1D"))
+  glTexImage2D = cast[proc (target: GLenum, level: GLint, internalformat: GLint,
+      width: GLsizei, height: GLsizei, border: GLint, format: GLenum,
+      `type`: GLenum, pixels: pointer) {.stdcall.}](load("glTexImage2D"))
   glDrawBuffer = cast[proc (buf: GLenum) {.stdcall.}](load("glDrawBuffer"))
   glClear = cast[proc (mask: GLbitfield) {.stdcall.}](load("glClear"))
-  glClearColor = cast[proc (red: GLfloat, green: GLfloat, blue: GLfloat, alpha: GLfloat) {.stdcall.}](load("glClearColor"))
+  glClearColor = cast[proc (red: GLfloat, green: GLfloat, blue: GLfloat,
+      alpha: GLfloat) {.stdcall.}](load("glClearColor"))
   glClearStencil = cast[proc (s: GLint) {.stdcall.}](load("glClearStencil"))
   glClearDepth = cast[proc (depth: GLdouble) {.stdcall.}](load("glClearDepth"))
   glStencilMask = cast[proc (mask: GLuint) {.stdcall.}](load("glStencilMask"))
-  glColorMask = cast[proc (red: GLboolean, green: GLboolean, blue: GLboolean, alpha: GLboolean) {.stdcall.}](load("glColorMask"))
+  glColorMask = cast[proc (red: GLboolean, green: GLboolean, blue: GLboolean,
+      alpha: GLboolean) {.stdcall.}](load("glColorMask"))
   glDepthMask = cast[proc (flag: GLboolean) {.stdcall.}](load("glDepthMask"))
   glDisable = cast[proc (cap: GLenum) {.stdcall.}](load("glDisable"))
   glEnable = cast[proc (cap: GLenum) {.stdcall.}](load("glEnable"))
@@ -1648,81 +1984,139 @@ proc load_GL_VERSION_1_0(load: proc) =
   glFlush = cast[proc () {.stdcall.}](load("glFlush"))
   glBlendFunc = cast[proc (sfactor: GLenum, dfactor: GLenum) {.stdcall.}](load("glBlendFunc"))
   glLogicOp = cast[proc (opcode: GLenum) {.stdcall.}](load("glLogicOp"))
-  glStencilFunc = cast[proc (`func`: GLenum, `ref`: GLint, mask: GLuint) {.stdcall.}](load("glStencilFunc"))
-  glStencilOp = cast[proc (fail: GLenum, zfail: GLenum, zpass: GLenum) {.stdcall.}](load("glStencilOp"))
+  glStencilFunc = cast[proc (`func`: GLenum, `ref`: GLint,
+      mask: GLuint) {.stdcall.}](load("glStencilFunc"))
+  glStencilOp = cast[proc (fail: GLenum, zfail: GLenum,
+      zpass: GLenum) {.stdcall.}](load("glStencilOp"))
   glDepthFunc = cast[proc (`func`: GLenum) {.stdcall.}](load("glDepthFunc"))
   glPixelStoref = cast[proc (pname: GLenum, param: GLfloat) {.stdcall.}](load("glPixelStoref"))
   glPixelStorei = cast[proc (pname: GLenum, param: GLint) {.stdcall.}](load("glPixelStorei"))
   glReadBuffer = cast[proc (src: GLenum) {.stdcall.}](load("glReadBuffer"))
-  glReadPixels = cast[proc (x: GLint, y: GLint, width: GLsizei, height: GLsizei, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}](load("glReadPixels"))
-  glGetBooleanv = cast[proc (pname: GLenum, data: ptr GLboolean) {.stdcall.}](load("glGetBooleanv"))
-  glGetDoublev = cast[proc (pname: GLenum, data: ptr GLdouble) {.stdcall.}](load("glGetDoublev"))
+  glReadPixels = cast[proc (x: GLint, y: GLint, width: GLsizei, height: GLsizei,
+      format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}](load("glReadPixels"))
+  glGetBooleanv = cast[proc (pname: GLenum, data: ptr GLboolean) {.stdcall.}](
+      load("glGetBooleanv"))
+  glGetDoublev = cast[proc (pname: GLenum, data: ptr GLdouble) {.stdcall.}](
+      load("glGetDoublev"))
   glGetError = cast[proc (): GLenum {.stdcall.}](load("glGetError"))
   glGetFloatv = cast[proc (pname: GLenum, data: ptr GLfloat) {.stdcall.}](load("glGetFloatv"))
   glGetIntegerv = cast[proc (pname: GLenum, data: ptr GLint) {.stdcall.}](load("glGetIntegerv"))
   glGetString = cast[proc (name: GLenum): ptr GLubyte {.stdcall.}](load("glGetString"))
-  glGetTexImage = cast[proc (target: GLenum, level: GLint, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}](load("glGetTexImage"))
-  glGetTexParameterfv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLfloat) {.stdcall.}](load("glGetTexParameterfv"))
-  glGetTexParameteriv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetTexParameteriv"))
-  glGetTexLevelParameterfv = cast[proc (target: GLenum, level: GLint, pname: GLenum, params: ptr GLfloat) {.stdcall.}](load("glGetTexLevelParameterfv"))
-  glGetTexLevelParameteriv = cast[proc (target: GLenum, level: GLint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetTexLevelParameteriv"))
+  glGetTexImage = cast[proc (target: GLenum, level: GLint, format: GLenum,
+      `type`: GLenum, pixels: pointer) {.stdcall.}](load("glGetTexImage"))
+  glGetTexParameterfv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLfloat) {.stdcall.}](load("glGetTexParameterfv"))
+  glGetTexParameteriv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetTexParameteriv"))
+  glGetTexLevelParameterfv = cast[proc (target: GLenum, level: GLint,
+      pname: GLenum, params: ptr GLfloat) {.stdcall.}](load("glGetTexLevelParameterfv"))
+  glGetTexLevelParameteriv = cast[proc (target: GLenum, level: GLint,
+      pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetTexLevelParameteriv"))
   glIsEnabled = cast[proc (cap: GLenum): GLboolean {.stdcall.}](load("glIsEnabled"))
   glDepthRange = cast[proc (n: GLdouble, f: GLdouble) {.stdcall.}](load("glDepthRange"))
-  glViewport = cast[proc (x: GLint, y: GLint, width: GLsizei, height: GLsizei) {.stdcall.}](load("glViewport"))
+  glViewport = cast[proc (x: GLint, y: GLint, width: GLsizei,
+      height: GLsizei) {.stdcall.}](load("glViewport"))
 
 
 proc load_GL_VERSION_1_1(load: proc) =
   if not GLAD_GL_VERSION_1_1: return
 
-  glDrawArrays = cast[proc (mode: GLenum, first: GLint, count: GLsizei) {.stdcall.}](load("glDrawArrays"))
-  glDrawElements = cast[proc (mode: GLenum, count: GLsizei, `type`: GLenum, indices: pointer) {.stdcall.}](load("glDrawElements"))
-  glPolygonOffset = cast[proc (factor: GLfloat, units: GLfloat) {.stdcall.}](load("glPolygonOffset"))
-  glCopyTexImage1D = cast[proc (target: GLenum, level: GLint, internalformat: GLenum, x: GLint, y: GLint, width: GLsizei, border: GLint) {.stdcall.}](load("glCopyTexImage1D"))
-  glCopyTexImage2D = cast[proc (target: GLenum, level: GLint, internalformat: GLenum, x: GLint, y: GLint, width: GLsizei, height: GLsizei, border: GLint) {.stdcall.}](load("glCopyTexImage2D"))
-  glCopyTexSubImage1D = cast[proc (target: GLenum, level: GLint, xoffset: GLint, x: GLint, y: GLint, width: GLsizei) {.stdcall.}](load("glCopyTexSubImage1D"))
-  glCopyTexSubImage2D = cast[proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, x: GLint, y: GLint, width: GLsizei, height: GLsizei) {.stdcall.}](load("glCopyTexSubImage2D"))
-  glTexSubImage1D = cast[proc (target: GLenum, level: GLint, xoffset: GLint, width: GLsizei, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}](load("glTexSubImage1D"))
-  glTexSubImage2D = cast[proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, width: GLsizei, height: GLsizei, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}](load("glTexSubImage2D"))
+  glDrawArrays = cast[proc (mode: GLenum, first: GLint,
+      count: GLsizei) {.stdcall.}](load("glDrawArrays"))
+  glDrawElements = cast[proc (mode: GLenum, count: GLsizei, `type`: GLenum,
+      indices: pointer) {.stdcall.}](load("glDrawElements"))
+  glPolygonOffset = cast[proc (factor: GLfloat, units: GLfloat) {.stdcall.}](
+      load("glPolygonOffset"))
+  glCopyTexImage1D = cast[proc (target: GLenum, level: GLint,
+      internalformat: GLenum, x: GLint, y: GLint, width: GLsizei,
+      border: GLint) {.stdcall.}](load("glCopyTexImage1D"))
+  glCopyTexImage2D = cast[proc (target: GLenum, level: GLint,
+      internalformat: GLenum, x: GLint, y: GLint, width: GLsizei,
+      height: GLsizei, border: GLint) {.stdcall.}](load("glCopyTexImage2D"))
+  glCopyTexSubImage1D = cast[proc (target: GLenum, level: GLint, xoffset: GLint,
+      x: GLint, y: GLint, width: GLsizei) {.stdcall.}](load("glCopyTexSubImage1D"))
+  glCopyTexSubImage2D = cast[proc (target: GLenum, level: GLint, xoffset: GLint,
+      yoffset: GLint, x: GLint, y: GLint, width: GLsizei,
+      height: GLsizei) {.stdcall.}](load("glCopyTexSubImage2D"))
+  glTexSubImage1D = cast[proc (target: GLenum, level: GLint, xoffset: GLint,
+      width: GLsizei, format: GLenum, `type`: GLenum,
+      pixels: pointer) {.stdcall.}](load("glTexSubImage1D"))
+  glTexSubImage2D = cast[proc (target: GLenum, level: GLint, xoffset: GLint,
+      yoffset: GLint, width: GLsizei, height: GLsizei, format: GLenum,
+      `type`: GLenum, pixels: pointer) {.stdcall.}](load("glTexSubImage2D"))
   glBindTexture = cast[proc (target: GLenum, texture: GLuint) {.stdcall.}](load("glBindTexture"))
-  glDeleteTextures = cast[proc (n: GLsizei, textures: ptr GLuint) {.stdcall.}](load("glDeleteTextures"))
-  glGenTextures = cast[proc (n: GLsizei, textures: ptr GLuint) {.stdcall.}](load("glGenTextures"))
+  glDeleteTextures = cast[proc (n: GLsizei, textures: ptr GLuint) {.stdcall.}](
+      load("glDeleteTextures"))
+  glGenTextures = cast[proc (n: GLsizei, textures: ptr GLuint) {.stdcall.}](
+      load("glGenTextures"))
   glIsTexture = cast[proc (texture: GLuint): GLboolean {.stdcall.}](load("glIsTexture"))
 
 
 proc load_GL_VERSION_1_2(load: proc) =
   if not GLAD_GL_VERSION_1_2: return
 
-  glDrawRangeElements = cast[proc (mode: GLenum, start: GLuint, `end`: GLuint, count: GLsizei, `type`: GLenum, indices: pointer) {.stdcall.}](load("glDrawRangeElements"))
-  glTexImage3D = cast[proc (target: GLenum, level: GLint, internalformat: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}](load("glTexImage3D"))
-  glTexSubImage3D = cast[proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}](load("glTexSubImage3D"))
-  glCopyTexSubImage3D = cast[proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, x: GLint, y: GLint, width: GLsizei, height: GLsizei) {.stdcall.}](load("glCopyTexSubImage3D"))
+  glDrawRangeElements = cast[proc (mode: GLenum, start: GLuint, `end`: GLuint,
+      count: GLsizei, `type`: GLenum, indices: pointer) {.stdcall.}](load("glDrawRangeElements"))
+  glTexImage3D = cast[proc (target: GLenum, level: GLint, internalformat: GLint,
+      width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint,
+      format: GLenum, `type`: GLenum, pixels: pointer) {.stdcall.}](load("glTexImage3D"))
+  glTexSubImage3D = cast[proc (target: GLenum, level: GLint, xoffset: GLint,
+      yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei,
+      depth: GLsizei, format: GLenum, `type`: GLenum,
+      pixels: pointer) {.stdcall.}](load("glTexSubImage3D"))
+  glCopyTexSubImage3D = cast[proc (target: GLenum, level: GLint, xoffset: GLint,
+      yoffset: GLint, zoffset: GLint, x: GLint, y: GLint, width: GLsizei,
+      height: GLsizei) {.stdcall.}](load("glCopyTexSubImage3D"))
 
 
 proc load_GL_VERSION_1_3(load: proc) =
   if not GLAD_GL_VERSION_1_3: return
 
   glActiveTexture = cast[proc (texture: GLenum) {.stdcall.}](load("glActiveTexture"))
-  glSampleCoverage = cast[proc (value: GLfloat, invert: GLboolean) {.stdcall.}](load("glSampleCoverage"))
-  glCompressedTexImage3D = cast[proc (target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei, border: GLint, imageSize: GLsizei, data: pointer) {.stdcall.}](load("glCompressedTexImage3D"))
-  glCompressedTexImage2D = cast[proc (target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, height: GLsizei, border: GLint, imageSize: GLsizei, data: pointer) {.stdcall.}](load("glCompressedTexImage2D"))
-  glCompressedTexImage1D = cast[proc (target: GLenum, level: GLint, internalformat: GLenum, width: GLsizei, border: GLint, imageSize: GLsizei, data: pointer) {.stdcall.}](load("glCompressedTexImage1D"))
-  glCompressedTexSubImage3D = cast[proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei, height: GLsizei, depth: GLsizei, format: GLenum, imageSize: GLsizei, data: pointer) {.stdcall.}](load("glCompressedTexSubImage3D"))
-  glCompressedTexSubImage2D = cast[proc (target: GLenum, level: GLint, xoffset: GLint, yoffset: GLint, width: GLsizei, height: GLsizei, format: GLenum, imageSize: GLsizei, data: pointer) {.stdcall.}](load("glCompressedTexSubImage2D"))
-  glCompressedTexSubImage1D = cast[proc (target: GLenum, level: GLint, xoffset: GLint, width: GLsizei, format: GLenum, imageSize: GLsizei, data: pointer) {.stdcall.}](load("glCompressedTexSubImage1D"))
-  glGetCompressedTexImage = cast[proc (target: GLenum, level: GLint, img: pointer) {.stdcall.}](load("glGetCompressedTexImage"))
+  glSampleCoverage = cast[proc (value: GLfloat, invert: GLboolean) {.stdcall.}](
+      load("glSampleCoverage"))
+  glCompressedTexImage3D = cast[proc (target: GLenum, level: GLint,
+      internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei,
+      border: GLint, imageSize: GLsizei, data: pointer) {.stdcall.}](load("glCompressedTexImage3D"))
+  glCompressedTexImage2D = cast[proc (target: GLenum, level: GLint,
+      internalformat: GLenum, width: GLsizei, height: GLsizei, border: GLint,
+      imageSize: GLsizei, data: pointer) {.stdcall.}](load("glCompressedTexImage2D"))
+  glCompressedTexImage1D = cast[proc (target: GLenum, level: GLint,
+      internalformat: GLenum, width: GLsizei, border: GLint, imageSize: GLsizei,
+      data: pointer) {.stdcall.}](load("glCompressedTexImage1D"))
+  glCompressedTexSubImage3D = cast[proc (target: GLenum, level: GLint,
+      xoffset: GLint, yoffset: GLint, zoffset: GLint, width: GLsizei,
+      height: GLsizei, depth: GLsizei, format: GLenum, imageSize: GLsizei,
+      data: pointer) {.stdcall.}](load("glCompressedTexSubImage3D"))
+  glCompressedTexSubImage2D = cast[proc (target: GLenum, level: GLint,
+      xoffset: GLint, yoffset: GLint, width: GLsizei, height: GLsizei,
+      format: GLenum, imageSize: GLsizei, data: pointer) {.stdcall.}](load("glCompressedTexSubImage2D"))
+  glCompressedTexSubImage1D = cast[proc (target: GLenum, level: GLint,
+      xoffset: GLint, width: GLsizei, format: GLenum, imageSize: GLsizei,
+      data: pointer) {.stdcall.}](load("glCompressedTexSubImage1D"))
+  glGetCompressedTexImage = cast[proc (target: GLenum, level: GLint,
+      img: pointer) {.stdcall.}](load("glGetCompressedTexImage"))
 
 
 proc load_GL_VERSION_1_4(load: proc) =
   if not GLAD_GL_VERSION_1_4: return
 
-  glBlendFuncSeparate = cast[proc (sfactorRGB: GLenum, dfactorRGB: GLenum, sfactorAlpha: GLenum, dfactorAlpha: GLenum) {.stdcall.}](load("glBlendFuncSeparate"))
-  glMultiDrawArrays = cast[proc (mode: GLenum, first: ptr GLint, count: ptr GLsizei, drawcount: GLsizei) {.stdcall.}](load("glMultiDrawArrays"))
-  glMultiDrawElements = cast[proc (mode: GLenum, count: ptr GLsizei, `type`: GLenum, indices: ptr pointer, drawcount: GLsizei) {.stdcall.}](load("glMultiDrawElements"))
-  glPointParameterf = cast[proc (pname: GLenum, param: GLfloat) {.stdcall.}](load("glPointParameterf"))
-  glPointParameterfv = cast[proc (pname: GLenum, params: ptr GLfloat) {.stdcall.}](load("glPointParameterfv"))
+  glBlendFuncSeparate = cast[proc (sfactorRGB: GLenum, dfactorRGB: GLenum,
+      sfactorAlpha: GLenum, dfactorAlpha: GLenum) {.stdcall.}](load("glBlendFuncSeparate"))
+  glMultiDrawArrays = cast[proc (mode: GLenum, first: ptr GLint,
+      count: ptr GLsizei, drawcount: GLsizei) {.stdcall.}](load("glMultiDrawArrays"))
+  glMultiDrawElements = cast[proc (mode: GLenum, count: ptr GLsizei,
+      `type`: GLenum, indices: ptr pointer, drawcount: GLsizei) {.stdcall.}](
+      load("glMultiDrawElements"))
+  glPointParameterf = cast[proc (pname: GLenum, param: GLfloat) {.stdcall.}](
+      load("glPointParameterf"))
+  glPointParameterfv = cast[proc (pname: GLenum,
+      params: ptr GLfloat) {.stdcall.}](load("glPointParameterfv"))
   glPointParameteri = cast[proc (pname: GLenum, param: GLint) {.stdcall.}](load("glPointParameteri"))
-  glPointParameteriv = cast[proc (pname: GLenum, params: ptr GLint) {.stdcall.}](load("glPointParameteriv"))
-  glBlendColor = cast[proc (red: GLfloat, green: GLfloat, blue: GLfloat, alpha: GLfloat) {.stdcall.}](load("glBlendColor"))
+  glPointParameteriv = cast[proc (pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glPointParameteriv"))
+  glBlendColor = cast[proc (red: GLfloat, green: GLfloat, blue: GLfloat,
+      alpha: GLfloat) {.stdcall.}](load("glBlendColor"))
   glBlendEquation = cast[proc (mode: GLenum) {.stdcall.}](load("glBlendEquation"))
 
 
@@ -1734,325 +2128,581 @@ proc load_GL_VERSION_1_5(load: proc) =
   glIsQuery = cast[proc (id: GLuint): GLboolean {.stdcall.}](load("glIsQuery"))
   glBeginQuery = cast[proc (target: GLenum, id: GLuint) {.stdcall.}](load("glBeginQuery"))
   glEndQuery = cast[proc (target: GLenum) {.stdcall.}](load("glEndQuery"))
-  glGetQueryiv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetQueryiv"))
-  glGetQueryObjectiv = cast[proc (id: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetQueryObjectiv"))
-  glGetQueryObjectuiv = cast[proc (id: GLuint, pname: GLenum, params: ptr GLuint) {.stdcall.}](load("glGetQueryObjectuiv"))
+  glGetQueryiv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetQueryiv"))
+  glGetQueryObjectiv = cast[proc (id: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetQueryObjectiv"))
+  glGetQueryObjectuiv = cast[proc (id: GLuint, pname: GLenum,
+      params: ptr GLuint) {.stdcall.}](load("glGetQueryObjectuiv"))
   glBindBuffer = cast[proc (target: GLenum, buffer: GLuint) {.stdcall.}](load("glBindBuffer"))
-  glDeleteBuffers = cast[proc (n: GLsizei, buffers: ptr GLuint) {.stdcall.}](load("glDeleteBuffers"))
+  glDeleteBuffers = cast[proc (n: GLsizei, buffers: ptr GLuint) {.stdcall.}](
+      load("glDeleteBuffers"))
   glGenBuffers = cast[proc (n: GLsizei, buffers: ptr GLuint) {.stdcall.}](load("glGenBuffers"))
   glIsBuffer = cast[proc (buffer: GLuint): GLboolean {.stdcall.}](load("glIsBuffer"))
-  glBufferData = cast[proc (target: GLenum, size: GLsizeiptr, data: pointer, usage: GLenum) {.stdcall.}](load("glBufferData"))
-  glBufferSubData = cast[proc (target: GLenum, offset: GLintptr, size: GLsizeiptr, data: pointer) {.stdcall.}](load("glBufferSubData"))
-  glGetBufferSubData = cast[proc (target: GLenum, offset: GLintptr, size: GLsizeiptr, data: pointer) {.stdcall.}](load("glGetBufferSubData"))
-  glMapBuffer = cast[proc (target: GLenum, access: GLenum): pointer {.stdcall.}](load("glMapBuffer"))
+  glBufferData = cast[proc (target: GLenum, size: GLsizeiptr, data: pointer,
+      usage: GLenum) {.stdcall.}](load("glBufferData"))
+  glBufferSubData = cast[proc (target: GLenum, offset: GLintptr,
+      size: GLsizeiptr, data: pointer) {.stdcall.}](load("glBufferSubData"))
+  glGetBufferSubData = cast[proc (target: GLenum, offset: GLintptr,
+      size: GLsizeiptr, data: pointer) {.stdcall.}](load("glGetBufferSubData"))
+  glMapBuffer = cast[proc (target: GLenum,
+      access: GLenum): pointer {.stdcall.}](load("glMapBuffer"))
   glUnmapBuffer = cast[proc (target: GLenum): GLboolean {.stdcall.}](load("glUnmapBuffer"))
-  glGetBufferParameteriv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetBufferParameteriv"))
-  glGetBufferPointerv = cast[proc (target: GLenum, pname: GLenum, params: ptr pointer) {.stdcall.}](load("glGetBufferPointerv"))
+  glGetBufferParameteriv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetBufferParameteriv"))
+  glGetBufferPointerv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr pointer) {.stdcall.}](load("glGetBufferPointerv"))
 
 
 proc load_GL_VERSION_2_0(load: proc) =
   if not GLAD_GL_VERSION_2_0: return
 
-  glBlendEquationSeparate = cast[proc (modeRGB: GLenum, modeAlpha: GLenum) {.stdcall.}](load("glBlendEquationSeparate"))
+  glBlendEquationSeparate = cast[proc (modeRGB: GLenum,
+      modeAlpha: GLenum) {.stdcall.}](load("glBlendEquationSeparate"))
   glDrawBuffers = cast[proc (n: GLsizei, bufs: ptr GLenum) {.stdcall.}](load("glDrawBuffers"))
-  glStencilOpSeparate = cast[proc (face: GLenum, sfail: GLenum, dpfail: GLenum, dppass: GLenum) {.stdcall.}](load("glStencilOpSeparate"))
-  glStencilFuncSeparate = cast[proc (face: GLenum, `func`: GLenum, `ref`: GLint, mask: GLuint) {.stdcall.}](load("glStencilFuncSeparate"))
-  glStencilMaskSeparate = cast[proc (face: GLenum, mask: GLuint) {.stdcall.}](load("glStencilMaskSeparate"))
-  glAttachShader = cast[proc (program: GLuint, shader: GLuint) {.stdcall.}](load("glAttachShader"))
-  glBindAttribLocation = cast[proc (program: GLuint, index: GLuint, name: cstring) {.stdcall.}](load("glBindAttribLocation"))
+  glStencilOpSeparate = cast[proc (face: GLenum, sfail: GLenum, dpfail: GLenum,
+      dppass: GLenum) {.stdcall.}](load("glStencilOpSeparate"))
+  glStencilFuncSeparate = cast[proc (face: GLenum, `func`: GLenum, `ref`: GLint,
+      mask: GLuint) {.stdcall.}](load("glStencilFuncSeparate"))
+  glStencilMaskSeparate = cast[proc (face: GLenum, mask: GLuint) {.stdcall.}](
+      load("glStencilMaskSeparate"))
+  glAttachShader = cast[proc (program: GLuint, shader: GLuint) {.stdcall.}](
+      load("glAttachShader"))
+  glBindAttribLocation = cast[proc (program: GLuint, index: GLuint,
+      name: cstring) {.stdcall.}](load("glBindAttribLocation"))
   glCompileShader = cast[proc (shader: GLuint) {.stdcall.}](load("glCompileShader"))
   glCreateProgram = cast[proc (): GLuint {.stdcall.}](load("glCreateProgram"))
   glCreateShader = cast[proc (`type`: GLenum): GLuint {.stdcall.}](load("glCreateShader"))
   glDeleteProgram = cast[proc (program: GLuint) {.stdcall.}](load("glDeleteProgram"))
   glDeleteShader = cast[proc (shader: GLuint) {.stdcall.}](load("glDeleteShader"))
-  glDetachShader = cast[proc (program: GLuint, shader: GLuint) {.stdcall.}](load("glDetachShader"))
+  glDetachShader = cast[proc (program: GLuint, shader: GLuint) {.stdcall.}](
+      load("glDetachShader"))
   glDisableVertexAttribArray = cast[proc (index: GLuint) {.stdcall.}](load("glDisableVertexAttribArray"))
   glEnableVertexAttribArray = cast[proc (index: GLuint) {.stdcall.}](load("glEnableVertexAttribArray"))
-  glGetActiveAttrib = cast[proc (program: GLuint, index: GLuint, bufSize: GLsizei, length: ptr GLsizei, size: ptr GLint, `type`: ptr GLenum, name: cstring) {.stdcall.}](load("glGetActiveAttrib"))
-  glGetActiveUniform = cast[proc (program: GLuint, index: GLuint, bufSize: GLsizei, length: ptr GLsizei, size: ptr GLint, `type`: ptr GLenum, name: cstring) {.stdcall.}](load("glGetActiveUniform"))
-  glGetAttachedShaders = cast[proc (program: GLuint, maxCount: GLsizei, count: ptr GLsizei, shaders: ptr GLuint) {.stdcall.}](load("glGetAttachedShaders"))
-  glGetAttribLocation = cast[proc (program: GLuint, name: cstring): GLint {.stdcall.}](load("glGetAttribLocation"))
-  glGetProgramiv = cast[proc (program: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetProgramiv"))
-  glGetProgramInfoLog = cast[proc (program: GLuint, bufSize: GLsizei, length: ptr GLsizei, infoLog: cstring) {.stdcall.}](load("glGetProgramInfoLog"))
-  glGetShaderiv = cast[proc (shader: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetShaderiv"))
-  glGetShaderInfoLog = cast[proc (shader: GLuint, bufSize: GLsizei, length: ptr GLsizei, infoLog: cstring) {.stdcall.}](load("glGetShaderInfoLog"))
-  glGetShaderSource = cast[proc (shader: GLuint, bufSize: GLsizei, length: ptr GLsizei, source: cstring) {.stdcall.}](load("glGetShaderSource"))
-  glGetUniformLocation = cast[proc (program: GLuint, name: cstring): GLint {.stdcall.}](load("glGetUniformLocation"))
-  glGetUniformfv = cast[proc (program: GLuint, location: GLint, params: ptr GLfloat) {.stdcall.}](load("glGetUniformfv"))
-  glGetUniformiv = cast[proc (program: GLuint, location: GLint, params: ptr GLint) {.stdcall.}](load("glGetUniformiv"))
-  glGetVertexAttribdv = cast[proc (index: GLuint, pname: GLenum, params: ptr GLdouble) {.stdcall.}](load("glGetVertexAttribdv"))
-  glGetVertexAttribfv = cast[proc (index: GLuint, pname: GLenum, params: ptr GLfloat) {.stdcall.}](load("glGetVertexAttribfv"))
-  glGetVertexAttribiv = cast[proc (index: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetVertexAttribiv"))
-  glGetVertexAttribPointerv = cast[proc (index: GLuint, pname: GLenum, pointer: ptr pointer) {.stdcall.}](load("glGetVertexAttribPointerv"))
+  glGetActiveAttrib = cast[proc (program: GLuint, index: GLuint,
+      bufSize: GLsizei, length: ptr GLsizei, size: ptr GLint,
+      `type`: ptr GLenum, name: cstring) {.stdcall.}](load("glGetActiveAttrib"))
+  glGetActiveUniform = cast[proc (program: GLuint, index: GLuint,
+      bufSize: GLsizei, length: ptr GLsizei, size: ptr GLint,
+      `type`: ptr GLenum, name: cstring) {.stdcall.}](load("glGetActiveUniform"))
+  glGetAttachedShaders = cast[proc (program: GLuint, maxCount: GLsizei,
+      count: ptr GLsizei, shaders: ptr GLuint) {.stdcall.}](load("glGetAttachedShaders"))
+  glGetAttribLocation = cast[proc (program: GLuint,
+      name: cstring): GLint {.stdcall.}](load("glGetAttribLocation"))
+  glGetProgramiv = cast[proc (program: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetProgramiv"))
+  glGetProgramInfoLog = cast[proc (program: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, infoLog: cstring) {.stdcall.}](load("glGetProgramInfoLog"))
+  glGetShaderiv = cast[proc (shader: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetShaderiv"))
+  glGetShaderInfoLog = cast[proc (shader: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, infoLog: cstring) {.stdcall.}](load("glGetShaderInfoLog"))
+  glGetShaderSource = cast[proc (shader: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, source: cstring) {.stdcall.}](load("glGetShaderSource"))
+  glGetUniformLocation = cast[proc (program: GLuint,
+      name: cstring): GLint {.stdcall.}](load("glGetUniformLocation"))
+  glGetUniformfv = cast[proc (program: GLuint, location: GLint,
+      params: ptr GLfloat) {.stdcall.}](load("glGetUniformfv"))
+  glGetUniformiv = cast[proc (program: GLuint, location: GLint,
+      params: ptr GLint) {.stdcall.}](load("glGetUniformiv"))
+  glGetVertexAttribdv = cast[proc (index: GLuint, pname: GLenum,
+      params: ptr GLdouble) {.stdcall.}](load("glGetVertexAttribdv"))
+  glGetVertexAttribfv = cast[proc (index: GLuint, pname: GLenum,
+      params: ptr GLfloat) {.stdcall.}](load("glGetVertexAttribfv"))
+  glGetVertexAttribiv = cast[proc (index: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetVertexAttribiv"))
+  glGetVertexAttribPointerv = cast[proc (index: GLuint, pname: GLenum,
+      pointer: ptr pointer) {.stdcall.}](load("glGetVertexAttribPointerv"))
   glIsProgram = cast[proc (program: GLuint): GLboolean {.stdcall.}](load("glIsProgram"))
   glIsShader = cast[proc (shader: GLuint): GLboolean {.stdcall.}](load("glIsShader"))
   glLinkProgram = cast[proc (program: GLuint) {.stdcall.}](load("glLinkProgram"))
-  glShaderSource = cast[proc (shader: GLuint, count: GLsizei, string: cstringArray, length: ptr GLint) {.stdcall.}](load("glShaderSource"))
+  glShaderSource = cast[proc (shader: GLuint, count: GLsizei,
+      string: cstringArray, length: ptr GLint) {.stdcall.}](load("glShaderSource"))
   glUseProgram = cast[proc (program: GLuint) {.stdcall.}](load("glUseProgram"))
   glUniform1f = cast[proc (location: GLint, v0: GLfloat) {.stdcall.}](load("glUniform1f"))
-  glUniform2f = cast[proc (location: GLint, v0: GLfloat, v1: GLfloat) {.stdcall.}](load("glUniform2f"))
-  glUniform3f = cast[proc (location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat) {.stdcall.}](load("glUniform3f"))
-  glUniform4f = cast[proc (location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat, v3: GLfloat) {.stdcall.}](load("glUniform4f"))
+  glUniform2f = cast[proc (location: GLint, v0: GLfloat,
+      v1: GLfloat) {.stdcall.}](load("glUniform2f"))
+  glUniform3f = cast[proc (location: GLint, v0: GLfloat, v1: GLfloat,
+      v2: GLfloat) {.stdcall.}](load("glUniform3f"))
+  glUniform4f = cast[proc (location: GLint, v0: GLfloat, v1: GLfloat,
+      v2: GLfloat, v3: GLfloat) {.stdcall.}](load("glUniform4f"))
   glUniform1i = cast[proc (location: GLint, v0: GLint) {.stdcall.}](load("glUniform1i"))
-  glUniform2i = cast[proc (location: GLint, v0: GLint, v1: GLint) {.stdcall.}](load("glUniform2i"))
-  glUniform3i = cast[proc (location: GLint, v0: GLint, v1: GLint, v2: GLint) {.stdcall.}](load("glUniform3i"))
-  glUniform4i = cast[proc (location: GLint, v0: GLint, v1: GLint, v2: GLint, v3: GLint) {.stdcall.}](load("glUniform4i"))
-  glUniform1fv = cast[proc (location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glUniform1fv"))
-  glUniform2fv = cast[proc (location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glUniform2fv"))
-  glUniform3fv = cast[proc (location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glUniform3fv"))
-  glUniform4fv = cast[proc (location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glUniform4fv"))
-  glUniform1iv = cast[proc (location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}](load("glUniform1iv"))
-  glUniform2iv = cast[proc (location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}](load("glUniform2iv"))
-  glUniform3iv = cast[proc (location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}](load("glUniform3iv"))
-  glUniform4iv = cast[proc (location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}](load("glUniform4iv"))
-  glUniformMatrix2fv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix2fv"))
-  glUniformMatrix3fv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix3fv"))
-  glUniformMatrix4fv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix4fv"))
+  glUniform2i = cast[proc (location: GLint, v0: GLint, v1: GLint) {.stdcall.}](
+      load("glUniform2i"))
+  glUniform3i = cast[proc (location: GLint, v0: GLint, v1: GLint,
+      v2: GLint) {.stdcall.}](load("glUniform3i"))
+  glUniform4i = cast[proc (location: GLint, v0: GLint, v1: GLint, v2: GLint,
+      v3: GLint) {.stdcall.}](load("glUniform4i"))
+  glUniform1fv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}](load("glUniform1fv"))
+  glUniform2fv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}](load("glUniform2fv"))
+  glUniform3fv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}](load("glUniform3fv"))
+  glUniform4fv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLfloat) {.stdcall.}](load("glUniform4fv"))
+  glUniform1iv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}](load("glUniform1iv"))
+  glUniform2iv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}](load("glUniform2iv"))
+  glUniform3iv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}](load("glUniform3iv"))
+  glUniform4iv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLint) {.stdcall.}](load("glUniform4iv"))
+  glUniformMatrix2fv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix2fv"))
+  glUniformMatrix3fv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix3fv"))
+  glUniformMatrix4fv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix4fv"))
   glValidateProgram = cast[proc (program: GLuint) {.stdcall.}](load("glValidateProgram"))
   glVertexAttrib1d = cast[proc (index: GLuint, x: GLdouble) {.stdcall.}](load("glVertexAttrib1d"))
-  glVertexAttrib1dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](load("glVertexAttrib1dv"))
+  glVertexAttrib1dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](
+      load("glVertexAttrib1dv"))
   glVertexAttrib1f = cast[proc (index: GLuint, x: GLfloat) {.stdcall.}](load("glVertexAttrib1f"))
-  glVertexAttrib1fv = cast[proc (index: GLuint, v: ptr GLfloat) {.stdcall.}](load("glVertexAttrib1fv"))
+  glVertexAttrib1fv = cast[proc (index: GLuint, v: ptr GLfloat) {.stdcall.}](
+      load("glVertexAttrib1fv"))
   glVertexAttrib1s = cast[proc (index: GLuint, x: GLshort) {.stdcall.}](load("glVertexAttrib1s"))
-  glVertexAttrib1sv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](load("glVertexAttrib1sv"))
-  glVertexAttrib2d = cast[proc (index: GLuint, x: GLdouble, y: GLdouble) {.stdcall.}](load("glVertexAttrib2d"))
-  glVertexAttrib2dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](load("glVertexAttrib2dv"))
-  glVertexAttrib2f = cast[proc (index: GLuint, x: GLfloat, y: GLfloat) {.stdcall.}](load("glVertexAttrib2f"))
-  glVertexAttrib2fv = cast[proc (index: GLuint, v: ptr GLfloat) {.stdcall.}](load("glVertexAttrib2fv"))
-  glVertexAttrib2s = cast[proc (index: GLuint, x: GLshort, y: GLshort) {.stdcall.}](load("glVertexAttrib2s"))
-  glVertexAttrib2sv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](load("glVertexAttrib2sv"))
-  glVertexAttrib3d = cast[proc (index: GLuint, x: GLdouble, y: GLdouble, z: GLdouble) {.stdcall.}](load("glVertexAttrib3d"))
-  glVertexAttrib3dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](load("glVertexAttrib3dv"))
-  glVertexAttrib3f = cast[proc (index: GLuint, x: GLfloat, y: GLfloat, z: GLfloat) {.stdcall.}](load("glVertexAttrib3f"))
-  glVertexAttrib3fv = cast[proc (index: GLuint, v: ptr GLfloat) {.stdcall.}](load("glVertexAttrib3fv"))
-  glVertexAttrib3s = cast[proc (index: GLuint, x: GLshort, y: GLshort, z: GLshort) {.stdcall.}](load("glVertexAttrib3s"))
-  glVertexAttrib3sv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](load("glVertexAttrib3sv"))
-  glVertexAttrib4Nbv = cast[proc (index: GLuint, v: ptr GLbyte) {.stdcall.}](load("glVertexAttrib4Nbv"))
-  glVertexAttrib4Niv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](load("glVertexAttrib4Niv"))
-  glVertexAttrib4Nsv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](load("glVertexAttrib4Nsv"))
-  glVertexAttrib4Nub = cast[proc (index: GLuint, x: GLubyte, y: GLubyte, z: GLubyte, w: GLubyte) {.stdcall.}](load("glVertexAttrib4Nub"))
-  glVertexAttrib4Nubv = cast[proc (index: GLuint, v: ptr GLubyte) {.stdcall.}](load("glVertexAttrib4Nubv"))
-  glVertexAttrib4Nuiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](load("glVertexAttrib4Nuiv"))
-  glVertexAttrib4Nusv = cast[proc (index: GLuint, v: ptr GLushort) {.stdcall.}](load("glVertexAttrib4Nusv"))
-  glVertexAttrib4bv = cast[proc (index: GLuint, v: ptr GLbyte) {.stdcall.}](load("glVertexAttrib4bv"))
-  glVertexAttrib4d = cast[proc (index: GLuint, x: GLdouble, y: GLdouble, z: GLdouble, w: GLdouble) {.stdcall.}](load("glVertexAttrib4d"))
-  glVertexAttrib4dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](load("glVertexAttrib4dv"))
-  glVertexAttrib4f = cast[proc (index: GLuint, x: GLfloat, y: GLfloat, z: GLfloat, w: GLfloat) {.stdcall.}](load("glVertexAttrib4f"))
-  glVertexAttrib4fv = cast[proc (index: GLuint, v: ptr GLfloat) {.stdcall.}](load("glVertexAttrib4fv"))
+  glVertexAttrib1sv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](
+      load("glVertexAttrib1sv"))
+  glVertexAttrib2d = cast[proc (index: GLuint, x: GLdouble,
+      y: GLdouble) {.stdcall.}](load("glVertexAttrib2d"))
+  glVertexAttrib2dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](
+      load("glVertexAttrib2dv"))
+  glVertexAttrib2f = cast[proc (index: GLuint, x: GLfloat,
+      y: GLfloat) {.stdcall.}](load("glVertexAttrib2f"))
+  glVertexAttrib2fv = cast[proc (index: GLuint, v: ptr GLfloat) {.stdcall.}](
+      load("glVertexAttrib2fv"))
+  glVertexAttrib2s = cast[proc (index: GLuint, x: GLshort,
+      y: GLshort) {.stdcall.}](load("glVertexAttrib2s"))
+  glVertexAttrib2sv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](
+      load("glVertexAttrib2sv"))
+  glVertexAttrib3d = cast[proc (index: GLuint, x: GLdouble, y: GLdouble,
+      z: GLdouble) {.stdcall.}](load("glVertexAttrib3d"))
+  glVertexAttrib3dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](
+      load("glVertexAttrib3dv"))
+  glVertexAttrib3f = cast[proc (index: GLuint, x: GLfloat, y: GLfloat,
+      z: GLfloat) {.stdcall.}](load("glVertexAttrib3f"))
+  glVertexAttrib3fv = cast[proc (index: GLuint, v: ptr GLfloat) {.stdcall.}](
+      load("glVertexAttrib3fv"))
+  glVertexAttrib3s = cast[proc (index: GLuint, x: GLshort, y: GLshort,
+      z: GLshort) {.stdcall.}](load("glVertexAttrib3s"))
+  glVertexAttrib3sv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](
+      load("glVertexAttrib3sv"))
+  glVertexAttrib4Nbv = cast[proc (index: GLuint, v: ptr GLbyte) {.stdcall.}](
+      load("glVertexAttrib4Nbv"))
+  glVertexAttrib4Niv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](
+      load("glVertexAttrib4Niv"))
+  glVertexAttrib4Nsv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](
+      load("glVertexAttrib4Nsv"))
+  glVertexAttrib4Nub = cast[proc (index: GLuint, x: GLubyte, y: GLubyte,
+      z: GLubyte, w: GLubyte) {.stdcall.}](load("glVertexAttrib4Nub"))
+  glVertexAttrib4Nubv = cast[proc (index: GLuint, v: ptr GLubyte) {.stdcall.}](
+      load("glVertexAttrib4Nubv"))
+  glVertexAttrib4Nuiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](
+      load("glVertexAttrib4Nuiv"))
+  glVertexAttrib4Nusv = cast[proc (index: GLuint, v: ptr GLushort) {.stdcall.}](
+      load("glVertexAttrib4Nusv"))
+  glVertexAttrib4bv = cast[proc (index: GLuint, v: ptr GLbyte) {.stdcall.}](
+      load("glVertexAttrib4bv"))
+  glVertexAttrib4d = cast[proc (index: GLuint, x: GLdouble, y: GLdouble,
+      z: GLdouble, w: GLdouble) {.stdcall.}](load("glVertexAttrib4d"))
+  glVertexAttrib4dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](
+      load("glVertexAttrib4dv"))
+  glVertexAttrib4f = cast[proc (index: GLuint, x: GLfloat, y: GLfloat,
+      z: GLfloat, w: GLfloat) {.stdcall.}](load("glVertexAttrib4f"))
+  glVertexAttrib4fv = cast[proc (index: GLuint, v: ptr GLfloat) {.stdcall.}](
+      load("glVertexAttrib4fv"))
   glVertexAttrib4iv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](load("glVertexAttrib4iv"))
-  glVertexAttrib4s = cast[proc (index: GLuint, x: GLshort, y: GLshort, z: GLshort, w: GLshort) {.stdcall.}](load("glVertexAttrib4s"))
-  glVertexAttrib4sv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](load("glVertexAttrib4sv"))
-  glVertexAttrib4ubv = cast[proc (index: GLuint, v: ptr GLubyte) {.stdcall.}](load("glVertexAttrib4ubv"))
-  glVertexAttrib4uiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](load("glVertexAttrib4uiv"))
-  glVertexAttrib4usv = cast[proc (index: GLuint, v: ptr GLushort) {.stdcall.}](load("glVertexAttrib4usv"))
-  glVertexAttribPointer = cast[proc (index: GLuint, size: GLint, `type`: GLenum, normalized: GLboolean, stride: GLsizei, pointer: pointer) {.stdcall.}](load("glVertexAttribPointer"))
+  glVertexAttrib4s = cast[proc (index: GLuint, x: GLshort, y: GLshort,
+      z: GLshort, w: GLshort) {.stdcall.}](load("glVertexAttrib4s"))
+  glVertexAttrib4sv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](
+      load("glVertexAttrib4sv"))
+  glVertexAttrib4ubv = cast[proc (index: GLuint, v: ptr GLubyte) {.stdcall.}](
+      load("glVertexAttrib4ubv"))
+  glVertexAttrib4uiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](
+      load("glVertexAttrib4uiv"))
+  glVertexAttrib4usv = cast[proc (index: GLuint, v: ptr GLushort) {.stdcall.}](
+      load("glVertexAttrib4usv"))
+  glVertexAttribPointer = cast[proc (index: GLuint, size: GLint, `type`: GLenum,
+      normalized: GLboolean, stride: GLsizei, pointer: pointer) {.stdcall.}](
+      load("glVertexAttribPointer"))
 
 
 proc load_GL_VERSION_2_1(load: proc) =
   if not GLAD_GL_VERSION_2_1: return
 
-  glUniformMatrix2x3fv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix2x3fv"))
-  glUniformMatrix3x2fv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix3x2fv"))
-  glUniformMatrix2x4fv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix2x4fv"))
-  glUniformMatrix4x2fv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix4x2fv"))
-  glUniformMatrix3x4fv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix3x4fv"))
-  glUniformMatrix4x3fv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix4x3fv"))
+  glUniformMatrix2x3fv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix2x3fv"))
+  glUniformMatrix3x2fv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix3x2fv"))
+  glUniformMatrix2x4fv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix2x4fv"))
+  glUniformMatrix4x2fv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix4x2fv"))
+  glUniformMatrix3x4fv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix3x4fv"))
+  glUniformMatrix4x3fv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glUniformMatrix4x3fv"))
 
 
 proc load_GL_VERSION_3_0(load: proc) =
   if not GLAD_GL_VERSION_3_0: return
 
-  glColorMaski = cast[proc (index: GLuint, r: GLboolean, g: GLboolean, b: GLboolean, a: GLboolean) {.stdcall.}](load("glColorMaski"))
-  glGetBooleani_v = cast[proc (target: GLenum, index: GLuint, data: ptr GLboolean) {.stdcall.}](load("glGetBooleani_v"))
-  glGetIntegeri_v = cast[proc (target: GLenum, index: GLuint, data: ptr GLint) {.stdcall.}](load("glGetIntegeri_v"))
+  glColorMaski = cast[proc (index: GLuint, r: GLboolean, g: GLboolean,
+      b: GLboolean, a: GLboolean) {.stdcall.}](load("glColorMaski"))
+  glGetBooleani_v = cast[proc (target: GLenum, index: GLuint,
+      data: ptr GLboolean) {.stdcall.}](load("glGetBooleani_v"))
+  glGetIntegeri_v = cast[proc (target: GLenum, index: GLuint,
+      data: ptr GLint) {.stdcall.}](load("glGetIntegeri_v"))
   glEnablei = cast[proc (target: GLenum, index: GLuint) {.stdcall.}](load("glEnablei"))
   glDisablei = cast[proc (target: GLenum, index: GLuint) {.stdcall.}](load("glDisablei"))
-  glIsEnabledi = cast[proc (target: GLenum, index: GLuint): GLboolean {.stdcall.}](load("glIsEnabledi"))
-  glBeginTransformFeedback = cast[proc (primitiveMode: GLenum) {.stdcall.}](load("glBeginTransformFeedback"))
+  glIsEnabledi = cast[proc (target: GLenum,
+      index: GLuint): GLboolean {.stdcall.}](load("glIsEnabledi"))
+  glBeginTransformFeedback = cast[proc (primitiveMode: GLenum) {.stdcall.}](
+      load("glBeginTransformFeedback"))
   glEndTransformFeedback = cast[proc () {.stdcall.}](load("glEndTransformFeedback"))
-  glBindBufferRange = cast[proc (target: GLenum, index: GLuint, buffer: GLuint, offset: GLintptr, size: GLsizeiptr) {.stdcall.}](load("glBindBufferRange"))
-  glBindBufferBase = cast[proc (target: GLenum, index: GLuint, buffer: GLuint) {.stdcall.}](load("glBindBufferBase"))
-  glTransformFeedbackVaryings = cast[proc (program: GLuint, count: GLsizei, varyings: cstringArray, bufferMode: GLenum) {.stdcall.}](load("glTransformFeedbackVaryings"))
-  glGetTransformFeedbackVarying = cast[proc (program: GLuint, index: GLuint, bufSize: GLsizei, length: ptr GLsizei, size: ptr GLsizei, `type`: ptr GLenum, name: cstring) {.stdcall.}](load("glGetTransformFeedbackVarying"))
+  glBindBufferRange = cast[proc (target: GLenum, index: GLuint, buffer: GLuint,
+      offset: GLintptr, size: GLsizeiptr) {.stdcall.}](load("glBindBufferRange"))
+  glBindBufferBase = cast[proc (target: GLenum, index: GLuint,
+      buffer: GLuint) {.stdcall.}](load("glBindBufferBase"))
+  glTransformFeedbackVaryings = cast[proc (program: GLuint, count: GLsizei,
+      varyings: cstringArray, bufferMode: GLenum) {.stdcall.}](load("glTransformFeedbackVaryings"))
+  glGetTransformFeedbackVarying = cast[proc (program: GLuint, index: GLuint,
+      bufSize: GLsizei, length: ptr GLsizei, size: ptr GLsizei,
+      `type`: ptr GLenum, name: cstring) {.stdcall.}](load("glGetTransformFeedbackVarying"))
   glClampColor = cast[proc (target: GLenum, clamp: GLenum) {.stdcall.}](load("glClampColor"))
-  glBeginConditionalRender = cast[proc (id: GLuint, mode: GLenum) {.stdcall.}](load("glBeginConditionalRender"))
+  glBeginConditionalRender = cast[proc (id: GLuint, mode: GLenum) {.stdcall.}](
+      load("glBeginConditionalRender"))
   glEndConditionalRender = cast[proc () {.stdcall.}](load("glEndConditionalRender"))
-  glVertexAttribIPointer = cast[proc (index: GLuint, size: GLint, `type`: GLenum, stride: GLsizei, pointer: pointer) {.stdcall.}](load("glVertexAttribIPointer"))
-  glGetVertexAttribIiv = cast[proc (index: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetVertexAttribIiv"))
-  glGetVertexAttribIuiv = cast[proc (index: GLuint, pname: GLenum, params: ptr GLuint) {.stdcall.}](load("glGetVertexAttribIuiv"))
+  glVertexAttribIPointer = cast[proc (index: GLuint, size: GLint,
+      `type`: GLenum, stride: GLsizei, pointer: pointer) {.stdcall.}](load("glVertexAttribIPointer"))
+  glGetVertexAttribIiv = cast[proc (index: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetVertexAttribIiv"))
+  glGetVertexAttribIuiv = cast[proc (index: GLuint, pname: GLenum,
+      params: ptr GLuint) {.stdcall.}](load("glGetVertexAttribIuiv"))
   glVertexAttribI1i = cast[proc (index: GLuint, x: GLint) {.stdcall.}](load("glVertexAttribI1i"))
-  glVertexAttribI2i = cast[proc (index: GLuint, x: GLint, y: GLint) {.stdcall.}](load("glVertexAttribI2i"))
-  glVertexAttribI3i = cast[proc (index: GLuint, x: GLint, y: GLint, z: GLint) {.stdcall.}](load("glVertexAttribI3i"))
-  glVertexAttribI4i = cast[proc (index: GLuint, x: GLint, y: GLint, z: GLint, w: GLint) {.stdcall.}](load("glVertexAttribI4i"))
+  glVertexAttribI2i = cast[proc (index: GLuint, x: GLint,
+      y: GLint) {.stdcall.}](load("glVertexAttribI2i"))
+  glVertexAttribI3i = cast[proc (index: GLuint, x: GLint, y: GLint,
+      z: GLint) {.stdcall.}](load("glVertexAttribI3i"))
+  glVertexAttribI4i = cast[proc (index: GLuint, x: GLint, y: GLint, z: GLint,
+      w: GLint) {.stdcall.}](load("glVertexAttribI4i"))
   glVertexAttribI1ui = cast[proc (index: GLuint, x: GLuint) {.stdcall.}](load("glVertexAttribI1ui"))
-  glVertexAttribI2ui = cast[proc (index: GLuint, x: GLuint, y: GLuint) {.stdcall.}](load("glVertexAttribI2ui"))
-  glVertexAttribI3ui = cast[proc (index: GLuint, x: GLuint, y: GLuint, z: GLuint) {.stdcall.}](load("glVertexAttribI3ui"))
-  glVertexAttribI4ui = cast[proc (index: GLuint, x: GLuint, y: GLuint, z: GLuint, w: GLuint) {.stdcall.}](load("glVertexAttribI4ui"))
-  glVertexAttribI1iv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](load("glVertexAttribI1iv"))
-  glVertexAttribI2iv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](load("glVertexAttribI2iv"))
-  glVertexAttribI3iv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](load("glVertexAttribI3iv"))
-  glVertexAttribI4iv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](load("glVertexAttribI4iv"))
-  glVertexAttribI1uiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](load("glVertexAttribI1uiv"))
-  glVertexAttribI2uiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](load("glVertexAttribI2uiv"))
-  glVertexAttribI3uiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](load("glVertexAttribI3uiv"))
-  glVertexAttribI4uiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](load("glVertexAttribI4uiv"))
-  glVertexAttribI4bv = cast[proc (index: GLuint, v: ptr GLbyte) {.stdcall.}](load("glVertexAttribI4bv"))
-  glVertexAttribI4sv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](load("glVertexAttribI4sv"))
-  glVertexAttribI4ubv = cast[proc (index: GLuint, v: ptr GLubyte) {.stdcall.}](load("glVertexAttribI4ubv"))
-  glVertexAttribI4usv = cast[proc (index: GLuint, v: ptr GLushort) {.stdcall.}](load("glVertexAttribI4usv"))
-  glGetUniformuiv = cast[proc (program: GLuint, location: GLint, params: ptr GLuint) {.stdcall.}](load("glGetUniformuiv"))
-  glBindFragDataLocation = cast[proc (program: GLuint, color: GLuint, name: cstring) {.stdcall.}](load("glBindFragDataLocation"))
-  glGetFragDataLocation = cast[proc (program: GLuint, name: cstring): GLint {.stdcall.}](load("glGetFragDataLocation"))
+  glVertexAttribI2ui = cast[proc (index: GLuint, x: GLuint,
+      y: GLuint) {.stdcall.}](load("glVertexAttribI2ui"))
+  glVertexAttribI3ui = cast[proc (index: GLuint, x: GLuint, y: GLuint,
+      z: GLuint) {.stdcall.}](load("glVertexAttribI3ui"))
+  glVertexAttribI4ui = cast[proc (index: GLuint, x: GLuint, y: GLuint,
+      z: GLuint, w: GLuint) {.stdcall.}](load("glVertexAttribI4ui"))
+  glVertexAttribI1iv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](
+      load("glVertexAttribI1iv"))
+  glVertexAttribI2iv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](
+      load("glVertexAttribI2iv"))
+  glVertexAttribI3iv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](
+      load("glVertexAttribI3iv"))
+  glVertexAttribI4iv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](
+      load("glVertexAttribI4iv"))
+  glVertexAttribI1uiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](
+      load("glVertexAttribI1uiv"))
+  glVertexAttribI2uiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](
+      load("glVertexAttribI2uiv"))
+  glVertexAttribI3uiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](
+      load("glVertexAttribI3uiv"))
+  glVertexAttribI4uiv = cast[proc (index: GLuint, v: ptr GLuint) {.stdcall.}](
+      load("glVertexAttribI4uiv"))
+  glVertexAttribI4bv = cast[proc (index: GLuint, v: ptr GLbyte) {.stdcall.}](
+      load("glVertexAttribI4bv"))
+  glVertexAttribI4sv = cast[proc (index: GLuint, v: ptr GLshort) {.stdcall.}](
+      load("glVertexAttribI4sv"))
+  glVertexAttribI4ubv = cast[proc (index: GLuint, v: ptr GLubyte) {.stdcall.}](
+      load("glVertexAttribI4ubv"))
+  glVertexAttribI4usv = cast[proc (index: GLuint, v: ptr GLushort) {.stdcall.}](
+      load("glVertexAttribI4usv"))
+  glGetUniformuiv = cast[proc (program: GLuint, location: GLint,
+      params: ptr GLuint) {.stdcall.}](load("glGetUniformuiv"))
+  glBindFragDataLocation = cast[proc (program: GLuint, color: GLuint,
+      name: cstring) {.stdcall.}](load("glBindFragDataLocation"))
+  glGetFragDataLocation = cast[proc (program: GLuint,
+      name: cstring): GLint {.stdcall.}](load("glGetFragDataLocation"))
   glUniform1ui = cast[proc (location: GLint, v0: GLuint) {.stdcall.}](load("glUniform1ui"))
-  glUniform2ui = cast[proc (location: GLint, v0: GLuint, v1: GLuint) {.stdcall.}](load("glUniform2ui"))
-  glUniform3ui = cast[proc (location: GLint, v0: GLuint, v1: GLuint, v2: GLuint) {.stdcall.}](load("glUniform3ui"))
-  glUniform4ui = cast[proc (location: GLint, v0: GLuint, v1: GLuint, v2: GLuint, v3: GLuint) {.stdcall.}](load("glUniform4ui"))
-  glUniform1uiv = cast[proc (location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glUniform1uiv"))
-  glUniform2uiv = cast[proc (location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glUniform2uiv"))
-  glUniform3uiv = cast[proc (location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glUniform3uiv"))
-  glUniform4uiv = cast[proc (location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glUniform4uiv"))
-  glTexParameterIiv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glTexParameterIiv"))
-  glTexParameterIuiv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLuint) {.stdcall.}](load("glTexParameterIuiv"))
-  glGetTexParameterIiv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetTexParameterIiv"))
-  glGetTexParameterIuiv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLuint) {.stdcall.}](load("glGetTexParameterIuiv"))
-  glClearBufferiv = cast[proc (buffer: GLenum, drawbuffer: GLint, value: ptr GLint) {.stdcall.}](load("glClearBufferiv"))
-  glClearBufferuiv = cast[proc (buffer: GLenum, drawbuffer: GLint, value: ptr GLuint) {.stdcall.}](load("glClearBufferuiv"))
-  glClearBufferfv = cast[proc (buffer: GLenum, drawbuffer: GLint, value: ptr GLfloat) {.stdcall.}](load("glClearBufferfv"))
-  glClearBufferfi = cast[proc (buffer: GLenum, drawbuffer: GLint, depth: GLfloat, stencil: GLint) {.stdcall.}](load("glClearBufferfi"))
-  glGetStringi = cast[proc (name: GLenum, index: GLuint): ptr GLubyte {.stdcall.}](load("glGetStringi"))
-  glIsRenderbuffer = cast[proc (renderbuffer: GLuint): GLboolean {.stdcall.}](load("glIsRenderbuffer"))
-  glBindRenderbuffer = cast[proc (target: GLenum, renderbuffer: GLuint) {.stdcall.}](load("glBindRenderbuffer"))
-  glDeleteRenderbuffers = cast[proc (n: GLsizei, renderbuffers: ptr GLuint) {.stdcall.}](load("glDeleteRenderbuffers"))
-  glGenRenderbuffers = cast[proc (n: GLsizei, renderbuffers: ptr GLuint) {.stdcall.}](load("glGenRenderbuffers"))
-  glRenderbufferStorage = cast[proc (target: GLenum, internalformat: GLenum, width: GLsizei, height: GLsizei) {.stdcall.}](load("glRenderbufferStorage"))
-  glGetRenderbufferParameteriv = cast[proc (target: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetRenderbufferParameteriv"))
-  glIsFramebuffer = cast[proc (framebuffer: GLuint): GLboolean {.stdcall.}](load("glIsFramebuffer"))
-  glBindFramebuffer = cast[proc (target: GLenum, framebuffer: GLuint) {.stdcall.}](load("glBindFramebuffer"))
-  glDeleteFramebuffers = cast[proc (n: GLsizei, framebuffers: ptr GLuint) {.stdcall.}](load("glDeleteFramebuffers"))
-  glGenFramebuffers = cast[proc (n: GLsizei, framebuffers: ptr GLuint) {.stdcall.}](load("glGenFramebuffers"))
-  glCheckFramebufferStatus = cast[proc (target: GLenum): GLenum {.stdcall.}](load("glCheckFramebufferStatus"))
-  glFramebufferTexture1D = cast[proc (target: GLenum, attachment: GLenum, textarget: GLenum, texture: GLuint, level: GLint) {.stdcall.}](load("glFramebufferTexture1D"))
-  glFramebufferTexture2D = cast[proc (target: GLenum, attachment: GLenum, textarget: GLenum, texture: GLuint, level: GLint) {.stdcall.}](load("glFramebufferTexture2D"))
-  glFramebufferTexture3D = cast[proc (target: GLenum, attachment: GLenum, textarget: GLenum, texture: GLuint, level: GLint, zoffset: GLint) {.stdcall.}](load("glFramebufferTexture3D"))
-  glFramebufferRenderbuffer = cast[proc (target: GLenum, attachment: GLenum, renderbuffertarget: GLenum, renderbuffer: GLuint) {.stdcall.}](load("glFramebufferRenderbuffer"))
-  glGetFramebufferAttachmentParameteriv = cast[proc (target: GLenum, attachment: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetFramebufferAttachmentParameteriv"))
+  glUniform2ui = cast[proc (location: GLint, v0: GLuint,
+      v1: GLuint) {.stdcall.}](load("glUniform2ui"))
+  glUniform3ui = cast[proc (location: GLint, v0: GLuint, v1: GLuint,
+      v2: GLuint) {.stdcall.}](load("glUniform3ui"))
+  glUniform4ui = cast[proc (location: GLint, v0: GLuint, v1: GLuint, v2: GLuint,
+      v3: GLuint) {.stdcall.}](load("glUniform4ui"))
+  glUniform1uiv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}](load("glUniform1uiv"))
+  glUniform2uiv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}](load("glUniform2uiv"))
+  glUniform3uiv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}](load("glUniform3uiv"))
+  glUniform4uiv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLuint) {.stdcall.}](load("glUniform4uiv"))
+  glTexParameterIiv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glTexParameterIiv"))
+  glTexParameterIuiv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLuint) {.stdcall.}](load("glTexParameterIuiv"))
+  glGetTexParameterIiv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetTexParameterIiv"))
+  glGetTexParameterIuiv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLuint) {.stdcall.}](load("glGetTexParameterIuiv"))
+  glClearBufferiv = cast[proc (buffer: GLenum, drawbuffer: GLint,
+      value: ptr GLint) {.stdcall.}](load("glClearBufferiv"))
+  glClearBufferuiv = cast[proc (buffer: GLenum, drawbuffer: GLint,
+      value: ptr GLuint) {.stdcall.}](load("glClearBufferuiv"))
+  glClearBufferfv = cast[proc (buffer: GLenum, drawbuffer: GLint,
+      value: ptr GLfloat) {.stdcall.}](load("glClearBufferfv"))
+  glClearBufferfi = cast[proc (buffer: GLenum, drawbuffer: GLint,
+      depth: GLfloat, stencil: GLint) {.stdcall.}](load("glClearBufferfi"))
+  glGetStringi = cast[proc (name: GLenum,
+      index: GLuint): ptr GLubyte {.stdcall.}](load("glGetStringi"))
+  glIsRenderbuffer = cast[proc (renderbuffer: GLuint): GLboolean {.stdcall.}](
+      load("glIsRenderbuffer"))
+  glBindRenderbuffer = cast[proc (target: GLenum,
+      renderbuffer: GLuint) {.stdcall.}](load("glBindRenderbuffer"))
+  glDeleteRenderbuffers = cast[proc (n: GLsizei,
+      renderbuffers: ptr GLuint) {.stdcall.}](load("glDeleteRenderbuffers"))
+  glGenRenderbuffers = cast[proc (n: GLsizei,
+      renderbuffers: ptr GLuint) {.stdcall.}](load("glGenRenderbuffers"))
+  glRenderbufferStorage = cast[proc (target: GLenum, internalformat: GLenum,
+      width: GLsizei, height: GLsizei) {.stdcall.}](load("glRenderbufferStorage"))
+  glGetRenderbufferParameteriv = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetRenderbufferParameteriv"))
+  glIsFramebuffer = cast[proc (framebuffer: GLuint): GLboolean {.stdcall.}](
+      load("glIsFramebuffer"))
+  glBindFramebuffer = cast[proc (target: GLenum,
+      framebuffer: GLuint) {.stdcall.}](load("glBindFramebuffer"))
+  glDeleteFramebuffers = cast[proc (n: GLsizei,
+      framebuffers: ptr GLuint) {.stdcall.}](load("glDeleteFramebuffers"))
+  glGenFramebuffers = cast[proc (n: GLsizei,
+      framebuffers: ptr GLuint) {.stdcall.}](load("glGenFramebuffers"))
+  glCheckFramebufferStatus = cast[proc (target: GLenum): GLenum {.stdcall.}](
+      load("glCheckFramebufferStatus"))
+  glFramebufferTexture1D = cast[proc (target: GLenum, attachment: GLenum,
+      textarget: GLenum, texture: GLuint, level: GLint) {.stdcall.}](load("glFramebufferTexture1D"))
+  glFramebufferTexture2D = cast[proc (target: GLenum, attachment: GLenum,
+      textarget: GLenum, texture: GLuint, level: GLint) {.stdcall.}](load("glFramebufferTexture2D"))
+  glFramebufferTexture3D = cast[proc (target: GLenum, attachment: GLenum,
+      textarget: GLenum, texture: GLuint, level: GLint,
+      zoffset: GLint) {.stdcall.}](load("glFramebufferTexture3D"))
+  glFramebufferRenderbuffer = cast[proc (target: GLenum, attachment: GLenum,
+      renderbuffertarget: GLenum, renderbuffer: GLuint) {.stdcall.}](load("glFramebufferRenderbuffer"))
+  glGetFramebufferAttachmentParameteriv = cast[proc (target: GLenum,
+      attachment: GLenum, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetFramebufferAttachmentParameteriv"))
   glGenerateMipmap = cast[proc (target: GLenum) {.stdcall.}](load("glGenerateMipmap"))
-  glBlitFramebuffer = cast[proc (srcX0: GLint, srcY0: GLint, srcX1: GLint, srcY1: GLint, dstX0: GLint, dstY0: GLint, dstX1: GLint, dstY1: GLint, mask: GLbitfield, filter: GLenum) {.stdcall.}](load("glBlitFramebuffer"))
-  glRenderbufferStorageMultisample = cast[proc (target: GLenum, samples: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei) {.stdcall.}](load("glRenderbufferStorageMultisample"))
-  glFramebufferTextureLayer = cast[proc (target: GLenum, attachment: GLenum, texture: GLuint, level: GLint, layer: GLint) {.stdcall.}](load("glFramebufferTextureLayer"))
-  glMapBufferRange = cast[proc (target: GLenum, offset: GLintptr, length: GLsizeiptr, access: GLbitfield): pointer {.stdcall.}](load("glMapBufferRange"))
-  glFlushMappedBufferRange = cast[proc (target: GLenum, offset: GLintptr, length: GLsizeiptr) {.stdcall.}](load("glFlushMappedBufferRange"))
+  glBlitFramebuffer = cast[proc (srcX0: GLint, srcY0: GLint, srcX1: GLint,
+      srcY1: GLint, dstX0: GLint, dstY0: GLint, dstX1: GLint, dstY1: GLint,
+      mask: GLbitfield, filter: GLenum) {.stdcall.}](load("glBlitFramebuffer"))
+  glRenderbufferStorageMultisample = cast[proc (target: GLenum,
+      samples: GLsizei, internalformat: GLenum, width: GLsizei,
+      height: GLsizei) {.stdcall.}](load("glRenderbufferStorageMultisample"))
+  glFramebufferTextureLayer = cast[proc (target: GLenum, attachment: GLenum,
+      texture: GLuint, level: GLint, layer: GLint) {.stdcall.}](load("glFramebufferTextureLayer"))
+  glMapBufferRange = cast[proc (target: GLenum, offset: GLintptr,
+      length: GLsizeiptr, access: GLbitfield): pointer {.stdcall.}](load("glMapBufferRange"))
+  glFlushMappedBufferRange = cast[proc (target: GLenum, offset: GLintptr,
+      length: GLsizeiptr) {.stdcall.}](load("glFlushMappedBufferRange"))
   glBindVertexArray = cast[proc (array: GLuint) {.stdcall.}](load("glBindVertexArray"))
-  glDeleteVertexArrays = cast[proc (n: GLsizei, arrays: ptr GLuint) {.stdcall.}](load("glDeleteVertexArrays"))
-  glGenVertexArrays = cast[proc (n: GLsizei, arrays: ptr GLuint) {.stdcall.}](load("glGenVertexArrays"))
+  glDeleteVertexArrays = cast[proc (n: GLsizei,
+      arrays: ptr GLuint) {.stdcall.}](load("glDeleteVertexArrays"))
+  glGenVertexArrays = cast[proc (n: GLsizei, arrays: ptr GLuint) {.stdcall.}](
+      load("glGenVertexArrays"))
   glIsVertexArray = cast[proc (array: GLuint): GLboolean {.stdcall.}](load("glIsVertexArray"))
 
 
 proc load_GL_VERSION_3_1(load: proc) =
   if not GLAD_GL_VERSION_3_1: return
 
-  glDrawArraysInstanced = cast[proc (mode: GLenum, first: GLint, count: GLsizei, instancecount: GLsizei) {.stdcall.}](load("glDrawArraysInstanced"))
-  glDrawElementsInstanced = cast[proc (mode: GLenum, count: GLsizei, `type`: GLenum, indices: pointer, instancecount: GLsizei) {.stdcall.}](load("glDrawElementsInstanced"))
-  glTexBuffer = cast[proc (target: GLenum, internalformat: GLenum, buffer: GLuint) {.stdcall.}](load("glTexBuffer"))
+  glDrawArraysInstanced = cast[proc (mode: GLenum, first: GLint, count: GLsizei,
+      instancecount: GLsizei) {.stdcall.}](load("glDrawArraysInstanced"))
+  glDrawElementsInstanced = cast[proc (mode: GLenum, count: GLsizei,
+      `type`: GLenum, indices: pointer, instancecount: GLsizei) {.stdcall.}](
+      load("glDrawElementsInstanced"))
+  glTexBuffer = cast[proc (target: GLenum, internalformat: GLenum,
+      buffer: GLuint) {.stdcall.}](load("glTexBuffer"))
   glPrimitiveRestartIndex = cast[proc (index: GLuint) {.stdcall.}](load("glPrimitiveRestartIndex"))
-  glCopyBufferSubData = cast[proc (readTarget: GLenum, writeTarget: GLenum, readOffset: GLintptr, writeOffset: GLintptr, size: GLsizeiptr) {.stdcall.}](load("glCopyBufferSubData"))
-  glGetUniformIndices = cast[proc (program: GLuint, uniformCount: GLsizei, uniformNames: cstringArray, uniformIndices: ptr GLuint) {.stdcall.}](load("glGetUniformIndices"))
-  glGetActiveUniformsiv = cast[proc (program: GLuint, uniformCount: GLsizei, uniformIndices: ptr GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetActiveUniformsiv"))
-  glGetActiveUniformName = cast[proc (program: GLuint, uniformIndex: GLuint, bufSize: GLsizei, length: ptr GLsizei, uniformName: cstring) {.stdcall.}](load("glGetActiveUniformName"))
-  glGetUniformBlockIndex = cast[proc (program: GLuint, uniformBlockName: cstring): GLuint {.stdcall.}](load("glGetUniformBlockIndex"))
-  glGetActiveUniformBlockiv = cast[proc (program: GLuint, uniformBlockIndex: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetActiveUniformBlockiv"))
-  glGetActiveUniformBlockName = cast[proc (program: GLuint, uniformBlockIndex: GLuint, bufSize: GLsizei, length: ptr GLsizei, uniformBlockName: cstring) {.stdcall.}](load("glGetActiveUniformBlockName"))
-  glUniformBlockBinding = cast[proc (program: GLuint, uniformBlockIndex: GLuint, uniformBlockBinding: GLuint) {.stdcall.}](load("glUniformBlockBinding"))
-  glBindBufferRange = cast[proc (target: GLenum, index: GLuint, buffer: GLuint, offset: GLintptr, size: GLsizeiptr) {.stdcall.}](load("glBindBufferRange"))
-  glBindBufferBase = cast[proc (target: GLenum, index: GLuint, buffer: GLuint) {.stdcall.}](load("glBindBufferBase"))
-  glGetIntegeri_v = cast[proc (target: GLenum, index: GLuint, data: ptr GLint) {.stdcall.}](load("glGetIntegeri_v"))
+  glCopyBufferSubData = cast[proc (readTarget: GLenum, writeTarget: GLenum,
+      readOffset: GLintptr, writeOffset: GLintptr,
+      size: GLsizeiptr) {.stdcall.}](load("glCopyBufferSubData"))
+  glGetUniformIndices = cast[proc (program: GLuint, uniformCount: GLsizei,
+      uniformNames: cstringArray, uniformIndices: ptr GLuint) {.stdcall.}](load("glGetUniformIndices"))
+  glGetActiveUniformsiv = cast[proc (program: GLuint, uniformCount: GLsizei,
+      uniformIndices: ptr GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetActiveUniformsiv"))
+  glGetActiveUniformName = cast[proc (program: GLuint, uniformIndex: GLuint,
+      bufSize: GLsizei, length: ptr GLsizei, uniformName: cstring) {.stdcall.}](
+      load("glGetActiveUniformName"))
+  glGetUniformBlockIndex = cast[proc (program: GLuint,
+      uniformBlockName: cstring): GLuint {.stdcall.}](load("glGetUniformBlockIndex"))
+  glGetActiveUniformBlockiv = cast[proc (program: GLuint,
+      uniformBlockIndex: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](
+      load("glGetActiveUniformBlockiv"))
+  glGetActiveUniformBlockName = cast[proc (program: GLuint,
+      uniformBlockIndex: GLuint, bufSize: GLsizei, length: ptr GLsizei,
+      uniformBlockName: cstring) {.stdcall.}](load("glGetActiveUniformBlockName"))
+  glUniformBlockBinding = cast[proc (program: GLuint, uniformBlockIndex: GLuint,
+      uniformBlockBinding: GLuint) {.stdcall.}](load("glUniformBlockBinding"))
+  glBindBufferRange = cast[proc (target: GLenum, index: GLuint, buffer: GLuint,
+      offset: GLintptr, size: GLsizeiptr) {.stdcall.}](load("glBindBufferRange"))
+  glBindBufferBase = cast[proc (target: GLenum, index: GLuint,
+      buffer: GLuint) {.stdcall.}](load("glBindBufferBase"))
+  glGetIntegeri_v = cast[proc (target: GLenum, index: GLuint,
+      data: ptr GLint) {.stdcall.}](load("glGetIntegeri_v"))
 
 
 proc load_GL_VERSION_3_2(load: proc) =
   if not GLAD_GL_VERSION_3_2: return
 
-  glDrawElementsBaseVertex = cast[proc (mode: GLenum, count: GLsizei, `type`: GLenum, indices: pointer, basevertex: GLint) {.stdcall.}](load("glDrawElementsBaseVertex"))
-  glDrawRangeElementsBaseVertex = cast[proc (mode: GLenum, start: GLuint, `end`: GLuint, count: GLsizei, `type`: GLenum, indices: pointer, basevertex: GLint) {.stdcall.}](load("glDrawRangeElementsBaseVertex"))
-  glDrawElementsInstancedBaseVertex = cast[proc (mode: GLenum, count: GLsizei, `type`: GLenum, indices: pointer, instancecount: GLsizei, basevertex: GLint) {.stdcall.}](load("glDrawElementsInstancedBaseVertex"))
-  glMultiDrawElementsBaseVertex = cast[proc (mode: GLenum, count: ptr GLsizei, `type`: GLenum, indices: ptr pointer, drawcount: GLsizei, basevertex: ptr GLint) {.stdcall.}](load("glMultiDrawElementsBaseVertex"))
+  glDrawElementsBaseVertex = cast[proc (mode: GLenum, count: GLsizei,
+      `type`: GLenum, indices: pointer, basevertex: GLint) {.stdcall.}](load("glDrawElementsBaseVertex"))
+  glDrawRangeElementsBaseVertex = cast[proc (mode: GLenum, start: GLuint,
+      `end`: GLuint, count: GLsizei, `type`: GLenum, indices: pointer,
+      basevertex: GLint) {.stdcall.}](load("glDrawRangeElementsBaseVertex"))
+  glDrawElementsInstancedBaseVertex = cast[proc (mode: GLenum, count: GLsizei,
+      `type`: GLenum, indices: pointer, instancecount: GLsizei,
+      basevertex: GLint) {.stdcall.}](load("glDrawElementsInstancedBaseVertex"))
+  glMultiDrawElementsBaseVertex = cast[proc (mode: GLenum, count: ptr GLsizei,
+      `type`: GLenum, indices: ptr pointer, drawcount: GLsizei,
+      basevertex: ptr GLint) {.stdcall.}](load("glMultiDrawElementsBaseVertex"))
   glProvokingVertex = cast[proc (mode: GLenum) {.stdcall.}](load("glProvokingVertex"))
-  glFenceSync = cast[proc (condition: GLenum, flags: GLbitfield): GLsync {.stdcall.}](load("glFenceSync"))
+  glFenceSync = cast[proc (condition: GLenum,
+      flags: GLbitfield): GLsync {.stdcall.}](load("glFenceSync"))
   glIsSync = cast[proc (sync: GLsync): GLboolean {.stdcall.}](load("glIsSync"))
   glDeleteSync = cast[proc (sync: GLsync) {.stdcall.}](load("glDeleteSync"))
-  glClientWaitSync = cast[proc (sync: GLsync, flags: GLbitfield, timeout: GLuint64): GLenum {.stdcall.}](load("glClientWaitSync"))
-  glWaitSync = cast[proc (sync: GLsync, flags: GLbitfield, timeout: GLuint64) {.stdcall.}](load("glWaitSync"))
-  glGetInteger64v = cast[proc (pname: GLenum, data: ptr GLint64) {.stdcall.}](load("glGetInteger64v"))
-  glGetSynciv = cast[proc (sync: GLsync, pname: GLenum, count: GLsizei, length: ptr GLsizei, values: ptr GLint) {.stdcall.}](load("glGetSynciv"))
-  glGetInteger64i_v = cast[proc (target: GLenum, index: GLuint, data: ptr GLint64) {.stdcall.}](load("glGetInteger64i_v"))
-  glGetBufferParameteri64v = cast[proc (target: GLenum, pname: GLenum, params: ptr GLint64) {.stdcall.}](load("glGetBufferParameteri64v"))
-  glFramebufferTexture = cast[proc (target: GLenum, attachment: GLenum, texture: GLuint, level: GLint) {.stdcall.}](load("glFramebufferTexture"))
-  glTexImage2DMultisample = cast[proc (target: GLenum, samples: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei, fixedsamplelocations: GLboolean) {.stdcall.}](load("glTexImage2DMultisample"))
-  glTexImage3DMultisample = cast[proc (target: GLenum, samples: GLsizei, internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei, fixedsamplelocations: GLboolean) {.stdcall.}](load("glTexImage3DMultisample"))
-  glGetMultisamplefv = cast[proc (pname: GLenum, index: GLuint, val: ptr GLfloat) {.stdcall.}](load("glGetMultisamplefv"))
-  glSampleMaski = cast[proc (maskNumber: GLuint, mask: GLbitfield) {.stdcall.}](load("glSampleMaski"))
+  glClientWaitSync = cast[proc (sync: GLsync, flags: GLbitfield,
+      timeout: GLuint64): GLenum {.stdcall.}](load("glClientWaitSync"))
+  glWaitSync = cast[proc (sync: GLsync, flags: GLbitfield,
+      timeout: GLuint64) {.stdcall.}](load("glWaitSync"))
+  glGetInteger64v = cast[proc (pname: GLenum, data: ptr GLint64) {.stdcall.}](
+      load("glGetInteger64v"))
+  glGetSynciv = cast[proc (sync: GLsync, pname: GLenum, count: GLsizei,
+      length: ptr GLsizei, values: ptr GLint) {.stdcall.}](load("glGetSynciv"))
+  glGetInteger64i_v = cast[proc (target: GLenum, index: GLuint,
+      data: ptr GLint64) {.stdcall.}](load("glGetInteger64i_v"))
+  glGetBufferParameteri64v = cast[proc (target: GLenum, pname: GLenum,
+      params: ptr GLint64) {.stdcall.}](load("glGetBufferParameteri64v"))
+  glFramebufferTexture = cast[proc (target: GLenum, attachment: GLenum,
+      texture: GLuint, level: GLint) {.stdcall.}](load("glFramebufferTexture"))
+  glTexImage2DMultisample = cast[proc (target: GLenum, samples: GLsizei,
+      internalformat: GLenum, width: GLsizei, height: GLsizei,
+      fixedsamplelocations: GLboolean) {.stdcall.}](load("glTexImage2DMultisample"))
+  glTexImage3DMultisample = cast[proc (target: GLenum, samples: GLsizei,
+      internalformat: GLenum, width: GLsizei, height: GLsizei, depth: GLsizei,
+      fixedsamplelocations: GLboolean) {.stdcall.}](load("glTexImage3DMultisample"))
+  glGetMultisamplefv = cast[proc (pname: GLenum, index: GLuint,
+      val: ptr GLfloat) {.stdcall.}](load("glGetMultisamplefv"))
+  glSampleMaski = cast[proc (maskNumber: GLuint, mask: GLbitfield) {.stdcall.}](
+      load("glSampleMaski"))
 
 
 proc load_GL_VERSION_3_3(load: proc) =
   if not GLAD_GL_VERSION_3_3: return
 
-  glBindFragDataLocationIndexed = cast[proc (program: GLuint, colorNumber: GLuint, index: GLuint, name: cstring) {.stdcall.}](load("glBindFragDataLocationIndexed"))
-  glGetFragDataIndex = cast[proc (program: GLuint, name: cstring): GLint {.stdcall.}](load("glGetFragDataIndex"))
-  glGenSamplers = cast[proc (count: GLsizei, samplers: ptr GLuint) {.stdcall.}](load("glGenSamplers"))
-  glDeleteSamplers = cast[proc (count: GLsizei, samplers: ptr GLuint) {.stdcall.}](load("glDeleteSamplers"))
+  glBindFragDataLocationIndexed = cast[proc (program: GLuint,
+      colorNumber: GLuint, index: GLuint, name: cstring) {.stdcall.}](load("glBindFragDataLocationIndexed"))
+  glGetFragDataIndex = cast[proc (program: GLuint,
+      name: cstring): GLint {.stdcall.}](load("glGetFragDataIndex"))
+  glGenSamplers = cast[proc (count: GLsizei, samplers: ptr GLuint) {.stdcall.}](
+      load("glGenSamplers"))
+  glDeleteSamplers = cast[proc (count: GLsizei,
+      samplers: ptr GLuint) {.stdcall.}](load("glDeleteSamplers"))
   glIsSampler = cast[proc (sampler: GLuint): GLboolean {.stdcall.}](load("glIsSampler"))
   glBindSampler = cast[proc (unit: GLuint, sampler: GLuint) {.stdcall.}](load("glBindSampler"))
-  glSamplerParameteri = cast[proc (sampler: GLuint, pname: GLenum, param: GLint) {.stdcall.}](load("glSamplerParameteri"))
-  glSamplerParameteriv = cast[proc (sampler: GLuint, pname: GLenum, param: ptr GLint) {.stdcall.}](load("glSamplerParameteriv"))
-  glSamplerParameterf = cast[proc (sampler: GLuint, pname: GLenum, param: GLfloat) {.stdcall.}](load("glSamplerParameterf"))
-  glSamplerParameterfv = cast[proc (sampler: GLuint, pname: GLenum, param: ptr GLfloat) {.stdcall.}](load("glSamplerParameterfv"))
-  glSamplerParameterIiv = cast[proc (sampler: GLuint, pname: GLenum, param: ptr GLint) {.stdcall.}](load("glSamplerParameterIiv"))
-  glSamplerParameterIuiv = cast[proc (sampler: GLuint, pname: GLenum, param: ptr GLuint) {.stdcall.}](load("glSamplerParameterIuiv"))
-  glGetSamplerParameteriv = cast[proc (sampler: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetSamplerParameteriv"))
-  glGetSamplerParameterIiv = cast[proc (sampler: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetSamplerParameterIiv"))
-  glGetSamplerParameterfv = cast[proc (sampler: GLuint, pname: GLenum, params: ptr GLfloat) {.stdcall.}](load("glGetSamplerParameterfv"))
-  glGetSamplerParameterIuiv = cast[proc (sampler: GLuint, pname: GLenum, params: ptr GLuint) {.stdcall.}](load("glGetSamplerParameterIuiv"))
+  glSamplerParameteri = cast[proc (sampler: GLuint, pname: GLenum,
+      param: GLint) {.stdcall.}](load("glSamplerParameteri"))
+  glSamplerParameteriv = cast[proc (sampler: GLuint, pname: GLenum,
+      param: ptr GLint) {.stdcall.}](load("glSamplerParameteriv"))
+  glSamplerParameterf = cast[proc (sampler: GLuint, pname: GLenum,
+      param: GLfloat) {.stdcall.}](load("glSamplerParameterf"))
+  glSamplerParameterfv = cast[proc (sampler: GLuint, pname: GLenum,
+      param: ptr GLfloat) {.stdcall.}](load("glSamplerParameterfv"))
+  glSamplerParameterIiv = cast[proc (sampler: GLuint, pname: GLenum,
+      param: ptr GLint) {.stdcall.}](load("glSamplerParameterIiv"))
+  glSamplerParameterIuiv = cast[proc (sampler: GLuint, pname: GLenum,
+      param: ptr GLuint) {.stdcall.}](load("glSamplerParameterIuiv"))
+  glGetSamplerParameteriv = cast[proc (sampler: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetSamplerParameteriv"))
+  glGetSamplerParameterIiv = cast[proc (sampler: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetSamplerParameterIiv"))
+  glGetSamplerParameterfv = cast[proc (sampler: GLuint, pname: GLenum,
+      params: ptr GLfloat) {.stdcall.}](load("glGetSamplerParameterfv"))
+  glGetSamplerParameterIuiv = cast[proc (sampler: GLuint, pname: GLenum,
+      params: ptr GLuint) {.stdcall.}](load("glGetSamplerParameterIuiv"))
   glQueryCounter = cast[proc (id: GLuint, target: GLenum) {.stdcall.}](load("glQueryCounter"))
-  glGetQueryObjecti64v = cast[proc (id: GLuint, pname: GLenum, params: ptr GLint64) {.stdcall.}](load("glGetQueryObjecti64v"))
-  glGetQueryObjectui64v = cast[proc (id: GLuint, pname: GLenum, params: ptr GLuint64) {.stdcall.}](load("glGetQueryObjectui64v"))
-  glVertexAttribDivisor = cast[proc (index: GLuint, divisor: GLuint) {.stdcall.}](load("glVertexAttribDivisor"))
-  glVertexAttribP1ui = cast[proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: GLuint) {.stdcall.}](load("glVertexAttribP1ui"))
-  glVertexAttribP1uiv = cast[proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: ptr GLuint) {.stdcall.}](load("glVertexAttribP1uiv"))
-  glVertexAttribP2ui = cast[proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: GLuint) {.stdcall.}](load("glVertexAttribP2ui"))
-  glVertexAttribP2uiv = cast[proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: ptr GLuint) {.stdcall.}](load("glVertexAttribP2uiv"))
-  glVertexAttribP3ui = cast[proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: GLuint) {.stdcall.}](load("glVertexAttribP3ui"))
-  glVertexAttribP3uiv = cast[proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: ptr GLuint) {.stdcall.}](load("glVertexAttribP3uiv"))
-  glVertexAttribP4ui = cast[proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: GLuint) {.stdcall.}](load("glVertexAttribP4ui"))
-  glVertexAttribP4uiv = cast[proc (index: GLuint, `type`: GLenum, normalized: GLboolean, value: ptr GLuint) {.stdcall.}](load("glVertexAttribP4uiv"))
+  glGetQueryObjecti64v = cast[proc (id: GLuint, pname: GLenum,
+      params: ptr GLint64) {.stdcall.}](load("glGetQueryObjecti64v"))
+  glGetQueryObjectui64v = cast[proc (id: GLuint, pname: GLenum,
+      params: ptr GLuint64) {.stdcall.}](load("glGetQueryObjectui64v"))
+  glVertexAttribDivisor = cast[proc (index: GLuint,
+      divisor: GLuint) {.stdcall.}](load("glVertexAttribDivisor"))
+  glVertexAttribP1ui = cast[proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: GLuint) {.stdcall.}](load("glVertexAttribP1ui"))
+  glVertexAttribP1uiv = cast[proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: ptr GLuint) {.stdcall.}](load("glVertexAttribP1uiv"))
+  glVertexAttribP2ui = cast[proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: GLuint) {.stdcall.}](load("glVertexAttribP2ui"))
+  glVertexAttribP2uiv = cast[proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: ptr GLuint) {.stdcall.}](load("glVertexAttribP2uiv"))
+  glVertexAttribP3ui = cast[proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: GLuint) {.stdcall.}](load("glVertexAttribP3ui"))
+  glVertexAttribP3uiv = cast[proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: ptr GLuint) {.stdcall.}](load("glVertexAttribP3uiv"))
+  glVertexAttribP4ui = cast[proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: GLuint) {.stdcall.}](load("glVertexAttribP4ui"))
+  glVertexAttribP4uiv = cast[proc (index: GLuint, `type`: GLenum,
+      normalized: GLboolean, value: ptr GLuint) {.stdcall.}](load("glVertexAttribP4uiv"))
   glVertexP2ui = cast[proc (`type`: GLenum, value: GLuint) {.stdcall.}](load("glVertexP2ui"))
-  glVertexP2uiv = cast[proc (`type`: GLenum, value: ptr GLuint) {.stdcall.}](load("glVertexP2uiv"))
+  glVertexP2uiv = cast[proc (`type`: GLenum, value: ptr GLuint) {.stdcall.}](
+      load("glVertexP2uiv"))
   glVertexP3ui = cast[proc (`type`: GLenum, value: GLuint) {.stdcall.}](load("glVertexP3ui"))
-  glVertexP3uiv = cast[proc (`type`: GLenum, value: ptr GLuint) {.stdcall.}](load("glVertexP3uiv"))
+  glVertexP3uiv = cast[proc (`type`: GLenum, value: ptr GLuint) {.stdcall.}](
+      load("glVertexP3uiv"))
   glVertexP4ui = cast[proc (`type`: GLenum, value: GLuint) {.stdcall.}](load("glVertexP4ui"))
-  glVertexP4uiv = cast[proc (`type`: GLenum, value: ptr GLuint) {.stdcall.}](load("glVertexP4uiv"))
+  glVertexP4uiv = cast[proc (`type`: GLenum, value: ptr GLuint) {.stdcall.}](
+      load("glVertexP4uiv"))
   glTexCoordP1ui = cast[proc (`type`: GLenum, coords: GLuint) {.stdcall.}](load("glTexCoordP1ui"))
-  glTexCoordP1uiv = cast[proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}](load("glTexCoordP1uiv"))
+  glTexCoordP1uiv = cast[proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}](
+      load("glTexCoordP1uiv"))
   glTexCoordP2ui = cast[proc (`type`: GLenum, coords: GLuint) {.stdcall.}](load("glTexCoordP2ui"))
-  glTexCoordP2uiv = cast[proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}](load("glTexCoordP2uiv"))
+  glTexCoordP2uiv = cast[proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}](
+      load("glTexCoordP2uiv"))
   glTexCoordP3ui = cast[proc (`type`: GLenum, coords: GLuint) {.stdcall.}](load("glTexCoordP3ui"))
-  glTexCoordP3uiv = cast[proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}](load("glTexCoordP3uiv"))
+  glTexCoordP3uiv = cast[proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}](
+      load("glTexCoordP3uiv"))
   glTexCoordP4ui = cast[proc (`type`: GLenum, coords: GLuint) {.stdcall.}](load("glTexCoordP4ui"))
-  glTexCoordP4uiv = cast[proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}](load("glTexCoordP4uiv"))
-  glMultiTexCoordP1ui = cast[proc (texture: GLenum, `type`: GLenum, coords: GLuint) {.stdcall.}](load("glMultiTexCoordP1ui"))
-  glMultiTexCoordP1uiv = cast[proc (texture: GLenum, `type`: GLenum, coords: ptr GLuint) {.stdcall.}](load("glMultiTexCoordP1uiv"))
-  glMultiTexCoordP2ui = cast[proc (texture: GLenum, `type`: GLenum, coords: GLuint) {.stdcall.}](load("glMultiTexCoordP2ui"))
-  glMultiTexCoordP2uiv = cast[proc (texture: GLenum, `type`: GLenum, coords: ptr GLuint) {.stdcall.}](load("glMultiTexCoordP2uiv"))
-  glMultiTexCoordP3ui = cast[proc (texture: GLenum, `type`: GLenum, coords: GLuint) {.stdcall.}](load("glMultiTexCoordP3ui"))
-  glMultiTexCoordP3uiv = cast[proc (texture: GLenum, `type`: GLenum, coords: ptr GLuint) {.stdcall.}](load("glMultiTexCoordP3uiv"))
-  glMultiTexCoordP4ui = cast[proc (texture: GLenum, `type`: GLenum, coords: GLuint) {.stdcall.}](load("glMultiTexCoordP4ui"))
-  glMultiTexCoordP4uiv = cast[proc (texture: GLenum, `type`: GLenum, coords: ptr GLuint) {.stdcall.}](load("glMultiTexCoordP4uiv"))
+  glTexCoordP4uiv = cast[proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}](
+      load("glTexCoordP4uiv"))
+  glMultiTexCoordP1ui = cast[proc (texture: GLenum, `type`: GLenum,
+      coords: GLuint) {.stdcall.}](load("glMultiTexCoordP1ui"))
+  glMultiTexCoordP1uiv = cast[proc (texture: GLenum, `type`: GLenum,
+      coords: ptr GLuint) {.stdcall.}](load("glMultiTexCoordP1uiv"))
+  glMultiTexCoordP2ui = cast[proc (texture: GLenum, `type`: GLenum,
+      coords: GLuint) {.stdcall.}](load("glMultiTexCoordP2ui"))
+  glMultiTexCoordP2uiv = cast[proc (texture: GLenum, `type`: GLenum,
+      coords: ptr GLuint) {.stdcall.}](load("glMultiTexCoordP2uiv"))
+  glMultiTexCoordP3ui = cast[proc (texture: GLenum, `type`: GLenum,
+      coords: GLuint) {.stdcall.}](load("glMultiTexCoordP3ui"))
+  glMultiTexCoordP3uiv = cast[proc (texture: GLenum, `type`: GLenum,
+      coords: ptr GLuint) {.stdcall.}](load("glMultiTexCoordP3uiv"))
+  glMultiTexCoordP4ui = cast[proc (texture: GLenum, `type`: GLenum,
+      coords: GLuint) {.stdcall.}](load("glMultiTexCoordP4ui"))
+  glMultiTexCoordP4uiv = cast[proc (texture: GLenum, `type`: GLenum,
+      coords: ptr GLuint) {.stdcall.}](load("glMultiTexCoordP4uiv"))
   glNormalP3ui = cast[proc (`type`: GLenum, coords: GLuint) {.stdcall.}](load("glNormalP3ui"))
-  glNormalP3uiv = cast[proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}](load("glNormalP3uiv"))
+  glNormalP3uiv = cast[proc (`type`: GLenum, coords: ptr GLuint) {.stdcall.}](
+      load("glNormalP3uiv"))
   glColorP3ui = cast[proc (`type`: GLenum, color: GLuint) {.stdcall.}](load("glColorP3ui"))
-  glColorP3uiv = cast[proc (`type`: GLenum, color: ptr GLuint) {.stdcall.}](load("glColorP3uiv"))
+  glColorP3uiv = cast[proc (`type`: GLenum, color: ptr GLuint) {.stdcall.}](
+      load("glColorP3uiv"))
   glColorP4ui = cast[proc (`type`: GLenum, color: GLuint) {.stdcall.}](load("glColorP4ui"))
-  glColorP4uiv = cast[proc (`type`: GLenum, color: ptr GLuint) {.stdcall.}](load("glColorP4uiv"))
-  glSecondaryColorP3ui = cast[proc (`type`: GLenum, color: GLuint) {.stdcall.}](load("glSecondaryColorP3ui"))
-  glSecondaryColorP3uiv = cast[proc (`type`: GLenum, color: ptr GLuint) {.stdcall.}](load("glSecondaryColorP3uiv"))
+  glColorP4uiv = cast[proc (`type`: GLenum, color: ptr GLuint) {.stdcall.}](
+      load("glColorP4uiv"))
+  glSecondaryColorP3ui = cast[proc (`type`: GLenum, color: GLuint) {.stdcall.}](
+      load("glSecondaryColorP3ui"))
+  glSecondaryColorP3uiv = cast[proc (`type`: GLenum,
+      color: ptr GLuint) {.stdcall.}](load("glSecondaryColorP3uiv"))
 
 
 proc load_GL_VERSION_4_0(load: proc) =
@@ -2060,144 +2710,288 @@ proc load_GL_VERSION_4_0(load: proc) =
 
   glMinSampleShading = cast[proc (value: GLfloat) {.stdcall.}](load("glMinSampleShading"))
   glBlendEquationi = cast[proc (buf: GLuint, mode: GLenum) {.stdcall.}](load("glBlendEquationi"))
-  glBlendEquationSeparatei = cast[proc (buf: GLuint, modeRGB: GLenum, modeAlpha: GLenum) {.stdcall.}](load("glBlendEquationSeparatei"))
-  glBlendFunci = cast[proc (buf: GLuint, src: GLenum, dst: GLenum) {.stdcall.}](load("glBlendFunci"))
-  glBlendFuncSeparatei = cast[proc (buf: GLuint, srcRGB: GLenum, dstRGB: GLenum, srcAlpha: GLenum, dstAlpha: GLenum) {.stdcall.}](load("glBlendFuncSeparatei"))
-  glDrawArraysIndirect = cast[proc (mode: GLenum, indirect: pointer) {.stdcall.}](load("glDrawArraysIndirect"))
-  glDrawElementsIndirect = cast[proc (mode: GLenum, `type`: GLenum, indirect: pointer) {.stdcall.}](load("glDrawElementsIndirect"))
+  glBlendEquationSeparatei = cast[proc (buf: GLuint, modeRGB: GLenum,
+      modeAlpha: GLenum) {.stdcall.}](load("glBlendEquationSeparatei"))
+  glBlendFunci = cast[proc (buf: GLuint, src: GLenum, dst: GLenum) {.stdcall.}](
+      load("glBlendFunci"))
+  glBlendFuncSeparatei = cast[proc (buf: GLuint, srcRGB: GLenum, dstRGB: GLenum,
+      srcAlpha: GLenum, dstAlpha: GLenum) {.stdcall.}](load("glBlendFuncSeparatei"))
+  glDrawArraysIndirect = cast[proc (mode: GLenum,
+      indirect: pointer) {.stdcall.}](load("glDrawArraysIndirect"))
+  glDrawElementsIndirect = cast[proc (mode: GLenum, `type`: GLenum,
+      indirect: pointer) {.stdcall.}](load("glDrawElementsIndirect"))
   glUniform1d = cast[proc (location: GLint, x: GLdouble) {.stdcall.}](load("glUniform1d"))
-  glUniform2d = cast[proc (location: GLint, x: GLdouble, y: GLdouble) {.stdcall.}](load("glUniform2d"))
-  glUniform3d = cast[proc (location: GLint, x: GLdouble, y: GLdouble, z: GLdouble) {.stdcall.}](load("glUniform3d"))
-  glUniform4d = cast[proc (location: GLint, x: GLdouble, y: GLdouble, z: GLdouble, w: GLdouble) {.stdcall.}](load("glUniform4d"))
-  glUniform1dv = cast[proc (location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glUniform1dv"))
-  glUniform2dv = cast[proc (location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glUniform2dv"))
-  glUniform3dv = cast[proc (location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glUniform3dv"))
-  glUniform4dv = cast[proc (location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glUniform4dv"))
-  glUniformMatrix2dv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix2dv"))
-  glUniformMatrix3dv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix3dv"))
-  glUniformMatrix4dv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix4dv"))
-  glUniformMatrix2x3dv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix2x3dv"))
-  glUniformMatrix2x4dv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix2x4dv"))
-  glUniformMatrix3x2dv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix3x2dv"))
-  glUniformMatrix3x4dv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix3x4dv"))
-  glUniformMatrix4x2dv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix4x2dv"))
-  glUniformMatrix4x3dv = cast[proc (location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix4x3dv"))
-  glGetUniformdv = cast[proc (program: GLuint, location: GLint, params: ptr GLdouble) {.stdcall.}](load("glGetUniformdv"))
-  glGetSubroutineUniformLocation = cast[proc (program: GLuint, shadertype: GLenum, name: cstring): GLint {.stdcall.}](load("glGetSubroutineUniformLocation"))
-  glGetSubroutineIndex = cast[proc (program: GLuint, shadertype: GLenum, name: cstring): GLuint {.stdcall.}](load("glGetSubroutineIndex"))
-  glGetActiveSubroutineUniformiv = cast[proc (program: GLuint, shadertype: GLenum, index: GLuint, pname: GLenum, values: ptr GLint) {.stdcall.}](load("glGetActiveSubroutineUniformiv"))
-  glGetActiveSubroutineUniformName = cast[proc (program: GLuint, shadertype: GLenum, index: GLuint, bufSize: GLsizei, length: ptr GLsizei, name: cstring) {.stdcall.}](load("glGetActiveSubroutineUniformName"))
-  glGetActiveSubroutineName = cast[proc (program: GLuint, shadertype: GLenum, index: GLuint, bufSize: GLsizei, length: ptr GLsizei, name: cstring) {.stdcall.}](load("glGetActiveSubroutineName"))
-  glUniformSubroutinesuiv = cast[proc (shadertype: GLenum, count: GLsizei, indices: ptr GLuint) {.stdcall.}](load("glUniformSubroutinesuiv"))
-  glGetUniformSubroutineuiv = cast[proc (shadertype: GLenum, location: GLint, params: ptr GLuint) {.stdcall.}](load("glGetUniformSubroutineuiv"))
-  glGetProgramStageiv = cast[proc (program: GLuint, shadertype: GLenum, pname: GLenum, values: ptr GLint) {.stdcall.}](load("glGetProgramStageiv"))
+  glUniform2d = cast[proc (location: GLint, x: GLdouble,
+      y: GLdouble) {.stdcall.}](load("glUniform2d"))
+  glUniform3d = cast[proc (location: GLint, x: GLdouble, y: GLdouble,
+      z: GLdouble) {.stdcall.}](load("glUniform3d"))
+  glUniform4d = cast[proc (location: GLint, x: GLdouble, y: GLdouble,
+      z: GLdouble, w: GLdouble) {.stdcall.}](load("glUniform4d"))
+  glUniform1dv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}](load("glUniform1dv"))
+  glUniform2dv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}](load("glUniform2dv"))
+  glUniform3dv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}](load("glUniform3dv"))
+  glUniform4dv = cast[proc (location: GLint, count: GLsizei,
+      value: ptr GLdouble) {.stdcall.}](load("glUniform4dv"))
+  glUniformMatrix2dv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix2dv"))
+  glUniformMatrix3dv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix3dv"))
+  glUniformMatrix4dv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix4dv"))
+  glUniformMatrix2x3dv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix2x3dv"))
+  glUniformMatrix2x4dv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix2x4dv"))
+  glUniformMatrix3x2dv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix3x2dv"))
+  glUniformMatrix3x4dv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix3x4dv"))
+  glUniformMatrix4x2dv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix4x2dv"))
+  glUniformMatrix4x3dv = cast[proc (location: GLint, count: GLsizei,
+      transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glUniformMatrix4x3dv"))
+  glGetUniformdv = cast[proc (program: GLuint, location: GLint,
+      params: ptr GLdouble) {.stdcall.}](load("glGetUniformdv"))
+  glGetSubroutineUniformLocation = cast[proc (program: GLuint,
+      shadertype: GLenum, name: cstring): GLint {.stdcall.}](load("glGetSubroutineUniformLocation"))
+  glGetSubroutineIndex = cast[proc (program: GLuint, shadertype: GLenum,
+      name: cstring): GLuint {.stdcall.}](load("glGetSubroutineIndex"))
+  glGetActiveSubroutineUniformiv = cast[proc (program: GLuint,
+      shadertype: GLenum, index: GLuint, pname: GLenum,
+      values: ptr GLint) {.stdcall.}](load("glGetActiveSubroutineUniformiv"))
+  glGetActiveSubroutineUniformName = cast[proc (program: GLuint,
+      shadertype: GLenum, index: GLuint, bufSize: GLsizei, length: ptr GLsizei,
+      name: cstring) {.stdcall.}](load("glGetActiveSubroutineUniformName"))
+  glGetActiveSubroutineName = cast[proc (program: GLuint, shadertype: GLenum,
+      index: GLuint, bufSize: GLsizei, length: ptr GLsizei,
+      name: cstring) {.stdcall.}](load("glGetActiveSubroutineName"))
+  glUniformSubroutinesuiv = cast[proc (shadertype: GLenum, count: GLsizei,
+      indices: ptr GLuint) {.stdcall.}](load("glUniformSubroutinesuiv"))
+  glGetUniformSubroutineuiv = cast[proc (shadertype: GLenum, location: GLint,
+      params: ptr GLuint) {.stdcall.}](load("glGetUniformSubroutineuiv"))
+  glGetProgramStageiv = cast[proc (program: GLuint, shadertype: GLenum,
+      pname: GLenum, values: ptr GLint) {.stdcall.}](load("glGetProgramStageiv"))
   glPatchParameteri = cast[proc (pname: GLenum, value: GLint) {.stdcall.}](load("glPatchParameteri"))
-  glPatchParameterfv = cast[proc (pname: GLenum, values: ptr GLfloat) {.stdcall.}](load("glPatchParameterfv"))
-  glBindTransformFeedback = cast[proc (target: GLenum, id: GLuint) {.stdcall.}](load("glBindTransformFeedback"))
-  glDeleteTransformFeedbacks = cast[proc (n: GLsizei, ids: ptr GLuint) {.stdcall.}](load("glDeleteTransformFeedbacks"))
-  glGenTransformFeedbacks = cast[proc (n: GLsizei, ids: ptr GLuint) {.stdcall.}](load("glGenTransformFeedbacks"))
+  glPatchParameterfv = cast[proc (pname: GLenum,
+      values: ptr GLfloat) {.stdcall.}](load("glPatchParameterfv"))
+  glBindTransformFeedback = cast[proc (target: GLenum, id: GLuint) {.stdcall.}](
+      load("glBindTransformFeedback"))
+  glDeleteTransformFeedbacks = cast[proc (n: GLsizei,
+      ids: ptr GLuint) {.stdcall.}](load("glDeleteTransformFeedbacks"))
+  glGenTransformFeedbacks = cast[proc (n: GLsizei,
+      ids: ptr GLuint) {.stdcall.}](load("glGenTransformFeedbacks"))
   glIsTransformFeedback = cast[proc (id: GLuint): GLboolean {.stdcall.}](load("glIsTransformFeedback"))
   glPauseTransformFeedback = cast[proc () {.stdcall.}](load("glPauseTransformFeedback"))
   glResumeTransformFeedback = cast[proc () {.stdcall.}](load("glResumeTransformFeedback"))
-  glDrawTransformFeedback = cast[proc (mode: GLenum, id: GLuint) {.stdcall.}](load("glDrawTransformFeedback"))
-  glDrawTransformFeedbackStream = cast[proc (mode: GLenum, id: GLuint, stream: GLuint) {.stdcall.}](load("glDrawTransformFeedbackStream"))
-  glBeginQueryIndexed = cast[proc (target: GLenum, index: GLuint, id: GLuint) {.stdcall.}](load("glBeginQueryIndexed"))
-  glEndQueryIndexed = cast[proc (target: GLenum, index: GLuint) {.stdcall.}](load("glEndQueryIndexed"))
-  glGetQueryIndexediv = cast[proc (target: GLenum, index: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetQueryIndexediv"))
+  glDrawTransformFeedback = cast[proc (mode: GLenum, id: GLuint) {.stdcall.}](
+      load("glDrawTransformFeedback"))
+  glDrawTransformFeedbackStream = cast[proc (mode: GLenum, id: GLuint,
+      stream: GLuint) {.stdcall.}](load("glDrawTransformFeedbackStream"))
+  glBeginQueryIndexed = cast[proc (target: GLenum, index: GLuint,
+      id: GLuint) {.stdcall.}](load("glBeginQueryIndexed"))
+  glEndQueryIndexed = cast[proc (target: GLenum, index: GLuint) {.stdcall.}](
+      load("glEndQueryIndexed"))
+  glGetQueryIndexediv = cast[proc (target: GLenum, index: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetQueryIndexediv"))
 
 
 proc load_GL_VERSION_4_1(load: proc) =
   if not GLAD_GL_VERSION_4_1: return
 
   glReleaseShaderCompiler = cast[proc () {.stdcall.}](load("glReleaseShaderCompiler"))
-  glShaderBinary = cast[proc (count: GLsizei, shaders: ptr GLuint, binaryFormat: GLenum, binary: pointer, length: GLsizei) {.stdcall.}](load("glShaderBinary"))
-  glGetShaderPrecisionFormat = cast[proc (shadertype: GLenum, precisiontype: GLenum, range: ptr GLint, precision: ptr GLint) {.stdcall.}](load("glGetShaderPrecisionFormat"))
+  glShaderBinary = cast[proc (count: GLsizei, shaders: ptr GLuint,
+      binaryFormat: GLenum, binary: pointer, length: GLsizei) {.stdcall.}](load("glShaderBinary"))
+  glGetShaderPrecisionFormat = cast[proc (shadertype: GLenum,
+      precisiontype: GLenum, range: ptr GLint,
+      precision: ptr GLint) {.stdcall.}](load("glGetShaderPrecisionFormat"))
   glDepthRangef = cast[proc (n: GLfloat, f: GLfloat) {.stdcall.}](load("glDepthRangef"))
   glClearDepthf = cast[proc (d: GLfloat) {.stdcall.}](load("glClearDepthf"))
-  glGetProgramBinary = cast[proc (program: GLuint, bufSize: GLsizei, length: ptr GLsizei, binaryFormat: ptr GLenum, binary: pointer) {.stdcall.}](load("glGetProgramBinary"))
-  glProgramBinary = cast[proc (program: GLuint, binaryFormat: GLenum, binary: pointer, length: GLsizei) {.stdcall.}](load("glProgramBinary"))
-  glProgramParameteri = cast[proc (program: GLuint, pname: GLenum, value: GLint) {.stdcall.}](load("glProgramParameteri"))
-  glUseProgramStages = cast[proc (pipeline: GLuint, stages: GLbitfield, program: GLuint) {.stdcall.}](load("glUseProgramStages"))
-  glActiveShaderProgram = cast[proc (pipeline: GLuint, program: GLuint) {.stdcall.}](load("glActiveShaderProgram"))
-  glCreateShaderProgramv = cast[proc (`type`: GLenum, count: GLsizei, strings: cstringArray): GLuint {.stdcall.}](load("glCreateShaderProgramv"))
+  glGetProgramBinary = cast[proc (program: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, binaryFormat: ptr GLenum,
+      binary: pointer) {.stdcall.}](load("glGetProgramBinary"))
+  glProgramBinary = cast[proc (program: GLuint, binaryFormat: GLenum,
+      binary: pointer, length: GLsizei) {.stdcall.}](load("glProgramBinary"))
+  glProgramParameteri = cast[proc (program: GLuint, pname: GLenum,
+      value: GLint) {.stdcall.}](load("glProgramParameteri"))
+  glUseProgramStages = cast[proc (pipeline: GLuint, stages: GLbitfield,
+      program: GLuint) {.stdcall.}](load("glUseProgramStages"))
+  glActiveShaderProgram = cast[proc (pipeline: GLuint,
+      program: GLuint) {.stdcall.}](load("glActiveShaderProgram"))
+  glCreateShaderProgramv = cast[proc (`type`: GLenum, count: GLsizei,
+      strings: cstringArray): GLuint {.stdcall.}](load("glCreateShaderProgramv"))
   glBindProgramPipeline = cast[proc (pipeline: GLuint) {.stdcall.}](load("glBindProgramPipeline"))
-  glDeleteProgramPipelines = cast[proc (n: GLsizei, pipelines: ptr GLuint) {.stdcall.}](load("glDeleteProgramPipelines"))
-  glGenProgramPipelines = cast[proc (n: GLsizei, pipelines: ptr GLuint) {.stdcall.}](load("glGenProgramPipelines"))
-  glIsProgramPipeline = cast[proc (pipeline: GLuint): GLboolean {.stdcall.}](load("glIsProgramPipeline"))
-  glGetProgramPipelineiv = cast[proc (pipeline: GLuint, pname: GLenum, params: ptr GLint) {.stdcall.}](load("glGetProgramPipelineiv"))
-  glProgramParameteri = cast[proc (program: GLuint, pname: GLenum, value: GLint) {.stdcall.}](load("glProgramParameteri"))
-  glProgramUniform1i = cast[proc (program: GLuint, location: GLint, v0: GLint) {.stdcall.}](load("glProgramUniform1i"))
-  glProgramUniform1iv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}](load("glProgramUniform1iv"))
-  glProgramUniform1f = cast[proc (program: GLuint, location: GLint, v0: GLfloat) {.stdcall.}](load("glProgramUniform1f"))
-  glProgramUniform1fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glProgramUniform1fv"))
-  glProgramUniform1d = cast[proc (program: GLuint, location: GLint, v0: GLdouble) {.stdcall.}](load("glProgramUniform1d"))
-  glProgramUniform1dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glProgramUniform1dv"))
-  glProgramUniform1ui = cast[proc (program: GLuint, location: GLint, v0: GLuint) {.stdcall.}](load("glProgramUniform1ui"))
-  glProgramUniform1uiv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glProgramUniform1uiv"))
-  glProgramUniform2i = cast[proc (program: GLuint, location: GLint, v0: GLint, v1: GLint) {.stdcall.}](load("glProgramUniform2i"))
-  glProgramUniform2iv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}](load("glProgramUniform2iv"))
-  glProgramUniform2f = cast[proc (program: GLuint, location: GLint, v0: GLfloat, v1: GLfloat) {.stdcall.}](load("glProgramUniform2f"))
-  glProgramUniform2fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glProgramUniform2fv"))
-  glProgramUniform2d = cast[proc (program: GLuint, location: GLint, v0: GLdouble, v1: GLdouble) {.stdcall.}](load("glProgramUniform2d"))
-  glProgramUniform2dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glProgramUniform2dv"))
-  glProgramUniform2ui = cast[proc (program: GLuint, location: GLint, v0: GLuint, v1: GLuint) {.stdcall.}](load("glProgramUniform2ui"))
-  glProgramUniform2uiv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glProgramUniform2uiv"))
-  glProgramUniform3i = cast[proc (program: GLuint, location: GLint, v0: GLint, v1: GLint, v2: GLint) {.stdcall.}](load("glProgramUniform3i"))
-  glProgramUniform3iv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}](load("glProgramUniform3iv"))
-  glProgramUniform3f = cast[proc (program: GLuint, location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat) {.stdcall.}](load("glProgramUniform3f"))
-  glProgramUniform3fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glProgramUniform3fv"))
-  glProgramUniform3d = cast[proc (program: GLuint, location: GLint, v0: GLdouble, v1: GLdouble, v2: GLdouble) {.stdcall.}](load("glProgramUniform3d"))
-  glProgramUniform3dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glProgramUniform3dv"))
-  glProgramUniform3ui = cast[proc (program: GLuint, location: GLint, v0: GLuint, v1: GLuint, v2: GLuint) {.stdcall.}](load("glProgramUniform3ui"))
-  glProgramUniform3uiv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glProgramUniform3uiv"))
-  glProgramUniform4i = cast[proc (program: GLuint, location: GLint, v0: GLint, v1: GLint, v2: GLint, v3: GLint) {.stdcall.}](load("glProgramUniform4i"))
-  glProgramUniform4iv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLint) {.stdcall.}](load("glProgramUniform4iv"))
-  glProgramUniform4f = cast[proc (program: GLuint, location: GLint, v0: GLfloat, v1: GLfloat, v2: GLfloat, v3: GLfloat) {.stdcall.}](load("glProgramUniform4f"))
-  glProgramUniform4fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glProgramUniform4fv"))
-  glProgramUniform4d = cast[proc (program: GLuint, location: GLint, v0: GLdouble, v1: GLdouble, v2: GLdouble, v3: GLdouble) {.stdcall.}](load("glProgramUniform4d"))
-  glProgramUniform4dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glProgramUniform4dv"))
-  glProgramUniform4ui = cast[proc (program: GLuint, location: GLint, v0: GLuint, v1: GLuint, v2: GLuint, v3: GLuint) {.stdcall.}](load("glProgramUniform4ui"))
-  glProgramUniform4uiv = cast[proc (program: GLuint, location: GLint, count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glProgramUniform4uiv"))
-  glProgramUniformMatrix2fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glProgramUniformMatrix2fv"))
-  glProgramUniformMatrix3fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glProgramUniformMatrix3fv"))
-  glProgramUniformMatrix4fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glProgramUniformMatrix4fv"))
-  glProgramUniformMatrix2dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glProgramUniformMatrix2dv"))
-  glProgramUniformMatrix3dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glProgramUniformMatrix3dv"))
-  glProgramUniformMatrix4dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glProgramUniformMatrix4dv"))
-  glProgramUniformMatrix2x3fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glProgramUniformMatrix2x3fv"))
-  glProgramUniformMatrix3x2fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glProgramUniformMatrix3x2fv"))
-  glProgramUniformMatrix2x4fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glProgramUniformMatrix2x4fv"))
-  glProgramUniformMatrix4x2fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glProgramUniformMatrix4x2fv"))
-  glProgramUniformMatrix3x4fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glProgramUniformMatrix3x4fv"))
-  glProgramUniformMatrix4x3fv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](load("glProgramUniformMatrix4x3fv"))
-  glProgramUniformMatrix2x3dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glProgramUniformMatrix2x3dv"))
-  glProgramUniformMatrix3x2dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glProgramUniformMatrix3x2dv"))
-  glProgramUniformMatrix2x4dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glProgramUniformMatrix2x4dv"))
-  glProgramUniformMatrix4x2dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glProgramUniformMatrix4x2dv"))
-  glProgramUniformMatrix3x4dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glProgramUniformMatrix3x4dv"))
-  glProgramUniformMatrix4x3dv = cast[proc (program: GLuint, location: GLint, count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](load("glProgramUniformMatrix4x3dv"))
+  glDeleteProgramPipelines = cast[proc (n: GLsizei,
+      pipelines: ptr GLuint) {.stdcall.}](load("glDeleteProgramPipelines"))
+  glGenProgramPipelines = cast[proc (n: GLsizei,
+      pipelines: ptr GLuint) {.stdcall.}](load("glGenProgramPipelines"))
+  glIsProgramPipeline = cast[proc (pipeline: GLuint): GLboolean {.stdcall.}](
+      load("glIsProgramPipeline"))
+  glGetProgramPipelineiv = cast[proc (pipeline: GLuint, pname: GLenum,
+      params: ptr GLint) {.stdcall.}](load("glGetProgramPipelineiv"))
+  glProgramParameteri = cast[proc (program: GLuint, pname: GLenum,
+      value: GLint) {.stdcall.}](load("glProgramParameteri"))
+  glProgramUniform1i = cast[proc (program: GLuint, location: GLint,
+      v0: GLint) {.stdcall.}](load("glProgramUniform1i"))
+  glProgramUniform1iv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLint) {.stdcall.}](load("glProgramUniform1iv"))
+  glProgramUniform1f = cast[proc (program: GLuint, location: GLint,
+      v0: GLfloat) {.stdcall.}](load("glProgramUniform1f"))
+  glProgramUniform1fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glProgramUniform1fv"))
+  glProgramUniform1d = cast[proc (program: GLuint, location: GLint,
+      v0: GLdouble) {.stdcall.}](load("glProgramUniform1d"))
+  glProgramUniform1dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glProgramUniform1dv"))
+  glProgramUniform1ui = cast[proc (program: GLuint, location: GLint,
+      v0: GLuint) {.stdcall.}](load("glProgramUniform1ui"))
+  glProgramUniform1uiv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glProgramUniform1uiv"))
+  glProgramUniform2i = cast[proc (program: GLuint, location: GLint, v0: GLint,
+      v1: GLint) {.stdcall.}](load("glProgramUniform2i"))
+  glProgramUniform2iv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLint) {.stdcall.}](load("glProgramUniform2iv"))
+  glProgramUniform2f = cast[proc (program: GLuint, location: GLint, v0: GLfloat,
+      v1: GLfloat) {.stdcall.}](load("glProgramUniform2f"))
+  glProgramUniform2fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glProgramUniform2fv"))
+  glProgramUniform2d = cast[proc (program: GLuint, location: GLint,
+      v0: GLdouble, v1: GLdouble) {.stdcall.}](load("glProgramUniform2d"))
+  glProgramUniform2dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glProgramUniform2dv"))
+  glProgramUniform2ui = cast[proc (program: GLuint, location: GLint, v0: GLuint,
+      v1: GLuint) {.stdcall.}](load("glProgramUniform2ui"))
+  glProgramUniform2uiv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glProgramUniform2uiv"))
+  glProgramUniform3i = cast[proc (program: GLuint, location: GLint, v0: GLint,
+      v1: GLint, v2: GLint) {.stdcall.}](load("glProgramUniform3i"))
+  glProgramUniform3iv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLint) {.stdcall.}](load("glProgramUniform3iv"))
+  glProgramUniform3f = cast[proc (program: GLuint, location: GLint, v0: GLfloat,
+      v1: GLfloat, v2: GLfloat) {.stdcall.}](load("glProgramUniform3f"))
+  glProgramUniform3fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glProgramUniform3fv"))
+  glProgramUniform3d = cast[proc (program: GLuint, location: GLint,
+      v0: GLdouble, v1: GLdouble, v2: GLdouble) {.stdcall.}](load("glProgramUniform3d"))
+  glProgramUniform3dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glProgramUniform3dv"))
+  glProgramUniform3ui = cast[proc (program: GLuint, location: GLint, v0: GLuint,
+      v1: GLuint, v2: GLuint) {.stdcall.}](load("glProgramUniform3ui"))
+  glProgramUniform3uiv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glProgramUniform3uiv"))
+  glProgramUniform4i = cast[proc (program: GLuint, location: GLint, v0: GLint,
+      v1: GLint, v2: GLint, v3: GLint) {.stdcall.}](load("glProgramUniform4i"))
+  glProgramUniform4iv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLint) {.stdcall.}](load("glProgramUniform4iv"))
+  glProgramUniform4f = cast[proc (program: GLuint, location: GLint, v0: GLfloat,
+      v1: GLfloat, v2: GLfloat, v3: GLfloat) {.stdcall.}](load("glProgramUniform4f"))
+  glProgramUniform4fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLfloat) {.stdcall.}](load("glProgramUniform4fv"))
+  glProgramUniform4d = cast[proc (program: GLuint, location: GLint,
+      v0: GLdouble, v1: GLdouble, v2: GLdouble, v3: GLdouble) {.stdcall.}](load("glProgramUniform4d"))
+  glProgramUniform4dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLdouble) {.stdcall.}](load("glProgramUniform4dv"))
+  glProgramUniform4ui = cast[proc (program: GLuint, location: GLint, v0: GLuint,
+      v1: GLuint, v2: GLuint, v3: GLuint) {.stdcall.}](load("glProgramUniform4ui"))
+  glProgramUniform4uiv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, value: ptr GLuint) {.stdcall.}](load("glProgramUniform4uiv"))
+  glProgramUniformMatrix2fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](
+      load("glProgramUniformMatrix2fv"))
+  glProgramUniformMatrix3fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](
+      load("glProgramUniformMatrix3fv"))
+  glProgramUniformMatrix4fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](
+      load("glProgramUniformMatrix4fv"))
+  glProgramUniformMatrix2dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](
+      load("glProgramUniformMatrix2dv"))
+  glProgramUniformMatrix3dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](
+      load("glProgramUniformMatrix3dv"))
+  glProgramUniformMatrix4dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](
+      load("glProgramUniformMatrix4dv"))
+  glProgramUniformMatrix2x3fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](
+      load("glProgramUniformMatrix2x3fv"))
+  glProgramUniformMatrix3x2fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](
+      load("glProgramUniformMatrix3x2fv"))
+  glProgramUniformMatrix2x4fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](
+      load("glProgramUniformMatrix2x4fv"))
+  glProgramUniformMatrix4x2fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](
+      load("glProgramUniformMatrix4x2fv"))
+  glProgramUniformMatrix3x4fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](
+      load("glProgramUniformMatrix3x4fv"))
+  glProgramUniformMatrix4x3fv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLfloat) {.stdcall.}](
+      load("glProgramUniformMatrix4x3fv"))
+  glProgramUniformMatrix2x3dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](
+      load("glProgramUniformMatrix2x3dv"))
+  glProgramUniformMatrix3x2dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](
+      load("glProgramUniformMatrix3x2dv"))
+  glProgramUniformMatrix2x4dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](
+      load("glProgramUniformMatrix2x4dv"))
+  glProgramUniformMatrix4x2dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](
+      load("glProgramUniformMatrix4x2dv"))
+  glProgramUniformMatrix3x4dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](
+      load("glProgramUniformMatrix3x4dv"))
+  glProgramUniformMatrix4x3dv = cast[proc (program: GLuint, location: GLint,
+      count: GLsizei, transpose: GLboolean, value: ptr GLdouble) {.stdcall.}](
+      load("glProgramUniformMatrix4x3dv"))
   glValidateProgramPipeline = cast[proc (pipeline: GLuint) {.stdcall.}](load("glValidateProgramPipeline"))
-  glGetProgramPipelineInfoLog = cast[proc (pipeline: GLuint, bufSize: GLsizei, length: ptr GLsizei, infoLog: cstring) {.stdcall.}](load("glGetProgramPipelineInfoLog"))
+  glGetProgramPipelineInfoLog = cast[proc (pipeline: GLuint, bufSize: GLsizei,
+      length: ptr GLsizei, infoLog: cstring) {.stdcall.}](load("glGetProgramPipelineInfoLog"))
   glVertexAttribL1d = cast[proc (index: GLuint, x: GLdouble) {.stdcall.}](load("glVertexAttribL1d"))
-  glVertexAttribL2d = cast[proc (index: GLuint, x: GLdouble, y: GLdouble) {.stdcall.}](load("glVertexAttribL2d"))
-  glVertexAttribL3d = cast[proc (index: GLuint, x: GLdouble, y: GLdouble, z: GLdouble) {.stdcall.}](load("glVertexAttribL3d"))
-  glVertexAttribL4d = cast[proc (index: GLuint, x: GLdouble, y: GLdouble, z: GLdouble, w: GLdouble) {.stdcall.}](load("glVertexAttribL4d"))
-  glVertexAttribL1dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](load("glVertexAttribL1dv"))
-  glVertexAttribL2dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](load("glVertexAttribL2dv"))
-  glVertexAttribL3dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](load("glVertexAttribL3dv"))
-  glVertexAttribL4dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](load("glVertexAttribL4dv"))
-  glVertexAttribLPointer = cast[proc (index: GLuint, size: GLint, `type`: GLenum, stride: GLsizei, pointer: pointer) {.stdcall.}](load("glVertexAttribLPointer"))
-  glGetVertexAttribLdv = cast[proc (index: GLuint, pname: GLenum, params: ptr GLdouble) {.stdcall.}](load("glGetVertexAttribLdv"))
-  glViewportArrayv = cast[proc (first: GLuint, count: GLsizei, v: ptr GLfloat) {.stdcall.}](load("glViewportArrayv"))
-  glViewportIndexedf = cast[proc (index: GLuint, x: GLfloat, y: GLfloat, w: GLfloat, h: GLfloat) {.stdcall.}](load("glViewportIndexedf"))
-  glViewportIndexedfv = cast[proc (index: GLuint, v: ptr GLfloat) {.stdcall.}](load("glViewportIndexedfv"))
-  glScissorArrayv = cast[proc (first: GLuint, count: GLsizei, v: ptr GLint) {.stdcall.}](load("glScissorArrayv"))
-  glScissorIndexed = cast[proc (index: GLuint, left: GLint, bottom: GLint, width: GLsizei, height: GLsizei) {.stdcall.}](load("glScissorIndexed"))
+  glVertexAttribL2d = cast[proc (index: GLuint, x: GLdouble,
+      y: GLdouble) {.stdcall.}](load("glVertexAttribL2d"))
+  glVertexAttribL3d = cast[proc (index: GLuint, x: GLdouble, y: GLdouble,
+      z: GLdouble) {.stdcall.}](load("glVertexAttribL3d"))
+  glVertexAttribL4d = cast[proc (index: GLuint, x: GLdouble, y: GLdouble,
+      z: GLdouble, w: GLdouble) {.stdcall.}](load("glVertexAttribL4d"))
+  glVertexAttribL1dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](
+      load("glVertexAttribL1dv"))
+  glVertexAttribL2dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](
+      load("glVertexAttribL2dv"))
+  glVertexAttribL3dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](
+      load("glVertexAttribL3dv"))
+  glVertexAttribL4dv = cast[proc (index: GLuint, v: ptr GLdouble) {.stdcall.}](
+      load("glVertexAttribL4dv"))
+  glVertexAttribLPointer = cast[proc (index: GLuint, size: GLint,
+      `type`: GLenum, stride: GLsizei, pointer: pointer) {.stdcall.}](load("glVertexAttribLPointer"))
+  glGetVertexAttribLdv = cast[proc (index: GLuint, pname: GLenum,
+      params: ptr GLdouble) {.stdcall.}](load("glGetVertexAttribLdv"))
+  glViewportArrayv = cast[proc (first: GLuint, count: GLsizei,
+      v: ptr GLfloat) {.stdcall.}](load("glViewportArrayv"))
+  glViewportIndexedf = cast[proc (index: GLuint, x: GLfloat, y: GLfloat,
+      w: GLfloat, h: GLfloat) {.stdcall.}](load("glViewportIndexedf"))
+  glViewportIndexedfv = cast[proc (index: GLuint, v: ptr GLfloat) {.stdcall.}](
+      load("glViewportIndexedfv"))
+  glScissorArrayv = cast[proc (first: GLuint, count: GLsizei,
+      v: ptr GLint) {.stdcall.}](load("glScissorArrayv"))
+  glScissorIndexed = cast[proc (index: GLuint, left: GLint, bottom: GLint,
+      width: GLsizei, height: GLsizei) {.stdcall.}](load("glScissorIndexed"))
   glScissorIndexedv = cast[proc (index: GLuint, v: ptr GLint) {.stdcall.}](load("glScissorIndexedv"))
-  glDepthRangeArrayv = cast[proc (first: GLuint, count: GLsizei, v: ptr GLdouble) {.stdcall.}](load("glDepthRangeArrayv"))
-  glDepthRangeIndexed = cast[proc (index: GLuint, n: GLdouble, f: GLdouble) {.stdcall.}](load("glDepthRangeIndexed"))
-  glGetFloati_v = cast[proc (target: GLenum, index: GLuint, data: ptr GLfloat) {.stdcall.}](load("glGetFloati_v"))
-  glGetDoublei_v = cast[proc (target: GLenum, index: GLuint, data: ptr GLdouble) {.stdcall.}](load("glGetDoublei_v"))
+  glDepthRangeArrayv = cast[proc (first: GLuint, count: GLsizei,
+      v: ptr GLdouble) {.stdcall.}](load("glDepthRangeArrayv"))
+  glDepthRangeIndexed = cast[proc (index: GLuint, n: GLdouble,
+      f: GLdouble) {.stdcall.}](load("glDepthRangeIndexed"))
+  glGetFloati_v = cast[proc (target: GLenum, index: GLuint,
+      data: ptr GLfloat) {.stdcall.}](load("glGetFloati_v"))
+  glGetDoublei_v = cast[proc (target: GLenum, index: GLuint,
+      data: ptr GLdouble) {.stdcall.}](load("glGetDoublei_v"))
 
 
 proc findExtensionsGL() =

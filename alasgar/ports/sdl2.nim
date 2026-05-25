@@ -5,7 +5,7 @@ import macros
 import strutils
 export strutils.`%`
 
-{.push warning[user]: off}
+{.push warning[user]: off.}
 when defined(SDL_Static):
   static: echo "SDL_Static option is deprecated and will soon be removed. Instead please use --dynlibOverride:SDL2."
 
@@ -32,15 +32,15 @@ type
 
   WindowEventID* {.size: sizeof(byte).} = enum
     ## Event subtype for window events
-    WindowEvent_None = 0, ## Never used
-    WindowEvent_Shown, ## Window has been shown
-    WindowEvent_Hidden, ## Window has been hidden
-    WindowEvent_Exposed, ## Window has been exposed and should be redrawn
-    WindowEvent_Moved, ## Window has been moved to data1, data2
-    WindowEvent_Resized, ## Window has been resized to data1*data2
+    WindowEvent_None = 0,    ## Never used
+    WindowEvent_Shown,       ## Window has been shown
+    WindowEvent_Hidden,      ## Window has been hidden
+    WindowEvent_Exposed,     ## Window has been exposed and should be redrawn
+    WindowEvent_Moved,       ## Window has been moved to data1, data2
+    WindowEvent_Resized,     ## Window has been resized to data1*data2
     WindowEvent_SizeChanged,
       ## The window size has changed, either as a result of an API call or
-      ## through the system or user changing the window size.
+        ## through the system or user changing the window size.
     WindowEvent_Minimized, ## Window has been minimized
     WindowEvent_Maximized, ## Window has been maximized
     WindowEvent_Restored,
@@ -50,7 +50,7 @@ type
     WindowEvent_FocusGained, ## Window has gained keyboard focus
     WindowEvent_FocusLost, ## Window has lost keyboard focus
     WindowEvent_Close,
-    WindowEvent_TakeFocus, 
+    WindowEvent_TakeFocus,
       ## The window manager requests that the window be closed
     WindowEvent_HitTest
       ## Window had a hit test that wasn't `SDL_HITTEST_NORMAL`.
@@ -59,32 +59,32 @@ type
     ## The types of events that can be delivered.
 
     # Application events
-    QuitEvent = 0x100, ## User-requested quit
+    QuitEvent = 0x100,            ## User-requested quit
     AppTerminating,
       ## The application is being terminated by the OS
-      ## Called on iOS in `applicationWillTerminate()`
-      ## Called on Android in `onDestroy()`
+        ## Called on iOS in `applicationWillTerminate()`
+        ## Called on Android in `onDestroy()`
     AppLowMemory,
       ## The application is low on memory, free memory if possible.
-      ## Called on iOS in `applicationDidReceiveMemoryWarning()`
-      ## Called on Android in `onLowMemory()`
+        ## Called on iOS in `applicationDidReceiveMemoryWarning()`
+        ## Called on Android in `onLowMemory()`
     AppWillEnterBackground,
       ## The application is about to enter the background
-      ## Called on iOS in `applicationWillResignActive()`
-      ## Called on Android in `onPause()`
+        ## Called on iOS in `applicationWillResignActive()`
+        ## Called on Android in `onPause()`
     AppDidEnterBackground,
       ## The application did enter the background
-      ## and may not get CPU for some time
-      ## Called on iOS in `applicationDidEnterBackground()`
-      ## Called on Android in `onPause()`
+        ## and may not get CPU for some time
+        ## Called on iOS in `applicationDidEnterBackground()`
+        ## Called on Android in `onPause()`
     AppWillEnterForeground,
       ## The application is about to enter the foreground
-      ## Called on iOS in `applicationWillEnterForeground()`
-      ## Called on Android in `onResume()`
+        ## Called on iOS in `applicationWillEnterForeground()`
+        ## Called on Android in `onResume()`
     AppDidEnterForeground,
       ## The application is now interactive
-      ## Called on iOS in `applicationDidBecomeActive()`
-      ## Called on Android in `onResume()`
+        ## Called on iOS in `applicationDidBecomeActive()`
+        ## Called on Android in `onResume()`
 
     # Display events
     DisplayEvent = 0x150, ## Display state change
@@ -100,7 +100,7 @@ type
     TextInput, ## Keyboard text input
     KeymapChanged,
       ## Keymap changed due to a system event such as
-      ## an input language or keyboard layout change.
+        ## an input language or keyboard layout change.
 
     # Mouse events
     MouseMotion = 0x400, ## Mouse moved
@@ -158,7 +158,7 @@ type
       ## The device has beed reset and all textures need to be recreated
     UserEvent = 0x8000,
       ## Events `USEREVENT` through `LASTEVENT` are for your use,
-      ## and should be allocated with `registerEvents()`
+        ## and should be allocated with `registerEvents()`
     UserEvent1,
     UserEvent2,
     UserEvent3,
@@ -175,86 +175,86 @@ type
   QuitEventPtr* = ptr QuitEventObj
   QuitEventObj* = object
     ## The "quit requested" event
-    kind*: EventType ## `QuitEvent`
+    kind*: EventType   ## `QuitEvent`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
 
   WindowEventPtr* = ptr WindowEventObj
   WindowEventObj* = object
     ## Window state change event data (`event.window.*`)
-    kind*: EventType ## `WindowEvent`
-    timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    windowID*: uint32 ## The associated window
+    kind*: EventType      ## `WindowEvent`
+    timestamp*: uint32    ## In milliseconds, populated using `getTicks()`
+    windowID*: uint32     ## The associated window
     event*: WindowEventID ## WindowEvent ID
-    pad1,pad2,pad3: uint8
-    data1*, data2*: cint ## event dependent data
+    pad1, pad2, pad3: uint8
+    data1*, data2*: cint  ## event dependent data
     pad*: array[56-24, byte]
 
   KeyboardEventPtr* = ptr KeyboardEventObj
   KeyboardEventObj* = object
     ## Keyboard button event structure (`event.key.*`)
-    kind*: EventType ## `KEYDOWN` or `KEYUP`
+    kind*: EventType   ## `KEYDOWN` or `KEYUP`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    windowID*: uint32 ## The window with keyboard focus, if any
-    state*: uint8 ## `PRESSED` or `RELEASED`
-    repeat*: bool ## Non-zero if this is a key repeat
-    keysym*: KeySym ## The key that was pressed or released
+    windowID*: uint32  ## The window with keyboard focus, if any
+    state*: uint8      ## `PRESSED` or `RELEASED`
+    repeat*: bool      ## Non-zero if this is a key repeat
+    keysym*: KeySym    ## The key that was pressed or released
     pad*: array[24, byte]
 
   TextEditingEventPtr* = ptr TextEditingEventObj
   TextEditingEventObj* = object
     ## Keyboard text editing event structure (`event.edit.*`)
-    kind*: EventType ## `TEXTEDITING`
+    kind*: EventType   ## `TEXTEDITING`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    windowID*: uint32 ## The window with keyboard focus, if any
+    windowID*: uint32  ## The window with keyboard focus, if any
     text*: array[SDL_TEXTEDITINGEVENT_TEXT_SIZE, char] ## The editing text
-    start*: int32 ## The start cursor of selected editing text
-    length*: int32 ## The length of selected editing text
+    start*: int32      ## The start cursor of selected editing text
+    length*: int32     ## The length of selected editing text
     pad*: array[8, byte]
 
   TextInputEventPtr* = ptr TextInputEventObj
   TextInputEventObj* = object
     ## Keyboard text input event structure (`event.text.*`)
-    kind*: EventType ## `TEXTINPUT`
+    kind*: EventType                                         ## `TEXTINPUT`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
     windowID*: uint32 ## The window with keyboard focus, if any
-    text*: array[SDL_TEXTINPUTEVENT_TEXT_SIZE, char] ## The input text
+    text*: array[SDL_TEXTINPUTEVENT_TEXT_SIZE, char]         ## The input text
     pad*: array[24, byte]
 
   MouseMotionEventPtr* = ptr MouseMotionEventObj
   MouseMotionEventObj* = object
     ## Mouse motion event structure (`event.motion.*`)
-    kind*: EventType ## `MOUSEMOTION`
+    kind*: EventType   ## `MOUSEMOTION`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    windowID*: uint32 ## The window with mouse focus, if any
-    which*: uint32 ## The mouse instance id, or `SDL_TOUCH_MOUSEID`
-    state*: uint32 ## The current button state
-    x*: int32 ## X coordinate, relative to window
-    y*: int32 ## Y coordinate, relative to window
-    xrel*: int32 ## The relative motion in the X direction
-    yrel*: int32 ## The relative motion in the Y direction
+    windowID*: uint32  ## The window with mouse focus, if any
+    which*: uint32     ## The mouse instance id, or `SDL_TOUCH_MOUSEID`
+    state*: uint32     ## The current button state
+    x*: int32          ## X coordinate, relative to window
+    y*: int32          ## Y coordinate, relative to window
+    xrel*: int32       ## The relative motion in the X direction
+    yrel*: int32       ## The relative motion in the Y direction
     pad*: array[20, byte]
 
   MouseButtonEventPtr* = ptr MouseButtonEventObj
   MouseButtonEventObj* = object
     ## Mouse button event structure (`event.button.*`)
-    kind*: EventType ## `MOUSEBUTTONDOWN` or `MOUSEBUTTONUP`
+    kind*: EventType   ## `MOUSEBUTTONDOWN` or `MOUSEBUTTONUP`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    windowID*: uint32 ## The window with mouse focus, if any
-    which*: uint32 ## The mouse instance id, or `SDL_TOUCH_MOUSEID`
-    button*: uint8 ## The mouse button index
-    state*: uint8 ## `PRESSED` or `RELEASED`
-    clicks*: uint8 ## `1` for single-click, `2` for double-click, etc.
-    x*: cint ## X coordinate, relative to window
-    y*: cint ## Y coordinate, relative to window
+    windowID*: uint32  ## The window with mouse focus, if any
+    which*: uint32     ## The mouse instance id, or `SDL_TOUCH_MOUSEID`
+    button*: uint8     ## The mouse button index
+    state*: uint8      ## `PRESSED` or `RELEASED`
+    clicks*: uint8     ## `1` for single-click, `2` for double-click, etc.
+    x*: cint           ## X coordinate, relative to window
+    y*: cint           ## Y coordinate, relative to window
     pad*: array[28, byte]
 
   MouseWheelEventPtr* = ptr MouseWheelEventObj
   MouseWheelEventObj* = object
     ## Mouse wheel event structure (`event.wheel.*`)
-    kind*: EventType ## `MOUSEWHEEL`
+    kind*: EventType   ## `MOUSEWHEEL`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    windowID*: uint32 ## The window with mouse focus, if any
-    which*: uint32 ## The mouse instance id, or `SDL_TOUCH_MOUSEID`
+    windowID*: uint32  ## The window with mouse focus, if any
+    which*: uint32     ## The mouse instance id, or `SDL_TOUCH_MOUSEID`
     x*: cint
       ## The amount scrolled horizontally,
       ## positive to the right and negative to the left
@@ -270,31 +270,31 @@ type
   JoyAxisEventPtr* = ptr JoyAxisEventObj
   JoyAxisEventObj* = object
     ## Joystick axis motion event structure (`event.jaxis.*`)
-    kind*: EventType ## `JOYAXISMOTION`
+    kind*: EventType   ## `JOYAXISMOTION`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    which*: int32 ## The joystick instance id
-    axis*: uint8 ## The joystick axis index
-    pad1,pad2,pad3: uint8
-    value*: int16 ## The axis value (range: `-32768` to `32767`)
+    which*: int32      ## The joystick instance id
+    axis*: uint8       ## The joystick axis index
+    pad1, pad2, pad3: uint8
+    value*: int16      ## The axis value (range: `-32768` to `32767`)
 
   JoyBallEventPtr* = ptr JoyBallEventObj
   JoyBallEventObj* = object
     ## Joystick trackball motion event structure (`event.jball.*`)
-    kind*: EventType ## `JOYBALLMOTION`
+    kind*: EventType   ## `JOYBALLMOTION`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    which*: int32 ## The joystick instance id
-    ball*: uint8 ## The joystick trackball index
-    pad1,pad2,pad3: uint8
-    xrel*: int16 ## The relative motion in the X direction
-    yrel*: int16 ## The relative motion in the Y direction
+    which*: int32      ## The joystick instance id
+    ball*: uint8       ## The joystick trackball index
+    pad1, pad2, pad3: uint8
+    xrel*: int16       ## The relative motion in the X direction
+    yrel*: int16       ## The relative motion in the Y direction
 
   JoyHatEventPtr* = ptr JoyHatEventObj
   JoyHatEventObj* = object
     ## Joystick hat position change event structure (`event.jhat.*`)
-    kind*: EventType ## `JOYHATMOTION`
+    kind*: EventType   ## `JOYHATMOTION`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    which*: int32 ## The joystick instance id
-    hat*: uint8 ## The joystick hat index
+    which*: int32      ## The joystick instance id
+    hat*: uint8        ## The joystick hat index
     value*: uint8
       ## The hat position value (`joystick.SDL_HAT_*` consts)
       ## Note that zero means the POV is centered.
@@ -302,16 +302,16 @@ type
   JoyButtonEventPtr* = ptr JoyButtonEventObj
   JoyButtonEventObj* = object
     ## Joystick button event structure (`event.jbutton.*`)
-    kind*: EventType ## `JOYBUTTONDOWN` or `JOYBUTTONUP`
+    kind*: EventType   ## `JOYBUTTONDOWN` or `JOYBUTTONUP`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    which*: int32 ## The joystick instance id
-    button*: uint8 ## The joystick button index
-    state*: uint8 ## `PRESSED` or `RELEASED`
+    which*: int32      ## The joystick instance id
+    button*: uint8     ## The joystick button index
+    state*: uint8      ## `PRESSED` or `RELEASED`
 
   JoyDeviceEventPtr* = ptr JoyDeviceEventObj
   JoyDeviceEventObj* = object
     ## Joystick device event structure (`event.jdevice.*`)
-    kind*: EventType ## `JOYDEVICEADDED` or `JOYDEVICEREMOVED`
+    kind*: EventType   ## `JOYDEVICEADDED` or `JOYDEVICEREMOVED`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
     which*: int32
       ## The joystick device index for the `ADDED` event,
@@ -320,21 +320,21 @@ type
   ControllerAxisEventPtr* = ptr ControllerAxisEventObj
   ControllerAxisEventObj* = object
     ## Game controller axis motion event structure (`event.caxis.*`)
-    kind*: EventType ## `CONTROLLERAXISMOTION`
+    kind*: EventType   ## `CONTROLLERAXISMOTION`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    which*: int32 ## The joystick instance id
-    axis*: uint8 ## The controller axis (`GameControllerAxis`)
-    pad1,pad2,pad3: uint8
-    value*: int16 ## The axis value
+    which*: int32      ## The joystick instance id
+    axis*: uint8       ## The controller axis (`GameControllerAxis`)
+    pad1, pad2, pad3: uint8
+    value*: int16      ## The axis value
 
   ControllerButtonEventPtr* = ptr ControllerButtonEventObj
   ControllerButtonEventObj* = object
     ## Game controller button event structure (`event.cbutton.*`)
-    kind*: EventType ## `CONTROLLERBUTTONDOWN` or `CONTROLLERBUTTONUP`
+    kind*: EventType   ## `CONTROLLERBUTTONDOWN` or `CONTROLLERBUTTONUP`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    which*: int32 ## The joystick instance id
-    button*: uint8 ## The controller button (`GameControllerButton`)
-    state*: uint8 ## `PRESSED` or `RELEASED`
+    which*: int32      ## The joystick instance id
+    button*: uint8     ## The controller button (`GameControllerButton`)
+    state*: uint8      ## `PRESSED` or `RELEASED`
 
   ControllerDeviceEventPtr* = ptr ControllerDeviceEventObj
   ControllerDeviceEventObj* = object
@@ -354,43 +354,43 @@ type
   TouchFingerEventPtr* = ptr TouchFingerEventObj
   TouchFingerEventObj* = object
     ## Touch finger event structure (`event.tfinger.*`)
-    kind*: EventType ## `FINGERMOTION` or `FINGERDOWN` or `FINGERUP`
-    timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    touchID*: TouchID ## The touch device id
+    kind*: EventType    ## `FINGERMOTION` or `FINGERDOWN` or `FINGERUP`
+    timestamp*: uint32  ## In milliseconds, populated using `getTicks()`
+    touchID*: TouchID   ## The touch device id
     fingerID*: FingerID ## Normalized in the range 0...1
-    x*: cfloat ## Normalized in the range 0..1
-    y*: cfloat ## Normalized in the range 0..1
-    dx*: cfloat ## Normalized in the range -1..1
-    dy*: cfloat ## Normalized in the range -1..1
-    pressure*: cfloat ## Normalized in the range 0..1
+    x*: cfloat          ## Normalized in the range 0..1
+    y*: cfloat          ## Normalized in the range 0..1
+    dx*: cfloat         ## Normalized in the range -1..1
+    dy*: cfloat         ## Normalized in the range -1..1
+    pressure*: cfloat   ## Normalized in the range 0..1
     pad*: array[24, byte]
 
   MultiGestureEventPtr* = ptr MultiGestureEventObj
   MultiGestureEventObj* = object
     ## Multiple Finger Gesture Event (`event.mgesture.*`)
-    kind*: EventType ## `MULTIGESTURE`
+    kind*: EventType   ## `MULTIGESTURE`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    touchID*: TouchID ## The touch device index
+    touchID*: TouchID  ## The touch device index
     dTheta*, dDist*, x*, y*: cfloat
     numFingers*: uint16
 
   Finger* = object
     id*: FingerID
-    x*,y*: cfloat
+    x*, y*: cfloat
     pressure*: cfloat
 
   GestureID = int64
   DollarGestureEventPtr* = ptr DollarGestureEventObj
   DollarGestureEventObj* = object
     ## Dollar Gesture Event (`event.dgesture.*`)
-    kind*: EventType ## `DOLLARGESTURE` or `DOLLARRECORD`
+    kind*: EventType   ## `DOLLARGESTURE` or `DOLLARRECORD`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    touchID*: TouchID ## The touch device id
-    gestureID*: GestureID 
-    numFingers*: uint32 
+    touchID*: TouchID  ## The touch device id
+    gestureID*: GestureID
+    numFingers*: uint32
     error*: cfloat
-    x*: cfloat ## Normalized center of gesture
-    y*: cfloat ## Normalized center of gesture
+    x*: cfloat         ## Normalized center of gesture
+    y*: cfloat         ## Normalized center of gesture
 
   DropEventPtr* = ptr DropEventObj
   DropEventObj* = object
@@ -405,12 +405,12 @@ type
   UserEventPtr* = ptr UserEventObj
   UserEventObj* = object
     ## A user-defined event type (`event.user.*`)
-    kind*: EventType ## `USEREVENT` through `LASTEVENT-1`
+    kind*: EventType   ## `USEREVENT` through `LASTEVENT-1`
     timestamp*: uint32 ## In milliseconds, populated using `getTicks()`
-    windowID*: uint32 ## The associated window if any
-    code*: int32 ## User defined event code
-    data1*: pointer ## User defined data pointer
-    data2*: pointer ## User defined data pointer
+    windowID*: uint32  ## The associated window if any
+    code*: int32       ## User defined event code
+    data1*: pointer    ## User defined data pointer
+    data2*: pointer    ## User defined data pointer
 
   Eventaction* {.size: sizeof(cint).} = enum
     SDL_ADDEVENT, SDL_PEEKEVENT, SDL_GETEVENT
@@ -483,19 +483,19 @@ type
 
 const
   # GLprofile enum.
-  SDL_GL_CONTEXT_PROFILE_CORE*:          cint = 0x0001
+  SDL_GL_CONTEXT_PROFILE_CORE*: cint = 0x0001
   SDL_GL_CONTEXT_PROFILE_COMPATIBILITY*: cint = 0x0002
-  SDL_GL_CONTEXT_PROFILE_ES*:            cint = 0x0004
+  SDL_GL_CONTEXT_PROFILE_ES*: cint = 0x0004
 
   # GLcontextFlag enum.
-  SDL_GL_CONTEXT_DEBUG_FLAG*:              cint = 0x0001
+  SDL_GL_CONTEXT_DEBUG_FLAG*: cint = 0x0001
   SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG*: cint = 0x0002
-  SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG*:      cint = 0x0004
-  SDL_GL_CONTEXT_RESET_ISOLATION_FLAG*:    cint = 0x0008
+  SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG*: cint = 0x0004
+  SDL_GL_CONTEXT_RESET_ISOLATION_FLAG*: cint = 0x0008
 
   # GLcontextRelease enum.
-  SDL_GL_CONTEXT_RELEASE_BEHAVIOR_NONE*:  cint  = 0x0000
-  SDL_GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH*: cint  = 0x0001
+  SDL_GL_CONTEXT_RELEASE_BEHAVIOR_NONE*: cint = 0x0000
+  SDL_GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH*: cint = 0x0001
 
 type
   DisplayMode* = object
@@ -538,29 +538,30 @@ type
   RendererInfoPtr* = ptr RendererInfo
   RendererInfo* {.pure, final.} = object
     ## Information on the capabilities of a render driver or context
-    name*: cstring          ## The name of the renderer
-    flags*: uint32          ## Supported `RendererFlags`
-    num_texture_formats*: uint32 ## The number of available texture formats
+    name*: cstring                             ## The name of the renderer
+    flags*: uint32                             ## Supported `RendererFlags`
+    num_texture_formats*: uint32               ## The number of available texture formats
     texture_formats*: array[0..16 - 1, uint32] ## The available texture formats
-    max_texture_width*: cint ## The maximimum texture width
-    max_texture_height*: cint ## The maximimum texture height
+    max_texture_width*: cint                   ## The maximimum texture width
+    max_texture_height*: cint                  ## The maximimum texture height
 
   TextureAccess* {.size: sizeof(cint).} = enum
     ## The access pattern allowed for a texture
-    SDL_TEXTUREACCESS_STATIC, ## Changes rarely, not lockable
+    SDL_TEXTUREACCESS_STATIC,    ## Changes rarely, not lockable
     SDL_TEXTUREACCESS_STREAMING, ## Changes frequently, lockable
-    SDL_TEXTUREACCESS_TARGET ## Texture can be used as a render target
+    SDL_TEXTUREACCESS_TARGET     ## Texture can be used as a render target
 
-  TextureModulate*{.size:sizeof(cint).} = enum
+  TextureModulate*{.size: sizeof(cint).} = enum
     ## The texture channel modulation used in `copy proc<#copy,RendererPtr,TexturPtr,ptr.Rect,ptr.Rect>`_
-    SDL_TEXTUREMODULATE_NONE, ## No modulation
+    SDL_TEXTUREMODULATE_NONE,  ## No modulation
     SDL_TEXTUREMODULATE_COLOR, ## srcC = srcC * color
-    SDL_TEXTUREMODULATE_ALPHA ## srcA = srcA * alpha
+    SDL_TEXTUREMODULATE_ALPHA  ## srcA = srcA * alpha
 
   RendererFlip* = cint
-  SysWMType* {.size: sizeof(cint).}=enum
+  SysWMType* {.size: sizeof(cint).} = enum
     SysWM_Unknown, SysWM_Windows, SysWM_X11, SysWM_DirectFB,
-    SysWM_Cocoa, SysWM_UIkit, SysWM_Wayland, SysWM_Mir, SysWM_WinRT, SysWM_Android, SysWM_Vivante
+    SysWM_Cocoa, SysWM_UIkit, SysWM_Wayland, SysWM_Mir, SysWM_WinRT,
+      SysWM_Android, SysWM_Vivante
   WMinfo* = object
     version*: SDL_Version
     subsystem*: SysWMType
@@ -568,30 +569,30 @@ type
       ## if the low-level stuff is important to you check
       ## SDL_syswm.h and cast padding to the right type
 
-const # WindowFlags
-    SDL_WINDOW_FULLSCREEN*: cuint = 0x00000001 ## fullscreen window
-    SDL_WINDOW_OPENGL*: cuint = 0x00000002 ## window usable with OpenGL context
-    SDL_WINDOW_SHOWN*: cuint = 0x00000004 ## window is visible
-    SDL_WINDOW_HIDDEN*: cuint = 0x00000008 ## window is not visible
-    SDL_WINDOW_BORDERLESS*: cuint = 0x00000010 ## no window decoration
-    SDL_WINDOW_RESIZABLE*: cuint = 0x00000020 ## window can be resized
-    SDL_WINDOW_MINIMIZED*: cuint = 0x00000040 ## window is minimized
-    SDL_WINDOW_MAXIMIZED*: cuint = 0x00000080 ## window is maximized
-    SDL_WINDOW_INPUT_GRABBED*: cuint = 0x00000100 ## window has grabbed input focus
-    SDL_WINDOW_INPUT_FOCUS*: cuint = 0x00000200 ## window has input focus
-    SDL_WINDOW_MOUSE_FOCUS*: cuint = 0x00000400 ## window has mouse focus
-    SDL_WINDOW_FULLSCREEN_DESKTOP*: cuint = ( SDL_WINDOW_FULLSCREEN or 0x00001000 )
-    SDL_WINDOW_FOREIGN*: cuint = 0x00000800 ## window not created by SDL
-    SDL_WINDOW_ALLOW_HIGHDPI*: cuint = 0x00002000
-      ## window should be created in high-DPI mode if supported
-    ## On macOS `NSHighResolutionCapable` must be set true
-    ## in the application's `Info.plist` for this to have any effect.
-    SDL_WINDOW_MOUSE_CAPTURE*: cuint = 0x00004000
-      ## window has mouse captured (unrelated to INPUT_GRABBED)
-    SDL_WINDOW_VULKAN*: cuint = 0x10000000 ## window usable for Vulkan surface
-    SDL_FLIP_NONE*: cint = 0x00000000 ## Do not flip
-    SDL_FLIP_HORIZONTAL*: cint = 0x00000001 ## flip horizontally
-    SDL_FLIP_VERTICAL*: cint = 0x00000002 ## flip vertically
+const                                           # WindowFlags
+  SDL_WINDOW_FULLSCREEN*: cuint = 0x00000001    ## fullscreen window
+  SDL_WINDOW_OPENGL*: cuint = 0x00000002        ## window usable with OpenGL context
+  SDL_WINDOW_SHOWN*: cuint = 0x00000004         ## window is visible
+  SDL_WINDOW_HIDDEN*: cuint = 0x00000008        ## window is not visible
+  SDL_WINDOW_BORDERLESS*: cuint = 0x00000010    ## no window decoration
+  SDL_WINDOW_RESIZABLE*: cuint = 0x00000020     ## window can be resized
+  SDL_WINDOW_MINIMIZED*: cuint = 0x00000040     ## window is minimized
+  SDL_WINDOW_MAXIMIZED*: cuint = 0x00000080     ## window is maximized
+  SDL_WINDOW_INPUT_GRABBED*: cuint = 0x00000100 ## window has grabbed input focus
+  SDL_WINDOW_INPUT_FOCUS*: cuint = 0x00000200   ## window has input focus
+  SDL_WINDOW_MOUSE_FOCUS*: cuint = 0x00000400   ## window has mouse focus
+  SDL_WINDOW_FULLSCREEN_DESKTOP*: cuint = (SDL_WINDOW_FULLSCREEN or 0x00001000)
+  SDL_WINDOW_FOREIGN*: cuint = 0x00000800       ## window not created by SDL
+  SDL_WINDOW_ALLOW_HIGHDPI*: cuint = 0x00002000
+    ## window should be created in high-DPI mode if supported
+  ## On macOS `NSHighResolutionCapable` must be set true
+  ## in the application's `Info.plist` for this to have any effect.
+  SDL_WINDOW_MOUSE_CAPTURE*: cuint = 0x00004000
+    ## window has mouse captured (unrelated to INPUT_GRABBED)
+  SDL_WINDOW_VULKAN*: cuint = 0x10000000 ## window usable for Vulkan surface
+  SDL_FLIP_NONE*: cint = 0x00000000 ## Do not flip
+  SDL_FLIP_HORIZONTAL*: cint = 0x00000001 ## flip horizontally
+  SDL_FLIP_VERTICAL*: cint = 0x00000002 ## flip vertically
 
 
 converter toBool*(some: Bool32): bool = bool(some)
@@ -653,15 +654,16 @@ const
   SDL_PACKEDLAYOUT_2101010* = 7
   SDL_PACKEDLAYOUT_1010102* = 8
 
-template SDL_FOURCC (a,b,c,d: uint8): uint32 =
+template SDL_FOURCC (a, b, c, d: uint8): uint32 =
   uint32(a) or (uint32(b) shl 8) or (uint32(c) shl 16) or (uint32(d) shl 24)
 
 template SDL_DEFINE_PIXELFOURCC*(A, B, C, D: char): uint32 =
   SDL_FOURCC(A.uint8, B.uint8, C.uint8, D.uint8)
 
-template SDL_DEFINE_PIXELFORMAT*(`type`, order, layout, bits, bytes: int): uint32 =
-  uint32((1 shl 28) or ((`type`) shl 24) or ((order) shl 20) or ((layout) shl 16) or
-      ((bits) shl 8) or ((bytes) shl 0))
+template SDL_DEFINE_PIXELFORMAT*(`type`, order, layout, bits,
+    bytes: int): uint32 =
+  uint32((1 shl 28) or ((`type`) shl 24) or ((order) shl 20) or ((
+      layout) shl 16) or ((bits) shl 8) or ((bytes) shl 0))
 
 template SDL_PIXELFLAG*(X: uint32): int =
   int(((X) shr 28) and 0x0000000F)
@@ -680,7 +682,8 @@ template SDL_BITSPERPIXEL*(X: uint32): int =
 
 template SDL_BYTESPERPIXEL*(X: uint32): int =
   int(if SDL_ISPIXELFORMAT_FOURCC(X): (if (((X) == SDL_PIXELFORMAT_YUY2) or
-      ((X) == SDL_PIXELFORMAT_UYVY) or ((X) == SDL_PIXELFORMAT_YVYU)): 2 else: 1) else: (
+      ((X) == SDL_PIXELFORMAT_UYVY) or ((X) ==
+          SDL_PIXELFORMAT_YVYU)): 2 else: 1) else: (
       ((X) shr 0) and 0x000000FF))
 
 template SDL_ISPIXELFORMAT_INDEXED*(format: uint32): bool =
@@ -764,15 +767,20 @@ const
   SDL_PIXELFORMAT_ARGB2101010* = SDL_DEFINE_PIXELFORMAT(
       SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_ARGB, SDL_PACKEDLAYOUT_2101010,
       32, 4)
-  SDL_PIXELFORMAT_YV12* = SDL_DEFINE_PIXELFOURCC('Y', 'V', '1', '2') #*< Planar mode: Y + V + U  (3 planes)
+  SDL_PIXELFORMAT_YV12* = SDL_DEFINE_PIXELFOURCC('Y', 'V', '1',
+      '2') #*< Planar mode: Y + V + U  (3 planes)
   ## Planar mode: Y + V + U  (3 planes)
-  SDL_PIXELFORMAT_IYUV* = SDL_DEFINE_PIXELFOURCC('I', 'Y', 'U', 'V') #*< Planar mode: Y + U + V  (3 planes)
+  SDL_PIXELFORMAT_IYUV* = SDL_DEFINE_PIXELFOURCC('I', 'Y', 'U',
+      'V') #*< Planar mode: Y + U + V  (3 planes)
   ## Planar mode: Y + U + V  (3 planes)
-  SDL_PIXELFORMAT_YUY2* = SDL_DEFINE_PIXELFOURCC('Y', 'U', 'Y', '2') #*< Packed mode: Y0+U0+Y1+V0 (1 plane)
+  SDL_PIXELFORMAT_YUY2* = SDL_DEFINE_PIXELFOURCC('Y', 'U', 'Y',
+      '2') #*< Packed mode: Y0+U0+Y1+V0 (1 plane)
   ## Packed mode: Y0+U0+Y1+V0 (1 plane)
-  SDL_PIXELFORMAT_UYVY* = SDL_DEFINE_PIXELFOURCC('U', 'Y', 'V', 'Y') #*< Packed mode: U0+Y0+V0+Y1 (1 plane)
+  SDL_PIXELFORMAT_UYVY* = SDL_DEFINE_PIXELFOURCC('U', 'Y', 'V',
+      'Y') #*< Packed mode: U0+Y0+V0+Y1 (1 plane)
   ## Packed mode: U0+Y0+V0+Y1 (1 plane)
-  SDL_PIXELFORMAT_YVYU* = SDL_DEFINE_PIXELFOURCC('Y', 'V', 'Y', 'U') #*< Packed mode: Y0+V0+Y1+U0 (1 plane)
+  SDL_PIXELFORMAT_YVYU* = SDL_DEFINE_PIXELFOURCC('Y', 'V', 'Y',
+      'U') #*< Packed mode: Y0+V0+Y1+U0 (1 plane)
   ## Packed mode: Y0+V0+Y1+U0 (1 plane)
 
 
@@ -820,14 +828,14 @@ type
     ## **Note:** This object should be treated as read-only, except for
     ## `pixels`, which, if not `nil`, contains the raw pixel data
     ## for the surface.
-    flags*: uint32           ## Read-only
+    flags*: uint32 ## Read-only
     format*: ptr PixelFormat ## Read-only
-    w*, h*, pitch*: int32    ## Read-only
-    pixels*: pointer         ## Read-write
-    userdata*: pointer       ## Application data associated with the surface. Read-write
-    locked*: int32           ## Read-only   ## see if this should be Bool32
-    lock_data*: pointer      ## Read-only
-    clip_rect*: Rect         ## clipping information. Read-only
+    w*, h*, pitch*: int32 ## Read-only
+    pixels*: pointer ## Read-write
+    userdata*: pointer ## Application data associated with the surface. Read-write
+    locked*: int32 ## Read-only   ## see if this should be Bool32
+    lock_data*: pointer ## Read-only
+    clip_rect*: Rect ## clipping information. Read-only
     map: BlitMapPtr
       ## info for fast blit mapping to other surfaces. Private
     refcount*: cint
@@ -837,16 +845,16 @@ type
     ## The blend mode used in `copy proc<#copy,RendererPtr,TexturPtr,ptr.Rect,ptr.Rect>`_ and drawing operations.
     BlendMode_None = 0x00000000,
       ## no blending
-      ## dstRGBA = srcRGBA
+        ## dstRGBA = srcRGBA
     BlendMode_Blend = 0x00000001,
       ## alpha blending
-      ## dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))
-      ## dstA = srcA + (dstA * (1-srcA))
-    BlendMode_Add  = 0x00000002,
+        ## dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))
+        ## dstA = srcA + (dstA * (1-srcA))
+    BlendMode_Add = 0x00000002,
       ## additive blending
-      ## dstRGB = (srcRGB * srcA) + dstRGB
-      ## dstA = dstA
-    BlendMode_Mod  = 0x00000004
+        ## dstRGB = (srcRGB * srcA) + dstRGB
+        ## dstA = dstA
+    BlendMode_Mod = 0x00000004
       ## color modulate
       ## dstRGB = srcRGB * dstRGB
       ## dstA = dstA
@@ -876,7 +884,7 @@ const ## RendererFlags
   Renderer_TargetTexture*: cint = 0x00000008
     ## Ther render supports rendering to texture
 
-const  ## These are the currently supported flags for the `Surface`.
+const                        ## These are the currently supported flags for the `Surface`.
   SDL_SWSURFACE* = 0         ## Just here for compatibility
   SDL_PREALLOC* = 0x00000001 ## Surface uses preallocated memory
   SDL_RLEACCEL* = 0x00000002 ## Surface is RLE encoded
@@ -889,15 +897,15 @@ template SDL_MUSTLOCK*(some: SurfacePtr): bool =
 
 
 const
-  INIT_TIMER*       = 0x00000001
-  INIT_AUDIO*       = 0x00000010
-  INIT_VIDEO*       = 0x00000020
-  INIT_JOYSTICK*    = 0x00000200
-  INIT_HAPTIC*      = 0x00001000
+  INIT_TIMER* = 0x00000001
+  INIT_AUDIO* = 0x00000010
+  INIT_VIDEO* = 0x00000020
+  INIT_JOYSTICK* = 0x00000200
+  INIT_HAPTIC* = 0x00001000
   INIT_GAMECONTROLLER* = 0x00002000
-  INIT_EVENTS*      = 0x00004000
+  INIT_EVENTS* = 0x00004000
   INIT_NOPARACHUTE* = 0x00100000
-  INIT_EVERYTHING*  = 0x0000FFFF
+  INIT_EVERYTHING* = 0x0000FFFF
 
 const SDL_WINDOWPOS_UNDEFINED_MASK* = 0x1FFF0000
 
@@ -916,7 +924,8 @@ template SDL_WINDOWPOS_CENTERED_DISPLAY*(X: cint): cint =
 const SDL_WINDOWPOS_CENTERED*: cint = SDL_WINDOWPOS_CENTERED_DISPLAY(0)
 template SDL_WINDOWPOS_ISCENTERED*(X: cint): bool = (((X) and 0xFFFF0000) == SDL_WINDOWPOS_CENTERED_MASK)
 
-template evConv(name, name2, ptype: untyped; valid: openarray[EventType]): untyped =
+template evConv(name, name2, ptype: untyped; valid: openarray[
+    EventType]): untyped =
   proc `name`*(event: Event): ptype =
     assert event.kind in valid
     return cast[ptype](unsafeAddr event)
@@ -930,18 +939,22 @@ evConv(evTextEditing, edit, TextEditingEventPtr, [TextEditing])
 evConv(evTextInput, text, TextInputEventPtr, [TextInput])
 
 evConv(evMouseMotion, motion, MouseMotionEventPtr, [MouseMotion])
-evConv(evMouseButton, button, MouseButtonEventPtr, [MouseButtonDown, MouseButtonUp])
+evConv(evMouseButton, button, MouseButtonEventPtr, [MouseButtonDown,
+    MouseButtonUp])
 evConv(evMouseWheel, wheel, MouseWheelEventPtr, [MouseWheel])
 
 evConv(EvJoyAxis, jaxis, JoyAxisEventPtr, [JoyAxisMotion])
 evConv(EvJoyBall, jball, JoyBallEventPtr, [JoyBallMotion])
 evConv(EvJoyHat, jhat, JoyHatEventPtr, [JoyHatMotion])
 evConv(EvJoyButton, jbutton, JoyButtonEventPtr, [JoyButtonDown, JoyButtonUp])
-evConv(EvJoyDevice, jdevice, JoyDeviceEventPtr, [JoyDeviceAdded, JoyDeviceRemoved])
+evConv(EvJoyDevice, jdevice, JoyDeviceEventPtr, [JoyDeviceAdded,
+    JoyDeviceRemoved])
 
 evConv(EvControllerAxis, caxis, ControllerAxisEventPtr, [ControllerAxisMotion])
-evConv(EvControllerButton, cbutton, ControllerButtonEventPtr, [ControllerButtonDown, ControllerButtonUp])
-evConv(EvControllerDevice, cdevice, ControllerDeviceEventPtr, [ControllerDeviceAdded, ControllerDeviceRemoved])
+evConv(EvControllerButton, cbutton, ControllerButtonEventPtr, [
+    ControllerButtonDown, ControllerButtonUp])
+evConv(EvControllerDevice, cdevice, ControllerDeviceEventPtr, [
+    ControllerDeviceAdded, ControllerDeviceRemoved])
 
 evConv(EvTouchFinger, tfinger, TouchFingerEventPtr, [FingerMotion, FingerDown, FingerUp])
 evConv(EvMultiGesture, mgesture, MultiGestureEventPtr, [MultiGesture])
@@ -950,18 +963,19 @@ evConv(EvDollarGesture, dgesture, DollarGestureEventPtr, [DollarGesture])
 evConv(evDropFile, drop, DropEventPtr, [DropFile])
 evConv(evQuit, quit, QuitEventPtr, [QuitEvent])
 
-evConv(evUser, user, UserEventPtr, [UserEvent, UserEvent1, UserEvent2, UserEvent3, UserEvent4, UserEvent5])
+evConv(evUser, user, UserEventPtr, [UserEvent, UserEvent1, UserEvent2,
+    UserEvent3, UserEvent4, UserEvent5])
 #evConv(EvSysWM, syswm, SysWMEventPtr, {SysWMEvent})
 
 const ## SDL_MessageBox flags. If supported will display warning icon, etc.
-  SDL_MESSAGEBOX_ERROR* = 0x00000010 ## error dialog
-  SDL_MESSAGEBOX_WARNING* = 0x00000020 ## warning dialog
+  SDL_MESSAGEBOX_ERROR* = 0x00000010       ## error dialog
+  SDL_MESSAGEBOX_WARNING* = 0x00000020     ## warning dialog
   SDL_MESSAGEBOX_INFORMATION* = 0x00000040 ## informational dialog
 
   # Flags for SDL_MessageBoxButtonData.
-  SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT* = 0x00000001
+  SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT * = 0x00000001
     ## Marks the default button when return is hit
-  SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT* = 0x00000002
+  SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT * = 0x00000002
     ## Marks the default button when escape is hit
 
 type
@@ -983,16 +997,16 @@ type
 
   MessageBoxButtonData* {.pure, final.} = object
     ## Individual button data
-    flags*: cint ## MessageBoxButtonFlags
+    flags*: cint   ## MessageBoxButtonFlags
     buttonid*: cint
       ## User defined button id (value returned via SDL_MessageBox)
     text*: cstring ## The UTF-8 button text
 
   MessageBoxData* {.pure, final.} = object
-    flags*: cint ## SDL_MessageBoxFlags
+    flags*: cint       ## SDL_MessageBoxFlags
     window*: WindowPtr ## Parent window, can be `nil`
-    title*: cstring ## UTF-8 title
-    message*: cstring ## UTF-8 message text
+    title*: cstring    ## UTF-8 title
+    message*: cstring  ## UTF-8 message text
     numbuttons*: cint
     buttons*: ptr MessageBoxButtonData
     colorScheme*: ptr MessageBoxColorScheme
@@ -1021,7 +1035,8 @@ type
       ## `Return` the number of objects read, or `0` at error or end of file.
 
     write*: proc (context: RWopsPtr; source: pointer; size: csize_t;
-                  num: csize_t): csize_t {.cdecl, tags: [WriteIOEffect], raises: [].}
+                  num: csize_t): csize_t {.cdecl, tags: [WriteIOEffect],
+                      raises: [].}
       ## Write exactly `num` objects each of size `size` from the area
       ## pointed at by `p` to data stream.
       ##
@@ -1044,8 +1059,8 @@ type
 
 # SDL_system.h
 type VoidCallback* = proc(arg: pointer): void {.cdecl.}
-const SDL_ANDROID_EXTERNAL_STORAGE_READ*  = cint(0x01)
-const SDL_ANDROID_EXTERNAL_STORAGE_WRITE* = cint(0x02)
+const SDL_ANDROID_EXTERNAL_STORAGE_READ * = cint(0x01)
+const SDL_ANDROID_EXTERNAL_STORAGE_WRITE * = cint(0x02)
 
 when not defined(SDL_Static):
   {.push callConv: cdecl, dynlib: LibName.}
@@ -1098,7 +1113,7 @@ proc getLogicalSize*(renderer: RendererPtr; w, h: var cint) {.
   ## * `setLogicalSize proc<#setLogicalSize,RendererPtr,cint,cint>`_
 
 
-proc setDrawColor*(renderer: RendererPtr; r, g, b: uint8, a = 255'u8):
+proc setDrawColor*(renderer: RendererPtr; r, g, b: uint8; a = 255'u8):
   SDL_Return {.importc: "SDL_SetRenderDrawColor", discardable.}
   ## Set the color used for drawing operations (Rect, Line and Clear).
   ##
@@ -1131,7 +1146,8 @@ proc getDrawColor*(renderer: RendererPtr; r, g, b, a: var uint8): SDL_Return {.
   ## `a` A pointer to the alpha value used to draw on the rendering target,
   ## usually `SDL_ALPHA_OPAQUE` (`255`).
 
-proc setDrawBlendMode*(renderer: RendererPtr; blendMode: BlendMode): SDL_Return {.
+proc setDrawBlendMode*(renderer: RendererPtr;
+    blendMode: BlendMode): SDL_Return {.
   importc: "SDL_SetRenderDrawBlendMode", discardable.}
   ## Set the blend mode used for drawing operations (Fill and Line).
   ##
@@ -1179,7 +1195,7 @@ proc getDisplayIndex*(window: WindowPtr): cint {.importc: "SDL_GetWindowDisplayI
 proc setDisplayMode*(window: WindowPtr;
   mode: ptr DisplayMode): SDL_Return {.importc: "SDL_SetWindowDisplayMode".}
 
-proc getDisplayMode*(window: WindowPtr; mode: var DisplayMode): cint  {.
+proc getDisplayMode*(window: WindowPtr; mode: var DisplayMode): cint {.
   importc: "SDL_GetWindowDisplayMode".}
 
 proc getPixelFormat*(window: WindowPtr): uint32 {.importc: "SDL_GetWindowPixelFormat".}
@@ -1256,7 +1272,7 @@ proc setPosition*(window: WindowPtr; x, y: cint) {.importc: "SDL_SetWindowPositi
   ## **See also:**
   ## * `getPosition proc<#getPosition,WindowPtr,cint,cint>`_
 
-proc getPosition*(window: WindowPtr; x, y: var cint)  {.importc: "SDL_GetWindowPosition".}
+proc getPosition*(window: WindowPtr; x, y: var cint) {.importc: "SDL_GetWindowPosition".}
   ## Get the position of a window.
   ##
   ## `window` The window to query.
@@ -1271,7 +1287,7 @@ proc getPosition*(window: WindowPtr; x, y: var cint)  {.importc: "SDL_GetWindowP
   ## * `setPosition proc<#setPosition,WindowPtr,cint,cint>`_
 
 
-proc setSize*(window: WindowPtr; w, h: cint)  {.importc: "SDL_SetWindowSize".}
+proc setSize*(window: WindowPtr; w, h: cint) {.importc: "SDL_SetWindowSize".}
   ## Set the size of a window's client area.
   ##
   ## `window` The window to resize.
@@ -1352,7 +1368,7 @@ proc getSurface*(window: WindowPtr): SurfacePtr {.importc: "SDL_GetWindowSurface
   ## * `updateSurface proc<#updateSurface,WindowPtr>`_
   ## * `updateSurfaceRects proc<#updateSurfaceRects,WindowPtr,ptr.Rect,cint>`_
 
-proc updateSurface*(window: WindowPtr): SDL_Return  {.importc: "SDL_UpdateWindowSurface".}
+proc updateSurface*(window: WindowPtr): SDL_Return {.importc: "SDL_UpdateWindowSurface".}
   ## Copy the window surface to the screen.
   ##
   ## `Return` `0` on success, or `-1` on error.
@@ -1362,7 +1378,7 @@ proc updateSurface*(window: WindowPtr): SDL_Return  {.importc: "SDL_UpdateWindow
   ## * `updateSurfaceRects proc<#updateSurfaceRects,WindowPtr,ptr.Rect,cint>`_
 
 proc updateSurfaceRects*(window: WindowPtr; rects: ptr Rect;
-  numrects: cint): SDL_Return  {.importc: "SDL_UpdateWindowSurfaceRects".}
+  numrects: cint): SDL_Return {.importc: "SDL_UpdateWindowSurfaceRects".}
   ## Copy a number of rectangles on the window surface to the screen.
   ##
   ## `Return` `0` on success, or `-1` on error.
@@ -1648,7 +1664,8 @@ proc createWindowAndRenderer*(width, height: cint; window_flags: uint32;
   ## `Return` `0` on success, or `-1` on error.
 
 
-proc createRenderer*(window: WindowPtr; index: cint; flags: cint): RendererPtr {.
+proc createRenderer*(window: WindowPtr; index: cint;
+    flags: cint): RendererPtr {.
   importc: "SDL_CreateRenderer".}
   ## Create a 2D rendering context for a window.
   ##
@@ -1684,7 +1701,8 @@ proc getRendererInfo*(renderer: RendererPtr; info: RendererInfoPtr): cint {.
   importc: "SDL_GetRendererInfo".}
   ## Get information about a rendering context.
 
-proc getRendererOutputSize*(renderer: RendererPtr, w: ptr cint, h: ptr cint): cint {.
+proc getRendererOutputSize*(renderer: RendererPtr; w: ptr cint;
+    h: ptr cint): cint {.
   importc: "SDL_GetRendererOutputSize".}
   ## Get the output size in pixels of a rendering context.
 
@@ -1732,7 +1750,8 @@ proc createTexture*(renderer: RendererPtr; surface: SurfacePtr): TexturePtr {.
   inline.} = renderer.createTextureFromSurface(surface)
 
 proc queryTexture*(texture: TexturePtr; format: ptr uint32;
-  access, w, h: ptr cint): SDL_Return {.discardable, importc: "SDL_QueryTexture".}
+  access, w, h: ptr cint): SDL_Return {.discardable,
+      importc: "SDL_QueryTexture".}
   ## Query the attributes of a texture.
   ##
   ## `texture` A texture to be queried.
@@ -1811,7 +1830,8 @@ proc getTextureAlphaMod*(texture: TexturePtr; alpha: var uint8): SDL_Return {.
   ## **See also:**
   ## * `setTextureAlphaMod proc<#setTextureAlphaMod,TexturePtr,uint8>`_
 
-proc setTextureBlendMode*(texture: TexturePtr; blendMode: BlendMode): SDL_Return {.
+proc setTextureBlendMode*(texture: TexturePtr;
+    blendMode: BlendMode): SDL_Return {.
   importc: "SDL_SetTextureBlendMode", discardable.}
   ## Set the blend mode used for texture copy operations.
   ##
@@ -1828,7 +1848,7 @@ proc setTextureBlendMode*(texture: TexturePtr; blendMode: BlendMode): SDL_Return
   ## **See also:**
   ## * `getTextureBlendMode proc<#getTextureBlendMode,TexturePtr,BlendMode>`_
 
-proc getTextureBlendMode*(texture: TexturePtr, blendMode: var BlendMode):
+proc getTextureBlendMode*(texture: TexturePtr; blendMode: var BlendMode):
   SDL_Return {.importc: "SDL_GetTextureBlendMode", discardable.}
   ## Get the blend mode used for texture copy operations.
   ##
@@ -1941,7 +1961,8 @@ proc renderTargetSupported*(renderer: RendererPtr): Bool32 {.
   ##
   ## `Return` `true` if supported, `false` if not.
 
-proc setRenderTarget*(renderer: RendererPtr; texture: TexturePtr): SDL_Return {.discardable,
+proc setRenderTarget*(renderer: RendererPtr;
+    texture: TexturePtr): SDL_Return {.discardable,
   importc: "SDL_SetRenderTarget".}
   ## Set a texture as the current rendering target.
   ##
@@ -2247,7 +2268,7 @@ proc createRGBSurfaceFrom*(pixels: pointer; width, height, depth, pitch: cint;
 proc freeSurface*(surface: SurfacePtr) {.importc: "SDL_FreeSurface".}
 
 proc setSurfacePalette*(surface: SurfacePtr; palette: ptr Palette): cint {.
-  importc:"SDL_SetSurfacePalette".}
+  importc: "SDL_SetSurfacePalette".}
   ## Set the palette used by a surface.
   ##
   ## `Return` `0`, or `-1` if the surface format doesn't use a palette.
@@ -2314,7 +2335,7 @@ proc saveBMP_RW*(surface: SurfacePtr; dst: RWopsPtr;
 
 
 proc setSurfaceRLE*(surface: SurfacePtr; flag: cint): cint {.
-  importc:"SDL_SetSurfaceRLE".}
+  importc: "SDL_SetSurfaceRLE".}
   ## Sets the RLE acceleration hint for a surface.
   ##
   ## `Return` `0` on success, or `-1` if the surface is not valid.
@@ -2422,7 +2443,8 @@ proc setSurfaceBlendMode*(surface: SurfacePtr; blendMode: BlendMode): cint {.
   ## **See also:**
   ## * `getSurfaceBlendMode proc<#getSurfaceBlendMode,SurfacePtr,ptr.BlendMode>`_
 
-proc getSurfaceBlendMode*(surface: SurfacePtr; blendMode: ptr BlendMode): cint {.
+proc getSurfaceBlendMode*(surface: SurfacePtr;
+    blendMode: ptr BlendMode): cint {.
   importc: "SDL_GetSurfaceBlendMode".}
   ## Get the blend mode used for blit operations.
   ##
@@ -2740,7 +2762,7 @@ proc getDisplayDPI*(displayIndex: cint;
   ## * `getNumVideoDisplays proc<#getNumVideoDisplays>`_
 
 proc createWindow*(title: cstring; x, y, w, h: cint;
-                   flags: uint32): WindowPtr  {.importc: "SDL_CreateWindow".}
+                   flags: uint32): WindowPtr {.importc: "SDL_CreateWindow".}
   ## Create a window with the specified position, dimensions, and flags.
   ##
   ## `title` The title of the window, in UTF-8 encoding.
@@ -2975,7 +2997,7 @@ proc glGetCurrentWindow*: WindowPtr {.importc: "SDL_GL_GetCurrentWindow".}
 proc glGetCurrentContext*: GlContextPtr {.importc: "SDL_GL_GetCurrentContext".}
   ## Get the currently active OpenGL context.
 
-proc glGetDrawableSize*(window: WindowPtr; w,h: var cint) {.
+proc glGetDrawableSize*(window: WindowPtr; w, h: var cint) {.
   importc: "SDL_GL_GetDrawableSize".}
   ## Get the size of a window's underlying drawable in pixels
   ## (for use with glViewport).
@@ -3104,7 +3126,7 @@ proc vulkanUnloadLibrary*() {.importc: "SDL_Vulkan_UnloadLibrary".}
   ## **See also:**
   ## * `vulkanLoadLibrary proc<#vulkanLoadLibrary,cstring>`_
 
-proc vulkanGetInstanceExtensions*(window: WindowPtr, pCount: ptr cuint,
+proc vulkanGetInstanceExtensions*(window: WindowPtr; pCount: ptr cuint;
   pNames: cstringArray): Bool32 {.importc: "SDL_Vulkan_GetInstanceExtensions".}
   ## Get the names of the Vulkan instance extensions needed to create
   ## a surface with `vulkan_CreateSurface()`.
@@ -3146,7 +3168,8 @@ proc vulkanGetInstanceExtensions*(window: WindowPtr, pCount: ptr cuint,
   ## **See also:**
   ## * `vulkanCreateSurface proc<#vulkanCreateSurface,WindowPtr,VulkanInstance,ptr.VulkanSurface>`_
 
-proc vulkanCreateSurface*(window: WindowPtr, instance: VulkanInstance, surface: ptr VulkanSurface): Bool32 {.
+proc vulkanCreateSurface*(window: WindowPtr; instance: VulkanInstance;
+    surface: ptr VulkanSurface): Bool32 {.
   importc: "SDL_Vulkan_CreateSurface".}
   ## Create a Vulkan rendering surface for a window.
   ##
@@ -3179,7 +3202,7 @@ proc vulkanCreateSurface*(window: WindowPtr, instance: VulkanInstance, surface: 
   ## **See also:**
   ## * `vulkanGetInstanceExtensions proc<#vulkanGetInstanceExtensions,WindowPtr,ptr.cuint,cstringArray>`_
 
-proc vulkanGetDrawableSize*(window: WindowPtr, w, h: ptr cint) {.
+proc vulkanGetDrawableSize*(window: WindowPtr; w, h: ptr cint) {.
   importc: "SDL_Vulkan_GetDrawableSize".}
   ## Get the size of a window's underlying drawable in pixels
   ## (for use with setting viewport, scissor & etc).
@@ -3208,7 +3231,8 @@ proc vulkanGetDrawableSize*(window: WindowPtr, w, h: ptr cint) {.
 proc getKeyboardFocus*: WindowPtr {.importc: "SDL_GetKeyboardFocus".}
   ## Get the window which currently has keyboard focus.
 
-proc getKeyboardState*(numkeys: ptr int = nil): ptr array[0 .. SDL_NUM_SCANCODES.int, uint8] {.importc: "SDL_GetKeyboardState".}
+proc getKeyboardState*(numkeys: ptr int = nil): ptr array[0 ..
+    SDL_NUM_SCANCODES.int, uint8] {.importc: "SDL_GetKeyboardState".}
   ## Get a snapshot of the current state of the keyboard.
   ##
   ## `numkeys` if non-`nil`, receives the length of the returned array.
@@ -3359,7 +3383,7 @@ proc getRelativeMouseState*(x, y: var cint): uint8 {.
   ## be tested using the `button()` template, and x and y are set to the
   ## mouse deltas since the last call to `getRelativeMouseState()`.
 
-proc warpMouseInWindow*(window: WindowPtr; x, y: cint)  {.
+proc warpMouseInWindow*(window: WindowPtr; x, y: cint) {.
   importc: "SDL_WarpMouseInWindow".}
   ## Moves the mouse to the given position within the window.
   ##
@@ -3372,7 +3396,7 @@ proc warpMouseInWindow*(window: WindowPtr; x, y: cint)  {.
   ##
   ## **Note:** This procedure generates a mouse motion event.
 
-proc setRelativeMouseMode*(enabled: Bool32): SDL_Return  {.
+proc setRelativeMouseMode*(enabled: Bool32): SDL_Return {.
   importc: "SDL_SetRelativeMouseMode".}
   ## Set relative mouse mode.
   ##
@@ -3391,7 +3415,7 @@ proc setRelativeMouseMode*(enabled: Bool32): SDL_Return  {.
   ## * `getRelativeMouseMode proc<#getRelativeMouseMode>`_
 
 proc captureMouse*(enabled: Bool32): SDL_Return {.
-  importc: "SDL_CaptureMouse" .}
+  importc: "SDL_CaptureMouse".}
   ## Capture the mouse, to track input outside an SDL window.
   ##
   ## `enabled` Whether or not to enable capturing
@@ -3580,7 +3604,8 @@ proc pushEvent*(event: ptr Event): cint {.importc: "SDL_PushEvent".}
   ## `Return` `1` on success, `0` if the event was filtered,
   ## or `-1` if the event queue was full or there was some other error.
 
-proc setEventFilter*(filter: EventFilter; userdata: pointer) {.importc: "SDL_SetEventFilter".}
+proc setEventFilter*(filter: EventFilter;
+    userdata: pointer) {.importc: "SDL_SetEventFilter".}
   ## Sets up a filter to process all events before they change internal state
   ## and are posted to the internal event queue.
   ##
@@ -3695,7 +3720,8 @@ proc allocPalette*(numColors: cint): ptr Palette {.
   ## Returns A new palette, or `nil` if there wasn't enough memory.
   ## Note: The palette entries are initialized to white.
 
-proc setPixelFormatPalette*(format: ptr PixelFormat; palette: ptr Palette): cint {.
+proc setPixelFormatPalette*(format: ptr PixelFormat;
+    palette: ptr Palette): cint {.
   importc: "SDL_SetPixelFormatPalette".}
   ## Set the palette for a pixel format object.
 
@@ -3708,28 +3734,28 @@ proc freePalette*(palette: ptr Palette) {.
   importc: "SDL_FreePalette".}
   ## Free a palette created with `allocPalette()`.
 
-proc mapRGB*(format: ptr PixelFormat; r,g,b: uint8): uint32 {.
+proc mapRGB*(format: ptr PixelFormat; r, g, b: uint8): uint32 {.
   importc: "SDL_MapRGB".}
   ## Maps an RGB triple to an opaque pixel value for a given pixel format.
   ##
   ## **See also:**
   ## * `mapRGBA proc<#mapRGBA,ptr.PixelFormat,uint8,uint8,uint8,uint8>`_
 
-proc mapRGBA*(format: ptr PixelFormat; r,g,b,a: uint8): uint32 {.
+proc mapRGBA*(format: ptr PixelFormat; r, g, b, a: uint8): uint32 {.
   importc: "SDL_MapRGBA".}
   ## Maps an RGBA quadruple to a pixel value for a given pixel format.
   ##
   ## **See also:**
   ## * `mapRGB proc<#mapRGB,ptr.PixelFormat,uint8,uint8,uint8>`_
 
-proc getRGB*(pixel: uint32; format: ptr PixelFormat; r,g,b: var uint8) {.
+proc getRGB*(pixel: uint32; format: ptr PixelFormat; r, g, b: var uint8) {.
   importc: "SDL_GetRGB".}
   ## Get the RGB components from a pixel of the specified format.
   ##
   ## **See also:**
   ## * `getRGBA proc<#getRGBA,uint32,ptr.PixelFormat,uint8,uint8,uint8,uint8>`_
 
-proc getRGBA*(pixel: uint32; format: ptr PixelFormat; r,g,b,a: var uint8) {.
+proc getRGBA*(pixel: uint32; format: ptr PixelFormat; r, g, b, a: var uint8) {.
   importc: "SDL_GetRGBA".}
   ##Get the RGBA components from a pixel of the specified format.
   ##
@@ -3766,7 +3792,7 @@ proc freeClipboardText*(text: cstring) {.importc: "SDL_free".}
 proc getNumTouchFingers*(id: TouchID): cint {.importc: "SDL_GetNumTouchFingers".}
   ## Get the number of active fingers for a given touch device.
 
-proc getTouchFinger*(id: TouchID, index: cint): ptr Finger {.importc: "SDL_GetTouchFinger".}
+proc getTouchFinger*(id: TouchID; index: cint): ptr Finger {.importc: "SDL_GetTouchFinger".}
   ## Get the finger object of the given touch, with the given index.
 
 
@@ -3780,11 +3806,12 @@ when defined(windows):
     ## on which monitor a full screen application will appear.
 
   proc getD3D9Device*(renderer: RendererPtr): pointer {.
-    importc:"SDL_RenderGetD3D9Device".}
+    importc: "SDL_RenderGetD3D9Device".}
     ## Returns the D3D device associated with a renderer, or `nil` if it's not a D3D renderer.
     ## Once you are done using the device, you should release it to avoid a resource leak.
 
-  proc dXGIGetOutputInfo*(displayIndex: cint, adapterIndex,outputIndex: ptr cint) {.importc: "SDL_DXGIGetOutputInfo".}
+  proc dXGIGetOutputInfo*(displayIndex: cint; adapterIndex,
+      outputIndex: ptr cint) {.importc: "SDL_DXGIGetOutputInfo".}
     ## Returns the DXGI Adapter and Output indices for the specified display index.
     ## These can be passed to EnumAdapters and EnumOutputs respectively to get the objects
     ## required to create a DX10 or DX11 device and swap chain.
@@ -3792,22 +3819,22 @@ when defined(windows):
 elif defined(iPhone) or defined(ios):
 
 
-  proc iPhoneSetAnimationCallback*(window: WindowPtr, interval:cint,
-    callback: VoidCallback, callbackParam: pointer): cint {.
+  proc iPhoneSetAnimationCallback*(window: WindowPtr; interval: cint;
+    callback: VoidCallback; callbackParam: pointer): cint {.
     importc: "SDL_iPhoneSetAnimationCallback".}
 
   proc iPhoneSetEventPump*(enabled: bool) {.importc: "SDL_iPhoneSetEventPump".}
 
-  proc iPhoneKeyboardShow*(window:WindowPtr): cint {.
+  proc iPhoneKeyboardShow*(window: WindowPtr): cint {.
     importc: "SDL_iPhoneKeyboardShow".}
 
-  proc iPhoneKeyboardHide*(window:WindowPtr): cint {.
+  proc iPhoneKeyboardHide*(window: WindowPtr): cint {.
     importc: "SDL_iPhoneKeyboardHide".}
 
-  proc iPhoneKeyboardIsShown*(window:WindowPtr): bool {.
+  proc iPhoneKeyboardIsShown*(window: WindowPtr): bool {.
     importc: "SDL_iPhoneKeyboardIsShown".}
 
-  proc iPhoneKeyboardToggle*(window:WindowPtr): cint {.
+  proc iPhoneKeyboardToggle*(window: WindowPtr): cint {.
     importc: "SDL_iPhoneKeyboardToggle".}
 
 elif defined(android):
@@ -3887,7 +3914,7 @@ proc saveBMP*(surface: SurfacePtr; file: string): SDL_Return {.
 
 proc color*(r, g, b, a: range[0..255]): Color = (r.uint8, g.uint8, b.uint8, a.uint8)
 
-proc rect*(x, y: cint; w = cint(0), h = cint(0)): Rect =
+proc rect*(x, y: cint; w = cint(0); h = cint(0)): Rect =
   result.x = x
   result.y = y
   result.w = w
@@ -3910,12 +3937,13 @@ const
     ##
     ## By default nearest pixel sampling is used.
 
-proc setHint*(name: cstring, value: cstring): bool {.importc: "SDL_SetHint".}
+proc setHint*(name: cstring; value: cstring): bool {.importc: "SDL_SetHint".}
   ## Set a hint with normal priority.
   ##
   ## `Return` `true` if the hint was set, `false` otherwise.
 
-proc setHintWithPriority*(name: cstring, value: cstring, priority: cint): bool {.
+proc setHintWithPriority*(name: cstring; value: cstring;
+    priority: cint): bool {.
   importc: "SDL_SetHintWithPriority".}
   ## Set a hint with a specific priority.
   ##
@@ -3942,14 +3970,16 @@ proc seek*(ctx: RWopsPtr; offset: int64; whence: cint): int64 {.inline.} =
   # TODO: Add `RW_SEEK_SET`, `RW_SEEK_CUR`, `RW_SEEK_END`.
   ctx.seek(ctx, offset, whence)
 
-proc read*(ctx: RWopsPtr; `ptr`: pointer; size, maxnum: csize_t): csize_t {.inline.} =
+proc read*(ctx: RWopsPtr; `ptr`: pointer; size,
+    maxnum: csize_t): csize_t {.inline.} =
   ## Read up to `maxnum` objects each of size `size` from the data
   ## stream to the area pointed at by `p`.
   ##
   ## `Return` the number of objects read, or `0` at error or end of file.
   ctx.read(ctx, `ptr`, size, maxnum)
 
-proc write*(ctx: RWopsPtr; `ptr`: pointer; size, num: csize_t): csize_t {.inline.} =
+proc write*(ctx: RWopsPtr; `ptr`: pointer; size,
+    num: csize_t): csize_t {.inline.} =
   ## Write exactly `num` objects each of size `size` from the area
   ## pointed at by `p` to data stream.
   ##

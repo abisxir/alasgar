@@ -8,69 +8,67 @@ import camera
 
 
 type
-    InteractionHandleProc* = proc(component: InteractiveComponent, collision: Collision)
-    OutHandleProc* = proc(component: InteractiveComponent)
-    
-    InteractiveComponent* = ref object of Component
-        hover*: bool
-        pressed*: bool
-        pressStartTime*: float
-        pressEndTime*: float
-        input: Input
-        onHover: InteractionHandleProc
-        onOut: OutHandleProc
-        onMotion: InteractionHandleProc
-        onPress: InteractionHandleProc
-        onRelease: InteractionHandleProc
-
-    InteractiveSystem* = ref object of System
+  InteractionHandleProc* = proc(component: InteractiveComponent, collision: Collision)
+  OutHandleProc* = proc(component: InteractiveComponent)
+  InteractiveComponent* = ref object of Component
+    hover*: bool
+    pressed*: bool
+    pressStartTime*: float
+    pressEndTime*: float
+    input: Input
+    onHover: InteractionHandleProc
+    onOut: OutHandleProc
+    onMotion: InteractionHandleProc
+    onPress: InteractionHandleProc
+    onRelease: InteractionHandleProc
+  InteractiveSystem* = ref object of System
 
 
-proc newInteractiveComponent*(onHover: InteractionHandleProc=nil, 
-                              onOut: OutHandleProc=nil, 
-                              onMotion: InteractionHandleProc=nil,
-                              onPress: InteractionHandleProc=nil,
-                              onRelease: InteractionHandleProc=nil): InteractiveComponent =
-    new(result)
-    result.onHover = onHover
-    result.onMotion = onMotion
-    result.onOut = onOut
-    result.onPress = onPress
-    result.onRelease = onRelease
+proc newInteractiveComponent*(onHover: InteractionHandleProc=nil,
+                onOut: OutHandleProc=nil,
+                onMotion: InteractionHandleProc=nil,
+                onPress: InteractionHandleProc=nil,
+                onRelease: InteractionHandleProc=nil): InteractiveComponent =
+  new(result)
+  result.onHover = onHover
+  result.onMotion = onMotion
+  result.onOut = onOut
+  result.onPress = onPress
+  result.onRelease = onRelease
 
 proc handleMouseIn*(ic: InteractiveComponent, collision: Collision) =
-    if not ic.hover:
-        ic.hover = true
-        if ic.onHover != nil:
-            ic.onHover(ic, collision)
-    if ic.onMotion != nil:
-        ic.onMotion(ic, collision)
+  if not ic.hover:
+    ic.hover = true
+    if ic.onHover != nil:
+      ic.onHover(ic, collision)
+  if ic.onMotion != nil:
+    ic.onMotion(ic, collision)
 
 
 proc handleMouseOut*(ic: InteractiveComponent) =
-    if ic.hover:
-        ic.hover = false
-        if ic.onOut != nil:
-            ic.onOut(ic)
-        ic.pressed = false
+  if ic.hover:
+    ic.hover = false
+    if ic.onOut != nil:
+      ic.onOut(ic)
+    ic.pressed = false
 
 
 proc handleMousePress*(ic: InteractiveComponent, collision: Collision) =
-    ic.pressed = true
-    if ic.onPress != nil:
-        ic.onPress(ic, collision)
+  ic.pressed = true
+  if ic.onPress != nil:
+    ic.onPress(ic, collision)
 
 
 proc handleMouseRelease*(ic: InteractiveComponent, collision: Collision) =
-    ic.pressed = false
-    if ic.onRelease != nil:
-        ic.onRelease(ic, collision)
+  ic.pressed = false
+  if ic.onRelease != nil:
+    ic.onRelease(ic, collision)
 
 proc `interactiveComponent`(e: Entity): InteractiveComponent =
-    result = e[InteractiveComponent]
-    if isNil(result):
-        result = newInteractiveComponent()
-        add(e, result)
+  result = e[InteractiveComponent]
+  if isNil(result):
+    result = newInteractiveComponent()
+    add(e, result)
 
 proc `onHover=`*(e: Entity, f: InteractionHandleProc) = e.interactiveComponent.onHover = f
 proc `onOut=`*(e: Entity, f: OutHandleProc) = e.interactiveComponent.onOut = f
@@ -80,30 +78,30 @@ proc `onRelease=`*(e: Entity, f: InteractionHandleProc) = e.interactiveComponent
 
 # System implementation
 func newInteractiveSystem*(): InteractiveSystem =
-    new(result)
-    result.name = "Interactive"
+  new(result)
+  result.name = "Interactive"
 
 
 method process*(sys: InteractiveSystem, scene: Scene, input: Input, delta: float32, frames: int, age: float32) =
-    {.warning[LockLevel]:off.}
-    let 
-        activeCamera = scene.activeCamera
-        ray = getRayToScreenPosition(activeCamera, getMousePosition(input))
-    for ic in iterate[InteractiveComponent](scene):
-        ic.input = input
-        # Checks that entity is visible
-        if ic.entity.visible:
-            var cc = ic[CollisionComponent]
-            if cc != nil:
-                var collision = intersects(cc, ray)
-                if collision != nil:
-                    handleMouseIn(ic, collision)
-                    if getMouseButtonDown(input, mouseButtonLeft):
-                        handleMousePress(ic, collision)
-                    if getMouseButtonUp(input, mouseButtonLeft):
-                        handleMouseRelease(ic, collision)
-                else:
-                    handleMouseOut(ic)
+  {.warning[LockLevel]:off.}
+  let
+    activeCamera = scene.activeCamera
+    ray = getRayToScreenPosition(activeCamera, getMousePosition(input))
+  for ic in iterate[InteractiveComponent](scene):
+    ic.input = input
+    # Checks that entity is visible
+    if ic.entity.visible:
+      var cc = ic[CollisionComponent]
+      if cc != nil:
+        var collision = intersects(cc, ray)
+        if collision != nil:
+          handleMouseIn(ic, collision)
+          if getMouseButtonDown(input, mouseButtonLeft):
+            handleMousePress(ic, collision)
+          if getMouseButtonUp(input, mouseButtonLeft):
+            handleMouseRelease(ic, collision)
+        else:
+          handleMouseOut(ic)
 
 
 func `input`*(c: InteractiveComponent): Input = c.input

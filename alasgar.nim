@@ -89,11 +89,12 @@ export core,
        misc_camera
 
 
-proc window*(title: string, width, height: int, fullscreen: bool=false, resizable: bool=false) =
-    initEngine(
-        width,
-        height,
-        title=title,
-        fullscreen=fullscreen,
-        resizable=resizable,
-    )
+proc window*(title: string, width, height: int, fullscreen: bool = false,
+        resizable: bool = false) =
+  initEngine(
+      width,
+      height,
+      title = title,
+      fullscreen = fullscreen,
+      resizable = resizable,
+  )

@@ -7,9 +7,10 @@ import ../ports/opengl
 
 export utils
 
-var 
+var
   useResult {.compiletime.}: bool
-  typeRenameCache {.compiletime.}: Table[string, string] = initTable[string, string]()
+  typeRenameCache {.compiletime.}: Table[string, string] = initTable[string,
+      string]()
   simpleTypes {.compiletime.}: Table[string, string] = {
     "Mat2": "mat2",
     "Mat3": "mat3",
@@ -69,56 +70,56 @@ var
   }.toTable()
   declareCache {.compiletime.} = newTable[string, string]()
   samplers {.compiletime.} = {
-    "SamplerBuffer": "samplerBuffer", 
-    "Sampler1D": "sampler1D", 
-    "Sampler1DArray": "sampler1DArray", 
-    "Sampler2D": "sampler2D", 
-    "Sampler2DArray": "sampler2DArray", 
-    "Sampler2DRect": "sampler2DRect", 
-    "Sampler3D": "sampler3D", 
-    "SamplerCube": "samplerCube", 
-    "SamplerCubeArray": "samplerCubeArray", 
-    "Sampler1DShadow": "sampler1DShadow", 
-    "Sampler1DArrayShadow": "sampler1DArrayShadow", 
-    "Sampler2DShadow": "sampler2DShadow", 
-    "Sampler2DArrayShadow": "sampler2DArrayShadow", 
-    "Sampler2DRectShadow": "sampler2DRectShadow", 
-    "SamplerCubeShadow": "samplerCubeShadow", 
-    "SamplerCubeArrayShadow": "samplerCubeArrayShadow", 
+    "SamplerBuffer": "samplerBuffer",
+    "Sampler1D": "sampler1D",
+    "Sampler1DArray": "sampler1DArray",
+    "Sampler2D": "sampler2D",
+    "Sampler2DArray": "sampler2DArray",
+    "Sampler2DRect": "sampler2DRect",
+    "Sampler3D": "sampler3D",
+    "SamplerCube": "samplerCube",
+    "SamplerCubeArray": "samplerCubeArray",
+    "Sampler1DShadow": "sampler1DShadow",
+    "Sampler1DArrayShadow": "sampler1DArrayShadow",
+    "Sampler2DShadow": "sampler2DShadow",
+    "Sampler2DArrayShadow": "sampler2DArrayShadow",
+    "Sampler2DRectShadow": "sampler2DRectShadow",
+    "SamplerCubeShadow": "samplerCubeShadow",
+    "SamplerCubeArrayShadow": "samplerCubeArrayShadow",
     "ImageBuffer": "imageBuffer",
-    "ISamplerBuffer": "isamplerBuffer", 
-    "ISampler1D": "isampler1D", 
-    "ISampler1DArray": "isampler1DArray", 
-    "ISampler2D": "isampler2D", 
-    "ISampler2DArray": "isampler2DArray", 
-    "ISampler2DRect": "isampler2DRect", 
-    "ISampler3D": "isampler3D", 
-    "ISamplerCube": "isamplerCube", 
-    "ISamplerCubeArray": "isamplerCubeArray", 
-    "ISampler1DShadow": "isampler1DShadow", 
-    "ISampler1DArrayShadow": "isampler1DArrayShadow", 
-    "ISampler2DShadow": "isampler2DShadow", 
-    "ISampler2DArrayShadow": "isampler2DArrayShadow", 
-    "ISampler2DRectShadow": "isampler2DRectShadow", 
-    "ISamplerCubeShadow": "isamplerCubeShadow", 
-    "ISamplerCubeArrayShadow": "isamplerCubeArrayShadow", 
+    "ISamplerBuffer": "isamplerBuffer",
+    "ISampler1D": "isampler1D",
+    "ISampler1DArray": "isampler1DArray",
+    "ISampler2D": "isampler2D",
+    "ISampler2DArray": "isampler2DArray",
+    "ISampler2DRect": "isampler2DRect",
+    "ISampler3D": "isampler3D",
+    "ISamplerCube": "isamplerCube",
+    "ISamplerCubeArray": "isamplerCubeArray",
+    "ISampler1DShadow": "isampler1DShadow",
+    "ISampler1DArrayShadow": "isampler1DArrayShadow",
+    "ISampler2DShadow": "isampler2DShadow",
+    "ISampler2DArrayShadow": "isampler2DArrayShadow",
+    "ISampler2DRectShadow": "isampler2DRectShadow",
+    "ISamplerCubeShadow": "isamplerCubeShadow",
+    "ISamplerCubeArrayShadow": "isamplerCubeArrayShadow",
     "IImageBuffer": "iimageBuffer",
-    "USamplerBuffer": "usamplerBuffer", 
-    "USampler1D": "usampler1D", 
-    "USampler1DArray": "usampler1DArray", 
-    "USampler2D": "usampler2D", 
-    "USampler2DArray": "usampler2DArray", 
-    "USampler2DRect": "usampler2DRect", 
-    "USampler3D": "usampler3D", 
-    "USamplerCube": "usamplerCube", 
-    "USamplerCubeArray": "usamplerCubeArray", 
-    "USampler1DShadow": "usampler1DShadow", 
-    "USampler1DArrayShadow": "usampler1DArrayShadow", 
-    "USampler2DShadow": "usampler2DShadow", 
-    "USampler2DRectShadow": "usampler2DRectShadow", 
-    "USampler2DRectShadow": "usampler2DRectShadow", 
-    "USamplerCubeShadow": "usamplerCubeShadow", 
-    "USamplerCubeArrayShadow": "usamplerCubeArrayShadow", 
+    "USamplerBuffer": "usamplerBuffer",
+    "USampler1D": "usampler1D",
+    "USampler1DArray": "usampler1DArray",
+    "USampler2D": "usampler2D",
+    "USampler2DArray": "usampler2DArray",
+    "USampler2DRect": "usampler2DRect",
+    "USampler3D": "usampler3D",
+    "USamplerCube": "usamplerCube",
+    "USamplerCubeArray": "usamplerCubeArray",
+    "USampler1DShadow": "usampler1DShadow",
+    "USampler1DArrayShadow": "usampler1DArrayShadow",
+    "USampler2DShadow": "usampler2DShadow",
+    "USampler2DRectShadow": "usampler2DRectShadow",
+    "USampler2DRectShadow": "usampler2DRectShadow",
+    "USamplerCubeShadow": "usamplerCubeShadow",
+    "USamplerCubeArrayShadow": "usamplerCubeArrayShadow",
     "UImageBuffer": "uimageBuffer",
   }.toTable()
   metaDataTypes {.compiletime.} = ["Layout", "Uniform", "UniformWriteonly", "Attribute"]
@@ -128,14 +129,14 @@ var
     "not": "!",
   }.toTable()
   bitOperations {.compileTime.}: Table[string, string] = {
-    "and": "&", 
-    "or": "|", 
-    "xor": "^", 
-    "shr": ">>", 
+    "and": "&",
+    "or": "|",
+    "xor": "^",
+    "shr": ">>",
     "shl": "<<",
   }.toTable()
   bitOperationValidTypes {.compileTime.} = ["int", "uint"]
-  typeDefaults {.compileTime.}:Table[string, string] = {
+  typeDefaults {.compileTime.}: Table[string, string] = {
     "mat2": "mat2(0.0)",
     "mat3": "mat3(0.0)",
     "mat4": "mat4(0.0)",
@@ -211,7 +212,7 @@ var
 
 proc isInternalType(t: string): bool = t in samplers or t in metaDataTypes
 proc isSampler(sampler: string): bool = sampler in samplers
-proc isSampler(n: NimNode): bool = 
+proc isSampler(n: NimNode): bool =
   if n.kind == nnkBracketExpr:
     result = isSampler(n[1].repr)
   else:
@@ -219,7 +220,8 @@ proc isSampler(n: NimNode): bool =
 proc getSampler(sampler: string): string = samplers[sampler]
 proc isLogicalOp(n: NimNode): bool = n[0].strVal in logicalOperations
 proc getLogicalOp(n: NimNode): string = logicalOperations[n[0].strVal]
-proc isBitwiseOp(n: NimNode): bool = n[0].strVal in bitOperations and n[1].getType().strVal in bitOperationValidTypes
+proc isBitwiseOp(n: NimNode): bool = n[0].strVal in bitOperations and n[
+    1].getType().strVal in bitOperationValidTypes
 proc getBitwiseOp(n: NimNode): string = bitOperations[n[0].strVal]
 
 proc err(msg: string, n: NimNode) {.noreturn.} =
@@ -234,7 +236,7 @@ proc typeRenamePrivate(t: string): string =
   else:
     t
 
-proc typeRename(t: string): string = 
+proc typeRename(t: string): string =
   if hasKey(typeRenameCache, t):
     result = typeRenameCache[t]
   else:
@@ -243,7 +245,7 @@ proc typeRename(t: string): string =
     result = r
 
 #proc parseLayoutType(n: NimNode): string =
-#  let 
+#  let
 #    binding = "location"
 #    place = 0
 #    t = "int"
@@ -261,10 +263,10 @@ proc typeString(n: NimNode): string =
     err "can't figure out type", n
 
 const glslGlobals = [
-  "gl_Position", 
-  "gl_FragCoord", 
-  "gl_GlobalInvocationID", 
-  "gl_VertexID", 
+  "gl_Position",
+  "gl_FragCoord",
+  "gl_GlobalInvocationID",
+  "gl_VertexID",
   "gl_FrontFacing"
 ]
 
@@ -278,10 +280,12 @@ const glslFunctions = [
   "ivec2", "ivec3", "ivec4",
   "IVec2", "IVec3", "IVec4",
 
-  "abs", "clamp", "min", "max", "dot", "sqrt", "mix", "length", "cross", "reflect", "distance", "refract", "sign",
+  "abs", "clamp", "min", "max", "dot", "sqrt", "mix", "length", "cross",
+  "reflect", "distance", "refract", "sign",
   "smoothstep", "step",
   "dFdx", "dFdy", "fwidth",
-  "texelFetch", "imageStore", "imageLoad", "texture", "textureLod", "textureSize",
+  "texelFetch", "imageStore", "imageLoad", "texture", "textureLod",
+  "textureSize",
   "normalize",
   "floor", "ceil", "round", "exp", "inversesqrt", "exp2", "log", "fract",
   "[]", "[]=",
@@ -308,7 +312,7 @@ proc isVectorAccess(s: string): bool =
           else:
             return false
       return true
-  return  false
+  return false
 
 proc procRename(t: string): string =
   ## Some GLSL proc names don't match Nim names, rename here.
@@ -438,7 +442,7 @@ proc toCode(n: NimNode, res: var string, level = 0) =
 
   of nnkHiddenDeref, nnkHiddenAddr:
     n[0].toCode(res)
-  
+
   of nnkHiddenSubConv:
     n[1].toCode(res)
 
@@ -792,8 +796,9 @@ proc toCodeStmts(n: NimNode, res: var string, level = 0) =
   else:
     n.toCode(res, level)
 
-proc parseBracket(param: NimNode, res: var string, forceOut=false, attributeCount: var int): int =
-  let 
+proc parseBracket(param: NimNode, res: var string, forceOut = false,
+    attributeCount: var int): int =
+  let
     prefix = typeRename(param[0].strVal)
   if prefix == "layout":
     if isSampler(param[2]):
@@ -823,7 +828,8 @@ proc parseBracket(param: NimNode, res: var string, forceOut=false, attributeCoun
     res.add " "
     res.add typeRename(param[1].strVal)
 
-proc toCodeTopLevel(topLevelNode: NimNode, res: var string, level = 0, attributeCount: var int) =
+proc toCodeTopLevel(topLevelNode: NimNode, res: var string, level = 0,
+    attributeCount: var int) =
   ## Top level block such as in and out params.
   ## Generates the main function (which is not like all the other functions)
   assert topLevelNode.kind == nnkProcDef or topLevelNode.kind == nnkTemplateDef
@@ -946,7 +952,7 @@ proc procDef(topLevelNode: NimNode): string =
       result.add "}"
 
 proc getDeclartion(n: NimNode): string =
-  let 
+  let
     typeInst = n.getTypeInst()
     impl = n.getImpl()
   ## Get the declaration of a function.
@@ -962,7 +968,7 @@ proc getDeclartion(n: NimNode): string =
       err &"Invalid x[y]: {typeInst[0].repr}", n
   else:
     result = typeRename(typeInst.repr)
-  
+
   result = result & " "
 
 proc gatherFunction(
@@ -981,7 +987,7 @@ proc gatherFunction(
           let impl = n.getImpl()
           if impl.kind notin {nnkIteratorDef, nnkProcDef, nnkFuncDef} and
               impl.kind != nnkNilLit and
-              (impl.kind != nnkTypeDef or not isInternalType(impl[0].repr)) :
+              (impl.kind != nnkTypeDef or not isInternalType(impl[0].repr)):
             var defStr: string
             if impl.kind == nnkTypeDef:
               let key = impl[2].lineInfo
@@ -1025,7 +1031,7 @@ proc gatherFunction(
 
 proc toGLSLInner*(s: NimNode): (string, int) =
 
-  var 
+  var
     code: string
     attributeCount = 0
 
@@ -1034,7 +1040,7 @@ proc toGLSLInner*(s: NimNode): (string, int) =
   code.add "/*\n"
   code.add " * compiled by alasgar \n"
   code.add " * " & s.strVal & " \n"
-  code.add " */\n\n" 
+  code.add " */\n\n"
   code.add "precision highp float;\nprecision highp int;\nprecision highp sampler2DArray;\nprecision highp sampler2DArrayShadow;"
   when defined(emscripten) or defined(linux):
     code.add """vec4 unpackUnorm4x8(uint i) { return vec4(float(i & uint(0xff)) / 255.0, float(i/uint(0x100) & uint(0xff)) / 255.0, float(i/uint(0x10000) & uint(0xff)) / 255.0,float(i/uint(0x1000000)) / 255.0);}"""

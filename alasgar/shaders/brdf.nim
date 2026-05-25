@@ -1,7 +1,7 @@
 import types
 import common
 
-proc getIrradianceSphericalHarmonics*(N: Vec3): Vec3 = 
+proc getIrradianceSphericalHarmonics*(N: Vec3): Vec3 =
   # Irradiance from "Ditch River" IBL
   # (http://www.hdrlabs.com/sibl/archive.html)
   result = max(
@@ -15,45 +15,48 @@ proc getIrradianceSphericalHarmonics*(N: Vec3): Vec3 =
       0.0)
 
 proc calculateBRDF(FRAGMENT: Fragment, NoH: float, LoH: float): float =
-    let 
-        
-        d: float = NoH * NoH * FRAGMENT.ROUGHNESS2_MINUS_ONE + 1.00001
-        LoH2: float = LoH * LoH
-        
-    result = FRAGMENT.ALPHA / ((d * d) * max(0.1, LoH2) * FRAGMENT.NORMALIZED_ROUGHNESS)
+  let
+
+    d: float = NoH * NoH * FRAGMENT.ROUGHNESS2_MINUS_ONE + 1.00001
+    LoH2: float = LoH * LoH
+
+  result = FRAGMENT.ALPHA / ((d * d) * max(0.1, LoH2) *
+      FRAGMENT.NORMALIZED_ROUGHNESS)
 
 proc getBRDF*(FRAGMENT: Fragment, LIGHT: Light, NoL, NoH, LoH: float): Vec3 =
-    let
-        radiance: Vec3 = NoL * getIrradianceSphericalHarmonics(FRAGMENT.N)
-        brdf: float = calculateBRDF(FRAGMENT, NoH, LoH)
-    result = (brdf * FRAGMENT.SPECULAR + FRAGMENT.ALBEDO) * radiance
+  let
+    radiance: Vec3 = NoL * getIrradianceSphericalHarmonics(FRAGMENT.N)
+    brdf: float = calculateBRDF(FRAGMENT, NoH, LoH)
+  result = (brdf * FRAGMENT.SPECULAR + FRAGMENT.ALBEDO) * radiance
 
 # Schlick 1994, "An Inexpensive BRDF Model for Physically-Based Rendering"
 proc fSchlick*(F0: Vec3, VoH: float): Vec3 = F0 + (vec3(1.0) - F0) * pow5(1.0 - VoH)
 
-proc getPhong*(FRAGMENT: FRAGMENT, LIGHT: Light, L, H: Vec3, NoL, NoH, VoH: float): Vec3 =
-    let 
-        fresnelTerm = fSchlick(vec3(0.04), VoH)
-        diffuseTerm = (1.0 - fresnelTerm) * FRAGMENT.ALBEDO / PI
-        visibilityTerm = 0.25
-        phongBlinn = pow(NoH, FRAGMENT.SHININESS)
-        blinnNormalization = (FRAGMENT.SHININESS + 8.0) / (8.0 * PI)
-        normalDistribution = phongBlinn * blinnNormalization
-        specularTerm = fresnelTerm * visibilityTerm * normalDistribution * FRAGMENT.SPECULAR
-    result = (diffuseTerm + specularTerm) * LIGHT.COLOR
+proc getPhong*(FRAGMENT: FRAGMENT, LIGHT: Light, L, H: Vec3, NoL, NoH,
+    VoH: float): Vec3 =
+  let
+    fresnelTerm = fSchlick(vec3(0.04), VoH)
+    diffuseTerm = (1.0 - fresnelTerm) * FRAGMENT.ALBEDO / PI
+    visibilityTerm = 0.25
+    phongBlinn = pow(NoH, FRAGMENT.SHININESS)
+    blinnNormalization = (FRAGMENT.SHININESS + 8.0) / (8.0 * PI)
+    normalDistribution = phongBlinn * blinnNormalization
+    specularTerm = fresnelTerm * visibilityTerm * normalDistribution *
+        FRAGMENT.SPECULAR
+  result = (diffuseTerm + specularTerm) * LIGHT.COLOR
 
 proc blinnPhong*(FRAGMENT: Fragment, LIGHT: Light, NoL, NoH: float): Vec3 =
-    let
-        specular = if NoL > 0.0: pow(NoH, FRAGMENT.SHININESS) else: 0.0
+  let
+    specular = if NoL > 0.0: pow(NoH, FRAGMENT.SHININESS) else: 0.0
     result = specular * FRAGMENT.SPECULAR
 
 proc orenNayarDiffuse*(NoL, NoV, LoV, ALPHA, ALBEDO: float): float =
-    let 
-        s = LoV - NoL * NoV
-        t = mix(1.0, max(NoL, NoV), step(0.0, s))
-        A = 1.0 + ALPHA * (ALBEDO / (ALPHA + 0.13) + 0.5 / (ALPHA + 0.33))
-        B = 0.45 * ALPHA / (ALPHA + 0.09)
-    result = ALBEDO * max(0.0, NoL) * (A + B * s / t) / PI
+  let
+    s = LoV - NoL * NoV
+    t = mix(1.0, max(NoL, NoV), step(0.0, s))
+    A = 1.0 + ALPHA * (ALBEDO / (ALPHA + 0.13) + 0.5 / (ALPHA + 0.33))
+    B = 0.45 * ALPHA / (ALPHA + 0.09)
+  result = ALBEDO * max(0.0, NoL) * (A + B * s / t) / PI
 
 
 #[

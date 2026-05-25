@@ -14,57 +14,57 @@ import shaders/compile
 func calculateMipMap(size: int): int = log2(size.float32).int + 1
 
 proc panoramaToCubemap(inTexture: Texture, size: int): Texture =
-    let 
-        fb = newFramebuffer()
-        shader = newCanvasShader(panoramaToCubemapFragment)
-        texture = newCubeTexture(
-            size,
-            size,
-            minFilter=GL_NEAREST_MIPMAP_LINEAR,
-            magFilter=GL_LINEAR,
-            levels=calculateMipMap(size)
-        )
-    
-    use(shader)
-    for i in 0..5:
-        use(fb, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X.int + i, 0, size, size)
-        use(shader, inTexture, "PANAROMA_MAP", 0)
-        shader["FACE"] = i
-        draw(fb)
-    
-    mipmap(texture)
-    destroy(shader)
-    destroy(fb)
+  let
+    fb = newFramebuffer()
+    shader = newCanvasShader(panoramaToCubemapFragment)
+    texture = newCubeTexture(
+        size,
+        size,
+        minFilter = GL_NEAREST_MIPMAP_LINEAR,
+        magFilter = GL_LINEAR,
+        levels = calculateMipMap(size)
+    )
 
-    return texture
+  use(shader)
+  for i in 0..5:
+    use(fb, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X.int + i, 0, size, size)
+    use(shader, inTexture, "PANAROMA_MAP", 0)
+    shader["FACE"] = i
+    draw(fb)
+
+  mipmap(texture)
+  destroy(shader)
+  destroy(fb)
+
+  return texture
 
 ## Sets the given cubemap texture as skybox
 proc setSkybox*(scene: Scene, cubemap: Texture) =
-    scene.environmentMap = cubemap
-    #scene.ggxMap = generateGGX(cubemap, setting.envSampleCount)
-    #scene.lutMap = generateLUT(cubemap, setting.envSampleCount)    
+  scene.environmentMap = cubemap
+  #scene.ggxMap = generateGGX(cubemap, setting.envSampleCount)
+  #scene.lutMap = generateLUT(cubemap, setting.envSampleCount)
 
 template `skybox=`*(scene: Scene, cubemap: Texture) = setSkybox(scene, cubemap)
 
 ## Loads the given six images and sets it as skybox
-proc setSkybox*(scene: Scene, px, nx, py, ny, pz, nz: string) = 
-    scene.skybox = newCubeTexture(
-        px, 
-        nx, 
-        py, 
-        ny, 
-        pz, 
-        nz
-    )
+proc setSkybox*(scene: Scene, px, nx, py, ny, pz, nz: string) =
+  scene.skybox = newCubeTexture(
+      px,
+      nx,
+      py,
+      ny,
+      pz,
+      nz
+  )
 
 ## Loads the given panaroma image and sets it as skybox
-proc setSkybox*(scene: Scene, url: string, size: int) = 
-    # Loads the given panaroma into a texture
-    let inTexture = newTexture(url)
-    # Converts panaroma texture to cubemap and sets it as skybox
-    scene.skybox = panoramaToCubemap(inTexture, size)
-    # Destroys the created texture
-    destroy(inTexture)
+proc setSkybox*(scene: Scene, url: string, size: int) =
+  # Loads the given panaroma into a texture
+  let inTexture = newTexture(url)
+  # Converts panaroma texture to cubemap and sets it as skybox
+  scene.skybox = panoramaToCubemap(inTexture, size)
+  # Destroys the created texture
+  destroy(inTexture)
 
 
 #[
