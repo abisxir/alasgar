@@ -144,4 +144,3 @@ proc mainFragment*(SKIN_MAP: Layout[0, Uniform[Sampler2D]],
 
   #COLOR.rgb = FRAGMENT.N
   #COLOR.a = 1.0
-

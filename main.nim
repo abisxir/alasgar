@@ -1,68 +1,89 @@
+import math
+
 import alasgar
+import private/ports/opengl
+import private/aljebra
 
-settings.exitOnEsc = true
-# Creates a window named Step4
-window("Alasgar", 800, 600)
+proc vertex(
+  IN_POSITION: Layout[0, Vec3],
+  IN_COLOR: Layout[1, Vec4],
+  PROJECTION: Uniform[Mat4],
+  VIEW: Uniform[Mat4],
+  MODEL: Uniform[Mat4],
+  COLOR: var Vec4,
+  gl_Position: var Vec4
+) =
+  gl_Position = PROJECTION * VIEW * MODEL * vec4(IN_POSITION, 1)
+  COLOR = IN_COLOR
 
-let
-  # Creates a new scene
-  scene = newScene()
-  # Creates the camera entity
-  cameraEntity = newEntity(scene, "Camera")
 
-# Sets the background color
-scene.background = parseHex("909090")
-scene.ambient = parseHex("ffffff")
+proc fragment(
+  COLOR: Vec4,
+  OUT_COLOR: var Layout[0, Vec4]
+) =
+  OUT_COLOR = COLOR
 
-# Sets the camera position
-cameraEntity.transform.position = vec3(2)
-# Adds a perspective camera component to entity
-add(
-    cameraEntity,
-    newPerspectiveCamera(
-        75,
-        runtime.ratio,
-        0.1,
-        100.0,
-        vec3(0) - cameraEntity.transform.position
-  )
-)
-addCameraController(cameraEntity)
-# Makes the camera entity child of the scene
-add(scene, cameraEntity)
 
-# Creates the cube entity, by default position is 0, 0, 0
-let cubeEntity = newEntity(scene, "Cube")
-# Add a cube mesh component to entity
-add(cubeEntity, newCubeMesh())
-# Adds a script component to the cube entity
-program(cubeEntity, proc(script: ScriptComponent) =
-  let t = 2 * runtime.age
-  # Rotates the cube using euler angles
-  script.transform.euler = vec3(
-      sin(t),
-      cos(t),
-      sin(t) * cos(t),
-  )
-)
-# Makes the cube enity child of the scene
-add(scene, cubeEntity)
-# Scale it up
-cubeEntity.transform.scale = vec3(2)
+const
+  VERTICES = [
+    # position             color0
+    -1.0'f32, -1.0, -1.0,  1.0, 0.0, 0.0, 1.0,
+    1.0, -1.0, -1.0,      1.0, 0.0, 0.0, 1.0,
+    1.0,  1.0, -1.0,      1.0, 0.0, 0.0, 1.0,
+    -1.0,  1.0, -1.0,      1.0, 0.0, 0.0, 1.0,
 
-# Creates the light entity
-let lightEntity = newEntity(scene, "Light")
-# Sets light position
-lightEntity.transform.position = vec3(10)
-# Adds a point light component to entity
-add(
-    lightEntity,
-    newPointLightComponent()
-)
-# Makes the light entity child of the scene
-add(scene, lightEntity)
+    -1.0, -1.0,  1.0,      0.0, 1.0, 0.0, 1.0,
+    1.0, -1.0,  1.0,      0.0, 1.0, 0.0, 1.0,
+    1.0,  1.0,  1.0,      0.0, 1.0, 0.0, 1.0,
+    -1.0,  1.0,  1.0,      0.0, 1.0, 0.0, 1.0,
 
-# Renders an empty scene
-render(scene)
-# Runs game main loop
-loop()
+    -1.0, -1.0, -1.0,      0.0, 0.0, 1.0, 1.0,
+    -1.0,  1.0, -1.0,      0.0, 0.0, 1.0, 1.0,
+    -1.0,  1.0,  1.0,      0.0, 0.0, 1.0, 1.0,
+    -1.0, -1.0,  1.0,      0.0, 0.0, 1.0, 1.0,
+
+    1.0, -1.0, -1.0,      1.0, 0.5, 0.0, 1.0,
+    1.0,  1.0, -1.0,      1.0, 0.5, 0.0, 1.0,
+    1.0,  1.0,  1.0,      1.0, 0.5, 0.0, 1.0,
+    1.0, -1.0,  1.0,      1.0, 0.5, 0.0, 1.0,
+
+    -1.0, -1.0, -1.0,      0.0, 0.5, 1.0, 1.0,
+    -1.0, -1.0,  1.0,      0.0, 0.5, 1.0, 1.0,
+    1.0, -1.0,  1.0,      0.0, 0.5, 1.0, 1.0,
+    1.0, -1.0, -1.0,      0.0, 0.5, 1.0, 1.0,
+
+    -1.0,  1.0, -1.0,      1.0, 0.0, 0.5, 1.0,
+    -1.0,  1.0,  1.0,      1.0, 0.0, 0.5, 1.0,
+    1.0,  1.0,  1.0,      1.0, 0.0, 0.5, 1.0,
+    1.0,  1.0, -1.0,      1.0, 0.0, 0.5, 1.0,
+  ]
+  INDICES = [
+    0'u16, 1, 2,  0, 2, 3,
+    6, 5, 4,      7, 6, 4,
+    8, 9, 10,     8, 10, 11,
+    14, 13, 12,   15, 14, 12,
+    16, 17, 18,   16, 18, 19,
+    22, 21, 20,   23, 22, 20,
+  ]
+var
+  p1: Pipeline
+  model: Mat4
+  projection: Mat4
+  view: Mat4
+
+proc load() =
+  p1 = pipeline(shader=shader(vertex, fragment), vertices=VERTICES, indices=INDICES)
+  model = mat4()
+  projection = perspective(60, 800.0 / 600.0, 0.1, 100.0)
+
+proc draw() =
+  graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
+  view = lookAt(vec3(5.0, 0.0, 5.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0))
+  p1.shader.set("PROJECTION", projection)
+  p1.shader.set("VIEW", view)
+  p1.shader.set("MODEL", model)
+  graphics.render(p1)
+
+proc cleanup() = destroy(addr p1)
+
+window(800, 600, "My Game", load, draw, cleanup)

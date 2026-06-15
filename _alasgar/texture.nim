@@ -22,11 +22,17 @@ type
     internalFormat: GLenum
     minFilter: GLenum
     uvChannel*: int
+  Sampler2D* = ref object
+    texture: Texture
+    uvChannel*: int
+  Sampler3D* = ref object
+    texture: Texture
+    uvChannel*: int
 
-template `id`*(t: Texture): GLuint = 
-  if isNil(t): 
-    0.GLuint 
-  else: 
+template `id`*(t: Texture): GLuint =
+  if isNil(t):
+    0.GLuint
+  else:
     t.buffer
 template `levels`*(t: Texture): int32 = t.levels
 template `width`*(t: Texture): int32 = t.width
@@ -38,9 +44,9 @@ proc destroyTexture(t: Texture) =
   if t != nil and t.buffer != 0:
     echo &"Destroying texture[{t.buffer}]..."
     glDeleteTextures(1, t.buffer.addr)
-    t.buffer = 0 
+    t.buffer = 0
 
-proc hash*(t: Texture): Hash = 
+proc hash*(t: Texture): Hash =
   if t != nil:
     int(t.buffer)
   else:
@@ -49,13 +55,13 @@ proc hash*(t: Texture): Hash =
 var cache = newCachedContainer[Texture](destroyTexture)
 
 proc createTexture(target: GLenum,
-           width, 
-           height: int, 
-           wrapS=GL_CLAMP_TO_EDGE, 
-           wrapT=GL_CLAMP_TO_EDGE, 
-           wrapR=GL_CLAMP_TO_EDGE, 
-           minFilter=GL_NEAREST, 
-           magFilter=GL_NEAREST, 
+           width,
+           height: int,
+           wrapS=GL_CLAMP_TO_EDGE,
+           wrapT=GL_CLAMP_TO_EDGE,
+           wrapR=GL_CLAMP_TO_EDGE,
+           minFilter=GL_NEAREST,
+           magFilter=GL_NEAREST,
            levels=1,
            internalFormat:GLenum=GL_RGBA8,
            layers=1): Texture =
@@ -84,14 +90,14 @@ proc setPixels*(t: Texture,
         dataType: GLenum,
         pixels: pointer) =
   glTexImage2D(
-    t.target, 
-    0.GLint, 
-    t.internalFormat.GLint, 
-    t.width.GLsizei, 
-    t.height.GLsizei, 
-    0.GLint, 
-    format, 
-    dataType, 
+    t.target,
+    0.GLint,
+    t.internalFormat.GLint,
+    t.width.GLsizei,
+    t.height.GLsizei,
+    0.GLint,
+    format,
+    dataType,
     pixels
   )
   if not isNil(pixels) and (t.levels > 1 or t.minFilter in [GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR]):
@@ -101,7 +107,7 @@ proc setFaces(t: Texture,
         format: GLenum,
         dataType: GLenum,
         faces: array[6, pointer]) =
-  
+
   glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0.GLint, t.internalFormat.GLint, t.width.GLsizei, t.height.GLsizei, 0.GLint, format, dataType, faces[0])
   glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0.GLint, t.internalFormat.GLint, t.width.GLsizei, t.height.GLsizei, 0.GLint, format, dataType, faces[1])
   glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0.GLint, t.internalFormat.GLint, t.width.GLsizei, t.height.GLsizei, 0.GLint, format, dataType, faces[2])
@@ -116,15 +122,15 @@ proc allocate*(t: Texture, format=GL_RGBA, dataType=GL_UNSIGNED_BYTE) =
   if t.target in [GL_TEXTURE_2D_ARRAY]:
     when defined(macosx):
       glTexImage3D(
-        t.target, 
-        0, 
-        t.internalFormat.GLint, 
-        t.width.GLsizei, 
-        t.height.GLsizei, 
-        t.layers.GLsizei, 
-        0.GLint, 
-        format, 
-        dataType, 
+        t.target,
+        0,
+        t.internalFormat.GLint,
+        t.width.GLsizei,
+        t.height.GLsizei,
+        t.layers.GLsizei,
+        0.GLint,
+        format,
+        dataType,
         nil
       )
     else:
@@ -132,29 +138,29 @@ proc allocate*(t: Texture, format=GL_RGBA, dataType=GL_UNSIGNED_BYTE) =
   else:
     when defined(macosx):
       glTexImage2D(
-        t.target, 
-        0.GLint, 
-        t.internalFormat.GLint, 
-        t.width.GLsizei, 
-        t.height.GLsizei, 
-        0.GLint, 
-        format, 
-        dataType, 
+        t.target,
+        0.GLint,
+        t.internalFormat.GLint,
+        t.width.GLsizei,
+        t.height.GLsizei,
+        0.GLint,
+        format,
+        dataType,
         cast[pointer](0)
       )
     else:
       glTexStorage2D(
-        t.target, 
-        t.levels.GLsizei, 
-        t.internalFormat, 
-        t.width.GLsizei, 
+        t.target,
+        t.levels.GLsizei,
+        t.internalFormat,
+        t.width.GLsizei,
         t.height.GLsizei
       )
 
 
 
 proc copy*(t: Texture, data: ptr float32, format=GL_RGBA, width=0, height=0) =
-  let 
+  let
     w = if width > 0: width else: t.width
     h = if height > 0: height else: t.height
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w.GLsizei, h.GLsizei, format, cGL_FLOAT, data)
@@ -174,32 +180,32 @@ proc getTextureParamText*(p: GLenum): string =
     else: &"{p.int}"
 
 proc newTexture*(target: GLenum,
-         width, 
-         height: int, 
+         width,
+         height: int,
          levels: int=1,
          internalFormat: GLenum=GL_RGBA8,
-         wrapS=GL_CLAMP_TO_EDGE, 
-         wrapT=GL_CLAMP_TO_EDGE, 
-         wrapR=GL_CLAMP_TO_EDGE, 
-         minFilter=GL_NEAREST, 
+         wrapS=GL_CLAMP_TO_EDGE,
+         wrapT=GL_CLAMP_TO_EDGE,
+         wrapR=GL_CLAMP_TO_EDGE,
+         minFilter=GL_NEAREST,
          magFilter=GL_NEAREST,
          layers: int=1): Texture =
   result = createTexture(
     target,
-    width, 
-    height, 
-    wrapS=wrapS, 
-    wrapT=wrapT, 
-    wrapR=wrapR, 
-    minFilter=if levels > 1: GL_LINEAR_MIPMAP_LINEAR  else: minFilter, 
-    magFilter=magFilter, 
+    width,
+    height,
+    wrapS=wrapS,
+    wrapT=wrapT,
+    wrapR=wrapR,
+    minFilter=if levels > 1: GL_LINEAR_MIPMAP_LINEAR  else: minFilter,
+    magFilter=magFilter,
     levels=levels,
     internalFormat=internalFormat,
     layers=layers
   )
-    
+
 proc extractFormats(bits: int, channels: int, hdr: bool): (GLenum, GLenum, GLenum) =
-  var 
+  var
     format = case channels:
       of 1:
         GL_RED
@@ -244,18 +250,18 @@ proc extractFormats(bits: int, channels: int, hdr: bool): (GLenum, GLenum, GLenu
 
   result = (internalFormat, format, dataType)
 
-proc newTexture2D*(width, 
-           height: int, 
+proc newTexture2D*(width,
+           height: int,
            levels: int=1,
            internalFormat: GLenum=GL_RGBA8,
            format: GLenum=GL_RGBA,
            dataType: GLenum=GL_UNSIGNED_BYTE,
            pixels: pointer=nil,
-           wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture = 
+           wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture =
   result = newTexture(
     target=GL_TEXTURE_2D,
     width=width,
-    height=height,  
+    height=height,
     levels=levels,
     internalFormat=internalFormat,
     wrapS=wrapS,
@@ -267,17 +273,17 @@ proc newTexture2D*(width,
   if not isNil(pixels):
     setPixels(result, format, dataType, pixels)
 
-proc newTexture2D*(width, 
-           height: int, 
-           bits: int, 
-           channels: int, 
+proc newTexture2D*(width,
+           height: int,
+           bits: int,
+           channels: int,
            hdr: bool,
            pixels: pointer,
            wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture =
   let (internalFormat, format, dataType) = extractFormats(bits, channels, hdr)
   result = newTexture2D(
-    width, 
-    height, 
+    width,
+    height,
     levels=1,
     internalFormat=internalFormat,
     format=format,
@@ -287,11 +293,11 @@ proc newTexture2D*(width,
     wrapT=wrapT,
     wrapR=wrapR,
     minFilter=minFilter,
-    magFilter=magFilter      
+    magFilter=magFilter
   )
 
-proc newCubeTexture*(width, 
-           height: int, 
+proc newCubeTexture*(width,
+           height: int,
            levels: int=1,
            internalFormat: GLenum=GL_RGBA8,
            format: GLenum=GL_RGBA,
@@ -301,7 +307,7 @@ proc newCubeTexture*(width,
   result = newTexture(
     target=GL_TEXTURE_CUBE_MAP,
     width=width,
-    height=height, 
+    height=height,
     levels=levels,
     internalFormat=internalFormat,
     wrapS=wrapS,
@@ -312,19 +318,19 @@ proc newCubeTexture*(width,
   )
   setFaces(result, format, dataType, faces)
 
-proc newCubeTexture*(width, 
-           height: int, 
+proc newCubeTexture*(width,
+           height: int,
            levels: int=1,
            internalFormat: GLenum=GL_RGBA8,
-           wrapS=GL_CLAMP_TO_EDGE, 
-           wrapT=GL_CLAMP_TO_EDGE, 
-           wrapR=GL_CLAMP_TO_EDGE, 
-           minFilter=GL_NEAREST, 
+           wrapS=GL_CLAMP_TO_EDGE,
+           wrapT=GL_CLAMP_TO_EDGE,
+           wrapR=GL_CLAMP_TO_EDGE,
+           minFilter=GL_NEAREST,
            magFilter=GL_NEAREST): Texture =
   result = newTexture(
     target=GL_TEXTURE_CUBE_MAP,
     width=width,
-    height=height, 
+    height=height,
     levels=levels,
     internalFormat=internalFormat,
     wrapS=wrapS,
@@ -336,17 +342,17 @@ proc newCubeTexture*(width,
   allocate(result)
   echo &"* cubemap of size {width}x{height} allocated."
 
-proc newCubeTexture*(width, 
-           height: int, 
-           bits: int, 
-           channels: int, 
+proc newCubeTexture*(width,
+           height: int,
+           bits: int,
+           channels: int,
            hdr: bool,
            wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST,
            faces: array[6, pointer]): Texture =
   let (internalFormat, format, dataType) = extractFormats(bits, channels, hdr)
   result = newCubeTexture(
-    width, 
-    height, 
+    width,
+    height,
     levels=1,
     internalFormat=internalFormat,
     format=format,
@@ -363,16 +369,16 @@ proc newTexture*(color: Color): Texture =
   var bytes = color.bytes
   result = newTexture2D(width=1, height=1, bits=8, channels=4, hdr=false, pixels=bytes.addr)
 
-proc newTexture*(r: Resource, wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture = 
+proc newTexture*(r: Resource, wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture =
   if has(cache, r.url):
     result = get(cache, r.url)
   else:
     let image = cast[ImageResource](r)
     result = newTexture2D(
-      width=image.width, 
-      height=image.height, 
+      width=image.width,
+      height=image.height,
       bits=image.bits,
-      channels=image.channels, 
+      channels=image.channels,
       hdr=image.hdr,
       pixels=image.caddr,
       wrapS=wrapS,
@@ -383,33 +389,33 @@ proc newTexture*(r: Resource, wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wr
     )
     add(cache, r.url, result)
 
-proc newTexture*(url: string, wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture = 
+proc newTexture*(url: string, wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture =
   let resource = load(url)
   result = newTexture(
-    resource, 
-    wrapS, 
-    wrapT, 
+    resource,
+    wrapS,
+    wrapT,
     wrapR,
-    minFilter, 
+    minFilter,
     magFilter,
   )
 
 
-proc newTexture*(byteSeq: var seq[byte], wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture = 
+proc newTexture*(byteSeq: var seq[byte], wrapS=GL_CLAMP_TO_EDGE, wrapT=GL_CLAMP_TO_EDGE, wrapR=GL_CLAMP_TO_EDGE, minFilter=GL_NEAREST, magFilter=GL_NEAREST): Texture =
   let resource = new(ImageResource)
   resource.url = getMD5(encode(byteSeq))
   loadImage(byteSeq, resource)
   result = newTexture(
-    resource, 
-    wrapS, 
-    wrapT, 
+    resource,
+    wrapS,
+    wrapT,
     wrapR,
-    minFilter, 
+    minFilter,
     magFilter,
   )
 
-proc newCubeTexture*(px, nx, py, ny, pz, nz: string): Texture = 
-  var 
+proc newCubeTexture*(px, nx, py, ny, pz, nz: string): Texture =
+  var
     urls = [px, nx, py, ny, pz, nz]
     faces: array[6, pointer]
     width, height, channels, bits: int
@@ -424,11 +430,11 @@ proc newCubeTexture*(px, nx, py, ny, pz, nz: string): Texture =
     height = image.height
 
   result = newCubeTexture(
-    width=width.int32, 
-    height=height.int32, 
-    bits=bits, 
-    channels=channels, 
-    hdr=false, 
+    width=width.int32,
+    height=height.int32,
+    bits=bits,
+    channels=channels,
+    hdr=false,
     faces=faces
   )
 
@@ -437,20 +443,20 @@ proc copy*(src, dst: Texture) =
   if src.target == dst.target:
     let depth = if src.target == GL_TEXTURE_CUBE_MAP: 6 else: 1
     glCopyImageSubData(
-      src.buffer, 
-      src.target, 
-      0.GLint, 
-      0.GLint, 
-      0.GLint, 
-      0.GLint, 
-      dst.buffer, 
-      dst.target, 
-      0.GLint, 
-      0.GLint, 
-      0.GLint, 
-      0.GLint, 
-      src.width.GLsizei, 
-      src.height.GLsizei, 
+      src.buffer,
+      src.target,
+      0.GLint,
+      0.GLint,
+      0.GLint,
+      0.GLint,
+      dst.buffer,
+      dst.target,
+      0.GLint,
+      0.GLint,
+      0.GLint,
+      0.GLint,
+      src.width.GLsizei,
+      src.height.GLsizei,
       depth.GLsizei
     )
 ]#
@@ -463,14 +469,14 @@ proc mipmap*(t: Texture) =
 proc params*(t: Texture, param: GLenum, value: GLenum) =
   glTexParameteri(t.target, param, value.GLint)
 
-proc attach*(t: Texture) = 
+proc attach*(t: Texture) =
   if t != nil:
     glBindTexture(t.target, t.buffer)
 
-proc detach*(t: Texture) = 
+proc detach*(t: Texture) =
   glBindTexture(t.target, 0)
 
-proc unit*(t: Texture, slot: int) = 
+proc unit*(t: Texture, slot: int) =
   glActiveTexture((GL_TEXTURE0.int + slot).GLenum)
   if t != nil:
     glBindTexture(t.target, t.buffer)
@@ -479,27 +485,27 @@ proc unit*(t: Texture, slot: int) =
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0)
 
 #[
-proc use*(t: Texture, slot: int) = 
+proc use*(t: Texture, slot: int) =
   glActiveTexture((GL_TEXTURE0.int + slot).GLenum)
   if t != nil:
     glBindTexture(t.target, t.buffer)
   else:
     glBindTexture(GL_TEXTURE_2D, 0)
 
-proc useForOutput*(t: Texture, slot: int, levels: int, layered=false) = 
+proc useForOutput*(t: Texture, slot: int, levels: int, layered=false) =
   glBindImageTexture(
-    slot.GLuint, 
-    t.buffer, 
-    levels.GLint, 
-    if layered: GL_TRUE.GLboolean else: GL_FALSE.GLboolean, 
-    0.GLint, 
-    GL_WRITE_ONLY, 
+    slot.GLuint,
+    t.buffer,
+    levels.GLint,
+    if layered: GL_TRUE.GLboolean else: GL_FALSE.GLboolean,
+    0.GLint,
+    GL_WRITE_ONLY,
     t.internalFormat
   )
 ]#
 
 proc destroy*(t: Texture) = remove(cache, t)
-proc cleanupTextures*() = 
+proc cleanupTextures*() =
   if len(cache) > 0:
     echo &"Cleaning up [{len(cache)}] textures..."
     clear(cache)
