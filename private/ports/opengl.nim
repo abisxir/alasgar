@@ -1,5 +1,4 @@
 import strformat
-import sdl2
 import enums
 
 when defined(windows):
@@ -30,19 +29,35 @@ when declared(glDebugMessageCallback):
     #else:
     echo message
 
+when defined(windows):
+  proc wglGetProcAddress(name: cstring): pointer {.stdcall, importc, dynlib: "opengl32".}
+  proc loadOpenGLProc(name: cstring): pointer {.cdecl.} = wglGetProcAddress(name)
+elif defined(macosx):
+  import std/dynlib
+  var openGLHandle: LibHandle
+  proc loadOpenGLProc(name: cstring): pointer {.cdecl.} =
+    if openGLHandle == nil:
+      openGLHandle = loadLib("/System/Library/Frameworks/OpenGL.framework/OpenGL")
+    if openGLHandle != nil:
+      result = symAddr(openGLHandle, $name)
+elif defined(linux):
+  proc glXGetProcAddressARB(name: ptr GLubyte): pointer {.cdecl, importc, dynlib: "libGL.so.1".}
+  proc loadOpenGLProc(name: cstring): pointer {.cdecl.} =
+    glXGetProcAddressARB(cast[ptr GLubyte](name))
+else:
+  proc eglGetProcAddress(name: cstring): pointer {.cdecl, importc, dynlib: "EGL".}
+  proc loadOpenGLProc(name: cstring): pointer {.cdecl.} = eglGetProcAddress(name)
+
 proc logContextInfo() =
   echo "Device and render info:"
   var
-    linked: SDL_Version
     version = cast[cstring](glGetString(GL_VERSION))
     vendor = cast[cstring](glGetString(GL_VENDOR))
     renderer = cast[cstring](glGetString(GL_RENDERER))
     maxVaryingVectors: GLint
 
-  getVersion(linked)
   glGetIntegerv(GL_MAX_VARYING_VECTORS, addr maxVaryingVectors)
 
-  echo &"  SDL linked version  : {linked.major}.{linked.minor}.{linked.patch}"
   echo &"  Version: {version}"
   echo &"  Vendor: {vendor}"
   echo &"  Renderer: {renderer}"
@@ -50,66 +65,39 @@ proc logContextInfo() =
 
 when defined(macosx):
   const
-    OPENGL_PROFILE* = SDL_GL_CONTEXT_PROFILE_CORE
     OPENGL_MAJOR_VERSION* = 4
     OPENGL_MINOR_VERSION* = 1
     OPENGL_SHADER_VERSION* = "410"
 elif defined(windows):
   const
-    OPENGL_PROFILE* = SDL_GL_CONTEXT_PROFILE_CORE
     OPENGL_MAJOR_VERSION* = 4
     OPENGL_MINOR_VERSION* = 6
     OPENGL_SHADER_VERSION* = "460"
 elif defined(linux):
   const
-    OPENGL_PROFILE* = SDL_GL_CONTEXT_PROFILE_ES
-    OPENGL_MAJOR_VERSION* = 3
-    OPENGL_MINOR_VERSION* = 0
-    OPENGL_SHADER_VERSION* = "300 es"
+    OPENGL_MAJOR_VERSION* = 4
+    OPENGL_MINOR_VERSION* = 6
+    OPENGL_SHADER_VERSION* = "460"
 else:
   const
-    OPENGL_PROFILE* = SDL_GL_CONTEXT_PROFILE_ES
     OPENGL_MAJOR_VERSION* = 3
     OPENGL_MINOR_VERSION* = 0
     OPENGL_SHADER_VERSION* = "300 es"
 
-proc createOpenGLContext*(window: WindowPtr): GlContextPtr =
-  # Initialize opengl context
-  discard glSetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1)
-  discard glSetAttribute(SDL_GL_DOUBLEBUFFER, 1)
-  discard glSetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, OPENGL_PROFILE)
-  discard glSetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,
-      OPENGL_MAJOR_VERSION.cint)
-  discard glSetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,
-      OPENGL_MINOR_VERSION.cint)
-
-  # Creates opengl context
-  result = glCreateContext(window)
-
-  # Checks that opengl context has created
-  if result == nil:
-    quit "Could not create context!"
-
-  # Activates opengl context
-  discard glMakeCurrent(window, result)
-
-  # Loads opengl functions
+proc initOpenGL*() =
   when declared(gladLoadGLES2):
-    discard gladLoadGLES2(glGetProcAddress)
+    if not gladLoadGLES2(loadOpenGLProc):
+      quit "Could not load OpenGL ES functions."
   else:
-    discard gladLoadGL(glGetProcAddress)
+    if not gladLoadGL(loadOpenGLProc):
+      quit "Could not load OpenGL functions."
 
-  # Logs context info
   logContextInfo()
 
-  # Sets debug callback
   when declared(glDebugMessageCallback):
     glDebugMessageCallback(printGlDebug, nil)
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS)
     glEnable(GL_DEBUG_OUTPUT)
-
-  #when declared(GL_TEXTURE_CUBE_MAP_SEAMLESS):
-  #  glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS)
 
 proc getOpenGLErrorString*(error: uint32): string = &"OpenGL error: {glEnumToString(error.uint32)}"
 

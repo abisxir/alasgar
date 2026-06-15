@@ -12,5 +12,4 @@ installFiles = @["alasgar.nim"]
 requires "nim >= 2.2.0"
 
 # Dependencies
-requires "chroma == 1.0.0"
-requires "vmath == 3.0.0"
+requires "sokol == 0.6.0"
