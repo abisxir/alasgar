@@ -3,12 +3,12 @@ import strformat
 import strutils
 import tables
 
-import ../ports/opengl
-import ../texture
-import ../utils
-import ../aljebra
+import ports/opengl
+import texture
+import utils
+import aljebra
 
-import compile
+import glsl
 
 type
   ShaderValueKind = enum
@@ -29,10 +29,10 @@ type
     value: ShaderValue
     extra: int
   Shader* = object
-    program: GLuint
+    program*: GLuint
     layout*: ShaderLayout
+    source*: string
     params: Table[string, ShaderParam]
-    source: string
 
 proc destroy*(shader: ptr Shader) =
   if shader.program != 0:
@@ -101,7 +101,7 @@ proc loadShaderSource(src: cstring, kind: GLenum): GLuint =
     logi "Shader compile log: ", info
 
 
-proc createProgram(vs, fs: string): GLuint =
+proc createProgram*(vs, fs: string): GLuint =
   result = glCreateProgram()
   if result == 0:
     halt &"Could not create program: {glGetError().int}"
@@ -309,22 +309,6 @@ proc use*(shader: var Shader) =
   glUseProgram(shader.program)
   for key, param in pairs(shader.params):
     update(shader, key, param)
-
-template shader*(vx, fx: untyped): Shader =
-  var
-    r = compileToGLSL(vx)
-    fs = toGLSL(fx)
-    vs = r[0]
-    layout = r[1]
-    source = vs & "\n" & fs
-  Shader(
-    program: createProgram(
-      vs,
-      fs,
-    ),
-    layout: layout,
-    source: source,
-  )
 
 #template newSpatialShader*(fs: untyped): Shader = newSpacialShader(mainVertex, fs)
 #proc newSpatialShader*(): Shader = newSpatialShader(mainVertex, mainFragment)

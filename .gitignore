@@ -63,3 +63,6 @@ art/
 
 SDL2.dll
 SDL2_mixer.dll
+.shaders/
+test.nim
+test

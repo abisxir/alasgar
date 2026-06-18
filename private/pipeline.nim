@@ -1,9 +1,11 @@
 import std/strformat
 
 import ports/opengl
-import shaders/base
-import shaders/compile
+import shader
+import glsl
 import core
+import aljebra
+import camera
 
 type
   Pipeline* = object
@@ -13,6 +15,7 @@ type
     vao: GLuint
     vbo: GLuint
     ibo: GLuint
+
 
 proc destroy*(p: ptr Pipeline) =
   if p.ibo != 0:
@@ -60,11 +63,45 @@ proc pipeline*[V, I](shader: Shader, vertices: openArray[V], indices: openArray[
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ibo)
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(indices) * sizeof(I)).GLsizeiptr, cast[pointer](addr indices[0]), GL_STATIC_DRAW)
 
-  #glBindVertexArray(0)
-  #glBindBuffer(GL_ARRAY_BUFFER, 0)
-  #glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+  glBindVertexArray(0)
+  glBindBuffer(GL_ARRAY_BUFFER, 0)
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
-proc render*(g: ptr Graphics, p: var Pipeline) =
+
+proc setCameraData(g: ptr Graphics, shader: var Shader, camera: Camera) =
+  let
+    invView = camera.transform.world
+    view = inverse(invView)
+    viewProjection = view * camera.projection
+  shader["GLSL_CAMERA.PROJECTION"] = camera.projection
+  shader["GLSL_CAMERA.VIEW"] = inverse(invView)
+  shader["GLSL_CAMERA.VIEW_PROJECTION"] = viewProjection
+  shader["GLSL_CAMERA.INV_PROJECTION"] = inverse(camera.projection)
+  shader["GLSL_CAMERA.INV_VIEW"] = invView
+  shader["GLSL_CAMERA.INV_VIEW_PROJECTION"] = inverse(viewProjection)
+  shader["GLSL_CAMERA.NEAR_PLANE"] = camera.nearZ
+  shader["GLSL_CAMERA.FAR_PLANE"] = camera.farZ
+  shader["GLSL_CAMERA.ASPECT"] = g.aspect
+
+
+proc render*(g: ptr Graphics, p: var Pipeline, camera: Camera) =
   use(p.shader)
+  setCameraData(g, p.shader, camera)
   glBindVertexArray(p.vao)
   glDrawElements(GL_TRIANGLES, p.count.GLsizei, p.indexType, cast[pointer](0))
+
+template shader*(g: ptr Graphics, vx, fx: untyped): Shader =
+  var
+    r = toGLSL(vx)
+    fs = toGLSL(fx)[0]
+    vs = r[0]
+    layout = r[1]
+    source = vs & "\n" & fs
+  Shader(
+    program: createProgram(
+      vs,
+      fs,
+    ),
+    layout: layout,
+    source: source,
+  )

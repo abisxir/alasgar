@@ -7,13 +7,11 @@ import private/aljebra
 proc vertex(
   IN_POSITION: Layout[0, Vec3],
   IN_COLOR: Layout[1, Vec4],
-  PROJECTION: Uniform[Mat4],
-  VIEW: Uniform[Mat4],
   MODEL: Uniform[Mat4],
   COLOR: var Vec4,
   gl_Position: var Vec4
 ) =
-  gl_Position = PROJECTION * VIEW * MODEL * vec4(IN_POSITION, 1)
+  gl_Position = GLSL_CAMERA.PROJECTION * GLSL_CAMERA.VIEW * MODEL * vec4(IN_POSITION, 1)
   COLOR = IN_COLOR
 
 
@@ -65,25 +63,25 @@ const
     16, 17, 18,   16, 18, 19,
     22, 21, 20,   23, 22, 20,
   ]
+
 var
-  p1: Pipeline
-  model: Mat4
-  projection: Mat4
-  view: Mat4
+  cube: Pipeline
+  t1: Transform
+  camera: Camera
 
 proc load() =
-  p1 = pipeline(shader=shader(vertex, fragment), vertices=VERTICES, indices=INDICES)
-  model = mat4()
-  projection = perspective(60, 800.0 / 600.0, 0.1, 100.0)
+  var ct = Transform(position: vec3(5, 0, 5))
+  ct.lookAt(vec3(0, 0, 0), vec3(0, 1, 0))
+  cube = pipeline(shader=graphics.shader(vertex, fragment), vertices=VERTICES, indices=INDICES)
+  camera = graphics.perspective(ct, 60, 0.1, 100.0)
 
 proc draw() =
   graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
-  view = lookAt(vec3(5.0, 0.0, 5.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0))
-  p1.shader.set("PROJECTION", projection)
-  p1.shader.set("VIEW", view)
-  p1.shader.set("MODEL", model)
-  graphics.render(p1)
+  #p1.shader.set("PROJECTION", projection)
+  #p1.shader.set("VIEW", view)
+  cube.shader.set("MODEL", mat4())
+  graphics.render(cube, camera)
 
-proc cleanup() = destroy(addr p1)
+proc cleanup() = destroy(addr cube)
 
 window(800, 600, "My Game", load, draw, cleanup)

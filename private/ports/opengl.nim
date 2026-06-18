@@ -23,11 +23,13 @@ when declared(glDebugMessageCallback):
         message: ptr GLchar,
         userParam: pointer
         ) {.stdcall.} =
-    let message = &"source=0x{source.uint32:0x} type=0x{typ.uint32:0x} id=0x{id.uint32:0x} severity=0x{severity.uint32:0x}: {$message}"
+    let
+      converted = cast[cstring](message)
+      formatted = &"source=0x{source.uint32:0x} type=0x{typ.uint32:0x} id=0x{id.uint32:0x} severity=0x{severity.uint32:0x}: {$message}"
     #if severity == GL_DEBUG_SEVERITY_HIGH:
     #    raise newException(OpenGLError, message)
     #else:
-    echo message
+    echo formatted
 
 when defined(windows):
   proc wglGetProcAddress(name: cstring): pointer {.stdcall, importc, dynlib: "opengl32".}

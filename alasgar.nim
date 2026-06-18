@@ -1,8 +1,9 @@
 import private/core
-import private/shaders/base as shader_base
-import private/shaders/compile
+import private/shader
+import private/glsl
 import private/aljebra
 import private/pipeline
+import private/camera
 #import private/input
 
-export core, aljebra, shader_base, compile, pipeline
+export core, aljebra, shader, glsl, pipeline, camera

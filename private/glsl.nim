@@ -3,8 +3,8 @@
 
 import macros, strutils, tables, strformat
 
-import ../aljebra
-import ../ports/opengl
+import aljebra
+import ports/opengl
 
 type
   ShaderAttribute* = object
@@ -274,7 +274,7 @@ const glslGlobals = [
   "gl_FragCoord",
   "gl_GlobalInvocationID",
   "gl_VertexID",
-  "gl_FrontFacing"
+  "gl_FrontFacing",
 ]
 
 ## List of function that GLSL provides, don't include their Nim src.
@@ -1056,7 +1056,12 @@ proc toGLSLInner*(s: NimNode): (string, ShaderLayout) =
   code.add " */\n\n"
   code.add "precision highp float;\nprecision highp int;\nprecision highp sampler2DArray;\nprecision highp sampler2DArrayShadow;"
   when defined(emscripten) or defined(linux):
+    code.add "\n/*unpack sheem*/"
     code.add """vec4 unpackUnorm4x8(uint i) { return vec4(float(i & uint(0xff)) / 255.0, float(i/uint(0x100) & uint(0xff)) / 255.0, float(i/uint(0x10000) & uint(0xff)) / 255.0,float(i/uint(0x1000000)) / 255.0);}"""
+  code.add "\n"
+  code.add "struct CameraGLSL {\n\tmat4 VIEW;\n\tmat4 PROJECTION;\n\tmat4 VIEW_PROJECTION;\n\tmat4 INV_VIEW;\n\tmat4 INV_PROJECTION;\n\tmat4 INV_VIEW_PROJECTION;\n\tvec3 POSITION;\n\tfloat NEAR_PLANE;\n\tvec3 DIRECTION;\n\tfloat FAR_PLANE;\n\tfloat ASPECT;\n};"
+  code.add "\n"
+  code.add "uniform CameraGLSL GLSL_CAMERA;"
   code.add "\n"
 
   var n = getImpl(s)
@@ -1097,20 +1102,18 @@ proc toGLSLInner*(s: NimNode): (string, ShaderLayout) =
 
   return (code, layout)
 
-macro compileToGLSL*(
+macro toGLSL*(
   s: typed,
 ): (string, ShaderLayout) =
   ## Converts proc to a glsl string.
   result = newLit(toGLSLInner(s))
 
-macro toGLSL*(
-  s: typed,
-): string =
-  ## Converts proc to a glsl string.
-  let r = newLit(toGLSLInner(s))
-  result = r[0]
+func `stride`*(layout: ShaderLayout): int =
+  for data in layout.attrs:
+    result += data.size
 
 func `count`*(layout: ShaderLayout): int = len(layout.attrs)
+
 func `count`*(data: ShaderAttribute): int =
   if data.typeName == "Vec2":
     result = 2
@@ -1120,23 +1123,7 @@ func `count`*(data: ShaderAttribute): int =
     result = 4
   else:
     result = 1
-func `stride`*(layout: ShaderLayout): int =
-  for data in layout.attrs:
-    result += data.size
 
-
-#template toGLSL*(s: typed): string =
-#  ## Converts proc to a glsl string.
-#  let r = compileToGLSL(s)
-#  result = r[0]
-#
-#template toGLSL*(s: typed, attributeCount: var int): string =
-#  ## Converts proc to a glsl string.
-#  let r = compileToGLSL(s)
-#  result = r[0]
-#  attributeCount = r[1]
-
-## GLSL helper functions
 
 type
   Layout*[N, T] = T
@@ -1194,7 +1181,6 @@ type
   USamplerCubeShadow* = object
   USamplerCubeArrayShadow* = object
   UImageBuffer* = object
-
 
 proc texelFetch*(sampler: Sampler2D, P: IVec2, lod: int): Vec4 = discard
 proc textureLod*(sampler: SamplerCube, P: Vec3, lod: float): Vec4 = discard

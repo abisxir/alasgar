@@ -9,11 +9,13 @@ when (defined(windows) or defined(macosx)) and not defined(gl):
   {.error: "The current renderer still uses raw OpenGL; compile with -d:gl when using Sokol on this platform.".}
 
 type
+  OnWindowResize = proc (width, height: int32)
   Window* = object
     title: string
     size: UVec2
   Graphics* = object
     size: UVec2
+    onWindowResizeCallbacks: seq[OnWindowResize]
     color*: Vec4
   Runtime* = object
     frames: int
@@ -92,6 +94,8 @@ proc eventCallback(event: ptr sapp.Event) {.cdecl.} =
     engine.window.size = uvec2(width.uint32, height.uint32)
     engine.graphics.size = engine.window.size
     echo &"Window resized: ({width}, {height})"
+    for cb in engine.graphics.onWindowResizeCallbacks:
+      cb(width, height)
   else:
     discard
 
@@ -149,3 +153,28 @@ proc `frames`*(runtime: ptr Runtime): int =
   ## echo runtime.frames
   ## ```
   runtime.frames
+
+
+proc `size`*(g: ptr Graphics): UVec2 =
+  ## Return the render screen size.
+  ##
+  ## Example:
+  ## ```nim
+  ## let aspect = graphics.size.x.float32 / graphics.size.y.float32
+  ## ```
+  g.size
+
+
+proc `aspect`*(g: ptr Graphics): float32 =
+  ## Return the render screen aspect, 16/9 or etc.
+  ##
+  ## Example:
+  ## ```nim
+  ## let aspect = graphics.aspect
+  ## ```
+  g.size.x.float32 / g.size.y.float32
+
+
+proc onWindowResize*(g: ptr Graphics, slot: OnWindowResize) =
+  if slot notin g.onWindowResizeCallbacks:
+    g.onWindowResizeCallbacks.add(slot)
