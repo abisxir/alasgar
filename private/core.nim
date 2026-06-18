@@ -19,7 +19,7 @@ type
     color*: Vec4
   Runtime* = object
     frames: int
-    age, delta, lastTicks: float32
+    age, delta: float32
   Engine* = object
     window: Window
     graphics: Graphics
@@ -35,11 +35,10 @@ let
   graphics*: ptr Graphics = addr engine.graphics
   runtime*: ptr Runtime = addr engine.runtime
 
-proc frame() {.cdecl.} =
+proc frameCallback() {.cdecl.} =
   let now = epochTime()
-  engine.runtime.delta = now - engine.runtime.lastTicks
+  engine.runtime.delta = sapp.frameDuration()
   engine.runtime.age += engine.runtime.delta
-  engine.runtime.lastTicks = now
   engine.runtime.frames += 1
 
   #glBindRenderbuffer(GL_RENDERBUFFER, 0)
@@ -77,7 +76,6 @@ proc initCallback() {.cdecl.} =
   if engine.load != nil:
     engine.load()
 
-  engine.runtime.lastTicks = epochTime()
 
 proc eventCallback(event: ptr sapp.Event) {.cdecl.} =
   case event[].`type`
@@ -115,7 +113,7 @@ proc window*(
 
   sapp.run(sapp.Desc(
     initCb: initCallback,
-    frameCb: frame,
+    frameCb: frameCallback,
     cleanupCb: cleanupCallback,
     eventCb: eventCallback,
     width: width.int32,

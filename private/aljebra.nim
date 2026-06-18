@@ -1795,5 +1795,5 @@ proc lookAt*(t: var Transform, target: Vec3, up: Vec3) =
   let
     world = t.world
     worldPosition = world.pos
-    rotation = quat(lookAt(worldPosition, target, up))
-  t.rotation = inverse(world.quat) * rotation
+    rotation = lookAt(worldPosition - target, up)
+  t.rotation = inverse(t.parent.quat) * rotation

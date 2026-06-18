@@ -66,7 +66,7 @@ const
 
 var
   cube: Pipeline
-  t1: Transform
+  t1 = Transform()
   camera: Camera
 
 proc load() =
@@ -74,12 +74,11 @@ proc load() =
   ct.lookAt(vec3(0, 0, 0), vec3(0, 1, 0))
   cube = pipeline(shader=graphics.shader(vertex, fragment), vertices=VERTICES, indices=INDICES)
   camera = graphics.perspective(ct, 60, 0.1, 100.0)
+  graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
 
 proc draw() =
-  graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
-  #p1.shader.set("PROJECTION", projection)
-  #p1.shader.set("VIEW", view)
-  cube.shader.set("MODEL", mat4())
+  t1.rotation = euler(0.0, runtime.age * runtime.delta * 10, 0.0)
+  cube.shader.set("MODEL", t1.world)
   graphics.render(cube, camera)
 
 proc cleanup() = destroy(addr cube)
