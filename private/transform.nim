@@ -1,11 +1,13 @@
-import common
+import aljebra
+
+export aljebra
 
 type
   Transform* = object
     position*: Vec3
     scale*: Vec3 = Vec3(x: 1.0, y: 1.0, z: 1.0)
     rotation*: Quat = Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0)
-    parent*: ptr Mat4
+    parent*: ptr Transform
 
 
 ## Transform
@@ -30,9 +32,9 @@ func `mat4`*(t: Transform): Mat4 =
 func `local`*(t: Transform): Mat4 = t.mat4
 func `world`*(t: Transform): Mat4 =
   if not isNil(t.parent):
-    t.parent[] * t.mat4
+    return t.parent[].world * t.mat4
   else:
-    t.mat4
+    return t.mat4
 
 proc lookAt*(t: var Transform, target: Vec3, up: Vec3) =
   let
@@ -40,4 +42,4 @@ proc lookAt*(t: var Transform, target: Vec3, up: Vec3) =
     worldPosition = world.pos
   t.rotation = lookAt(worldPosition - target, up)
   if not isNil(t.parent):
-    t.rotation = inverse(t.parent[].quat) * t.rotation
+    t.rotation = inverse(quat(t.parent[].world)) * t.rotation

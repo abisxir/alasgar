@@ -66,7 +66,8 @@ const
 
 var
   cube: Pipeline
-  t1 = Transform()
+  p1 = Transform()
+  t1 = Transform(parent: addr p1)
   camera: Camera
 
 proc load() =
@@ -77,7 +78,11 @@ proc load() =
   graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
 
 proc draw() =
-  t1.rotation = euler(0.0, runtime.age * runtime.delta * 10, 0.0)
+  let
+    speed = 20.0
+    r = runtime.age * runtime.delta * speed
+  p1.position = vec3(2 * sin(runtime.age), 2 * cos(runtime.age), 0)
+  t1.rotation = fromEuler(r, r, 0.0)
   cube.shader.set("MODEL", t1.world)
   graphics.render(cube, camera)
 

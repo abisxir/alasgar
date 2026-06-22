@@ -148,11 +148,8 @@ proc `[]=`*(s: Shader, key: string, value: Vec4) = glUniform4fv(getUniformLocati
 proc `[]=`*(s: Shader, key: string, value: float32) = glUniform1f(getUniformLocation(s, key), value)
 proc `[]=`*(s: Shader, key: string, value: int) = glUniform1i(getUniformLocation(s, key), value.GLint)
 proc `[]=`*(s: Shader, key: string, value: uint32) = glUniform1ui(getUniformLocation(s, key), value.GLuint)
-proc `[]=`*(s: Shader, key: string, value: var Mat4) = glUniformMatrix4fv(getUniformLocation(s, key), 1, false, value.caddr)
-proc `[]=`*(s: Shader, key: string, value: ptr Mat4) = glUniformMatrix4fv(getUniformLocation(s, key), 1, false, value[].caddr)
-proc `[]=`*(s: Shader, key: string, value: Mat4) = s[key] = value
-proc `[]=`*(s: Shader, key: string, value: var Mat3) = glUniformMatrix3fv(getUniformLocation(s, key), 1, false, value.caddr)
-proc `[]=`*(s: Shader, key: string, value: Mat3) = s[key] = value
+proc `[]=`*(s: Shader, key: string, value: Mat4) = glUniformMatrix4fv(getUniformLocation(s, key), 1, false, value.caddr)
+proc `[]=`*(s: Shader, key: string, value: Mat3) = glUniformMatrix3fv(getUniformLocation(s, key), 1, false, value.caddr)
 
 #proc `[]`*(s: Shader, key: string): int = getUniformLocation(s, key).int
 

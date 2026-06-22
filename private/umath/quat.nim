@@ -1,19 +1,20 @@
 import math
-import common
-import vec3
-import vec4
+import common, vec3, vec4
 
 func quat*(v: Vec3): Quat = Quat(x: v.x, y: v.y, z: v.z, w: 0.0)
+func quat*(x, y, z, w: float32): Quat = Quat(x: x, y: y, z: z, w: w)
 func quat*(w: float32): Quat = Quat(x: 0.0, y: 0.0, z: 0.0, w: w)
 func quat*(): Quat = Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0)
+func quat*(v: openArray[float32], offset: int): Quat = quat(v[offset], v[offset + 1], v[offset + 2], v[offset + 3])
 
 func fromEuler*(yaw, pitch, roll: float32): Quat =
-  let cy = cos(yaw * 0.5)
-  let sy = sin(yaw * 0.5)
-  let cp = cos(pitch * 0.5)
-  let sp = sin(pitch * 0.5)
-  let cr = cos(roll * 0.5)
-  let sr = sin(roll * 0.5)
+  let
+    cy = cos(yaw * 0.5)
+    sy = sin(yaw * 0.5)
+    cp = cos(pitch * 0.5)
+    sp = sin(pitch * 0.5)
+    cr = cos(roll * 0.5)
+    sr = sin(roll * 0.5)
   Quat(
     w: cr * cp * cy + sr * sp * sy,
     x: sr * cp * cy - cr * sp * sy,
@@ -21,7 +22,7 @@ func fromEuler*(yaw, pitch, roll: float32): Quat =
     z: cr * cp * sy - sr * sp * cy
   )
 
-func fromEuler*(v: Vec3): Quat = fromEuler*(v.x, v.y, v.z)
+func fromEuler*(v: Vec3): Quat = fromEuler(v.x, v.y, v.z)
 
 func euler*(q1: Quat): Vec3 =
   let
@@ -44,13 +45,40 @@ func euler*(q1: Quat): Vec3 =
     result.z = arcsin(2 * test / unit)
     result.x = arctan2(2 * q1.x * q1.w - 2 * q1.y * q1.z, -sqx + sqy - sqz + sqw)
 
-func `*`*(q, p: Quat): Quat =
-  Quat(
-    x: p.x * q.w + p.y * q.z - p.z * q.y + p.w * q.x,
-    y: -(p.x * q.z) + p.y * q.w + p.z * q.x + p.w * q.y,
-    z: p.x * q.y - p.y * q.x + p.z * q.w + p.w * q.z,
-    w: -(p.x * q.x) - p.y * q.y - p.z * q.z + p.w * q.w
+func `*`*(q, p: Quat): Quat = Quat(
+  x: p.x * q.w + p.y * q.z - p.z * q.y + p.w * q.x,
+  y: -(p.x * q.z) + p.y * q.w + p.z * q.x + p.w * q.y,
+  z: p.x * q.y - p.y * q.x + p.z * q.w + p.w * q.z,
+  w: -(p.x * q.x) - p.y * q.y - p.z * q.z + p.w * q.w
+)
+
+func `*`*(q: Quat, v: Vec3): Vec3 =
+  let
+    x = v.x
+    y = v.y
+    z = v.z
+    qx = q.x
+    qy = q.y
+    qz = q.z
+    qw = q.w
+    ix = +qw * x + qy * z - qz * y
+    iy = +qw * y + qz * x - qx * z
+    iz = +qw * z + qx * y - qy * x
+    iw = -qx * x - qy * y - qz * z
+
+  return vec3(
+    ix * qw + iw * -qx + iy * -qz - iz * -qy,
+    iy * qw + iw * -qy + iz * -qx - ix * -qz,
+    iz * qw + iw * -qz + ix * -qy - iy * -qx
   )
+
+func `*`*(v: Vec3, q: Quat): Vec3 =
+  let
+    u = vec3(q.x, q.y, q.z)
+    s = q.w
+  return vec3(2 * dot(u, v) * u) + ((s * s - dot(u, u)) * v) + (2 * s * cross(u, v))
+
+func rotate*(v: Vec3, q: Quat): Vec3 = v * q
 
 func conjugate*(quat: Quat): Quat =
   Quat(
@@ -132,36 +160,37 @@ func pow*(q: Quat, power: float32): Quat =
   Quat(x: axis.x * halfSin, y: axis.y * halfSin, z: axis.z * halfSin, w: halfCos)
 
 func angleAxis*(radians: float32, axis: Vec3): Quat =
-  var half: float32 = radians * 0.5'f32
-  var sinHalf = sin(half)
-  var a = axis
+  var
+    half: float32 = radians * 0.5'f32
+    sinHalf = sin(half)
+    a = axis
   if lengthSq(a) != 1:
     a = normalize(axis)
 
-  Quat(
+  return Quat(
     x: axis.x * sinHalf,
     y: axis.y * sinHalf,
     z: axis.z * sinHalf,
     w: cos(half)
   )
 
-  proc fromToRotation*(a, b: Vec3): Quat =
+proc fromToRotation*(a, b: Vec3): Quat =
+  let
+    p0 = normalize(a)
+    p1 = normalize(b)
+  if p0 == -1 * p1:
+    var mostOrthogonal = vec3(1, 0, 0)
+    if abs(p0.y) < abs(p0.x):
+      mostOrthogonal = vec3(0, 1, 0)
+    if abs(p0.z) < abs(p0.y) and abs(p0.z) < abs(p0.x):
+      mostOrthogonal = vec3(0, 0, 1)
+    let axis = normalize(cross(p0, mostOrthogonal))
+    result = quat(axis.x, axis.y, axis.z, 0)
+  else:
     let
-      p0 = normalize(a)
-      p1 = normalize(b)
-    if p0 == -1 * p1:
-      var mostOrthogonal = vec3(1, 0, 0)
-      if abs(p0.y) < abs(p0.x):
-        mostOrthogonal = vec3(0, 1, 0)
-      if abs(p0.z) < abs(p0.y) and abs(p0.z) < abs(p0.x):
-        mostOrthogonal = vec3(0, 0, 1)
-      let axis = normalize(cross(p0, mostOrthogonal))
-      result = quat(axis.x, axis.y, axis.z, 0)
-    else:
-      let
-        half = normalize(p0 + p1)
-        axis = cross(p0, half)
-      result = quat(axis.x, axis.y, axis.z, dot(p0, half))
+      half = normalize(p0 + p1)
+      axis = cross(p0, half)
+    result = quat(axis.x, axis.y, axis.z, dot(p0, half))
 
 func lookAt*(direction: Vec3, up: Vec3 = vec3(0, 1, 0)): Quat =
   # Normalize input data
@@ -202,7 +231,7 @@ func mat4*(q: Quat): Mat4 =
     xz = q.x * q.z
     yz = q.y * q.z
 
-  mat4(
+  return (
       ww + xx - yy - zz, 2 * xy - 2 * wz, 2 * xz + 2 * wy, 0,
       2 * xy + 2 * wz, ww - xx + yy - zz, 2 * yz - 2 * wx, 0,
       2 * xz - 2 * wy, 2 * yz + 2 * wx, ww - xx - yy + zz, 0,
@@ -223,37 +252,7 @@ func quat*(p: ptr float32, offset: int = 0): Quat =
     size = sizeof(float32).uint
     start = address + offset.uint * sizeof(float32).uint
     x = cast[ptr float32](start)
-    y = cast[ptr float32 + size](start)
-    z = cast[ptr float32 + 2 * size](start)
-    w = cast[ptr float32 + 3 * size](start)
+    y = cast[ptr float32](start + size)
+    z = cast[ptr float32](start + 2 * size)
+    w = cast[ptr float32](start + 3 * size)
   result = quat(x[], y[], z[], w[])
-
-func quat*(v: openArray[float32], offset: int): Quat = quat(v[offset], v[offset + 1], v[offset + 2], v[offset + 3])
-
-func `*`(q: Quat, v: Vec3): Vec3 =
-  let
-    x = v.x
-    y = v.y
-    z = v.z
-    qx = q.x
-    qy = q.y
-    qz = q.z
-    qw = q.w
-    ix = +qw * x + qy * z - qz * y
-    iy = +qw * y + qz * x - qx * z
-    iz = +qw * z + qx * y - qy * x
-    iw = -qx * x - qy * y - qz * z
-
-  vec3(
-    ix * qw + iw * -qx + iy * -qz - iz * -qy,
-    iy * qw + iw * -qy + iz * -qx - ix * -qz,
-    iz * qw + iw * -qz + ix * -qy - iy * -qx
-  )
-
-func `*`*(v: Vec3, q: Quat): Vec3 =
-  let
-    u = vec3(q.x, q.y, q.z)
-    s = q.w
-  return (2 * dot(u, v) * u) + ((s * s - dot(u, u)) * v) + (2 * s * cross(u, v))
-
-func rotate*(v: Vec3, q: Quat): Vec3 = v * q

@@ -51,4 +51,6 @@ const
   ONE_OVER_PI*: float32 = 0.3183098861837697
   LOG2*: float32 = 1.442695
 
-func caddr*[T](v: GVec2[T] | GVec3[T] | GVec4[T]): T = addr v.x
+func caddr*[T](v: GVec2[T] | GVec3[T] | GVec4[T]): ptr T = addr v.x
+func caddr*(m: Mat3 | Mat4): ptr float32 = addr m.m00
+func caddr*(m: ptr Mat3 | ptr Mat4): ptr float32 = addr m.m00
