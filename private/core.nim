@@ -1,3 +1,14 @@
+## Core runtime and windowing API.
+##
+## This module exposes the engine entry point and the small set of shared
+## runtime handles used by applications:
+##
+## - `window` starts the Sokol/OpenGL application loop.
+## - `graphics` exposes framebuffer state such as `size`, `aspect`, and clear
+##   `color`.
+## - `runtime` exposes timing state such as `age`, `delta`, and `frames`.
+## - `onWindowResize` registers callbacks for framebuffer resize events.
+
 import std/strformat
 import std/times
 
@@ -11,16 +22,20 @@ when (defined(windows) or defined(macosx)) and not defined(gl):
 type
   OnWindowResize = proc (width, height: int32)
   Window* = object
+    ## Window configuration and current size.
     title: string
     size: UVec2
   Graphics* = object
+    ## Graphics state shared with the active application.
     size: UVec2
     onWindowResizeCallbacks: seq[OnWindowResize]
-    color*: Vec4
+    color*: Vec4 ## Clear color used at the start of each frame.
   Runtime* = object
+    ## Runtime timing counters updated once per frame.
     frames: int
     age, delta: float32
   Engine* = object
+    ## Internal engine state for the active application.
     window: Window
     graphics: Graphics
     runtime: Runtime
@@ -32,8 +47,8 @@ var
   engine = Engine(vsync: true)
 
 let
-  graphics*: ptr Graphics = addr engine.graphics
-  runtime*: ptr Runtime = addr engine.runtime
+  graphics*: ptr Graphics = addr engine.graphics ## Shared graphics state.
+  runtime*: ptr Runtime = addr engine.runtime ## Shared runtime timing state.
 
 proc frameCallback() {.cdecl.} =
   let now = epochTime()
@@ -174,5 +189,15 @@ proc `aspect`*(g: ptr Graphics): float32 =
 
 
 proc onWindowResize*(g: ptr Graphics, slot: OnWindowResize) =
+  ## Register a callback for framebuffer resize events.
+  ##
+  ## Duplicate callbacks are ignored.
+  ##
+  ## Example:
+  ## ```nim
+  ## graphics.onWindowResize(proc (width, height: int32) =
+  ##   echo "resized to ", width, "x", height
+  ## )
+  ## ```
   if slot notin g.onWindowResizeCallbacks:
     g.onWindowResizeCallbacks.add(slot)

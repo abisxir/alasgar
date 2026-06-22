@@ -6,7 +6,7 @@ description = "Game Engine"
 license     = "MIT"
 
 # Directory configuration
-installDirs = @["alasgar", "assets"]
+installDirs = @["alasgar", "private", "assets"]
 installFiles = @["alasgar.nim"]
 
 requires "nim >= 2.2.0"
