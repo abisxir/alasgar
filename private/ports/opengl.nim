@@ -4,12 +4,24 @@ import enums
 when defined(windows):
   import gl460
   export gl460
+  const
+    OPENGL_MAJOR_VERSION* = 4
+    OPENGL_MINOR_VERSION* = 6
+    OPENGL_SHADER_VERSION* = "460"
 elif defined(macosx):
   import gl410
   export gl410
+  const
+    OPENGL_MAJOR_VERSION* = 4
+    OPENGL_MINOR_VERSION* = 1
+    OPENGL_SHADER_VERSION* = "410"
 else:
   import gles300
   export gles300
+  const
+    OPENGL_MAJOR_VERSION* = 3
+    OPENGL_MINOR_VERSION* = 0
+    OPENGL_SHADER_VERSION* = "300 es"
 
 when declared(glDebugMessageCallback):
   proc printGlDebug(
@@ -65,27 +77,6 @@ proc logContextInfo() =
   echo &"  Vendor: {vendor}"
   echo &"  Renderer: {renderer}"
   echo &"  Max varying vectors: {maxVaryingVectors}"
-
-when defined(macosx):
-  const
-    OPENGL_MAJOR_VERSION* = 4
-    OPENGL_MINOR_VERSION* = 1
-    OPENGL_SHADER_VERSION* = "410"
-elif defined(windows):
-  const
-    OPENGL_MAJOR_VERSION* = 4
-    OPENGL_MINOR_VERSION* = 6
-    OPENGL_SHADER_VERSION* = "460"
-elif defined(linux) and not defined(emscripten):
-  const
-    OPENGL_MAJOR_VERSION* = 4
-    OPENGL_MINOR_VERSION* = 6
-    OPENGL_SHADER_VERSION* = "460"
-else:
-  const
-    OPENGL_MAJOR_VERSION* = 3
-    OPENGL_MINOR_VERSION* = 0
-    OPENGL_SHADER_VERSION* = "300 es"
 
 proc initOpenGL*() =
   when declared(gladLoadGLES2):
