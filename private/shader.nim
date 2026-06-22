@@ -142,53 +142,17 @@ proc getAttributeLocation*(s: Shader, key: string): GLint =
   ## Returns -1 if the attribute is not found
   glGetAttribLocation(s.program, key)
 
-proc `[]=`*(s: Shader, key: string, value: Vec2) =
-  var location = getUniformLocation(s, key)
-  var data = value
-  glUniform2fv location, 1, data.caddr
-
-proc `[]=`*(s: Shader, key: string, value: Vec3) =
-  var location = getUniformLocation(s, key)
-  var data = value
-  glUniform3fv location, 1, data.caddr
-
-proc `[]=`*(s: Shader, key: string, value: Vec4) =
-  var location = getUniformLocation(s, key)
-  var data = value
-  glUniform4fv location, 1, data.caddr
-
-proc `[]=`*(s: Shader, key: string, value: float32) =
-  var location = getUniformLocation(s, key)
-  glUniform1f location, value
-
-
-proc `[]=`*(s: Shader, key: string, value: int) =
-  var location = getUniformLocation(s, key)
-  glUniform1i location, value.GLint
-
-proc `[]=`*(s: Shader, key: string, value: uint32) =
-  var location = getUniformLocation(s, key)
-  glUniform1ui location, value.GLuint
-
-proc `[]=`*(s: Shader, key: string, value: var Mat4) =
-  var location = getUniformLocation(s, key)
-  glUniformMatrix4fv location, 1, false, value.caddr
-
-proc `[]=`*(s: Shader, key: string, value: ptr Mat4) =
-  var location = getUniformLocation(s, key)
-  glUniformMatrix4fv location, 1, false, value[].caddr
-
-proc `[]=`*(s: Shader, key: string, value: Mat4) =
-  var matrix = value
-  s[key] = matrix
-
-proc `[]=`*(s: Shader, key: string, value: var Mat3) =
-  var location = getUniformLocation(s, key)
-  glUniformMatrix3fv location, 1, false, value.caddr
-
-proc `[]=`*(s: Shader, key: string, value: Mat3) =
-  var matrix = value
-  s[key] = matrix
+proc `[]=`*(s: Shader, key: string, value: Vec2) = glUniform2fv(getUniformLocation(s, key), 1, value.caddr)
+proc `[]=`*(s: Shader, key: string, value: Vec3) = glUniform3fv(getUniformLocation(s, key), 1, value.caddr)
+proc `[]=`*(s: Shader, key: string, value: Vec4) = glUniform4fv(getUniformLocation(s, key), 1, value.caddr)
+proc `[]=`*(s: Shader, key: string, value: float32) = glUniform1f(getUniformLocation(s, key), value)
+proc `[]=`*(s: Shader, key: string, value: int) = glUniform1i(getUniformLocation(s, key), value.GLint)
+proc `[]=`*(s: Shader, key: string, value: uint32) = glUniform1ui(getUniformLocation(s, key), value.GLuint)
+proc `[]=`*(s: Shader, key: string, value: var Mat4) = glUniformMatrix4fv(getUniformLocation(s, key), 1, false, value.caddr)
+proc `[]=`*(s: Shader, key: string, value: ptr Mat4) = glUniformMatrix4fv(getUniformLocation(s, key), 1, false, value[].caddr)
+proc `[]=`*(s: Shader, key: string, value: Mat4) = s[key] = value
+proc `[]=`*(s: Shader, key: string, value: var Mat3) = glUniformMatrix3fv(getUniformLocation(s, key), 1, false, value.caddr)
+proc `[]=`*(s: Shader, key: string, value: Mat3) = s[key] = value
 
 #proc `[]`*(s: Shader, key: string): int = getUniformLocation(s, key).int
 
@@ -196,24 +160,15 @@ proc `[]=`*(s: Shader, key: string, value: Mat3) =
 #    shader[p.key] = p.slot
 #    unit(p.value, p.slot)
 
-proc get*(shader: Shader, key: string, r: var uint32) = r = shader.params[
-    key].value.uintVal
-proc get*(shader: Shader, key: string, r: var int32) = r = shader.params[
-    key].value.intVal
-proc get*(shader: Shader, key: string, r: var int) = r = shader.params[
-    key].value.intVal.int
-proc get*(shader: Shader, key: string, r: var float32) = r = shader.params[
-    key].value.floatVal
-proc get*(shader: Shader, key: string, r: var Vec2) = r = shader.params[
-    key].value.vec2Val
-proc get*(shader: Shader, key: string, r: var Vec3) = r = shader.params[
-    key].value.vec3Val
-proc get*(shader: Shader, key: string, r: var Vec4) = r = shader.params[
-    key].value.vec4Val
-proc get*(shader: Shader, key: string, r: var Mat3) = r = shader.params[
-    key].value.mat3Val
-proc get*(shader: Shader, key: string, r: var Mat4) = r = shader.params[
-    key].value.mat4Val
+proc get*(shader: Shader, key: string, r: var uint32) = r = shader.params[key].value.uintVal
+proc get*(shader: Shader, key: string, r: var int32) = r = shader.params[key].value.intVal
+proc get*(shader: Shader, key: string, r: var int) = r = shader.params[key].value.intVal.int
+proc get*(shader: Shader, key: string, r: var float32) = r = shader.params[key].value.floatVal
+proc get*(shader: Shader, key: string, r: var Vec2) = r = shader.params[key].value.vec2Val
+proc get*(shader: Shader, key: string, r: var Vec3) = r = shader.params[key].value.vec3Val
+proc get*(shader: Shader, key: string, r: var Vec4) = r = shader.params[key].value.vec4Val
+proc get*(shader: Shader, key: string, r: var Mat3) = r = shader.params[key].value.mat3Val
+proc get*(shader: Shader, key: string, r: var Mat4) = r = shader.params[key].value.mat4Val
 
 proc set*(shader: var Shader, key: string, value: uint32) =
   shader.params[key] = ShaderParam(
@@ -282,10 +237,7 @@ proc set*(shader: var Shader, key: string, value: Texture, slot: int) =
     extra: slot
   )
 
-proc hasUniform*(shader: var Shader, name: string): bool =
-  var location = getUniformLocation(shader, name)
-  result = location >= 0
-
+proc hasUniform*(shader: var Shader, name: string): bool = getUniformLocation(shader, name) >= 0
 proc use*(shader: var Shader, texture: Texture, name: string, slot: int) =
   var location = getUniformLocation(shader, name)
   if location >= 0:

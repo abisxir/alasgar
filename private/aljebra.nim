@@ -75,12 +75,7 @@ type
     position*: Vec3
     scale*: Vec3 = Vec3(x: 1.0, y: 1.0, z: 1.0)
     rotation*: Quat = Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0)
-    parent*: Mat4 = (
-      m00: 1.0, m01: 0.0, m02: 0.0, m03: 0.0,
-      m10: 0.0, m11: 1.0, m12: 0.0, m13: 0.0,
-      m20: 0.0, m21: 0.0, m22: 1.0, m23: 0.0,
-      m30: 0.0, m31: 0.0, m32: 0.0, m33: 1.0,
-    )
+    parent*: ptr Mat4
 
 const
   EPSILON* = 0.00001
@@ -1789,11 +1784,16 @@ func `mat4`*(t: Transform): Mat4 =
     t.position.x, t.position.y, t.position.z, 1 # Position
   )
 func `local`*(t: Transform): Mat4 = t.mat4
-func `world`*(t: Transform): Mat4 = t.parent * t.mat4
+func `world`*(t: Transform): Mat4 =
+  if not isNil(t.parent):
+    t.parent[] * t.mat4
+  else:
+    t.mat4
 
 proc lookAt*(t: var Transform, target: Vec3, up: Vec3) =
   let
     world = t.world
     worldPosition = world.pos
-    rotation = lookAt(worldPosition - target, up)
-  t.rotation = inverse(t.parent.quat) * rotation
+  t.rotation = lookAt(worldPosition - target, up)
+  if not isNil(t.parent):
+    t.rotation = inverse(t.parent[].quat) * t.rotation

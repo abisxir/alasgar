@@ -1,6 +1,6 @@
 import math
 
-import ../aljebra
+import vmath
 
 type
   Pack2x16S{.union.} = object
