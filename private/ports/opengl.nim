@@ -55,6 +55,9 @@ elif defined(emscripten):
   proc emscripten_webgl_get_proc_address(name: cstring): pointer {.cdecl, importc.}
   proc loadOpenGLProc(name: cstring): pointer {.cdecl.} =
     emscripten_webgl_get_proc_address(name)
+elif defined(android):
+  proc eglGetProcAddress(name: cstring): pointer {.cdecl, importc.}
+  proc loadOpenGLProc(name: cstring): pointer {.cdecl.} = eglGetProcAddress(name)
 elif defined(linux):
   proc glXGetProcAddressARB(name: ptr GLubyte): pointer {.cdecl, importc, dynlib: "libGL.so.1".}
   proc loadOpenGLProc(name: cstring): pointer {.cdecl.} =

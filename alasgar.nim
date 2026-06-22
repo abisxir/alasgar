@@ -40,6 +40,7 @@ import private/aljebra
 import private/transform
 import private/pipeline
 import private/camera
+import private/utils
 #import private/input
 
-export core, shader, glsl, aljebra, transform, pipeline, camera
+export core, shader, glsl, aljebra, transform, pipeline, camera, utils
