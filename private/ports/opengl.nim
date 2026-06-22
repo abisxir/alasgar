@@ -7,9 +7,6 @@ when defined(windows):
 elif defined(macosx):
   import gl410
   export gl410
-#elif defined(linux) and not defined(emscripten):
-#import gl460
-#export gl460
 else:
   import gles300
   export gles300
@@ -42,7 +39,11 @@ elif defined(macosx):
       openGLHandle = loadLib("/System/Library/Frameworks/OpenGL.framework/OpenGL")
     if openGLHandle != nil:
       result = symAddr(openGLHandle, $name)
-elif defined(linux) and not defined(emscripten):
+elif defined(emscripten):
+  proc emscripten_webgl_get_proc_address(name: cstring): pointer {.cdecl, importc.}
+  proc loadOpenGLProc(name: cstring): pointer {.cdecl.} =
+    emscripten_webgl_get_proc_address(name)
+elif defined(linux):
   proc glXGetProcAddressARB(name: ptr GLubyte): pointer {.cdecl, importc, dynlib: "libGL.so.1".}
   proc loadOpenGLProc(name: cstring): pointer {.cdecl.} =
     glXGetProcAddressARB(cast[ptr GLubyte](name))
