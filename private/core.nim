@@ -36,6 +36,7 @@ type
     age, delta: float32
   Engine* = object
     ## Internal engine state for the active application.
+    app: sapp.Desc
     window: Window
     graphics: Graphics
     runtime: Runtime
@@ -45,6 +46,10 @@ type
 
 var
   engine = Engine(vsync: true)
+
+when defined(android):
+  var
+    androidDesc: sapp.Desc
 
 let
   graphics*: ptr Graphics = addr engine.graphics ## Shared graphics state.
@@ -126,7 +131,7 @@ proc window*(
   engine.draw = draw
   engine.cleanup = cleanup
 
-  sapp.run(sapp.Desc(
+  engine.app = sapp.Desc(
     initCb: initCallback,
     frameCb: frameCallback,
     cleanupCb: cleanupCallback,
@@ -138,7 +143,10 @@ proc window*(
     windowTitle: title.cstring,
     glMajorVersion: OPENGL_MAJOR_VERSION,
     glMinorVersion: OPENGL_MINOR_VERSION
-  ))
+  )
+
+  when not defined(android):
+    sapp.run(engine.app)
 
 proc `age`*(runtime: ptr Runtime): float32 =
   ## Return the age of the engine in seconds.
@@ -201,3 +209,11 @@ proc onWindowResize*(g: ptr Graphics, slot: OnWindowResize) =
   ## ```
   if slot notin g.onWindowResizeCallbacks:
     g.onWindowResizeCallbacks.add(slot)
+
+
+proc alasgar_app_desc*(): sapp.Desc {.exportc: "alasgar_app_desc", cdecl.} =
+  ## Return the application descriptor for the engine.
+  ## This is specially useful when embedding the engine in an existing
+  ## application. For example, to run the application from a C/C++
+  ## program or an android app.
+  engine.app
