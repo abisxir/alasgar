@@ -8,7 +8,7 @@ import transform
 import camera
 
 type
-  Pipeline* = object
+  Mesh* = object
     shader*: Shader
     count: int
     indexType: GLenum
@@ -17,7 +17,7 @@ type
     ibo: GLuint
 
 
-proc destroy*(p: var Pipeline) =
+proc destroy*(p: var Mesh) =
   if p.ibo != 0:
     glDeleteBuffers(1, p.ibo.addr)
     echo &"- Index buffer [{p.ibo.int}] destroyed."
@@ -32,7 +32,8 @@ proc destroy*(p: var Pipeline) =
     p.vao = 0
   destroy(p.shader)
 
-proc pipeline*[V, I](shader: Shader, vertices: openArray[V], indices: openArray[I]): Pipeline =
+proc mesh*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], indices: openArray[I]): Mesh =
+  discard g
   result.shader = shader
   result.count = len(indices)
   when sizeof(I) == sizeof(uint8):
@@ -43,6 +44,7 @@ proc pipeline*[V, I](shader: Shader, vertices: openArray[V], indices: openArray[
     result.indexType = GL_UNSIGNED_INT
   else:
     {.error: "Unsupported index buffer element type".}
+
   use(result.shader)
   glGenVertexArrays(1, result.vao.addr)
   glBindVertexArray(result.vao)
@@ -52,9 +54,9 @@ proc pipeline*[V, I](shader: Shader, vertices: openArray[V], indices: openArray[
   glBufferData(GL_ARRAY_BUFFER, (len(vertices) * sizeof(V)).GLsizeiptr, cast[pointer](addr vertices[0]), GL_STATIC_DRAW)
 
   var
-    stride = shader.layout.stride
+    stride = result.shader.layout.stride
     offset = 0
-  for attr in shader.layout.attrs:
+  for attr in result.shader.layout.attrs:
     glVertexAttribPointer(attr.index.GLuint, attr.count.GLint, cGL_FLOAT, false, stride.GLsizei, cast[pointer](offset))
     glEnableVertexAttribArray(attr.index.GLuint)
     offset += attr.size
@@ -66,6 +68,8 @@ proc pipeline*[V, I](shader: Shader, vertices: openArray[V], indices: openArray[
   glBindVertexArray(0)
   glBindBuffer(GL_ARRAY_BUFFER, 0)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+
+  return result
 
 
 proc setCameraData(g: ptr Graphics, shader: var Shader, camera: Camera) =
@@ -84,7 +88,7 @@ proc setCameraData(g: ptr Graphics, shader: var Shader, camera: Camera) =
   shader["GLSL_CAMERA.ASPECT"] = g.aspect
 
 
-proc render*(g: ptr Graphics, p: var Pipeline, camera: Camera) =
+proc render*(g: ptr Graphics, p: var Mesh, camera: Camera) =
   use(p.shader)
   setCameraData(g, p.shader, camera)
   glBindVertexArray(p.vao)

@@ -251,21 +251,11 @@ proc typeRename(t: string): string =
     typeRenameCache[t] = r
     result = r
 
-#proc parseLayoutType(n: NimNode): string =
-#  let
-#    binding = "location"
-#    place = 0
-#    t = "int"
-#  result = &"layout({binding}={place}) {t}"
-
-
 proc typeString(n: NimNode): string =
   if n.kind != nnkBracketExpr:
     typeRename(n.strVal)
   elif hasKey(vectorTypes, n.repr):
     vectorTypes[n.repr]
-#  elif startsWith(n.repr, "Layout"):
-#    parseLayoutType(n)
   else:
     err "can't figure out type", n
 
@@ -1200,3 +1190,6 @@ proc fwidth*(v: Vec2): Vec2 = discard
 proc fwidth*(v: Vec3): Vec3 = discard
 proc fwidth*(v: Vec4): Vec4 = discard
 proc ivec2*(x, y: int): IVec2 = discard
+
+var
+  gl_Position*: Vec4

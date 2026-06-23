@@ -6,27 +6,26 @@ import private/aljebra
 import private/texture
 
 
-proc vertex(
+proc vs(
   IN_POSITION: Layout[0, Vec3],
   IN_COLOR: Layout[1, Vec4],
   IN_UV: Layout[2, Vec2],
   MODEL: Uniform[Mat4],
-  COLOR: var Vec4,
-  UV: var Vec2,
-  gl_Position: var Vec4
+  VS_COLOR: var Vec4,
+  VS_UV: var Vec2,
 ) =
   gl_Position = GLSL_CAMERA.PROJECTION * GLSL_CAMERA.VIEW * MODEL * vec4(IN_POSITION, 1)
-  COLOR = IN_COLOR
-  UV = IN_UV
+  VS_COLOR = IN_COLOR
+  VS_UV = IN_UV
 
 
-proc fragment(
-  COLOR: Vec4,
-  UV: Vec2,
+proc fs(
+  VS_COLOR: Vec4,
+  VS_UV: Vec2,
   CHECKER: Uniform[Sampler2D],
   OUT_COLOR: var Layout[0, Vec4]
 ) =
-  OUT_COLOR = COLOR * texture(CHECKER, UV)
+  OUT_COLOR = VS_COLOR * texture(CHECKER, VS_UV)
 
 
 const
@@ -76,7 +75,7 @@ const
   ]
 
 var
-  cube: Pipeline
+  cube: Mesh
   p1 = Transform()
   t1 = Transform(parent: addr p1)
   camera: Camera
@@ -84,11 +83,13 @@ var
   checkerSampler: Sampler
 
 proc load() =
-  var ct = Transform(position: vec3(5, 0, 5))
+  var
+    ct = Transform(position: vec3(5, 0, 5))
+    shader = graphics.shader(vs, fs)
   ct.lookAt(vec3(0, 0, 0), vec3(0, 1, 0))
-  checker = texture(2, 2, pixels=CHECKER_PIXELS[0].addr)
-  checkerSampler = sampler(checker, minFilter=tfNearest, magFilter=tfNearest)
-  cube = pipeline(shader=graphics.shader(vertex, fragment), vertices=VERTICES, indices=INDICES)
+  checker = graphics.texture(2, 2, pixels=CHECKER_PIXELS[0].addr)
+  checkerSampler = graphics.sampler(checker, minFilter=tfNearest, magFilter=tfNearest)
+  cube = graphics.mesh(shader=shader, vertices=VERTICES, indices=INDICES)
   camera = graphics.perspective(ct, 60, 0.1, 100.0)
   graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
 

@@ -15,6 +15,7 @@ import std/times
 import sokol/app as sapp
 import ports/opengl
 import aljebra
+import geometry
 
 when (defined(windows) or defined(macosx)) and not defined(gl):
   {.error: "The current renderer still uses raw OpenGL; compile with -d:gl when using Sokol on this platform.".}
@@ -30,6 +31,7 @@ type
     size: UVec2
     onWindowResizeCallbacks: seq[OnWindowResize]
     color*: Vec4 ## Clear color used at the start of each frame.
+    geometry: Geometry
   Runtime* = object
     ## Runtime timing counters updated once per frame.
     frames: int

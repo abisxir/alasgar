@@ -1,4 +1,5 @@
 import ports/opengl
+import core
 
 type
   Pixel* = object
@@ -115,6 +116,7 @@ func `target`(slices: int): GLenum =
   else: GL_TEXTURE_2D_ARRAY
 
 proc texture*(
+  g: ptr Graphics,
   width, height: int,
   channels: int = 4,
   bits: int = 8,
@@ -122,6 +124,7 @@ proc texture*(
   mipmaps: int = 1,
   pixels: pointer = nil,
 ): Texture =
+  discard g
   let
     pixel = Pixel(bits: bits, channels: channels)
     target = slices.target
@@ -166,6 +169,7 @@ proc destroy*(texture: var Texture) =
     texture.id = 0
 
 proc sampler*(
+  g: ptr Graphics,
   texture: Texture,
   minFilter: TextureFilter = tfLinear,
   magFilter: TextureFilter = tfLinear,
@@ -174,6 +178,7 @@ proc sampler*(
   wrapT: TextureWrap = twClampToEdge,
   wrapR: TextureWrap = twClampToEdge,
 ): Sampler =
+  discard g
   result = Sampler(
     texture: texture,
     minFilter: minFilter,
