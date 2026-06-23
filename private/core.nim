@@ -34,6 +34,7 @@ type
     ## Runtime timing counters updated once per frame.
     frames: int
     age, delta: float32
+    time: float
   Engine* = object
     ## Internal engine state for the active application.
     app: sapp.Desc
@@ -56,7 +57,7 @@ let
   runtime*: ptr Runtime = addr engine.runtime ## Shared runtime timing state.
 
 proc frameCallback() {.cdecl.} =
-  let now = epochTime()
+  engine.runtime.time = epochTime()
   engine.runtime.delta = sapp.frameDuration()
   engine.runtime.age += engine.runtime.delta
   engine.runtime.frames += 1

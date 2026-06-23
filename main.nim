@@ -4,6 +4,7 @@ import alasgar
 import private/ports/opengl
 import private/aljebra
 
+
 proc vertex(
   IN_POSITION: Layout[0, Vec3],
   IN_COLOR: Layout[1, Vec4],

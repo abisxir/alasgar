@@ -13,3 +13,4 @@ requires "nim >= 2.2.0"
 
 # Dependencies
 requires "sokol == 0.6.0"
+requires "pixie == 6.1.0"
