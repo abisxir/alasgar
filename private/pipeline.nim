@@ -17,7 +17,7 @@ type
     ibo: GLuint
 
 
-proc destroy*(p: ptr Pipeline) =
+proc destroy*(p: var Pipeline) =
   if p.ibo != 0:
     glDeleteBuffers(1, p.ibo.addr)
     echo &"- Index buffer [{p.ibo.int}] destroyed."
@@ -30,7 +30,7 @@ proc destroy*(p: ptr Pipeline) =
     glDeleteVertexArrays(1, p.vao.addr)
     echo &"- Vertex array [{p.vao.int}] destroyed."
     p.vao = 0
-  destroy(addr p.shader)
+  destroy(p.shader)
 
 proc pipeline*[V, I](shader: Shader, vertices: openArray[V], indices: openArray[I]): Pipeline =
   result.shader = shader

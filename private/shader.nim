@@ -12,7 +12,7 @@ import glsl
 
 type
   ShaderValueKind = enum
-    svUint, svInt, svFloat, svVec2, svVec3, svVec4, svMat3, svMat4, svTexture, svSampler
+    svUint, svInt, svFloat, svVec2, svVec3, svVec4, svMat3, svMat4, svSampler
   ShaderParam = object
     case kind: ShaderValueKind
     of svUint:
@@ -31,18 +31,16 @@ type
       mat3Val: Mat3
     of svMat4:
       mat4Val: Mat4
-    of svTexture:
-      textureVal: Texture
     of svSampler:
       samplerVal: Sampler
-    extra: int
+    slot: int
   Shader* = object
     program*: GLuint
     layout*: ShaderLayout
     source*: string
     params: Table[string, ShaderParam]
 
-proc destroy*(shader: ptr Shader) =
+proc destroy*(shader: var Shader) =
   if shader.program != 0:
     glDeleteProgram(shader.program)
     echo &"- Shader [{shader.program}] destroyed."
@@ -158,7 +156,6 @@ proc `[]=`*(s: Shader, key: string, value: int) = glUniform1i(getUniformLocation
 proc `[]=`*(s: Shader, key: string, value: uint32) = glUniform1ui(getUniformLocation(s, key), value.GLuint)
 proc `[]=`*(s: Shader, key: string, value: Mat4) = glUniformMatrix4fv(getUniformLocation(s, key), 1, false, value.caddr)
 proc `[]=`*(s: Shader, key: string, value: Mat3) = glUniformMatrix3fv(getUniformLocation(s, key), 1, false, value.caddr)
-proc `[]=`*(s: Shader, key: string, value: Texture) = discard
 proc `[]=`*(s: Shader, key: string, value: Sampler) = discard
 
 proc get*(shader: Shader, key: string, r: var uint32) = r = shader.params[key].uintVal
@@ -170,7 +167,6 @@ proc get*(shader: Shader, key: string, r: var Vec3) = r = shader.params[key].vec
 proc get*(shader: Shader, key: string, r: var Vec4) = r = shader.params[key].vec4Val
 proc get*(shader: Shader, key: string, r: var Mat3) = r = shader.params[key].mat3Val
 proc get*(shader: Shader, key: string, r: var Mat4) = r = shader.params[key].mat4Val
-proc get*(shader: Shader, key: string, r: var Texture) = r = shader.params[key].textureVal
 proc get*(shader: Shader, key: string, r: var Sampler) = r = shader.params[key].samplerVal
 
 proc set*(shader: var Shader, key: string, value: uint32) =
@@ -218,26 +214,20 @@ proc set*(shader: var Shader, key: string, value: Mat4) =
     mat4Val: value
   )
 
-proc set*(shader: var Shader, key: string, value: Texture, slot: int) =
-  shader.params[key] = ShaderParam(
-    kind: svTexture,
-    textureVal: value,
-    extra: slot
-  )
-
 proc set*(shader: var Shader, key: string, value: Sampler, slot: int) =
   shader.params[key] = ShaderParam(
     kind: svSampler,
     samplerVal: value,
-    extra: slot
+    slot: slot
   )
 
 proc hasUniform*(shader: var Shader, name: string): bool = getUniformLocation(shader, name) >= 0
-proc use*(shader: var Shader, texture: Texture, name: string, slot: int) =
+
+proc activate(shader: var Shader, sampler: Sampler, name: string, slot: int) =
   var location = getUniformLocation(shader, name)
   if location >= 0:
-    shader[name] = slot
-    #unit(texture, slot)
+    glUniform1i(location, slot.GLint)
+    attach(sampler, slot)
 
 proc update(shader: var Shader, key: string, p: ShaderParam) =
   case p.kind:
@@ -249,8 +239,7 @@ proc update(shader: var Shader, key: string, p: ShaderParam) =
     of svVec4: shader[key] = p.vec4Val
     of svMat3: shader[key] = p.mat3Val
     of svMat4: shader[key] = p.mat4Val
-    of svTexture: discard
-    of svSampler: discard
+    of svSampler: activate(shader, p.samplerVal, key, p.slot)
 
 proc use*(shader: var Shader) =
   glUseProgram(shader.program)

@@ -825,8 +825,6 @@ proc parseBracket(param: NimNode, res: var string, forceOut = false,
           size: param[2].getSize(),
           instanced: false)
         )
-        #if attributeCount < param[1].intVal.int:
-        #  attributeCount = param[1].intVal.int + 1
     if param[2].kind == nnkBracketExpr:
       return parseBracket(param[2], res, false, layout)
     else:
@@ -860,14 +858,10 @@ proc toCodeTopLevel(topLevelNode: NimNode, res: var string, level = 0,
             continue
           var arraySize = -1
           if param[1].kind == nnkVarTy:
-            #if param[0].strVal == "fragColor":
-            #  res.add "layout(location = 0) "
             if param[1][0].repr == "seq":
               res.add "buffer?"
               res.add param[1].repr
               continue
-            #elif param[1][0].repr == "int":
-            #  res.add "flat "
             if param[1][0].kind == nnkBracketExpr:
               arraySize = parseBracket(param[1][0], res, true, layout)
             else:

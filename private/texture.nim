@@ -198,3 +198,8 @@ proc sampler*(
 proc attach*(sampler: Sampler, slot: int) =
   attach(sampler.texture, slot)
   glBindSampler(slot.GLuint, sampler.id)
+
+proc destroy*(sampler: var Sampler) =
+  if sampler.id != 0:
+    glDeleteSamplers(1, sampler.id.addr)
+    sampler.id = 0

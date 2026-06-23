@@ -3,58 +3,68 @@ import math
 import alasgar
 import private/ports/opengl
 import private/aljebra
+import private/texture
 
 
 proc vertex(
   IN_POSITION: Layout[0, Vec3],
   IN_COLOR: Layout[1, Vec4],
+  IN_UV: Layout[2, Vec2],
   MODEL: Uniform[Mat4],
   COLOR: var Vec4,
+  UV: var Vec2,
   gl_Position: var Vec4
 ) =
   gl_Position = GLSL_CAMERA.PROJECTION * GLSL_CAMERA.VIEW * MODEL * vec4(IN_POSITION, 1)
   COLOR = IN_COLOR
+  UV = IN_UV
 
 
 proc fragment(
   COLOR: Vec4,
+  UV: Vec2,
+  CHECKER: Uniform[Sampler2D],
   OUT_COLOR: var Layout[0, Vec4]
 ) =
-  OUT_COLOR = COLOR
+  OUT_COLOR = COLOR * texture(CHECKER, UV)
 
 
 const
   VERTICES = [
-    # position             color0
-    -1.0'f32, -1.0, -1.0,  1.0, 0.0, 0.0, 1.0,
-    1.0, -1.0, -1.0,      1.0, 0.0, 0.0, 1.0,
-    1.0,  1.0, -1.0,      1.0, 0.0, 0.0, 1.0,
-    -1.0,  1.0, -1.0,      1.0, 0.0, 0.0, 1.0,
+    # position             color0                uv
+    -1.0'f32, -1.0, -1.0,  1.0, 0.0, 0.0, 1.0,  0.0, 0.0,
+    1.0, -1.0, -1.0,       1.0, 0.0, 0.0, 1.0,  1.0, 0.0,
+    1.0,  1.0, -1.0,       1.0, 0.0, 0.0, 1.0,  1.0, 1.0,
+    -1.0,  1.0, -1.0,      1.0, 0.0, 0.0, 1.0,  0.0, 1.0,
 
-    -1.0, -1.0,  1.0,      0.0, 1.0, 0.0, 1.0,
-    1.0, -1.0,  1.0,      0.0, 1.0, 0.0, 1.0,
-    1.0,  1.0,  1.0,      0.0, 1.0, 0.0, 1.0,
-    -1.0,  1.0,  1.0,      0.0, 1.0, 0.0, 1.0,
+    -1.0, -1.0,  1.0,      0.0, 1.0, 0.0, 1.0,  0.0, 0.0,
+    1.0, -1.0,  1.0,       0.0, 1.0, 0.0, 1.0,  1.0, 0.0,
+    1.0,  1.0,  1.0,       0.0, 1.0, 0.0, 1.0,  1.0, 1.0,
+    -1.0,  1.0,  1.0,      0.0, 1.0, 0.0, 1.0,  0.0, 1.0,
 
-    -1.0, -1.0, -1.0,      0.0, 0.0, 1.0, 1.0,
-    -1.0,  1.0, -1.0,      0.0, 0.0, 1.0, 1.0,
-    -1.0,  1.0,  1.0,      0.0, 0.0, 1.0, 1.0,
-    -1.0, -1.0,  1.0,      0.0, 0.0, 1.0, 1.0,
+    -1.0, -1.0, -1.0,      0.0, 0.0, 1.0, 1.0,  0.0, 0.0,
+    -1.0,  1.0, -1.0,      0.0, 0.0, 1.0, 1.0,  1.0, 0.0,
+    -1.0,  1.0,  1.0,      0.0, 0.0, 1.0, 1.0,  1.0, 1.0,
+    -1.0, -1.0,  1.0,      0.0, 0.0, 1.0, 1.0,  0.0, 1.0,
 
-    1.0, -1.0, -1.0,      1.0, 0.5, 0.0, 1.0,
-    1.0,  1.0, -1.0,      1.0, 0.5, 0.0, 1.0,
-    1.0,  1.0,  1.0,      1.0, 0.5, 0.0, 1.0,
-    1.0, -1.0,  1.0,      1.0, 0.5, 0.0, 1.0,
+    1.0, -1.0, -1.0,       1.0, 0.5, 0.0, 1.0,  0.0, 0.0,
+    1.0,  1.0, -1.0,       1.0, 0.5, 0.0, 1.0,  1.0, 0.0,
+    1.0,  1.0,  1.0,       1.0, 0.5, 0.0, 1.0,  1.0, 1.0,
+    1.0, -1.0,  1.0,       1.0, 0.5, 0.0, 1.0,  0.0, 1.0,
 
-    -1.0, -1.0, -1.0,      0.0, 0.5, 1.0, 1.0,
-    -1.0, -1.0,  1.0,      0.0, 0.5, 1.0, 1.0,
-    1.0, -1.0,  1.0,      0.0, 0.5, 1.0, 1.0,
-    1.0, -1.0, -1.0,      0.0, 0.5, 1.0, 1.0,
+    -1.0, -1.0, -1.0,      0.0, 0.5, 1.0, 1.0,  0.0, 0.0,
+    -1.0, -1.0,  1.0,      0.0, 0.5, 1.0, 1.0,  1.0, 0.0,
+    1.0, -1.0,  1.0,       0.0, 0.5, 1.0, 1.0,  1.0, 1.0,
+    1.0, -1.0, -1.0,       0.0, 0.5, 1.0, 1.0,  0.0, 1.0,
 
-    -1.0,  1.0, -1.0,      1.0, 0.0, 0.5, 1.0,
-    -1.0,  1.0,  1.0,      1.0, 0.0, 0.5, 1.0,
-    1.0,  1.0,  1.0,      1.0, 0.0, 0.5, 1.0,
-    1.0,  1.0, -1.0,      1.0, 0.0, 0.5, 1.0,
+    -1.0,  1.0, -1.0,      1.0, 0.0, 0.5, 1.0,  0.0, 0.0,
+    -1.0,  1.0,  1.0,      1.0, 0.0, 0.5, 1.0,  1.0, 0.0,
+    1.0,  1.0,  1.0,       1.0, 0.0, 0.5, 1.0,  1.0, 1.0,
+    1.0,  1.0, -1.0,       1.0, 0.0, 0.5, 1.0,  0.0, 1.0,
+  ]
+  CHECKER_PIXELS = [
+    255'u8, 255, 255, 255,  32, 32, 32, 255,
+    32, 32, 32, 255,       255, 255, 255, 255,
   ]
   INDICES = [
     0'u16, 1, 2,  0, 2, 3,
@@ -70,10 +80,14 @@ var
   p1 = Transform()
   t1 = Transform(parent: addr p1)
   camera: Camera
+  checker: Texture
+  checkerSampler: Sampler
 
 proc load() =
   var ct = Transform(position: vec3(5, 0, 5))
   ct.lookAt(vec3(0, 0, 0), vec3(0, 1, 0))
+  checker = texture(2, 2, pixels=CHECKER_PIXELS[0].addr)
+  checkerSampler = sampler(checker, minFilter=tfNearest, magFilter=tfNearest)
   cube = pipeline(shader=graphics.shader(vertex, fragment), vertices=VERTICES, indices=INDICES)
   camera = graphics.perspective(ct, 60, 0.1, 100.0)
   graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
@@ -85,8 +99,12 @@ proc draw() =
   p1.position = vec3(2 * sin(runtime.age), 2 * cos(runtime.age), 0)
   t1.rotation = fromEuler(r, r, 0.0)
   cube.shader.set("MODEL", t1.world)
+  cube.shader.set("CHECKER", checkerSampler, 0)
   graphics.render(cube, camera)
 
-proc cleanup() = destroy(addr cube)
+proc cleanup() =
+  destroy(cube)
+  destroy(checkerSampler)
+  destroy(checker)
 
 window(800, 600, "My Game", load, draw, cleanup)
