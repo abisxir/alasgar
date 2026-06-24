@@ -40,6 +40,7 @@ import private/aljebra
 import private/transform
 import private/mesh
 import private/camera
+import private/geometry
 import private/utils
 
-export core, shader, glsl, aljebra, transform, mesh, camera, utils
+export core, shader, glsl, aljebra, transform, mesh, camera, geometry, utils

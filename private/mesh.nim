@@ -1,11 +1,16 @@
 import std/strformat
 
+import sokol/shape
+
 import ports/opengl
 import shader
 import glsl
 import core
 import transform
 import camera
+import geometry
+
+export Vertex
 
 type
   Mesh* = object
@@ -32,18 +37,21 @@ proc destroy*(p: var Mesh) =
     p.vao = 0
   destroy(p.shader)
 
+proc getIndexType[I](): GLenum =
+  when sizeof(I) == sizeof(uint8):
+    GL_UNSIGNED_BYTE
+  elif sizeof(I) == sizeof(uint16):
+    GL_UNSIGNED_SHORT
+  elif sizeof(I) == sizeof(uint32):
+    GL_UNSIGNED_INT
+  else:
+    {.error: "Unsupported index buffer element type".}
+
 proc mesh*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], indices: openArray[I]): Mesh =
   discard g
   result.shader = shader
   result.count = len(indices)
-  when sizeof(I) == sizeof(uint8):
-    result.indexType = GL_UNSIGNED_BYTE
-  elif sizeof(I) == sizeof(uint16):
-    result.indexType = GL_UNSIGNED_SHORT
-  elif sizeof(I) == sizeof(uint32):
-    result.indexType = GL_UNSIGNED_INT
-  else:
-    {.error: "Unsupported index buffer element type".}
+  result.indexType = getIndexType[I]()
 
   use(result.shader)
   glGenVertexArrays(1, result.vao.addr)
@@ -64,6 +72,47 @@ proc mesh*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], indice
   glGenBuffers(1, result.ibo.addr)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ibo)
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(indices) * sizeof(I)).GLsizeiptr, cast[pointer](addr indices[0]), GL_STATIC_DRAW)
+
+  glBindVertexArray(0)
+  glBindBuffer(GL_ARRAY_BUFFER, 0)
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+
+  return result
+
+
+proc compact*(g: ptr Graphics, shader: Shader, geometry: Geometry): Mesh =
+  discard g
+  result.shader = shader
+  result.count = len(geometry.indices)
+  result.indexType = getIndexType[uint32]()
+
+  use(result.shader)
+  glGenVertexArrays(1, result.vao.addr)
+  glBindVertexArray(result.vao)
+
+  glGenBuffers(1, result.vbo.addr)
+  glBindBuffer(GL_ARRAY_BUFFER, result.vbo)
+  glBufferData(GL_ARRAY_BUFFER, (len(geometry.vertices) * sizeof(Vertex)).GLsizeiptr, cast[pointer](geometry.vertices[0].addr), GL_STATIC_DRAW)
+
+  const
+    stride = sizeof(shape.Vertex).GLsizei
+    positionOffset = 0
+    normalOffset = 12
+    texcoordOffset = 16
+    colorOffset = 20
+
+  glVertexAttribPointer(0.GLuint, 3.GLint, cGL_FLOAT, false, stride, cast[pointer](positionOffset))
+  glEnableVertexAttribArray(0.GLuint)
+  glVertexAttribPointer(1.GLuint, 4.GLint, cGL_BYTE, true, stride, cast[pointer](normalOffset))
+  glEnableVertexAttribArray(1.GLuint)
+  glVertexAttribPointer(2.GLuint, 2.GLint, GL_UNSIGNED_SHORT, true, stride, cast[pointer](texcoordOffset))
+  glEnableVertexAttribArray(2.GLuint)
+  glVertexAttribPointer(3.GLuint, 4.GLint, GL_UNSIGNED_BYTE, true, stride, cast[pointer](colorOffset))
+  glEnableVertexAttribArray(3.GLuint)
+
+  glGenBuffers(1, result.ibo.addr)
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ibo)
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(geometry.indices) * sizeof(uint32)).GLsizeiptr, cast[pointer](geometry.indices[0].addr), GL_STATIC_DRAW)
 
   glBindVertexArray(0)
   glBindBuffer(GL_ARRAY_BUFFER, 0)

@@ -8,8 +8,8 @@ import private/texture
 
 proc vs(
   IN_POSITION: Layout[0, Vec3],
-  IN_COLOR: Layout[1, Vec4],
   IN_UV: Layout[2, Vec2],
+  IN_COLOR: Layout[3, Vec4],
   MODEL: Uniform[Mat4],
   VS_COLOR: var Vec4,
   VS_UV: var Vec2,
@@ -29,49 +29,9 @@ proc fs(
 
 
 const
-  VERTICES = [
-    # position             color0                uv
-    -1.0'f32, -1.0, -1.0,  1.0, 0.0, 0.0, 1.0,  0.0, 0.0,
-    1.0, -1.0, -1.0,       1.0, 0.0, 0.0, 1.0,  1.0, 0.0,
-    1.0,  1.0, -1.0,       1.0, 0.0, 0.0, 1.0,  1.0, 1.0,
-    -1.0,  1.0, -1.0,      1.0, 0.0, 0.0, 1.0,  0.0, 1.0,
-
-    -1.0, -1.0,  1.0,      0.0, 1.0, 0.0, 1.0,  0.0, 0.0,
-    1.0, -1.0,  1.0,       0.0, 1.0, 0.0, 1.0,  1.0, 0.0,
-    1.0,  1.0,  1.0,       0.0, 1.0, 0.0, 1.0,  1.0, 1.0,
-    -1.0,  1.0,  1.0,      0.0, 1.0, 0.0, 1.0,  0.0, 1.0,
-
-    -1.0, -1.0, -1.0,      0.0, 0.0, 1.0, 1.0,  0.0, 0.0,
-    -1.0,  1.0, -1.0,      0.0, 0.0, 1.0, 1.0,  1.0, 0.0,
-    -1.0,  1.0,  1.0,      0.0, 0.0, 1.0, 1.0,  1.0, 1.0,
-    -1.0, -1.0,  1.0,      0.0, 0.0, 1.0, 1.0,  0.0, 1.0,
-
-    1.0, -1.0, -1.0,       1.0, 0.5, 0.0, 1.0,  0.0, 0.0,
-    1.0,  1.0, -1.0,       1.0, 0.5, 0.0, 1.0,  1.0, 0.0,
-    1.0,  1.0,  1.0,       1.0, 0.5, 0.0, 1.0,  1.0, 1.0,
-    1.0, -1.0,  1.0,       1.0, 0.5, 0.0, 1.0,  0.0, 1.0,
-
-    -1.0, -1.0, -1.0,      0.0, 0.5, 1.0, 1.0,  0.0, 0.0,
-    -1.0, -1.0,  1.0,      0.0, 0.5, 1.0, 1.0,  1.0, 0.0,
-    1.0, -1.0,  1.0,       0.0, 0.5, 1.0, 1.0,  1.0, 1.0,
-    1.0, -1.0, -1.0,       0.0, 0.5, 1.0, 1.0,  0.0, 1.0,
-
-    -1.0,  1.0, -1.0,      1.0, 0.0, 0.5, 1.0,  0.0, 0.0,
-    -1.0,  1.0,  1.0,      1.0, 0.0, 0.5, 1.0,  1.0, 0.0,
-    1.0,  1.0,  1.0,       1.0, 0.0, 0.5, 1.0,  1.0, 1.0,
-    1.0,  1.0, -1.0,       1.0, 0.0, 0.5, 1.0,  0.0, 1.0,
-  ]
   CHECKER_PIXELS = [
     255'u8, 255, 255, 255,  32, 32, 32, 255,
     32, 32, 32, 255,       255, 255, 255, 255,
-  ]
-  INDICES = [
-    0'u16, 1, 2,  0, 2, 3,
-    6, 5, 4,      7, 6, 4,
-    8, 9, 10,     8, 10, 11,
-    14, 13, 12,   15, 14, 12,
-    16, 17, 18,   16, 18, 19,
-    22, 21, 20,   23, 22, 20,
   ]
 
 var
@@ -84,13 +44,14 @@ var
 
 proc load() =
   var
-    ct = Transform(position: vec3(5, 0, 5))
+    ct = Transform(position: vec3(0, 0, -5))
     shader = graphics.shader(vs, fs)
   ct.lookAt(vec3(0, 0, 0), vec3(0, 1, 0))
   checker = graphics.texture(2, 2, pixels=CHECKER_PIXELS[0].addr)
   checkerSampler = graphics.sampler(checker, minFilter=tfNearest, magFilter=tfNearest)
-  cube = graphics.mesh(shader=shader, vertices=VERTICES, indices=INDICES)
-  camera = graphics.perspective(ct, 60, 0.1, 100.0)
+  cube = graphics.compact(shader, graphics.cube())
+  #camera = graphics.perspective(ct, 60, 0.1, 100.0)
+  camera = graphics.ortho(ct, graphics.size.y.float32, 1, 1000.0)
   graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
 
 proc draw() =
