@@ -113,7 +113,7 @@ proc compact*(g: ptr Graphics, shader: Shader, geometry: Geometry): Mesh =
 
   glGenBuffers(1, result.ibo.addr)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ibo)
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(geometry.indices) * sizeof(uint32)).GLsizeiptr, cast[pointer](geometry.indices[0].addr), GL_STATIC_DRAW)
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(geometry.indices) * sizeof(uint16)).GLsizeiptr, cast[pointer](geometry.indices[0].addr), GL_STATIC_DRAW)
 
   glBindVertexArray(0)
   glBindBuffer(GL_ARRAY_BUFFER, 0)

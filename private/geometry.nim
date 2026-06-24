@@ -6,27 +6,29 @@ type
     vertices*: seq[shape.Vertex]
     indices*: seq[uint16]
 
-proc cube*(g: ptr Graphics): Geometry =
-  discard g
-  let sizes = shape.boxSizes(1)
+proc initGeometry(sizes: shape.Sizes): tuple[geometry: Geometry, buffer: shape.Buffer] =
+  result.geometry.vertices = newSeq[shape.Vertex](sizes.vertices.num.int)
+  result.geometry.indices = newSeq[uint16](sizes.indices.num.int)
 
-  result.vertices = newSeq[shape.Vertex](sizes.vertices.num.int)
-  result.indices = newSeq[uint16](sizes.indices.num.int)
-
-  var buffer = shape.Buffer(
+  result.buffer = shape.Buffer(
     vertices: shape.BufferItem(
       buffer: shape.Range(
-        `addr`: addr result.vertices[0],
+        `addr`: addr result.geometry.vertices[0],
         size: sizes.vertices.size.int,
       ),
     ),
     indices: shape.BufferItem(
       buffer: shape.Range(
-        `addr`: addr result.indices[0],
+        `addr`: addr result.geometry.indices[0],
         size: sizes.indices.size.int,
       ),
     ),
   )
+
+proc cube*(g: ptr Graphics): Geometry =
+  discard g
+  let sizes = shape.boxSizes(1)
+  var (geometry, buffer) = initGeometry(sizes)
 
   buffer = shape.buildBox(buffer, shape.Box(
     width: 2,
@@ -37,3 +39,75 @@ proc cube*(g: ptr Graphics): Geometry =
   ))
 
   doAssert buffer.valid
+  result = geometry
+
+proc plane*(g: ptr Graphics): Geometry =
+  discard g
+  let sizes = shape.planeSizes(1)
+  var (geometry, buffer) = initGeometry(sizes)
+
+  buffer = shape.buildPlane(buffer, shape.Plane(
+    width: 2,
+    depth: 2,
+    tiles: 1,
+    color: shape.color4f(1, 1, 1, 1),
+  ))
+
+  doAssert buffer.valid
+  result = geometry
+
+proc sphere*(g: ptr Graphics): Geometry =
+  discard g
+  const
+    slices = 32'u16
+    stacks = 16'u16
+  let sizes = shape.sphereSizes(slices, stacks)
+  var (geometry, buffer) = initGeometry(sizes)
+
+  buffer = shape.buildSphere(buffer, shape.Sphere(
+    radius: 1,
+    slices: slices,
+    stacks: stacks,
+    color: shape.color4f(1, 1, 1, 1),
+  ))
+
+  doAssert buffer.valid
+  result = geometry
+
+proc cylinder*(g: ptr Graphics): Geometry =
+  discard g
+  const
+    slices = 32'u16
+    stacks = 1'u16
+  let sizes = shape.cylinderSizes(slices, stacks)
+  var (geometry, buffer) = initGeometry(sizes)
+
+  buffer = shape.buildCylinder(buffer, shape.Cylinder(
+    radius: 1,
+    height: 2,
+    slices: slices,
+    stacks: stacks,
+    color: shape.color4f(1, 1, 1, 1),
+  ))
+
+  doAssert buffer.valid
+  result = geometry
+
+proc torus*(g: ptr Graphics): Geometry =
+  discard g
+  const
+    sides = 16'u16
+    rings = 32'u16
+  let sizes = shape.torusSizes(sides, rings)
+  var (geometry, buffer) = initGeometry(sizes)
+
+  buffer = shape.buildTorus(buffer, shape.Torus(
+    radius: 1,
+    ringRadius: 0.3,
+    sides: sides,
+    rings: rings,
+    color: shape.color4f(1, 1, 1, 1),
+  ))
+
+  doAssert buffer.valid
+  result = geometry
