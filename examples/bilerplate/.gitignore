@@ -1,0 +1,14 @@
+build/
+nimcache/
+src/main
+main
+
+platforms/android/.gradle/
+platforms/android/app/build/
+platforms/android/app/src/main/assets/
+platforms/android/app/jni/main/
+platforms/android/nimcache/
+platforms/android/vendor/
+nimble.develop
+nimble.paths
+nimbledeps

@@ -1,0 +1,33 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "dev.abim.boilerplate"
+    compileSdk 36
+    ndkVersion "29.0.14206865"
+
+    defaultConfig {
+        applicationId "dev.abim.boilerplate"
+        minSdk 21
+        targetSdk 36
+        versionCode 1
+        versionName "0.1.0"
+
+        ndk {
+            abiFilters "arm64-v8a", "armeabi-v7a", "x86_64"
+        }
+
+        externalNativeBuild {
+            ndkBuild {
+                arguments "NIM_INCLUDE_DIR=${System.getenv("NIM_INCLUDE_DIR") ?: ""}"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path "jni/Android.mk"
+        }
+    }
+}
