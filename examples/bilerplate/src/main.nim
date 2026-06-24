@@ -63,7 +63,7 @@ const
   ]
 
 var
-  cube: Pipeline
+  cube: Mesh
   p1 = Transform()
   t1 = Transform(parent: addr p1)
   cameraTransform: Transform
@@ -75,7 +75,7 @@ proc updateCamera() =
   camera = graphics.perspective(cameraTransform, 60, 0.1, 100.0)
 
 proc load() =
-  cube = pipeline(shader=graphics.shader(vertex, fragment), vertices=VERTICES, indices=INDICES)
+  cube = graphics.mesh(shader=graphics.shader(vertex, fragment), vertices=VERTICES, indices=INDICES)
   updateCamera()
   graphics.onWindowResize(proc (width, height: int32) =
     updateCamera()
@@ -92,6 +92,6 @@ proc draw() =
   cube.shader.set("MODEL", t1.world)
   graphics.render(cube, camera)
 
-proc cleanup() = destroy(addr cube)
+proc cleanup() = destroy(cube)
 
 window(800, 600, "boiler-plate", load, draw, cleanup)
