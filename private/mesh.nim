@@ -37,7 +37,8 @@ proc destroy*(p: var Mesh) =
     p.vao = 0
   destroy(p.shader)
 
-proc getIndexType[I](): GLenum =
+proc `indexType`[I](indices: openArray[I]): GLenum =
+  discard indices
   when sizeof(I) == sizeof(uint8):
     GL_UNSIGNED_BYTE
   elif sizeof(I) == sizeof(uint16):
@@ -51,7 +52,7 @@ proc mesh*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], indice
   discard g
   result.shader = shader
   result.count = len(indices)
-  result.indexType = getIndexType[I]()
+  result.indexType = indices.indexType
 
   use(result.shader)
   glGenVertexArrays(1, result.vao.addr)
@@ -84,7 +85,7 @@ proc compact*(g: ptr Graphics, shader: Shader, geometry: Geometry): Mesh =
   discard g
   result.shader = shader
   result.count = len(geometry.indices)
-  result.indexType = getIndexType[uint32]()
+  result.indexType = geometry.indices.indexType
 
   use(result.shader)
   glGenVertexArrays(1, result.vao.addr)

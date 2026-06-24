@@ -54,6 +54,6 @@ func ortho*(g: ptr Graphics, transform: Transform, height, nearZ, farZ: float32)
     aspect: g.aspect,
     nearZ: nearZ,
     farZ: farZ,
-    projection: ortho(-0.5 * w, 0.5 * w, -0.5 * height, -0.5 * height, nearZ, farZ)
+    projection: ortho(-0.5 * w, 0.5 * w, -0.5 * height, 0.5 * height, nearZ, farZ)
   )
 func `projection`*(c: Camera): Mat4 = c.projection

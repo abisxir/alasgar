@@ -44,14 +44,14 @@ var
 
 proc load() =
   var
-    ct = Transform(position: vec3(0, 0, -5))
+    ct = Transform(position: vec3(5, 5, 5))
     shader = graphics.shader(vs, fs)
   ct.lookAt(vec3(0, 0, 0), vec3(0, 1, 0))
   checker = graphics.texture(2, 2, pixels=CHECKER_PIXELS[0].addr)
   checkerSampler = graphics.sampler(checker, minFilter=tfNearest, magFilter=tfNearest)
   cube = graphics.compact(shader, graphics.cube())
   #camera = graphics.perspective(ct, 60, 0.1, 100.0)
-  camera = graphics.ortho(ct, graphics.size.y.float32, 1, 1000.0)
+  camera = graphics.ortho(ct, 6, 0.1, 100.0)
   graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
 
 proc draw() =
