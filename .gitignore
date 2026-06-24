@@ -67,3 +67,4 @@ SDL2_mixer.dll
 test.nim
 test
 .nimcache/
+examples/shapes
