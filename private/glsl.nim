@@ -1,7 +1,7 @@
 # https://github.com/treeform/shady
 ## Shader macro, converts Nim code into GLSL
 
-import macros, strutils, tables, strformat
+import macros, strutils, tables, strformat, sequtils
 
 import aljebra
 import ports/opengl
@@ -48,6 +48,7 @@ var
     "UniformWriteOnly": "writeonly uniform",
     "Attribute": "attribute",
     "Layout": "layout",
+    "Batch": "layout",
   }.toTable()
   vectorTypes {.compiletime.}: Table[string, string] = {
     "GMat2[float32]": "mat2",
@@ -129,7 +130,7 @@ var
     "USamplerCubeArrayShadow": "usamplerCubeArrayShadow",
     "UImageBuffer": "uimageBuffer",
   }.toTable()
-  metaDataTypes {.compiletime.} = ["Layout", "Uniform", "UniformWriteonly", "Attribute"]
+  metaDataTypes {.compiletime.} = ["Layout", "Batch", "Uniform", "UniformWriteonly", "Attribute"]
   logicalOperations {.compileTime.}: Table[string, string] = {
     "and": "&&",
     "or": "||",
@@ -161,6 +162,7 @@ var
   }.toTable()
   reservedDeclarations {.compileTime.} = [
     "Layout",
+    "Batch",
     "Uniform",
     "UniformWriteOnly",
     "Attribute",
@@ -796,6 +798,7 @@ proc toCodeStmts(n: NimNode, res: var string, level = 0) =
 proc parseBracket(param: NimNode, res: var string, forceOut = false,
     layout: var ShaderLayout): int =
   let
+    instanced = param[0].strVal == "Batch"
     prefix = typeRename(param[0].strVal)
   if prefix == "layout":
     if isSampler(param[2]):
@@ -813,7 +816,7 @@ proc parseBracket(param: NimNode, res: var string, forceOut = false,
           typeName: param[2].strVal,
           index: param[1].intVal.int,
           size: param[2].getSize(),
-          instanced: false)
+          instanced: instanced)
         )
     if param[2].kind == nnkBracketExpr:
       return parseBracket(param[2], res, false, layout)
@@ -1097,6 +1100,7 @@ func `stride`*(layout: ShaderLayout): int =
     result += data.size
 
 func `count`*(layout: ShaderLayout): int = len(layout.attrs)
+func `instanced`*(layout: ShaderLayout): bool = anyIt(layout.attrs, it.instanced)
 
 func `count`*(data: ShaderAttribute): int =
   if data.typeName == "Vec2":
@@ -1111,6 +1115,7 @@ func `count`*(data: ShaderAttribute): int =
 
 type
   Layout*[N, T] = T
+  Batch*[N, T] = T
   Uniform*[T] = T
   UniformWriteOnly*[T] = T
   Attribute*[T] = T

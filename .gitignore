@@ -68,3 +68,4 @@ test.nim
 test
 .nimcache/
 examples/shapes
+examples/batch

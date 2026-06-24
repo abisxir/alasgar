@@ -19,7 +19,24 @@ type
     indexType: GLenum
     vao: GLuint
     vbo: GLuint
+    instanceVbo: GLuint
     ibo: GLuint
+
+template shader*(g: ptr Graphics, vx, fx: untyped): Shader =
+  var
+    r = toGLSL(vx)
+    fs = toGLSL(fx)[0]
+    vs = r[0]
+    layout = r[1]
+    source = vs & "\n" & fs
+  Shader(
+    program: createProgram(
+      vs,
+      fs,
+    ),
+    layout: layout,
+    source: source,
+  )
 
 
 proc destroy*(p: var Mesh) =
@@ -31,6 +48,10 @@ proc destroy*(p: var Mesh) =
     glDeleteBuffers(1, p.vbo.addr)
     echo &"- Vertex buffer [{p.vbo.int}] destroyed."
     p.vbo = 0
+  if p.instanceVbo != 0:
+    glDeleteBuffers(1, p.instanceVbo.addr)
+    echo &"- Instance buffer [{p.instanceVbo.int}] destroyed."
+    p.instanceVbo = 0
   if p.vao != 0:
     glDeleteVertexArrays(1, p.vao.addr)
     echo &"- Vertex array [{p.vao.int}] destroyed."
@@ -48,6 +69,22 @@ proc `indexType`[I](indices: openArray[I]): GLenum =
   else:
     {.error: "Unsupported index buffer element type".}
 
+func stride(layout: ShaderLayout, instanced: bool): int =
+  for attr in layout.attrs:
+    if attr.instanced == instanced:
+      result += attr.size
+
+proc setupAttributes(layout: ShaderLayout, instanced: bool) =
+  let stride = layout.stride(instanced).GLsizei
+  var offset = 0
+  for attr in layout.attrs:
+    if attr.instanced != instanced:
+      continue
+    glVertexAttribPointer(attr.index.GLuint, attr.count.GLint, cGL_FLOAT, false, stride, cast[pointer](offset))
+    glEnableVertexAttribArray(attr.index.GLuint)
+    glVertexAttribDivisor(attr.index.GLuint, (if instanced: 1.GLuint else: 0.GLuint))
+    offset += attr.size
+
 proc mesh*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], indices: openArray[I]): Mesh =
   discard g
   result.shader = shader
@@ -62,13 +99,13 @@ proc mesh*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], indice
   glBindBuffer(GL_ARRAY_BUFFER, result.vbo)
   glBufferData(GL_ARRAY_BUFFER, (len(vertices) * sizeof(V)).GLsizeiptr, cast[pointer](addr vertices[0]), GL_STATIC_DRAW)
 
-  var
-    stride = result.shader.layout.stride
-    offset = 0
-  for attr in result.shader.layout.attrs:
-    glVertexAttribPointer(attr.index.GLuint, attr.count.GLint, cGL_FLOAT, false, stride.GLsizei, cast[pointer](offset))
-    glEnableVertexAttribArray(attr.index.GLuint)
-    offset += attr.size
+  setupAttributes(result.shader.layout, instanced = false)
+
+  if result.shader.layout.instanced:
+    glGenBuffers(1, result.instanceVbo.addr)
+    glBindBuffer(GL_ARRAY_BUFFER, result.instanceVbo)
+    glBufferData(GL_ARRAY_BUFFER, 0.GLsizeiptr, nil, GL_DYNAMIC_DRAW)
+    setupAttributes(result.shader.layout, instanced = true)
 
   glGenBuffers(1, result.ibo.addr)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ibo)
@@ -111,6 +148,12 @@ proc compact*(g: ptr Graphics, shader: Shader, geometry: Geometry): Mesh =
   glVertexAttribPointer(3.GLuint, 4.GLint, GL_UNSIGNED_BYTE, true, stride, cast[pointer](colorOffset))
   glEnableVertexAttribArray(3.GLuint)
 
+  if result.shader.layout.instanced:
+    glGenBuffers(1, result.instanceVbo.addr)
+    glBindBuffer(GL_ARRAY_BUFFER, result.instanceVbo)
+    glBufferData(GL_ARRAY_BUFFER, 0.GLsizeiptr, nil, GL_DYNAMIC_DRAW)
+    setupAttributes(result.shader.layout, instanced = true)
+
   glGenBuffers(1, result.ibo.addr)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ibo)
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(geometry.indices) * sizeof(uint16)).GLsizeiptr, cast[pointer](geometry.indices[0].addr), GL_STATIC_DRAW)
@@ -144,18 +187,10 @@ proc render*(g: ptr Graphics, p: var Mesh, camera: Camera) =
   glBindVertexArray(p.vao)
   glDrawElements(GL_TRIANGLES, p.count.GLsizei, p.indexType, cast[pointer](0))
 
-template shader*(g: ptr Graphics, vx, fx: untyped): Shader =
-  var
-    r = toGLSL(vx)
-    fs = toGLSL(fx)[0]
-    vs = r[0]
-    layout = r[1]
-    source = vs & "\n" & fs
-  Shader(
-    program: createProgram(
-      vs,
-      fs,
-    ),
-    layout: layout,
-    source: source,
-  )
+proc render*[T](g: ptr Graphics, p: var Mesh, camera: Camera, instances: openArray[T]) =
+  use(p.shader)
+  setCameraData(g, p.shader, camera)
+  glBindVertexArray(p.vao)
+  glBindBuffer(GL_ARRAY_BUFFER, p.instanceVbo)
+  glBufferData(GL_ARRAY_BUFFER, (len(instances) * sizeof(T)).GLsizeiptr, cast[pointer](addr instances[0]), GL_DYNAMIC_DRAW)
+  glDrawElementsInstanced(GL_TRIANGLES, p.count.GLsizei, p.indexType, cast[pointer](0), len(instances).GLsizei)
