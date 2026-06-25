@@ -7,7 +7,6 @@ proc vertex(
   IN_COLOR: Layout[1, Vec4],
   MODEL: Uniform[Mat4],
   COLOR: var Vec4,
-  gl_Position: var Vec4
 ) =
   gl_Position = GLSL_CAMERA.PROJECTION * GLSL_CAMERA.VIEW * MODEL * vec4(IN_POSITION, 1)
   COLOR = IN_COLOR

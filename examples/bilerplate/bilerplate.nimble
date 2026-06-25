@@ -15,18 +15,23 @@ const
   appName = "boiler-plate"
   entry = "src/main.nim"
   nativeOut = "build/native/main"
+  nativeCache = "build/nimcache/native"
   webOut = "build/web/index.html"
+  webCache = "build/nimcache/web"
   webShellFile = "platforms/web/index.html"
   webDockerfile = "platforms/web/Dockerfile"
   androidOut = "build/android"
   dockerImage = "alasgar-emscripten"
 
 proc localAlasgarPath(): string =
-  let path = getCurrentDir().parentDir() / "alasgar"
-  if dirExists(path):
-    path
-  else:
-    ""
+  for path in [
+    getCurrentDir().parentDir().parentDir(),
+    getCurrentDir().parentDir() / "alasgar",
+    getCurrentDir().parentDir().parentDir() / "alasgar",
+  ]:
+    if fileExists(path / "alasgar.nim") and dirExists(path / "private"):
+      return path
+  ""
 
 proc localAlasgarSwitch(): string =
   let path = localAlasgarPath()
@@ -35,26 +40,41 @@ proc localAlasgarSwitch(): string =
   else:
     ""
 
+proc isUsablePackagePath(packageName, path: string): bool =
+  result = path.len > 0 and dirExists(path / packageName)
+  if result and packageName == "sokol":
+    let appModule = path / packageName / "app.nim"
+    result = fileExists(appModule) and readFile(appModule).contains("glMajorVersion")
+
 proc packagePathSwitch(packageName: string): string =
-  let path = staticExec(&"nimble path {packageName} | tail -n1").strip()
-  if path.len > 0:
-    &"--path:\"{path}\" "
-  else:
-    ""
+  let nimblePathOutput = staticExec(&"nimble path {packageName} 2>/dev/null || true")
+  for rawPath in nimblePathOutput.splitLines():
+    let path = rawPath.strip()
+    if isUsablePackagePath(packageName, path):
+      return &"--path:\"{path}\" "
+
+  let pkgs2Dir = getHomeDir() / ".nimble" / "pkgs2"
+  if dirExists(pkgs2Dir):
+    for kind, path in walkDir(pkgs2Dir):
+      if kind == pcDir and path.splitPath().tail.startsWith(packageName & "-") and isUsablePackagePath(packageName, path):
+        return &"--path:\"{path}\" "
+
+  ""
 
 proc ensureBuildDirs() =
-  exec "mkdir -p build/native build/web build/android"
+  exec "mkdir -p build/native build/web build/android build/nimcache/native build/nimcache/web"
 
 proc buildNative(release: bool) =
   ensureBuildDirs()
   let mode = if release: "-d:release " else: ""
-  exec &"nim c {mode}{localAlasgarSwitch()}{packagePathSwitch(\"sokol\")}--out:{nativeOut} {entry}"
+  exec &"nim c {mode}{localAlasgarSwitch()}{packagePathSwitch(\"sokol\")}--nimcache:{nativeCache} --out:{nativeOut} {entry}"
 
 proc webCompileCommand(release: bool; extraSwitches = ""; includeLocalAlasgar = true): string =
   let mode = if release: "-d:release " else: ""
   let alasgarSwitch = if includeLocalAlasgar: localAlasgarSwitch() else: ""
   result = &"nim c {mode}-d:emscripten --threads:off --mm:arc --os:linux --cpu:i386 --cc:clang " &
     "--clang.exe:emcc --clang.linkerexe:emcc " &
+    &"--nimcache:{webCache} " &
     &"--out:{webOut} " &
     alasgarSwitch &
     extraSwitches &
@@ -71,7 +91,7 @@ proc buildWebDocker(release: bool) =
   let projectDir = getCurrentDir()
   let nimbleDir = getHomeDir() / ".nimble" / "pkgs2"
   let alasgarPath = localAlasgarPath()
-  let sokolDir = staticExec("nimble path sokol | tail -n1").strip().splitPath().tail
+  let sokolDir = packagePathSwitch("sokol").split("\"")[1].splitPath().tail
   let packagePaths = &"--path:/alasgar --path:/host-nimble-pkgs2/{sokolDir} "
   let command = webCompileCommand(release, packagePaths, false)
   exec &"docker build -f {webDockerfile} -t {dockerImage} ."

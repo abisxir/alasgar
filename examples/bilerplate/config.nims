@@ -9,10 +9,19 @@ import std/strutils
 let nativeOutDir = thisDir() / "build" / "native"
 discard staticExec("mkdir -p " & quoteShell(nativeOutDir))
 
-let localAlasgar = thisDir().parentDir / "alasgar"
-if dirExists(localAlasgar):
-  switch("path", localAlasgar)
+for localAlasgar in [
+  thisDir().parentDir().parentDir(),
+  thisDir().parentDir() / "alasgar",
+  thisDir().parentDir().parentDir() / "alasgar",
+]:
+  if fileExists(localAlasgar / "alasgar.nim") and dirExists(localAlasgar / "private"):
+    switch("path", localAlasgar)
+    break
 
-let sokolPath = staticExec("nimble path sokol 2>/dev/null | tail -n1").strip()
-if sokolPath.len > 0:
-  switch("path", sokolPath)
+let sokolPathOutput = staticExec("nimble path sokol 2>/dev/null || true")
+for rawPath in sokolPathOutput.splitLines():
+  let sokolPath = rawPath.strip()
+  let appModule = sokolPath / "sokol" / "app.nim"
+  if sokolPath.len > 0 and dirExists(sokolPath / "sokol") and fileExists(appModule) and readFile(appModule).contains("glMajorVersion"):
+    switch("path", sokolPath)
+    break
