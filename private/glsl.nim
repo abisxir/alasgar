@@ -4,7 +4,10 @@
 import macros, strutils, tables, strformat, sequtils
 
 import aljebra
+import camera
 import ports/opengl
+
+export aljebra, camera
 
 type
   ShaderAttribute* = object

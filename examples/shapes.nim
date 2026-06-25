@@ -43,7 +43,7 @@ var
   checkerSampler: Sampler
 
 proc newShape(geometry: Geometry, position, color, spin: Vec3): ShapeItem =
-  result.mesh = graphics.compact(graphics.shader(vs, fs), geometry)
+  result.mesh = graphics.compact(geometry, graphics.shader(vs, fs))
   result.transform = Transform(position: position)
   result.color = vec4(color, 1)
   result.spin = spin

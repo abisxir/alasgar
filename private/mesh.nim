@@ -3,6 +3,7 @@ import std/strformat
 import sokol/shape
 
 import ports/opengl
+import shaders/basic as basic
 import shader
 import glsl
 import core
@@ -118,7 +119,7 @@ proc mesh*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], indice
   return result
 
 
-proc compact*(g: ptr Graphics, shader: Shader, geometry: Geometry): Mesh =
+proc compact*(g: ptr Graphics, geometry: Geometry, shader: Shader): Mesh =
   discard g
   result.shader = shader
   result.count = len(geometry.indices)
@@ -164,6 +165,7 @@ proc compact*(g: ptr Graphics, shader: Shader, geometry: Geometry): Mesh =
 
   return result
 
+proc compact*(g: ptr Graphics, geometry: Geometry): Mesh = compact(g, geometry, g.shader(basic.vs, basic.fs))
 
 proc setCameraData(g: ptr Graphics, shader: var Shader, camera: Camera) =
   let

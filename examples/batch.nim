@@ -55,7 +55,7 @@ proc load() =
 
   checker = graphics.texture(2, 2, pixels=CHECKER_PIXELS[0].addr)
   checkerSampler = graphics.sampler(checker, minFilter=tfNearest, magFilter=tfNearest)
-  cube = graphics.compact(shader, graphics.cube())
+  cube = graphics.compact(graphics.cube(), shader)
 
 proc updateInstances() =
   for i, instance in instances.mpairs:

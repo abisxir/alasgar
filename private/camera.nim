@@ -34,6 +34,10 @@ type
 var
   GLSL_CAMERA*: CameraGLSL
 
+func buildTransform(position, target: Vec3): Transform =
+  result = Transform(position: position)
+  result.lookAt(target, vec3(0, 1, 0))
+
 proc perspective*(g: ptr Graphics, transform: Transform, fovY, nearZ, farZ: float32): Camera =
   let aspect = g.aspect()
   Camera(
@@ -44,6 +48,9 @@ proc perspective*(g: ptr Graphics, transform: Transform, fovY, nearZ, farZ: floa
     farZ: farZ,
     projection: perspective(fovY, aspect, nearZ, farZ)
   )
+
+proc perspective*(g: ptr Graphics, position, target: Vec3, fovY, nearZ, farZ: float32): Camera =
+  perspective(g, buildTransform(position, target), fovY, nearZ, farZ)
 
 func ortho*(g: ptr Graphics, transform: Transform, height, nearZ, farZ: float32): Camera =
   let
@@ -56,4 +63,9 @@ func ortho*(g: ptr Graphics, transform: Transform, height, nearZ, farZ: float32)
     farZ: farZ,
     projection: ortho(-0.5 * w, 0.5 * w, -0.5 * height, 0.5 * height, nearZ, farZ)
   )
+
+proc ortho*(g: ptr Graphics, position, target: Vec3, height, nearZ, farZ: float32): Camera =
+  ortho(g, buildTransform(position, target), height, nearZ, farZ)
+
+
 func `projection`*(c: Camera): Mat4 = c.projection

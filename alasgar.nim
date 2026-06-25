@@ -34,8 +34,8 @@
 ## let color = vec4(1, 0, 0, 1)
 ## ```
 import private/core
-import private/shader
 import private/glsl
+import private/shader
 import private/aljebra
 import private/transform
 import private/mesh
