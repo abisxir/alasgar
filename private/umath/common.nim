@@ -47,10 +47,12 @@ type
 
 const
   EPSILON*: float32 = 0.0000001
-  HALF_PI*: float32 = 1.570796326795
-  ONE_OVER_PI*: float32 = 0.3183098861837697
+  HALF_PI*: float32 = 1.5707963
+  ONE_OVER_PI*: float32 = 0.3183098
   LOG2*: float32 = 1.442695
 
 func caddr*[T](v: GVec2[T] | GVec3[T] | GVec4[T]): ptr T = addr v.x
 func caddr*(m: Mat3 | Mat4): ptr float32 = addr m.m00
 func caddr*(m: ptr Mat3 | ptr Mat4): ptr float32 = addr m.m00
+func toDeg*(r: float32): float32 = r * 180.0 / PI
+func toRad*(d: float32): float32 = d * PI / 180.0
