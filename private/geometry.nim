@@ -25,7 +25,7 @@ proc initGeometry(sizes: shape.Sizes): tuple[geometry: Geometry, buffer: shape.B
     ),
   )
 
-proc cube*(g: ptr Graphics): Geometry =
+proc cube*(g: ptr Graphics, color: Vec4): Geometry =
   discard g
   let sizes = shape.boxSizes(1)
   var (geometry, buffer) = initGeometry(sizes)
@@ -35,13 +35,15 @@ proc cube*(g: ptr Graphics): Geometry =
     height: 2,
     depth: 2,
     tiles: 1,
-    color: shape.color4f(1, 1, 1, 1),
+    color: shape.color4f(color.x, color.y, color.z, color.w),
   ))
 
   doAssert buffer.valid
   result = geometry
 
-proc plane*(g: ptr Graphics): Geometry =
+proc cube*(g: ptr Graphics): Geometry = cube(g, vec4(1))
+
+proc plane*(g: ptr Graphics, color: Vec4): Geometry =
   discard g
   let sizes = shape.planeSizes(1)
   var (geometry, buffer) = initGeometry(sizes)
@@ -50,13 +52,15 @@ proc plane*(g: ptr Graphics): Geometry =
     width: 2,
     depth: 2,
     tiles: 1,
-    color: shape.color4f(1, 1, 1, 1),
+    color: shape.color4f(color.x, color.y, color.z, color.w),
   ))
 
   doAssert buffer.valid
   result = geometry
 
-proc sphere*(g: ptr Graphics): Geometry =
+proc plane*(g: ptr Graphics): Geometry = plane(g, vec4(1))
+
+proc sphere*(g: ptr Graphics, color: Vec4): Geometry =
   discard g
   const
     slices = 32'u16
@@ -68,13 +72,15 @@ proc sphere*(g: ptr Graphics): Geometry =
     radius: 1,
     slices: slices,
     stacks: stacks,
-    color: shape.color4f(1, 1, 1, 1),
+    color: shape.color4f(color.x, color.y, color.z, color.w),
   ))
 
   doAssert buffer.valid
   result = geometry
 
-proc cylinder*(g: ptr Graphics): Geometry =
+proc sphere*(g: ptr Graphics): Geometry = sphere(g, vec4(1))
+
+proc cylinder*(g: ptr Graphics, color: Vec4): Geometry =
   discard g
   const
     slices = 32'u16
@@ -87,13 +93,15 @@ proc cylinder*(g: ptr Graphics): Geometry =
     height: 2,
     slices: slices,
     stacks: stacks,
-    color: shape.color4f(1, 1, 1, 1),
+    color: shape.color4f(color.x, color.y, color.z, color.w),
   ))
 
   doAssert buffer.valid
   result = geometry
 
-proc torus*(g: ptr Graphics): Geometry =
+proc cylinder*(g: ptr Graphics): Geometry = cylinder(g, vec4(1))
+
+proc torus*(g: ptr Graphics, color: Vec4): Geometry =
   discard g
   const
     sides = 16'u16
@@ -106,8 +114,10 @@ proc torus*(g: ptr Graphics): Geometry =
     ringRadius: 0.3,
     sides: sides,
     rings: rings,
-    color: shape.color4f(1, 1, 1, 1),
+    color: shape.color4f(color.x, color.y, color.z, color.w),
   ))
 
   doAssert buffer.valid
   result = geometry
+
+proc torus*(g: ptr Graphics): Geometry = torus(g, vec4(1))
