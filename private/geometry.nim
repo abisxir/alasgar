@@ -1,3 +1,5 @@
+import sequtils
+
 import sokol/shape
 import core
 
@@ -5,6 +7,12 @@ type
   Geometry* = object
     vertices*: seq[shape.Vertex]
     indices*: seq[uint16]
+
+func `+`*(a, b: Geometry): Geometry =
+  result.vertices = concat(a.vertices, b.vertices)
+  result.indices = concat(a.indices, b.indices)
+
+func merge*(a, b: Geometry): Geometry = a + b
 
 proc initGeometry(sizes: shape.Sizes): tuple[geometry: Geometry, buffer: shape.Buffer] =
   result.geometry.vertices = newSeq[shape.Vertex](sizes.vertices.num.int)
@@ -25,23 +33,29 @@ proc initGeometry(sizes: shape.Sizes): tuple[geometry: Geometry, buffer: shape.B
     ),
   )
 
-proc cube*(g: ptr Graphics, color: Vec4): Geometry =
+proc cube*(g: ptr Graphics, box: Vec3, tiles: uint16, color: Vec4, transform: common.Mat4): Geometry =
   discard g
   let sizes = shape.boxSizes(1)
   var (geometry, buffer) = initGeometry(sizes)
 
   buffer = shape.buildBox(buffer, shape.Box(
-    width: 2,
-    height: 2,
-    depth: 2,
-    tiles: 1,
+    width: box.x,
+    height: box.y,
+    depth: box.z,
+    tiles: tiles,
     color: shape.color4f(color.x, color.y, color.z, color.w),
+    transform: shape.Mat4(m: [
+      [transform.m00, transform.m01, transform.m02, transform.m03],
+      [transform.m10, transform.m11, transform.m12, transform.m13],
+      [transform.m20, transform.m21, transform.m22, transform.m23],
+      [transform.m30, transform.m31, transform.m32, transform.m33]
+    ])
   ))
 
   doAssert buffer.valid
   result = geometry
 
-proc cube*(g: ptr Graphics): Geometry = cube(g, vec4(1))
+proc cube*(g: ptr Graphics): Geometry = cube(g, vec3(2), 1, vec4(1), mat4())
 
 proc plane*(g: ptr Graphics, color: Vec4): Geometry =
   discard g
