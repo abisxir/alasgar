@@ -1,6 +1,7 @@
 import sequtils
 
 import sokol/shape
+import aljebra
 import core
 
 type
@@ -13,6 +14,14 @@ func `+`*(a, b: Geometry): Geometry =
   result.indices = concat(a.indices, b.indices)
 
 func merge*(a, b: Geometry): Geometry = a + b
+
+func toShapeMat4(transform: common.Mat4): shape.Mat4 =
+  shape.Mat4(m: [
+    [transform.m00, transform.m01, transform.m02, transform.m03],
+    [transform.m10, transform.m11, transform.m12, transform.m13],
+    [transform.m20, transform.m21, transform.m22, transform.m23],
+    [transform.m30, transform.m31, transform.m32, transform.m33],
+  ])
 
 proc initGeometry(sizes: shape.Sizes): tuple[geometry: Geometry, buffer: shape.Buffer] =
   result.geometry.vertices = newSeq[shape.Vertex](sizes.vertices.num.int)
@@ -35,7 +44,7 @@ proc initGeometry(sizes: shape.Sizes): tuple[geometry: Geometry, buffer: shape.B
 
 proc cube*(g: ptr Graphics, box: Vec3, tiles: uint16, color: Vec4, transform: common.Mat4): Geometry =
   discard g
-  let sizes = shape.boxSizes(1)
+  let sizes = shape.boxSizes(tiles.uint32)
   var (geometry, buffer) = initGeometry(sizes)
 
   buffer = shape.buildBox(buffer, shape.Box(
@@ -44,94 +53,85 @@ proc cube*(g: ptr Graphics, box: Vec3, tiles: uint16, color: Vec4, transform: co
     depth: box.z,
     tiles: tiles,
     color: shape.color4f(color.x, color.y, color.z, color.w),
-    transform: shape.Mat4(m: [
-      [transform.m00, transform.m01, transform.m02, transform.m03],
-      [transform.m10, transform.m11, transform.m12, transform.m13],
-      [transform.m20, transform.m21, transform.m22, transform.m23],
-      [transform.m30, transform.m31, transform.m32, transform.m33]
-    ])
+    transform: toShapeMat4(transform),
   ))
 
   doAssert buffer.valid
   result = geometry
 
-proc cube*(g: ptr Graphics): Geometry = cube(g, vec3(2), 1, vec4(1), mat4())
-
-proc plane*(g: ptr Graphics, color: Vec4): Geometry =
+proc plane*(g: ptr Graphics, size: Vec2, tiles: uint16, color: Vec4, transform: common.Mat4): Geometry =
   discard g
-  let sizes = shape.planeSizes(1)
+  let sizes = shape.planeSizes(tiles.uint32)
   var (geometry, buffer) = initGeometry(sizes)
 
   buffer = shape.buildPlane(buffer, shape.Plane(
-    width: 2,
-    depth: 2,
-    tiles: 1,
+    width: size.x,
+    depth: size.y,
+    tiles: tiles,
     color: shape.color4f(color.x, color.y, color.z, color.w),
+    transform: toShapeMat4(transform),
   ))
 
   doAssert buffer.valid
   result = geometry
 
-proc plane*(g: ptr Graphics): Geometry = plane(g, vec4(1))
-
-proc sphere*(g: ptr Graphics, color: Vec4): Geometry =
+proc sphere*(g: ptr Graphics, radius: float32, slices, stacks: uint16, color: Vec4, transform: common.Mat4): Geometry =
   discard g
-  const
-    slices = 32'u16
-    stacks = 16'u16
-  let sizes = shape.sphereSizes(slices, stacks)
+  let sizes = shape.sphereSizes(slices.uint32, stacks.uint32)
   var (geometry, buffer) = initGeometry(sizes)
 
   buffer = shape.buildSphere(buffer, shape.Sphere(
-    radius: 1,
+    radius: radius,
     slices: slices,
     stacks: stacks,
     color: shape.color4f(color.x, color.y, color.z, color.w),
+    transform: toShapeMat4(transform),
   ))
 
   doAssert buffer.valid
   result = geometry
 
-proc sphere*(g: ptr Graphics): Geometry = sphere(g, vec4(1))
-
-proc cylinder*(g: ptr Graphics, color: Vec4): Geometry =
+proc cylinder*(g: ptr Graphics, radius, height: float32, slices, stacks: uint16, color: Vec4, transform: common.Mat4): Geometry =
   discard g
-  const
-    slices = 32'u16
-    stacks = 1'u16
-  let sizes = shape.cylinderSizes(slices, stacks)
+  let sizes = shape.cylinderSizes(slices.uint32, stacks.uint32)
   var (geometry, buffer) = initGeometry(sizes)
 
   buffer = shape.buildCylinder(buffer, shape.Cylinder(
-    radius: 1,
-    height: 2,
+    radius: radius,
+    height: height,
     slices: slices,
     stacks: stacks,
     color: shape.color4f(color.x, color.y, color.z, color.w),
+    transform: toShapeMat4(transform),
   ))
 
   doAssert buffer.valid
   result = geometry
 
-proc cylinder*(g: ptr Graphics): Geometry = cylinder(g, vec4(1))
-
-proc torus*(g: ptr Graphics, color: Vec4): Geometry =
+proc torus*(g: ptr Graphics, radius, ringRadius: float32, sides, rings: uint16, color: Vec4, transform: common.Mat4): Geometry =
   discard g
-  const
-    sides = 16'u16
-    rings = 32'u16
-  let sizes = shape.torusSizes(sides, rings)
+  let sizes = shape.torusSizes(sides.uint32, rings.uint32)
   var (geometry, buffer) = initGeometry(sizes)
 
   buffer = shape.buildTorus(buffer, shape.Torus(
-    radius: 1,
-    ringRadius: 0.3,
+    radius: radius,
+    ringRadius: ringRadius,
     sides: sides,
     rings: rings,
     color: shape.color4f(color.x, color.y, color.z, color.w),
+    transform: toShapeMat4(transform),
   ))
 
   doAssert buffer.valid
   result = geometry
 
+proc cube*(g: ptr Graphics, color: Vec4): Geometry = cube(g, vec3(2), 1'u16, color, mat4())
+proc cube*(g: ptr Graphics): Geometry = cube(g, vec4(1))
+proc plane*(g: ptr Graphics, color: Vec4): Geometry = plane(g, vec2(2), 1'u16, color, mat4())
+proc plane*(g: ptr Graphics): Geometry = plane(g, vec4(1))
+proc sphere*(g: ptr Graphics, color: Vec4): Geometry = sphere(g, 1, 32'u16, 16'u16, color, mat4())
+proc sphere*(g: ptr Graphics): Geometry = sphere(g, vec4(1))
+proc cylinder*(g: ptr Graphics, color: Vec4): Geometry = cylinder(g, 1, 2, 32'u16, 1'u16, color, mat4())
+proc cylinder*(g: ptr Graphics): Geometry = cylinder(g, vec4(1))
+proc torus*(g: ptr Graphics, color: Vec4): Geometry = torus(g, 1, 0.3, 16'u16, 32'u16, color, mat4())
 proc torus*(g: ptr Graphics): Geometry = torus(g, vec4(1))
