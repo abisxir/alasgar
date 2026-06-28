@@ -3,12 +3,15 @@ import math
 import alasgar
 
 var
-  cube: Mesh
+  cubes: Mesh
   t = Transform()
   camera: Camera
 
 proc load() =
-  cube = graphics.compact(graphics.cube())
+  let
+    shape1 = graphics.cube(transform=translate(vec3(-2, 0, 0)), color=vec4(1, 0, 0, 1))
+    shape2 = graphics.cube(transform=translate(vec3( 2, 0, 0)), color=vec4(0, 1, 0, 1))
+  cubes = graphics.compact(shape1 + shape2)
   camera = graphics.perspective(vec3(5, 5, 5), vec3(0, 0, 0), 60, 0.1, 100.0)
   graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
 
@@ -17,10 +20,10 @@ proc draw() =
     speed = 20.0
     r = runtime.age * runtime.delta * speed
   t.rotation = fromEuler(r, r, 0.0)
-  cube.shader.set("MODEL", t.world)
-  graphics.render(cube, camera)
+  cubes.shader.set("MODEL", t.world)
+  graphics.render(cubes, camera)
 
 proc cleanup() =
-  destroy(cube)
+  destroy(cubes)
 
 window(800, 600, "My Game", load, draw, cleanup)

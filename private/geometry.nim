@@ -10,8 +10,11 @@ type
     indices*: seq[uint16]
 
 func `+`*(a, b: Geometry): Geometry =
+  let
+    size = a.vertices.len
+    bIndicesNormalized = mapIt(b.indices, it + size.uint16)
   result.vertices = concat(a.vertices, b.vertices)
-  result.indices = concat(a.indices, b.indices)
+  result.indices = concat(a.indices, bIndicesNormalized)
 
 func merge*(a, b: Geometry): Geometry = a + b
 
@@ -42,7 +45,7 @@ proc initGeometry(sizes: shape.Sizes): tuple[geometry: Geometry, buffer: shape.B
     ),
   )
 
-proc cube*(g: ptr Graphics, box: Vec3, tiles: uint16, color: Vec4, transform: common.Mat4): Geometry =
+proc cube*(g: ptr Graphics, box: Vec3=vec3(2), tiles: uint16=1, color: Vec4=vec4(1), transform: common.Mat4=mat4()): Geometry =
   discard g
   let sizes = shape.boxSizes(tiles.uint32)
   var (geometry, buffer) = initGeometry(sizes)
@@ -125,8 +128,6 @@ proc torus*(g: ptr Graphics, radius, ringRadius: float32, sides, rings: uint16, 
   doAssert buffer.valid
   result = geometry
 
-proc cube*(g: ptr Graphics, color: Vec4): Geometry = cube(g, vec3(2), 1'u16, color, mat4())
-proc cube*(g: ptr Graphics): Geometry = cube(g, vec4(1))
 proc plane*(g: ptr Graphics, color: Vec4): Geometry = plane(g, vec2(2), 1'u16, color, mat4())
 proc plane*(g: ptr Graphics): Geometry = plane(g, vec4(1))
 proc sphere*(g: ptr Graphics, color: Vec4): Geometry = sphere(g, 1, 32'u16, 16'u16, color, mat4())
