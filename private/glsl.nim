@@ -1186,18 +1186,6 @@ proc textureSize*(sampler: Sampler3D, lod: int): IVec3 = discard
 proc textureSize*(sampler: Sampler1D): int = discard
 proc textureSize*(sampler: Sampler2D): IVec2 = discard
 proc textureSize*(sampler: Sampler3D): IVec3 = discard
-proc exp2*(v: float): float = discard
-proc dFdx*(v: Vec3): Vec3 = discard
-proc dFdy*(v: Vec3): Vec3 = discard
-proc dFdx*(v: Vec2): Vec2 = discard
-proc dFdy*(v: Vec2): Vec2 = discard
-proc dFdx*(v: float): float = discard
-proc dFdy*(v: float): float = discard
-proc fwidth*(v: float): float = discard
-proc fwidth*(v: Vec2): Vec2 = discard
-proc fwidth*(v: Vec3): Vec3 = discard
-proc fwidth*(v: Vec4): Vec4 = discard
-proc ivec2*(x, y: int): IVec2 = discard
 
 var
   gl_Position*: Vec4

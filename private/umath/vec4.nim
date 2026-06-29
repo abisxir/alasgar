@@ -196,3 +196,93 @@ func `[]=`*[T: float32|int32|uint32](a: var GVec4[T], i: int, b: T) =
     a.z = b
   elif i == 3:
     a.w = b
+
+
+# Color funcs
+func colorByte(value: uint8): float32 = value.float32 / 255.0
+
+func hexValue(c: char): uint8 =
+  case c
+  of 'a'..'f':
+    uint8(ord(c) - ord('a') + 10)
+  of 'A'..'F':
+    uint8(ord(c) - ord('A') + 10)
+  else:
+    uint8(ord(c) - ord('0'))
+
+func hexByte(hex: string, index: int): uint8 =
+  hexValue(hex[index]) shl 4 or hexValue(hex[index + 1])
+
+func hexNibbleByte(hex: string, index: int): uint8 =
+  let value = hexValue(hex[index])
+  value shl 4 or value
+
+func color*(value: (uint8, uint8, uint8)): Vec4 =
+  Vec4(
+    x: colorByte(value[0]),
+    y: colorByte(value[1]),
+    z: colorByte(value[2]),
+    w: 1.0,
+  )
+
+func color*(value: (uint8, uint8, uint8, uint8)): Vec4 =
+  Vec4(
+    x: colorByte(value[0]),
+    y: colorByte(value[1]),
+    z: colorByte(value[2]),
+    w: colorByte(value[3]),
+  )
+
+func color*(value: uint32): Vec4 =
+  if value <= 0xFFFFFF'u32:
+    result = color((
+      ((value shr 16) and 0xFF).uint8,
+      ((value shr 8) and 0xFF).uint8,
+      (value and 0xFF).uint8,
+    ))
+  else:
+    result = color((
+      ((value shr 24) and 0xFF).uint8,
+      ((value shr 16) and 0xFF).uint8,
+      ((value shr 8) and 0xFF).uint8,
+      (value and 0xFF).uint8,
+    ))
+
+func color*(hex: string): Vec4 =
+  let start = if hex.len > 0 and hex[0] == '#': 1 else: 0
+  let size = hex.len - start
+
+  case size
+  of 3:
+    result = color((
+      hexNibbleByte(hex, start),
+      hexNibbleByte(hex, start + 1),
+      hexNibbleByte(hex, start + 2),
+    ))
+  of 4:
+    result = color((
+      hexNibbleByte(hex, start),
+      hexNibbleByte(hex, start + 1),
+      hexNibbleByte(hex, start + 2),
+      hexNibbleByte(hex, start + 3),
+    ))
+  of 6:
+    result = color((
+      hexByte(hex, start),
+      hexByte(hex, start + 2),
+      hexByte(hex, start + 4),
+    ))
+  of 8:
+    result = color((
+      hexByte(hex, start),
+      hexByte(hex, start + 2),
+      hexByte(hex, start + 4),
+      hexByte(hex, start + 6),
+    ))
+  else:
+    raise newException(ValueError, "Hex color must be RGB, RGBA, RRGGBB, or RRGGBBAA")
+
+converter colorToVec4*(value: (uint8, uint8, uint8)): Vec4 = color(value)
+converter colorToVec4*(value: (uint8, uint8, uint8, uint8)): Vec4 = color(value)
+converter colorToVec4*(value: uint32): Vec4 = color(value)
+converter colorToVec4*(hex: string): Vec4 = color(hex)

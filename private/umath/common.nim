@@ -54,9 +54,10 @@ const
 func caddr*[T](v: GVec2[T] | GVec3[T] | GVec4[T]): ptr T = addr v.x
 func caddr*(m: Mat3 | Mat4): ptr float32 = addr m.m00
 func caddr*(m: ptr Mat3 | ptr Mat4): ptr float32 = addr m.m00
-func toDeg*(r: float32): float32 = r * 180.0 / PI
-func toRad*(d: float32): float32 = d * PI / 180.0
-func `r`(v: Vec4|Vec3): float32 = v.x
-func `g`(v: Vec4|Vec3): float32 = v.y
-func `b`(v: Vec4|Vec3): float32 = v.z
-func `a`(v: Vec4): float32 = v.w
+func `r`*(v: Vec4|Vec3): float32 = v.x
+func `g`*(v: Vec4|Vec3): float32 = v.y
+func `b`*(v: Vec4|Vec3): float32 = v.z
+func `a`*(v: Vec4): float32 = v.w
+func `rgb`*(v: Vec4|Vec3): Vec3 = Vec3(x: v.x, y: v.y, z: v.z)
+func `rgba`*(v: Vec4): Vec4 = Vec4(x: v.x, y: v.y, z: v.z, w: v.w)
+func `rgba`*(v: Vec3): Vec4 = Vec4(x: v.x, y: v.y, z: v.z, w: 1.0)
