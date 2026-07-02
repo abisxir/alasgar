@@ -62,7 +62,7 @@ proc cube*(g: ptr Graphics, box: Vec3=vec3(2), tiles: uint16=1, color: Vec4=vec4
   doAssert buffer.valid
   result = geometry
 
-proc plane*(g: ptr Graphics, size: Vec2, tiles: uint16, color: Vec4, transform: common.Mat4): Geometry =
+proc plane*(g: ptr Graphics, size: Vec2=vec2(1), tiles: uint16=1, color: Vec4=vec4(1), transform: common.Mat4=mat4()): Geometry =
   discard g
   let sizes = shape.planeSizes(tiles.uint32)
   var (geometry, buffer) = initGeometry(sizes)
@@ -78,7 +78,14 @@ proc plane*(g: ptr Graphics, size: Vec2, tiles: uint16, color: Vec4, transform: 
   doAssert buffer.valid
   result = geometry
 
-proc sphere*(g: ptr Graphics, radius: float32, slices, stacks: uint16, color: Vec4, transform: common.Mat4): Geometry =
+proc sphere*(
+  g: ptr Graphics,
+  radius: float32=1,
+  slices: uint16=32,
+  stacks: uint16=16,
+  color: Vec4=vec4(1),
+  transform: common.Mat4=mat4()
+): Geometry =
   discard g
   let sizes = shape.sphereSizes(slices.uint32, stacks.uint32)
   var (geometry, buffer) = initGeometry(sizes)
@@ -94,7 +101,15 @@ proc sphere*(g: ptr Graphics, radius: float32, slices, stacks: uint16, color: Ve
   doAssert buffer.valid
   result = geometry
 
-proc cylinder*(g: ptr Graphics, radius, height: float32, slices, stacks: uint16, color: Vec4, transform: common.Mat4): Geometry =
+proc cylinder*(
+  g: ptr Graphics,
+  radius: float32=1,
+  height: float32=2,
+  slices: uint16=32,
+  stacks: uint16=1,
+  color: Vec4=vec4(1),
+  transform: common.Mat4=mat4()
+): Geometry =
   discard g
   let sizes = shape.cylinderSizes(slices.uint32, stacks.uint32)
   var (geometry, buffer) = initGeometry(sizes)
@@ -111,7 +126,15 @@ proc cylinder*(g: ptr Graphics, radius, height: float32, slices, stacks: uint16,
   doAssert buffer.valid
   result = geometry
 
-proc torus*(g: ptr Graphics, radius, ringRadius: float32, sides, rings: uint16, color: Vec4, transform: common.Mat4): Geometry =
+proc torus*(
+  g: ptr Graphics,
+  radius: float32=1,
+  ringRadius: float32=0.3,
+  sides: uint16=16,
+  rings: uint16=32,
+  color: Vec4=vec4(1),
+  transform: common.Mat4
+): Geometry =
   discard g
   let sizes = shape.torusSizes(sides.uint32, rings.uint32)
   var (geometry, buffer) = initGeometry(sizes)
@@ -127,12 +150,3 @@ proc torus*(g: ptr Graphics, radius, ringRadius: float32, sides, rings: uint16, 
 
   doAssert buffer.valid
   result = geometry
-
-proc plane*(g: ptr Graphics, color: Vec4): Geometry = plane(g, vec2(2), 1'u16, color, mat4())
-proc plane*(g: ptr Graphics): Geometry = plane(g, vec4(1))
-proc sphere*(g: ptr Graphics, color: Vec4): Geometry = sphere(g, 1, 32'u16, 16'u16, color, mat4())
-proc sphere*(g: ptr Graphics): Geometry = sphere(g, vec4(1))
-proc cylinder*(g: ptr Graphics, color: Vec4): Geometry = cylinder(g, 1, 2, 32'u16, 1'u16, color, mat4())
-proc cylinder*(g: ptr Graphics): Geometry = cylinder(g, vec4(1))
-proc torus*(g: ptr Graphics, color: Vec4): Geometry = torus(g, 1, 0.3, 16'u16, 32'u16, color, mat4())
-proc torus*(g: ptr Graphics): Geometry = torus(g, vec4(1))
