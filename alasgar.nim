@@ -41,7 +41,8 @@ import private/transform
 import private/mesh
 import private/camera
 import private/geometry
+import private/debug
 import private/utils
 import private/texture
 
-export core, shader, glsl, aljebra, transform, mesh, camera, geometry, utils, texture
+export core, shader, glsl, aljebra, transform, mesh, camera, geometry, debug, utils, texture

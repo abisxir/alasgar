@@ -17,6 +17,7 @@ type
   Mesh* = object
     shader*: Shader
     count: int
+    vertexCount: int
     indexType: GLenum
     vao: GLuint
     vbo: GLuint
@@ -90,6 +91,7 @@ proc mesh*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], indice
   discard g
   result.shader = shader
   result.count = len(indices)
+  result.vertexCount = len(vertices)
   result.indexType = indices.indexType
 
   use(result.shader)
@@ -123,6 +125,7 @@ proc compact*(g: ptr Graphics, geometry: Geometry, shader: Shader): Mesh =
   discard g
   result.shader = shader
   result.count = len(geometry.indices)
+  result.vertexCount = len(geometry.vertices)
   result.indexType = geometry.indices.indexType
 
   use(result.shader)
@@ -188,6 +191,7 @@ proc render*(g: ptr Graphics, p: var Mesh, camera: Camera) =
   setCameraData(g, p.shader, camera)
   glBindVertexArray(p.vao)
   glDrawElements(GL_TRIANGLES, p.count.GLsizei, p.indexType, cast[pointer](0))
+  runtime.recordDraw(1, p.vertexCount, p.count, 1)
 
 proc render*[T](g: ptr Graphics, p: var Mesh, camera: Camera, instances: openArray[T]) =
   use(p.shader)
@@ -196,3 +200,4 @@ proc render*[T](g: ptr Graphics, p: var Mesh, camera: Camera, instances: openArr
   glBindBuffer(GL_ARRAY_BUFFER, p.instanceVbo)
   glBufferData(GL_ARRAY_BUFFER, (len(instances) * sizeof(T)).GLsizeiptr, cast[pointer](addr instances[0]), GL_DYNAMIC_DRAW)
   glDrawElementsInstanced(GL_TRIANGLES, p.count.GLsizei, p.indexType, cast[pointer](0), len(instances).GLsizei)
+  runtime.recordDraw(1, p.vertexCount * len(instances), p.count * len(instances), len(instances))

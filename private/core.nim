@@ -32,11 +32,18 @@ type
     size: UVec2
     onWindowResizeCallbacks: seq[OnWindowResize]
     color*: Vec4 ## Clear color used at the start of each frame.
+  Stats* = object
+    drawCalls*: int
+    vertices*: int
+    indices*: int
+    instances*: int
+    batch*: int
   Runtime* = object
     ## Runtime timing counters updated once per frame.
     frames: int
     age, delta: float32
     time: float
+    stats: Stats
   MouseInput* = object
     ## Mouse state accumulated from app events for the current frame.
     position*: Vec2
@@ -71,6 +78,7 @@ proc frameCallback() {.cdecl.} =
   engine.runtime.delta = sapp.frameDuration()
   engine.runtime.age += engine.runtime.delta
   engine.runtime.frames += 1
+  engine.runtime.stats = Stats()
 
   #glBindRenderbuffer(GL_RENDERBUFFER, 0)
   #glBindFramebuffer(GL_FRAMEBUFFER, 0)
@@ -200,6 +208,28 @@ proc `frames`*(runtime: ptr Runtime): int =
   ## echo runtime.frames
   ## ```
   runtime.frames
+
+proc `fps`*(runtime: ptr Runtime): float32 =
+  ## Return current frames per second.
+  ##
+  ## Example:
+  ## ```nim
+  ## echo runtime.fps
+  ## ```
+  1.0 / runtime.delta
+
+proc `stats`*(runtime: ptr Runtime): Stats =
+  ## Return the current frame's debug statistics.
+  runtime.stats
+
+proc recordDraw*(r: ptr Runtime, drawCalls, vertices, indices, instances: int) =
+  ## Add one rendered submission to the current frame's debug statistics.
+  r.stats.drawCalls += drawCalls
+  r.stats.vertices += vertices
+  r.stats.indices += indices
+  r.stats.instances += instances
+  if instances > 1:
+    r.stats.batch += 1
 
 
 proc `size`*(g: ptr Graphics): UVec2 =

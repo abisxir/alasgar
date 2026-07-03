@@ -22,6 +22,7 @@ proc draw() =
   t.rotation = fromEuler(r, r, 0.0)
   cubes.shader.set("MODEL", t.world)
   graphics.render(cubes, camera)
+  graphics.debug()
 
 proc cleanup() =
   destroy(cubes)
