@@ -6,7 +6,7 @@ import ports/opengl
 import aljebra
 import core
 import shader
-import mesh
+import pipeline
 import shaders/debug as debugShader
 
 type

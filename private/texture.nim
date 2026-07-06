@@ -308,7 +308,6 @@ proc screen*(g: ptr Graphics) =
   glDrawBuffers(1.GLsizei, back.addr)
   glReadBuffer(GL_BACK.GLenum)
   glViewport(0, 0, size.x.GLsizei, size.y.GLsizei)
-  glDisable(GL_DEPTH_TEST)
 
 proc destroy*(view: var View) =
   if view.id > 0:

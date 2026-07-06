@@ -133,7 +133,7 @@ proc torus*(
   sides: uint16=16,
   rings: uint16=32,
   color: Vec4=vec4(1),
-  transform: common.Mat4
+  transform: common.Mat4=mat4()
 ): Geometry =
   discard g
   let sizes = shape.torusSizes(sides.uint32, rings.uint32)

@@ -14,7 +14,7 @@
 ## - `transform`: position, rotation, scale, and matrix conversion.
 ## - `camera`: perspective and orthographic camera construction.
 ## - `shader` and `glsl`: shader creation, uniforms, and Nim-to-GLSL helpers.
-## - `mesh`: vertex/index buffer setup and rendering.
+## - `pipeline`: vertex/index buffer setup and rendering.
 ##
 ## Basic use:
 ##
@@ -38,11 +38,11 @@ import private/glsl
 import private/shader
 import private/aljebra
 import private/transform
-import private/mesh
+import private/pipeline
 import private/camera
 import private/geometry
 import private/debug
 import private/utils
 import private/texture
 
-export core, shader, glsl, aljebra, transform, mesh, camera, geometry, debug, utils, texture
+export core, shader, glsl, aljebra, transform, pipeline, camera, geometry, debug, utils, texture

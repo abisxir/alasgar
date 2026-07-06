@@ -37,7 +37,7 @@ const
   ]
 
 var
-  cube: Mesh
+  cube: Pipeline
   model = Transform()
   camera: Camera
   checker: Texture

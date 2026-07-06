@@ -25,7 +25,7 @@ proc fs(
 
 type
   ShapeItem = object
-    mesh: Mesh
+    pipeline: Pipeline
     transform: Transform
     color: Vec4
     spin: Vec3
@@ -43,7 +43,7 @@ var
   checkerSampler: Sampler
 
 proc newShape(geometry: Geometry, position, color, spin: Vec3): ShapeItem =
-  result.mesh = graphics.compact(geometry, graphics.shader(vs, fs))
+  result.pipeline = graphics.compact(geometry, graphics.shader(vs, fs))
   result.transform = Transform(position: position)
   result.color = vec4(color, 1)
   result.spin = spin
@@ -68,14 +68,14 @@ proc draw() =
   for item in shapes.mitems:
     let spin = item.spin * runtime.age
     item.transform.rotation = fromEuler(spin.x, spin.y, spin.z)
-    item.mesh.shader.set("MODEL", item.transform.world)
-    item.mesh.shader.set("TINT", item.color)
-    item.mesh.shader.set("ALBEDO", checkerSampler, 0)
-    graphics.render(item.mesh, camera)
+    item.pipeline.shader.set("MODEL", item.transform.world)
+    item.pipeline.shader.set("TINT", item.color)
+    item.pipeline.shader.set("ALBEDO", checkerSampler, 0)
+    graphics.render(item.pipeline, camera)
 
 proc cleanup() =
   for item in shapes.mitems:
-    destroy(item.mesh)
+    destroy(item.pipeline)
   destroy(checkerSampler)
   destroy(checkerTexture)
 

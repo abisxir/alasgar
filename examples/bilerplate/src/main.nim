@@ -3,7 +3,7 @@ import math
 import alasgar
 
 var
-  cube: Mesh
+  cube: Pipeline
   t = Transform()
   camera: Camera
 
