@@ -43,7 +43,7 @@ type
     texture: Texture
 
 
-func `format`(p: Pixel): GLenum =
+func externalFormat(p: Pixel): GLenum =
   case p.attachment
   of paColor:
     case p.channels
@@ -52,13 +52,10 @@ func `format`(p: Pixel): GLenum =
     of 3: GL_RGB
     else: GL_RGBA
   of paDepth:
-    case p.bits
-    of 16: GL_DEPTH_COMPONENT16
-    of 32: GL_DEPTH_COMPONENT32F
-    else: GL_DEPTH_COMPONENT24
+    GL_DEPTH_COMPONENT
 
 
-func `size`(p: Pixel): GLenum =
+func internalFormat(p: Pixel): GLenum =
   case p.attachment:
   of paColor:
     case p.bits
@@ -88,7 +85,10 @@ func `size`(p: Pixel): GLenum =
       of 3: GL_RGB8
       else: GL_RGBA8
   of paDepth:
-    GL_DEPTH_COMPONENT
+    case p.bits
+    of 16: GL_DEPTH_COMPONENT16
+    of 32: GL_DEPTH_COMPONENT32F
+    else: GL_DEPTH_COMPONENT24
 
 proc `dataType`(p: Pixel): GLenum =
   case p.attachment
@@ -143,6 +143,18 @@ func `target`(slices: int): GLenum =
   of 6: GL_TEXTURE_CUBE_MAP
   else: GL_TEXTURE_2D_ARRAY
 
+func attachmentPoint(texture: Texture, slot: int): GLenum =
+  case texture.pixel.attachment
+  of paColor:
+    (GL_COLOR_ATTACHMENT0.int + slot).GLenum
+  of paDepth:
+    GL_DEPTH_ATTACHMENT
+
+func defaultFilter(texture: Texture): GLenum =
+  case texture.pixel.attachment
+  of paColor: GL_LINEAR
+  of paDepth: GL_NEAREST
+
 proc texture*(
   g: ptr Graphics,
   width, height: uint32,
@@ -157,9 +169,6 @@ proc texture*(
   let
     pixel = Pixel(attachment: attachment, bits: bits, channels: channels)
     target = slices.target
-    format = pixel.format
-    internalFormat = pixel.size
-    dataType = pixel.dataType
 
   result = Texture(
     target: target,
@@ -173,15 +182,19 @@ proc texture*(
   glGenTextures(1, result.id.addr)
   glBindTexture(result.target, result.id)
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+  glTexParameteri(result.target, GL_TEXTURE_MIN_FILTER, result.defaultFilter.GLint)
+  glTexParameteri(result.target, GL_TEXTURE_MAG_FILTER, result.defaultFilter.GLint)
+  glTexParameteri(result.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE.GLint)
+  glTexParameteri(result.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE.GLint)
   glTexImage2D(
     result.target,
     0.GLint,
-    internalFormat.GLint,
+    pixel.internalFormat.GLint,
     result.width.GLsizei,
     result.height.GLsizei,
     0.GLint,
-    format,
-    dataType,
+    pixel.externalFormat,
+    pixel.dataType,
     pixels,
   )
   if mipmaps > 1 and not isNil(pixels):
@@ -194,6 +207,10 @@ proc attach*(texture: Texture, slot: int) =
 
 proc dismiss*(texture: Texture) =
   glBindTexture(texture.target, 0)
+
+proc `texture`*(view: View): Texture =
+  ## Return the texture attached to this view.
+  view.texture
 
 proc destroy*(texture: var Texture) =
   if texture.id != 0:
@@ -241,9 +258,24 @@ proc destroy*(sampler: var Sampler) =
     glDeleteSamplers(1, sampler.id.addr)
     sampler.id = 0
 
-proc view*(g: ptr Graphics, texture: Texture): View =
+proc view*(g: ptr Graphics, texture: Texture, slot: int = 0): View =
+  discard g
   result.texture = texture
   glGenFramebuffers(1, addr result.id)
+  glBindFramebuffer(GL_FRAMEBUFFER, result.id)
+  glFramebufferTexture2D(
+      GL_FRAMEBUFFER,
+      result.texture.attachmentPoint(slot),
+      result.texture.target,
+      result.texture.id,
+      0
+  )
+  if result.texture.pixel.attachment == paDepth:
+    var none = GL_NONE.GLenum
+    glDrawBuffers(1.GLsizei, none.addr)
+    glReadBuffer(GL_NONE.GLenum)
+  if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
+    raise newException(ValueError, "Framebuffer is incomplete")
 
 proc view*(g: ptr Graphics, width, height: uint32): View = g.view(g.texture(width, height))
 proc view*(g: ptr Graphics): View = g.view(g.size.x, g.size.y)
@@ -251,15 +283,23 @@ proc view*(g: ptr Graphics): View = g.view(g.size.x, g.size.y)
 proc depth*(g: ptr Graphics, width, height: uint32): View = g.view(g.texture(width, height, attachment=paDepth, bits=16))
 proc depth*(g: ptr Graphics): View = g.depth(g.size.x, g.size.y)
 
-proc attach*(view: View, slot: int) =
+func `clearBit`(view: View): GLbitfield =
+  case view.texture.pixel.attachment
+  of paDepth: GL_DEPTH_BUFFER_BIT
+  of paColor: GL_COLOR_BUFFER_BIT
+
+proc use*(view: View) =
   glBindFramebuffer(GL_FRAMEBUFFER, view.id)
-  glFramebufferTexture2D(
-      GL_FRAMEBUFFER,
-      (GL_COLOR_ATTACHMENT0.int + slot).GLenum,
-      GL_TEXTURE_2D,
-      view.texture.id,
-      0
-  )
+  glViewport(0, 0, view.texture.width.GLsizei, view.texture.height.GLsizei)
+  glClear(view.clearBit)
+
+proc screen*(g: ptr Graphics) =
+  let size = g.size
+  var back = GL_BACK.GLenum
+  glBindFramebuffer(GL_FRAMEBUFFER, 0)
+  glDrawBuffers(1.GLsizei, back.addr)
+  glReadBuffer(GL_BACK.GLenum)
+  glViewport(0, 0, size.x.GLsizei, size.y.GLsizei)
 
 proc destroy*(view: var View) =
   if view.id > 0:
