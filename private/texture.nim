@@ -270,11 +270,18 @@ proc view*(g: ptr Graphics, texture: Texture, slot: int = 0): View =
       result.texture.id,
       0
   )
-  if result.texture.pixel.attachment == paDepth:
+  case result.texture.pixel.attachment
+  of paDepth:
     var none = GL_NONE.GLenum
     glDrawBuffers(1.GLsizei, none.addr)
     glReadBuffer(GL_NONE.GLenum)
-  if glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE:
+  of paColor:
+    var color = result.texture.attachmentPoint(slot)
+    glDrawBuffers(1.GLsizei, color.addr)
+    glReadBuffer(color)
+  let status = glCheckFramebufferStatus(GL_FRAMEBUFFER)
+  glBindFramebuffer(GL_FRAMEBUFFER, 0)
+  if status != GL_FRAMEBUFFER_COMPLETE:
     raise newException(ValueError, "Framebuffer is incomplete")
 
 proc view*(g: ptr Graphics, width, height: uint32): View = g.view(g.texture(width, height))
@@ -291,6 +298,7 @@ func `clearBit`(view: View): GLbitfield =
 proc use*(view: View) =
   glBindFramebuffer(GL_FRAMEBUFFER, view.id)
   glViewport(0, 0, view.texture.width.GLsizei, view.texture.height.GLsizei)
+  glEnable(GL_DEPTH_TEST)
   glClear(view.clearBit)
 
 proc screen*(g: ptr Graphics) =
@@ -300,6 +308,7 @@ proc screen*(g: ptr Graphics) =
   glDrawBuffers(1.GLsizei, back.addr)
   glReadBuffer(GL_BACK.GLenum)
   glViewport(0, 0, size.x.GLsizei, size.y.GLsizei)
+  glDisable(GL_DEPTH_TEST)
 
 proc destroy*(view: var View) =
   if view.id > 0:
