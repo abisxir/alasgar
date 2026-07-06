@@ -1,8 +1,20 @@
+## Texture, sampler, and framebuffer view helpers.
+##
+## This module wraps the small set of objects needed for render targets
+## and sampled textures:
+##
+## - `texture` creates a 2D texture with a color or depth format.
+## - `sampler` creates texture filtering and wrapping state.
+## - `view` creates a framebuffer backed by a texture.
+## - `use` binds a framebuffer view for rendering.
+## - `screen` restores rendering to the default framebuffer.
+
 import ports/opengl
 import core
 
 type
   PixelAttachment* = enum
+    ## Kind of data stored by a texture or framebuffer attachment.
     paColor
     paDepth
   Pixel = object
@@ -10,6 +22,12 @@ type
     bits: int
     channels: int
   Texture* = object
+    ## Texture handle and metadata.
+    ##
+    ## Textures are created with `texture` and must be released with
+    ## `destroy` when they are no longer needed. If a texture is passed to
+    ## `view`, destroy the resulting view instead; `destroy(view)` also deletes
+    ## the backing texture.
     id: GLuint
     target: GLenum
     width: uint32
@@ -18,18 +36,25 @@ type
     slices: int
     mipmaps: int
   TextureFilter* = enum
+    ## Sampling filter used when a texel is magnified or minified.
     tfNearest
     tfLinear
   MipmapFilter* = enum
+    ## Mipmap sampling mode for minification.
     mfNone
     mfNearest
     mfLinear
   TextureWrap* = enum
+    ## Addressing mode used when texture coordinates fall outside 0..1.
     twRepeat
     twMirroredRepeat
     twClampToEdge
     twClampToBorder
   Sampler* = object
+    ## Sampler object paired with a texture.
+    ##
+    ## Use `use(sampler, slot)` to bind both the texture and its sampler
+    ## state to a texture unit.
     id: GLuint
     texture: Texture
     minFilter: TextureFilter
@@ -39,6 +64,11 @@ type
     wrapT: TextureWrap
     wrapR: TextureWrap
   View* = object
+    ## Framebuffer view backed by a texture.
+    ##
+    ## Views are created with `view` or `depth`, made active with `use`, and
+    ## released with `destroy`. Destroying a view also destroys its backing
+    ## texture.
     id: GLuint
     texture: Texture
 
@@ -165,6 +195,16 @@ proc texture*(
   mipmaps: int = 1,
   pixels: pointer = nil,
 ): Texture =
+  ## Create a texture object.
+  ##
+  ## `attachment` selects whether the texture stores color or depth data.
+  ## `channels` and `bits` determine the external and internal pixel formats.
+  ## `slices` selects the texture target: `1` creates a 2D texture, `6` creates
+  ## a cube map target, and any other value creates a 2D array target.
+  ##
+  ## If `pixels` is non-nil, the pointer is uploaded as the level-0 image. When
+  ## `mipmaps` is greater than 1, mipmaps are generated only for textures that
+  ## were initialized with pixel data.
   discard g
   let
     pixel = Pixel(attachment: attachment, bits: bits, channels: channels)
@@ -201,11 +241,13 @@ proc texture*(
     glGenerateMipmap(result.target)
   glBindTexture(result.target, 0)
 
-proc attach*(texture: Texture, slot: int) =
+proc use*(texture: Texture, slot: int) =
+  ## Bind `texture` to texture unit `slot`.
   glActiveTexture((GL_TEXTURE0.int + slot).GLenum)
   glBindTexture(texture.target, texture.id)
 
 proc dismiss*(texture: Texture) =
+  ## Unbind the current texture from `texture`'s target.
   glBindTexture(texture.target, 0)
 
 proc `texture`*(view: View): Texture =
@@ -213,6 +255,9 @@ proc `texture`*(view: View): Texture =
   view.texture
 
 proc destroy*(texture: var Texture) =
+  ## Delete the texture object.
+  ##
+  ## The texture id is reset to 0, so calling this repeatedly is safe.
   if texture.id != 0:
     glDeleteTextures(1, texture.id.addr)
     texture.id = 0
@@ -227,6 +272,10 @@ proc sampler*(
   wrapT: TextureWrap = twClampToEdge,
   wrapR: TextureWrap = twClampToEdge,
 ): Sampler =
+  ## Create a sampler object for `texture`.
+  ##
+  ## `minFilter`, `magFilter`, and `mipmapFilter` control sampling quality.
+  ## `wrapS`, `wrapT`, and `wrapR` control addressing along each texture axis.
   discard g
   result = Sampler(
     texture: texture,
@@ -249,16 +298,30 @@ proc sampler*(
   glSamplerParameteri(result.id, GL_TEXTURE_WRAP_T, result.wrapT.gl.GLint)
   glSamplerParameteri(result.id, GL_TEXTURE_WRAP_R, result.wrapR.gl.GLint)
 
-proc attach*(sampler: Sampler, slot: int) =
-  attach(sampler.texture, slot)
+proc use*(sampler: Sampler, slot: int) =
+  ## Bind the sampler's texture and sampler state to texture unit `slot`.
+  use(sampler.texture, slot)
   glBindSampler(slot.GLuint, sampler.id)
 
 proc destroy*(sampler: var Sampler) =
+  ## Delete the sampler object.
+  ##
+  ## The sampler id is reset to 0, so calling this repeatedly is safe.
   if sampler.id != 0:
     glDeleteSamplers(1, sampler.id.addr)
     sampler.id = 0
 
 proc view*(g: ptr Graphics, texture: Texture, slot: int = 0): View =
+  ## Create a framebuffer view backed by `texture`.
+  ##
+  ## The returned view is responsible for deleting the framebuffer and the
+  ## backing texture from `destroy(view)`.
+  ##
+  ## Color textures are attached to `GL_COLOR_ATTACHMENT0 + slot`. Depth
+  ## textures are attached to `GL_DEPTH_ATTACHMENT` and disable color reads and
+  ## writes for the framebuffer.
+  ##
+  ## Raises `ValueError` when OpenGL reports an incomplete framebuffer.
   discard g
   result.texture = texture
   glGenFramebuffers(1, addr result.id)
@@ -284,11 +347,21 @@ proc view*(g: ptr Graphics, texture: Texture, slot: int = 0): View =
   if status != GL_FRAMEBUFFER_COMPLETE:
     raise newException(ValueError, "Framebuffer is incomplete")
 
-proc view*(g: ptr Graphics, width, height: uint32): View = g.view(g.texture(width, height))
-proc view*(g: ptr Graphics): View = g.view(g.size.x, g.size.y)
+proc view*(g: ptr Graphics, width, height: uint32): View =
+  ## Create a color framebuffer view with the requested size.
+  g.view(g.texture(width, height))
 
-proc depth*(g: ptr Graphics, width, height: uint32): View = g.view(g.texture(width, height, attachment=paDepth, bits=16))
-proc depth*(g: ptr Graphics): View = g.depth(g.size.x, g.size.y)
+proc view*(g: ptr Graphics): View =
+  ## Create a color framebuffer view matching the current render screen size.
+  g.view(g.size.x, g.size.y)
+
+proc depth*(g: ptr Graphics, width, height: uint32): View =
+  ## Create a depth framebuffer view with the requested size.
+  g.view(g.texture(width, height, attachment=paDepth, bits=16))
+
+proc depth*(g: ptr Graphics): View =
+  ## Create a depth framebuffer view matching the current render screen size.
+  g.depth(g.size.x, g.size.y)
 
 func `clearBit`(view: View): GLbitfield =
   case view.texture.pixel.attachment
@@ -296,12 +369,19 @@ func `clearBit`(view: View): GLbitfield =
   of paColor: GL_COLOR_BUFFER_BIT
 
 proc use*(view: View) =
+  ## Bind `view` as the active framebuffer, set its viewport, and clear it.
+  ##
+  ## Depth testing is enabled before clearing. Color views clear the color
+  ## buffer; depth views clear the depth buffer.
   glBindFramebuffer(GL_FRAMEBUFFER, view.id)
   glViewport(0, 0, view.texture.width.GLsizei, view.texture.height.GLsizei)
   glEnable(GL_DEPTH_TEST)
   glClear(view.clearBit)
 
 proc screen*(g: ptr Graphics) =
+  ## Restore rendering to the default framebuffer.
+  ##
+  ## The viewport is reset to the current render screen size.
   let size = g.size
   var back = GL_BACK.GLenum
   glBindFramebuffer(GL_FRAMEBUFFER, 0)
@@ -310,6 +390,9 @@ proc screen*(g: ptr Graphics) =
   glViewport(0, 0, size.x.GLsizei, size.y.GLsizei)
 
 proc destroy*(view: var View) =
+  ## Delete the framebuffer and its backing texture.
+  ##
+  ## The framebuffer id is reset to 0, so calling this repeatedly is safe.
   if view.id > 0:
     glDeleteFramebuffers(1, addr view.id)
     view.id = 0

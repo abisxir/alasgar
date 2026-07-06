@@ -227,7 +227,7 @@ proc activate(shader: var Shader, sampler: Sampler, name: string, slot: int) =
   var location = getUniformLocation(shader, name)
   if location >= 0:
     glUniform1i(location, slot.GLint)
-    attach(sampler, slot)
+    use(sampler, slot)
 
 proc update(shader: var Shader, key: string, p: ShaderParam) =
   case p.kind:

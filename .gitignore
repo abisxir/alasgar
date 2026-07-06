@@ -69,4 +69,4 @@ test
 .nimcache/
 examples/shapes
 examples/batch
-examples/depth_map
+examples/shadow
