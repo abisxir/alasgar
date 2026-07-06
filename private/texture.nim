@@ -2,14 +2,18 @@ import ports/opengl
 import core
 
 type
-  Pixel* = object
-    channels*: int
-    bits*: int
+  PixelAttachment* = enum
+    paColor
+    paDepth
+  Pixel = object
+    attachment: PixelAttachment
+    bits: int
+    channels: int
   Texture* = object
     id: GLuint
     target: GLenum
-    width: int
-    height: int
+    width: uint32
+    height: uint32
     pixel: Pixel
     slices: int
     mipmaps: int
@@ -34,51 +38,75 @@ type
     wrapS: TextureWrap
     wrapT: TextureWrap
     wrapR: TextureWrap
+  View* = object
+    id: GLuint
+    texture: Texture
+
 
 func `format`(p: Pixel): GLenum =
-  case p.channels
-  of 1: GL_RED
-  of 2: GL_RG
-  of 3: GL_RGB
-  else: GL_RGBA
+  case p.attachment
+  of paColor:
+    case p.channels
+    of 1: GL_RED
+    of 2: GL_RG
+    of 3: GL_RGB
+    else: GL_RGBA
+  of paDepth:
+    case p.bits
+    of 16: GL_DEPTH_COMPONENT16
+    of 32: GL_DEPTH_COMPONENT32F
+    else: GL_DEPTH_COMPONENT24
+
 
 func `size`(p: Pixel): GLenum =
-  case p.bits
-  of 16:
-    when declared(GL_R16):
+  case p.attachment:
+  of paColor:
+    case p.bits
+    of 16:
+      when declared(GL_R16):
+        case p.channels
+        of 1: GL_R16
+        of 2: GL_RG16
+        of 3: GL_RGB16
+        else: GL_RGBA16
+      else:
+        case p.channels
+        of 1: GL_R16F
+        of 2: GL_RG16F
+        of 3: GL_RGB16F
+        else: GL_RGBA16F
+    of 32:
       case p.channels
-      of 1: GL_R16
-      of 2: GL_RG16
-      of 3: GL_RGB16
-      else: GL_RGBA16
+      of 1: GL_R32F
+      of 2: GL_RG32F
+      of 3: GL_RGB32F
+      else: GL_RGBA32F
     else:
       case p.channels
-      of 1: GL_R16F
-      of 2: GL_RG16F
-      of 3: GL_RGB16F
-      else: GL_RGBA16F
-  of 32:
-    case p.channels
-    of 1: GL_R32F
-    of 2: GL_RG32F
-    of 3: GL_RGB32F
-    else: GL_RGBA32F
-  else:
-    case p.channels
-    of 1: GL_R8
-    of 2: GL_RG8
-    of 3: GL_RGB8
-    else: GL_RGBA8
+      of 1: GL_R8
+      of 2: GL_RG8
+      of 3: GL_RGB8
+      else: GL_RGBA8
+  of paDepth:
+    GL_DEPTH_COMPONENT
 
 proc `dataType`(p: Pixel): GLenum =
-  case p.bits
-  of 16:
-    when declared(GL_R16):
-      GL_UNSIGNED_SHORT
-    else:
-      GL_HALF_FLOAT
-  of 32: cGL_FLOAT
-  else: GL_UNSIGNED_BYTE
+  case p.attachment
+  of paColor:
+    case p.bits
+    of 16:
+      when declared(GL_R16):
+        GL_UNSIGNED_SHORT
+      else:
+        GL_HALF_FLOAT
+    of 32: cGL_FLOAT
+    else: GL_UNSIGNED_BYTE
+  of paDepth:
+    case p.bits
+    of 16: GL_UNSIGNED_SHORT
+    of 24: GL_UNSIGNED_INT
+    of 32: cGL_FLOAT
+    else: GL_UNSIGNED_BYTE
 
 func `gl`(filter: TextureFilter): GLenum =
   case filter
@@ -117,7 +145,8 @@ func `target`(slices: int): GLenum =
 
 proc texture*(
   g: ptr Graphics,
-  width, height: int,
+  width, height: uint32,
+  attachment: PixelAttachment = paColor,
   channels: int = 4,
   bits: int = 8,
   slices: int = 1,
@@ -126,7 +155,7 @@ proc texture*(
 ): Texture =
   discard g
   let
-    pixel = Pixel(bits: bits, channels: channels)
+    pixel = Pixel(attachment: attachment, bits: bits, channels: channels)
     target = slices.target
     format = pixel.format
     internalFormat = pixel.size
@@ -162,6 +191,9 @@ proc texture*(
 proc attach*(texture: Texture, slot: int) =
   glActiveTexture((GL_TEXTURE0.int + slot).GLenum)
   glBindTexture(texture.target, texture.id)
+
+proc dismiss*(texture: Texture) =
+  glBindTexture(texture.target, 0)
 
 proc destroy*(texture: var Texture) =
   if texture.id != 0:
@@ -208,3 +240,29 @@ proc destroy*(sampler: var Sampler) =
   if sampler.id != 0:
     glDeleteSamplers(1, sampler.id.addr)
     sampler.id = 0
+
+proc view*(g: ptr Graphics, texture: Texture): View =
+  result.texture = texture
+  glGenFramebuffers(1, addr result.id)
+
+proc view*(g: ptr Graphics, width, height: uint32): View = g.view(g.texture(width, height))
+proc view*(g: ptr Graphics): View = g.view(g.size.x, g.size.y)
+
+proc depth*(g: ptr Graphics, width, height: uint32): View = g.view(g.texture(width, height, attachment=paDepth, bits=16))
+proc depth*(g: ptr Graphics): View = g.depth(g.size.x, g.size.y)
+
+proc attach*(view: View, slot: int) =
+  glBindFramebuffer(GL_FRAMEBUFFER, view.id)
+  glFramebufferTexture2D(
+      GL_FRAMEBUFFER,
+      (GL_COLOR_ATTACHMENT0.int + slot).GLenum,
+      GL_TEXTURE_2D,
+      view.texture.id,
+      0
+  )
+
+proc destroy*(view: var View) =
+  if view.id > 0:
+    glDeleteFramebuffers(1, addr view.id)
+    view.id = 0
+    destroy(view.texture)

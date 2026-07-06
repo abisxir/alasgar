@@ -1,3 +1,5 @@
+## Disclaimer: this debug overlay implementation was written by AI.
+
 import std/[strformat, strutils]
 
 import ports/opengl
