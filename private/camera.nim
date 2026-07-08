@@ -17,6 +17,8 @@ type
     DIRECTION*: Vec3
     FAR_PLANE*: float
     ASPECT*: float
+    SCREEN_SIZE*: Vec2
+    INV_SCREEN_SIZE*: Vec2
   Camera* = object
     case kind*: ProjectionType
       of ptPerspective:

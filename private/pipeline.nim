@@ -184,6 +184,8 @@ proc setCameraData(g: ptr Graphics, shader: var Shader, camera: Camera) =
   shader["GLSL_CAMERA.NEAR_PLANE"] = camera.nearZ
   shader["GLSL_CAMERA.FAR_PLANE"] = camera.farZ
   shader["GLSL_CAMERA.ASPECT"] = g.aspect
+  shader["GLSL_CAMERA.SCREEN_SIZE"] = vec2(g.size)
+  shader["GLSL_CAMERA.INV_SCREEN_SIZE"] = 1.0 / vec2(g.size)
 
 
 proc render*(g: ptr Graphics, p: var Pipeline, camera: Camera) =

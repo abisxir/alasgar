@@ -70,3 +70,6 @@ test
 examples/shapes
 examples/batch
 examples/shadow
+nimble.develop
+nimble.paths
+nimbledeps
