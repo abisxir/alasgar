@@ -14,11 +14,10 @@ type
     x, y: float32
     r, g, b, a: float32
   DebugRenderer = object
-    initialized: bool
     shader: Shader
     vao, vbo: GLuint
 
-var renderer = DebugRenderer(initialized: false)
+var renderer: DebugRenderer
 
 const
   GlyphWidth = 5
@@ -91,10 +90,8 @@ proc addText(vertices: var seq[DebugVertex], text: string, x, y: float32, color:
           )
     penX += GlyphAdvance
 
-proc initRenderer(g: ptr Graphics) =
-  if renderer.initialized:
-    return
-  renderer.shader = g.shader(debugShader.vs, debugShader.fs)
+proc load() =
+  renderer.shader = graphics.shader(debugShader.vs, debugShader.fs)
   glGenVertexArrays(1, renderer.vao.addr)
   glBindVertexArray(renderer.vao)
   glGenBuffers(1, renderer.vbo.addr)
@@ -106,11 +103,10 @@ proc initRenderer(g: ptr Graphics) =
   glEnableVertexAttribArray(1.GLuint)
   glBindVertexArray(0)
   glBindBuffer(GL_ARRAY_BUFFER, 0)
-  renderer.initialized = true
+  echo "* Debug renderer initialized!"
 
 proc debug*(g: ptr Graphics, position = vec2(8, 8), color = vec4(0.5, 1.0, 0.4, 1.0)) =
-  ## Draw frame statistics as an on-screen overlay.
-  initRenderer(g)
+  discard g
 
   let
     stats = runtime.stats
@@ -142,11 +138,30 @@ proc debug*(g: ptr Graphics, position = vec2(8, 8), color = vec4(0.5, 1.0, 0.4, 
   glDisable(GL_DEPTH_TEST)
   glEnable(GL_BLEND)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
   use(renderer.shader)
   renderer.shader["VIEW_SIZE"] = vec2(size)
+
   glBindVertexArray(renderer.vao)
   glBindBuffer(GL_ARRAY_BUFFER, renderer.vbo)
   glBufferData(GL_ARRAY_BUFFER, (vertices.len * sizeof(DebugVertex)).GLsizeiptr, vertices[0].addr, GL_DYNAMIC_DRAW)
+
   glDrawArrays(GL_TRIANGLES, 0, vertices.len.GLsizei)
+
   glBindVertexArray(0)
   glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+
+proc cleanup() =
+  if renderer.vbo > 0:
+    glDeleteBuffers(1, addr renderer.vbo)
+    renderer.vbo = 0
+  if renderer.vao > 0:
+    glDeleteVertexArrays(1, addr renderer.vao)
+    renderer.vao = 0
+  destroy(renderer.shader)
+  echo "* Debug renderer destroyed"
+
+
+graphics.onLoad(load)
+graphics.onCleanup(cleanup)

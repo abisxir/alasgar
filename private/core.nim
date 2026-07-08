@@ -22,7 +22,7 @@ when (defined(windows) or defined(macosx)) and not defined(gl):
   {.error: "The current renderer still uses raw OpenGL; compile with -d:gl when using Sokol on this platform.".}
 
 type
-  OnWindowResize = proc ()
+  Callback = proc ()
   Window* = object
     ## Window configuration and current size.
     title: string
@@ -30,7 +30,9 @@ type
   Graphics* = object
     ## Graphics state shared with the active application.
     size: UVec2
-    onWindowResizeCallbacks: seq[OnWindowResize]
+    onWindowResizeCallbacks: seq[Callback]
+    onLoadCallbacks: seq[Callback]
+    onCleanupCallbacks: seq[Callback]
     color*: Vec4 ## Clear color used at the start of each frame.
   Stats* = object
     drawCalls*: int
@@ -102,10 +104,12 @@ proc frameCallback() {.cdecl.} =
   engine.mouse.scroll = vec2(0.0, 0.0)
 
 proc cleanupCallback() {.cdecl.} =
+  for cb in graphics.onCleanupCallbacks:
+    cb()
   if engine.cleanup != nil:
     engine.cleanup()
     echo "* Resources cleaned up."
-  echo "* Sokol window destroyed."
+  echo "* Window destroyed."
 
 proc initCallback() {.cdecl.} =
   initOpenGL()
@@ -117,6 +121,8 @@ proc initCallback() {.cdecl.} =
 
   if engine.load != nil:
     engine.load()
+    for cb in engine.graphics.onLoadCallbacks:
+      cb()
 
 
 proc eventCallback(event: ptr sapp.Event) {.cdecl.} =
@@ -252,19 +258,48 @@ proc `aspect`*(g: ptr Graphics): float32 =
   g.size.x.float32 / g.size.y.float32
 
 
-proc onWindowResize*(g: ptr Graphics, slot: OnWindowResize) =
+proc onWindowResize*(g: ptr Graphics, slot: Callback) =
   ## Register a callback for framebuffer resize events.
   ##
   ## Duplicate callbacks are ignored.
   ##
   ## Example:
   ## ```nim
-  ## graphics.onWindowResize(proc (width, height: int32) =
-  ##   echo "resized to ", width, "x", height
+  ## graphics.onWindowResize(proc () =
+  ##   echo "resized to ", graphics.size.x, "x", graphics.size.y
   ## )
   ## ```
   if slot notin g.onWindowResizeCallbacks:
     g.onWindowResizeCallbacks.add(slot)
+
+
+proc onLoad*(g: ptr Graphics, slot: Callback) =
+  ## Register a callback for load events.
+  ##
+  ## Duplicate callbacks are ignored.
+  ##
+  ## Example:
+  ## ```nim
+  ## graphics.onLoad(proc () =
+  ##   echo "Graphics loaded!"
+  ## )
+  ## ```
+  if slot notin g.onLoadCallbacks:
+    g.onLoadCallbacks.add(slot)
+
+proc onCleanup*(g: ptr Graphics, slot: Callback) =
+  ## Register a callback for when engines goes down.
+  ##
+  ## Duplicate callbacks are ignored.
+  ##
+  ## Example:
+  ## ```nim
+  ## graphics.onCleanup(proc () =
+  ##   echo "Cleanup things!"
+  ## )
+  ## ```
+  if slot notin g.onCleanupCallbacks:
+    g.onCleanupCallbacks.add(slot)
 
 
 proc alasgar_app_desc*(): sapp.Desc {.exportc: "alasgar_app_desc", cdecl.} =
