@@ -46,19 +46,13 @@ type
     age, delta: float32
     time: float
     stats: Stats
-  MouseInput* = object
-    ## Mouse state accumulated from app events for the current frame.
-    position*: Vec2
-    delta*: Vec2
-    scroll*: Vec2
-    rightDown*: bool
+    event*: sapp.Event
   Engine* = object
     ## Internal engine state for the active application.
     app: sapp.Desc
     window: Window
     graphics: Graphics
     runtime: Runtime
-    mouse: MouseInput
     stopped: bool
     load, draw, cleanup: proc()
     vsync: bool
@@ -73,7 +67,6 @@ when defined(android):
 let
   graphics*: ptr Graphics = addr engine.graphics ## Shared graphics state.
   runtime*: ptr Runtime = addr engine.runtime ## Shared runtime timing state.
-  mouse*: ptr MouseInput = addr engine.mouse ## Shared mouse input state.
 
 proc frameCallback() {.cdecl.} =
   engine.runtime.time = epochTime()
@@ -100,9 +93,6 @@ proc frameCallback() {.cdecl.} =
   if engine.draw != nil:
     engine.draw()
 
-  engine.mouse.delta = vec2(0.0, 0.0)
-  engine.mouse.scroll = vec2(0.0, 0.0)
-
 proc cleanupCallback() {.cdecl.} =
   for cb in graphics.onCleanupCallbacks:
     cb()
@@ -126,7 +116,7 @@ proc initCallback() {.cdecl.} =
 
 
 proc eventCallback(event: ptr sapp.Event) {.cdecl.} =
-  engine.mouse.position = vec2(event[].mouseX, event[].mouseY)
+  engine.runtime.event = event[]
 
   case event[].`type`
   of eventTypeQuitRequested:
@@ -135,16 +125,6 @@ proc eventCallback(event: ptr sapp.Event) {.cdecl.} =
     if event[].keyCode in {keyCodeEscape, keyCodeQ}:
       engine.stopped = true
       sapp.quit()
-  of eventTypeMouseDown:
-    if event[].mouseButton == mouseButtonRight:
-      engine.mouse.rightDown = true
-  of eventTypeMouseUp:
-    if event[].mouseButton == mouseButtonRight:
-      engine.mouse.rightDown = false
-  of eventTypeMouseMove:
-    engine.mouse.delta = engine.mouse.delta + vec2(event[].mouseDx, event[].mouseDy)
-  of eventTypeMouseScroll:
-    engine.mouse.scroll = engine.mouse.scroll + vec2(event[].scrollX, event[].scrollY)
   of eventTypeResized:
     let
       width = event[].framebufferWidth
@@ -161,6 +141,7 @@ proc window*(
   width, height: uint32,
   title: string,
   load, draw, cleanup: proc(),
+  fullscreen: bool = false,
 ) =
   ## Creates a window with the specified width, height, and title.
   ## It is the main entry point for the game loop.
@@ -178,6 +159,7 @@ proc window*(
     eventCb: eventCallback,
     width: width.int32,
     height: height.int32,
+    fullscreen: fullscreen,
     sampleCount: 1,
     swapInterval: (if engine.vsync: 1 else: 0),
     windowTitle: title.cstring,
