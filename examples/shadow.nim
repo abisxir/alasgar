@@ -20,8 +20,9 @@ proc sceneVs(
   VS_NORMAL: var Vec3,
   VS_LIGHT_POSITION: var Vec4,
 ) =
-  let worldPosition = MODEL * vec4(IN_POSITION, 1)
-  let worldNormal = MODEL * vec4(IN_NORMAL.x, IN_NORMAL.y, IN_NORMAL.z, 0)
+  let
+    worldPosition = MODEL * vec4(IN_POSITION, 1)
+    worldNormal = MODEL * vec4(IN_NORMAL.x, IN_NORMAL.y, IN_NORMAL.z, 0)
   gl_Position = GLSL_CAMERA.PROJECTION * GLSL_CAMERA.VIEW * worldPosition
   VS_COLOR = IN_COLOR
   VS_NORMAL = normalize(vec3(worldNormal.x, worldNormal.y, worldNormal.z))
@@ -35,19 +36,21 @@ proc sceneFs(
   LIGHT_DIRECTION: Uniform[Vec3],
   OUT_COLOR: var Layout[0, Vec4],
 ) =
-  let normal = normalize(VS_NORMAL)
-  let lightPosition = VS_LIGHT_POSITION / VS_LIGHT_POSITION.w
-  let shadowUv = vec2(lightPosition.x * 0.5 + 0.5, lightPosition.y * 0.5 + 0.5)
-  let currentDepth = lightPosition.z * 0.5 + 0.5
-  let closestDepth = texture(DEPTH_MAP, shadowUv).x
-  let bias = max(0.0015, 0.006 * (1.0 - dot(normal, LIGHT_DIRECTION)))
-  var shadow = 1.0
+  var
+    normal = normalize(VS_NORMAL)
+    lightPosition = VS_LIGHT_POSITION / VS_LIGHT_POSITION.w
+    shadowUv = vec2(lightPosition.x * 0.5 + 0.5, lightPosition.y * 0.5 + 0.5)
+    currentDepth = lightPosition.z * 0.5 + 0.5
+    closestDepth = texture(DEPTH_MAP, shadowUv).x
+    bias = max(0.0015, 0.006 * (1.0 - dot(normal, LIGHT_DIRECTION)))
+    shadow = 1.0
 
   if currentDepth - bias > closestDepth:
     shadow = 0.38
 
-  let diffuse = clamp(dot(normal, LIGHT_DIRECTION), 0.0, 1.0)
-  let light = 0.28 + diffuse * 0.72 * shadow
+  let
+    diffuse = clamp(dot(normal, LIGHT_DIRECTION), 0.0, 1.0)
+    light = 0.28 + diffuse * 0.72 * shadow
   OUT_COLOR = vec4(VS_COLOR.x * light, VS_COLOR.y * light, VS_COLOR.z * light, 1)
 
 const
@@ -55,10 +58,6 @@ const
   LightDirection = vec3(0.52, 0.70, 0.49)
 
 var
-  cube: Geometry
-  plane: Geometry
-  depthShader: Shader
-  sceneShader: Shader
   cubeDepth: Pipeline
   planeDepth: Pipeline
   cubeScene: Pipeline
@@ -70,25 +69,20 @@ var
   depthMap: View
   depthSampler: Sampler
 
-proc lightViewProjection(): Mat4 =
-  lightCamera.projection * inverse(lightCamera.transform.world)
-
 proc load() =
-  var cameraTransform = Transform(position: vec3(5.0, 4.0, 6.0))
-  cameraTransform.lookAt(vec3(0.0, -0.15, 0.0), vec3(0.0, 1.0, 0.0))
-  camera = graphics.perspective(cameraTransform, 45.0, 0.1, 50.0)
+  let
+    cameraTransform = lookAt(vec3(5.0, 4.0, 6.0), vec3(0.0, -0.15, 0.0), vec3(0.0, 1.0, 0.0))
+    lightTransform = lookAt(vec3(5.2, 7.0, 4.9), vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0))
+    depthShader = graphics.shader(depthVs, depthFs)
+    sceneShader = graphics.shader(sceneVs, sceneFs)
+    cube = graphics.cube(color=vec4(1.0, 0.32, 0.22, 1.0))
+    plane = graphics.plane(color=vec4(0.72, 0.74, 0.68, 1.0))
 
-  var lightTransform = Transform(position: vec3(5.2, 7.0, 4.9))
-  lightTransform.lookAt(vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0))
+  camera = graphics.perspective(cameraTransform, 45.0, 0.1, 50.0)
   lightCamera = graphics.ortho(lightTransform, 9.0, 1.0, 25.0)
 
   graphics.color = vec4(0.06, 0.07, 0.08, 1.0)
 
-  cube = graphics.cube(color=vec4(1.0, 0.32, 0.22, 1.0))
-  plane = graphics.plane(color=vec4(0.72, 0.74, 0.68, 1.0))
-
-  depthShader = graphics.shader(depthVs, depthFs)
-  sceneShader = graphics.shader(sceneVs, sceneFs)
 
   cubeDepth = graphics.compact(cube, depthShader)
   planeDepth = graphics.compact(plane, depthShader)
@@ -104,7 +98,7 @@ proc renderDepth(pipeline: var Pipeline, model: Mat4) =
 
 proc renderScene(pipeline: var Pipeline, model: Mat4) =
   pipeline.shader.set("MODEL", model)
-  pipeline.shader.set("LIGHT_VIEW_PROJECTION", lightViewProjection())
+  pipeline.shader.set("LIGHT_VIEW_PROJECTION", lightCamera.projection * inverse(lightCamera.transform.world))
   pipeline.shader.set("LIGHT_DIRECTION", LightDirection)
   pipeline.shader.set("DEPTH_MAP", depthSampler, 0)
   graphics.render(pipeline, camera)

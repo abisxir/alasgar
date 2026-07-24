@@ -44,6 +44,10 @@ proc lookAt*(t: var Transform, target: Vec3, up: Vec3) =
   if not isNil(t.parent):
     t.rotation = inverse(quat(t.parent[].world)) * t.rotation
 
+proc lookAt*(position, target: Vec3, up: Vec3): Transform =
+  result = Transform(position: position)
+  result.lookAt(target, up)
+
 proc translate*(t: var Transform, pos: Vec3) = t.position = pos
 proc translate*(t: var Transform, x, y, z: float32) = t.position = vec3(x, y, z)
 proc rotate*(t: var Transform, yaw, pitch, roll: float32) = t.rotation = fromEuler(yaw, pitch, roll)

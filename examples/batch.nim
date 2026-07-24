@@ -38,7 +38,7 @@ const
   BAR_SPACING = 0.9'f32
   BAR_WIDTH = 0.45'f32
   MIN_HEIGHT = 0.18'f32
-  MAX_HEIGHT = 3.4'f32
+  MAX_HEIGHT = 0.98'f32
 
 var
   cube: Pipeline
@@ -49,11 +49,10 @@ var
   instances: array[BATCH_COUNT, InstanceData]
 
 proc load() =
-  var
-    cameraTransform = Transform(position: vec3(0.0, 15.0, 24.0))
+  let
+    cameraTransform = lookAt(vec3(0.0, 15.0, 24.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0))
     shader = graphics.shader(vs, fs)
 
-  cameraTransform.lookAt(vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0))
   camera = graphics.perspective(cameraTransform, 60, 0.1, 100.0)
   graphics.color = vec4(0.035, 0.04, 0.052, 1.0)
 
@@ -83,10 +82,10 @@ proc updateInstances() =
 
 proc draw() =
   updateInstances()
-  #model.rotation = fromEuler(0.0, runtime.age * 0.12, 0.0)
   cube.shader.set("MODEL", model.world)
   graphics.render(cube, camera, instances)
   graphics.debug()
+
 proc cleanup() =
   destroy(cube)
   destroy(checkerSampler)

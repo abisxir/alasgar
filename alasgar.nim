@@ -44,5 +44,6 @@ import private/geometry
 import private/debug
 import private/utils
 import private/texture
+import private/text
 
-export core, shader, glsl, aljebra, transform, pipeline, camera, geometry, debug, utils, texture
+export core, shader, glsl, aljebra, transform, pipeline, camera, geometry, debug, utils, texture, text

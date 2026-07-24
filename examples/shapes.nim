@@ -49,8 +49,7 @@ proc newShape(geometry: Geometry, position, color, spin: Vec3): ShapeItem =
   result.spin = spin
 
 proc load() =
-  var cameraTransform = Transform(position: vec3(0.0, 0.0, 10.0))
-  cameraTransform.lookAt(vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0))
+  let cameraTransform = lookAt(vec3(0.0, 0.0, 10.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0))
 
   camera = graphics.perspective(cameraTransform, 60, 0.1, 100)
   graphics.color = vec4(0.08, 0.09, 0.12, 1)
