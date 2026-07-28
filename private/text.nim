@@ -136,17 +136,19 @@ proc createInstances(text: string, instances: var seq[TextInstance]) =
           )
       inc penX
 
-proc addPixel(geometry: var Geometry, x, y: float32, color: Vec4) =
+proc addPixel(geometry: var Geometry, x, y: float32, color: Vec4, transform: common.Mat4) =
   let first = geometry.vertices.len
-  let vertex = proc (x, y: float32): shape.Vertex = shape.Vertex(
-    x: x,
-    y: y,
-    z: 0,
-    normal: 0,
-    u: 0,
-    v: 0,
-    color: shape.color4f(color.x, color.y, color.z, color.w),
-  )
+  let vertex = proc (x, y: float32): shape.Vertex =
+    let position = transform * vec3(x, y, 0)
+    shape.Vertex(
+      x: position.x,
+      y: position.y,
+      z: position.z,
+      normal: 0,
+      u: 0,
+      v: 0,
+      color: shape.color4f(color.x, color.y, color.z, color.w),
+    )
   geometry.vertices.add(vertex(x, y))
   geometry.vertices.add(vertex(x + 1, y))
   geometry.vertices.add(vertex(x + 1, y + 1))
@@ -164,12 +166,12 @@ proc shape*(t: ptr TextRenderer, text: string, color: Vec4=vec4(1), transform: c
     penX = 0
     penY = 0
     current = ""
-    color: Vec4 = color
+    pixelColor: Vec4 = color
 
   for codepoint, style in codepoints(text):
     if style.len > 0 and style != current:
       current = style
-      color = style
+      pixelColor = style
     case codepoint
     of '\r'.ord:
       discard
@@ -187,7 +189,8 @@ proc shape*(t: ptr TextRenderer, text: string, color: Vec4=vec4(1), transform: c
               result.addPixel(
                 (penX * GlyphAdvance + column).float32,
                 (-penY * GlyphLineAdvance + GlyphHeight - row - 1).float32,
-                color,
+                pixelColor,
+                transform,
               )
       inc penX
 
