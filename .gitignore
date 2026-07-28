@@ -73,3 +73,4 @@ examples/shadow
 nimble.develop
 nimble.paths
 nimbledeps
+examples/text
