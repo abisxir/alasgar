@@ -1,4 +1,4 @@
-import std/unicode
+import std/[strutils, unicode]
 
 import core, pipeline, shader, camera, texture
 import shaders/text as textShader
@@ -13,6 +13,7 @@ const
   FirstGlyph = ' '.ord
   LastGlyph = '~'.ord
   MonogramPixels = staticRead("assets/monogram.r8")
+  DefaultColor = vec4(1)
 
 type
   TextVertex = object
@@ -64,14 +65,46 @@ proc cleanup() =
   destroy(renderer.sampler)
   destroy(renderer.atlas)
 
+iterator codepoints(text: string): (int, string) =
+  var
+    style: string
+    tag: string
+    inTag = false
+    escaped = false
+
+  for rune in text.runes:
+    let codepoint = rune.int
+    if escaped:
+      if inTag:
+        tag.add($rune)
+      else:
+        yield (codepoint, style)
+      escaped = false
+    elif codepoint == '\\'.ord:
+      escaped = true
+    elif inTag:
+      if codepoint == ']'.ord:
+        style = tag
+        inTag = false
+        tag.setLen(0)
+      else:
+        tag.add($rune)
+    elif codepoint == '['.ord:
+      inTag = true
+    else:
+      yield (codepoint, style)
 
 proc createInstances(text: string, instances: var seq[TextInstance]) =
   var
     penX = 0
     penY = 0
+    current = "#ffffffff"
+    color: Vec4 = current
 
-  for rune in text.runes:
-    let codepoint = rune.int
+  for codepoint, style in codepoints(text):
+    if style.len > 0 and style != current:
+      current = style
+      color = style
     case codepoint
     of '\r'.ord:
       discard
@@ -87,7 +120,7 @@ proc createInstances(text: string, instances: var seq[TextInstance]) =
           instances.add TextInstance(
             offset: vec3(penX * GlyphAdvance, -penY * GlyphLineAdvance, 0),
             glyph: vec2(glyph mod AtlasColumns, glyph div AtlasColumns),
-            color: vec4(1),
+            color: color,
           )
       inc penX
 

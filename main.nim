@@ -22,7 +22,7 @@ proc draw() =
   t.rotation = fromEuler(r, r, 0.0)
   cubes.shader.set("MODEL", t.world)
   graphics.render(cubes, camera)
-  graphics.text.draw("ALASGAR is running\n:)", vec2(8, 8))
+  graphics.text.draw("ALASGAR is [red]running [yellow]:)", vec2(8, 8))
 
 proc cleanup() =
   destroy(cubes)
