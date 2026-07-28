@@ -1,6 +1,9 @@
 import std/[strutils, unicode]
 
-import core, pipeline, shader, camera, texture
+import sokol/shape as shape
+
+import core, pipeline, shader, camera, texture, geometry
+import umath/common as common
 import shaders/text as textShader
 
 const
@@ -12,6 +15,8 @@ const
   GlyphLineAdvance = GlyphHeight
   FirstGlyph = ' '.ord
   LastGlyph = '~'.ord
+  AtlasWidth = AtlasColumns * GlyphWidth
+  AtlasHeight = AtlasRows * GlyphHeight
   MonogramPixels = staticRead("assets/monogram.r8")
   DefaultColor = vec4(1)
 
@@ -41,7 +46,6 @@ proc load() =
     ]
     indices = [0'u16, 1, 2, 0, 2, 3]
 
-  doAssert MonogramPixels.len == AtlasColumns * GlyphWidth * AtlasRows * GlyphHeight
   var pixels = newSeq[byte](MonogramPixels.len)
   for index, value in MonogramPixels:
     pixels[index] = value.byte
@@ -64,6 +68,14 @@ proc cleanup() =
   destroy(renderer.pipeline)
   destroy(renderer.sampler)
   destroy(renderer.atlas)
+
+func glyphPixel(glyph, row, column: int): bool =
+  let
+    glyphX = glyph mod AtlasColumns
+    glyphY = glyph div AtlasColumns
+    x = glyphX * GlyphWidth + column
+    y = glyphY * GlyphHeight + row
+  MonogramPixels[y * AtlasWidth + x] != '\0'
 
 iterator codepoints(text: string): (int, string) =
   var
@@ -124,12 +136,67 @@ proc createInstances(text: string, instances: var seq[TextInstance]) =
           )
       inc penX
 
+proc addPixel(geometry: var Geometry, x, y: float32, color: Vec4) =
+  let first = geometry.vertices.len
+  let vertex = proc (x, y: float32): shape.Vertex = shape.Vertex(
+    x: x,
+    y: y,
+    z: 0,
+    normal: 0,
+    u: 0,
+    v: 0,
+    color: shape.color4f(color.x, color.y, color.z, color.w),
+  )
+  geometry.vertices.add(vertex(x, y))
+  geometry.vertices.add(vertex(x + 1, y))
+  geometry.vertices.add(vertex(x + 1, y + 1))
+  geometry.vertices.add(vertex(x, y + 1))
+  geometry.indices.add([
+    first.uint16, (first + 1).uint16, (first + 2).uint16,
+    first.uint16, (first + 2).uint16, (first + 3).uint16
+  ])
+
+proc shape*(t: ptr TextRenderer, text: string, color: Vec4=vec4(1), transform: common.Mat4=mat4()): Geometry =
+  ## Create static geometry with one quad for every lit font pixel.
+  discard t
+
+  var
+    penX = 0
+    penY = 0
+    current = ""
+    color: Vec4 = color
+
+  for codepoint, style in codepoints(text):
+    if style.len > 0 and style != current:
+      current = style
+      color = style
+    case codepoint
+    of '\r'.ord:
+      discard
+    of '\n'.ord:
+      penX = 0
+      inc penY
+    of '\t'.ord:
+      penX += GlyphAdvance * 4
+    else:
+      if codepoint >= FirstGlyph and codepoint <= LastGlyph:
+        let glyph = codepoint - FirstGlyph
+        for row in 0..<GlyphHeight:
+          for column in 0..<GlyphWidth:
+            if glyphPixel(glyph, row, column):
+              result.addPixel(
+                (penX * GlyphAdvance + column).float32,
+                (-penY * GlyphLineAdvance + GlyphHeight - row - 1).float32,
+                color,
+              )
+      inc penX
+
 
 proc `text`*(g: ptr Graphics): ptr TextRenderer =
   discard g
   addr renderer
 
-proc draw*(t: ptr TextRenderer, text: string, model: Mat4, camera: Camera) =
+proc draw*(t: ptr TextRenderer, text: string, model: common.Mat4, camera: Camera) =
   ## Render text as instanced pixels using the supplied world transform and camera.
   var instances: seq[TextInstance]
   createInstances(text, instances)
