@@ -24,7 +24,7 @@ proc debug*(g: ptr Graphics, position = vec2(8, 8), color = vec4(0.5, 1.0, 0.4, 
       &"[lightgray] . VERTICES: [deepskyblue]{stats.vertices}",
       &"[lightgray] . INDICES: [violet]{stats.indices}",
       &"[lightgray] . INSTANCES: [mediumspringgreen]{stats.instances}",
-      &"[lightgray]WINDOW: [lightskyblue]{size.x}X{size.y}",
+      &"[lightgray]WINDOW: [lightskyblue]{size.x}x{size.y}",
     ]
 
   g.text.draw(colorTag(color) & lines.join("\n"), position)
