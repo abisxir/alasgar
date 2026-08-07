@@ -23,6 +23,7 @@ when (defined(windows) or defined(macosx)) and not defined(gl):
 
 type
   Callback = proc ()
+  InputCallback = proc (e: ptr sapp.Event)
   Window* = object
     ## Window configuration and current size.
     title: string
@@ -46,7 +47,8 @@ type
     age, delta: float32
     time: float
     stats: Stats
-    event*: sapp.Event
+    onInputCallbacks: seq[InputCallback]
+    exitOnEscape*: bool
   Engine* = object
     ## Internal engine state for the active application.
     app: sapp.Desc
@@ -116,13 +118,13 @@ proc initCallback() {.cdecl.} =
 
 
 proc eventCallback(event: ptr sapp.Event) {.cdecl.} =
-  engine.runtime.event = event[]
-
+  for cb in runtime.onInputCallbacks:
+    cb(event)
   case event[].`type`
   of eventTypeQuitRequested:
     engine.stopped = true
   of eventTypeKeyDown:
-    if event[].keyCode in {keyCodeEscape, keyCodeQ}:
+    if runtime.exitOnEscape and event[].keyCode in {keyCodeEscape, keyCodeQ}:
       engine.stopped = true
       sapp.quit()
   of eventTypeResized:
@@ -253,6 +255,21 @@ proc onWindowResize*(g: ptr Graphics, slot: Callback) =
   ## ```
   if slot notin g.onWindowResizeCallbacks:
     g.onWindowResizeCallbacks.add(slot)
+
+
+proc onInput*(r: ptr Runtime, slot: InputCallback) =
+  ## Register a callback any input events.
+  ##
+  ## Duplicate callbacks are ignored.
+  ##
+  ## Example:
+  ## ```nim
+  ## runtime.onInput(proc (event: ptr sapp.Event) =
+  ##   echo (event.mouseX, event.mouseY)
+  ## )
+  ## ```
+  if slot notin r.onInputCallbacks:
+    r.onInputCallbacks.add(slot)
 
 
 proc onLoad*(g: ptr Graphics, slot: Callback) =

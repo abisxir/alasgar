@@ -24,4 +24,5 @@ proc draw() =
 proc cleanup() =
   destroy(logo)
 
+runtime.exitOnEscape = true
 window(800, 600, "My Game", load, draw, cleanup)
