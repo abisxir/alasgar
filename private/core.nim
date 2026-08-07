@@ -1,13 +1,26 @@
-## Core runtime and windowing API.
+## Core runtime, windowing, and application lifecycle API.
 ##
-## This module exposes the engine entry point and the small set of shared
-## runtime handles used by applications:
+## Applications normally configure the shared `graphics` and `runtime` handles,
+## define their lifecycle callbacks, and pass those callbacks to `window`:
 ##
-## - `window` starts the Sokol/OpenGL application loop.
-## - `graphics` exposes framebuffer state such as `size`, `aspect`, and clear
-##   `color`.
-## - `runtime` exposes timing state such as `age`, `delta`, and `frames`.
-## - `onWindowResize` registers callbacks for framebuffer resize events.
+## ```nim
+## proc load() =
+##   graphics.color = vec4(0.08, 0.09, 0.12, 1.0)
+##
+## proc draw() =
+##   discard
+##
+## proc cleanup() =
+##   discard
+##
+## runtime.exitOnEscape = true
+## window(960, 540, "My application", load, draw, cleanup)
+## ```
+##
+## `graphics` provides framebuffer state and graphics lifecycle hooks. `runtime`
+## provides frame timing, input hooks, and rendering statistics. The pointers
+## remain valid for the lifetime of the process and are managed by the engine;
+## callers must not free them.
 
 import std/strformat
 import std/times
@@ -25,32 +38,41 @@ type
   Callback = proc ()
   InputCallback = proc (e: ptr sapp.Event)
   Window* = object
-    ## Window configuration and current size.
+    ## Opaque window configuration and state owned by the engine.
     title: string
     size: UVec2
   Graphics* = object
-    ## Graphics state shared with the active application.
+    ## Graphics state owned by the engine and accessed through `graphics`.
     size: UVec2
     onWindowResizeCallbacks: seq[Callback]
     onLoadCallbacks: seq[Callback]
     onCleanupCallbacks: seq[Callback]
-    color*: Vec4 ## Clear color used at the start of each frame.
+    color*: Vec4
+      ## RGBA clear color applied to the color buffer before each `draw` call.
   Stats* = object
-    drawCalls*: int
-    vertices*: int
-    indices*: int
-    instances*: int
-    batch*: int
+    ## Rendering counters for the current frame.
+    ##
+    ## The engine resets these values at the beginning of every frame. Rendering
+    ## code updates them through `recordDraw`.
+    drawCalls*: int ## Number of recorded rendering submissions.
+    vertices*: int ## Total number of submitted vertices.
+    indices*: int ## Total number of submitted indices.
+    instances*: int ## Total number of submitted instances.
+    batch*: int ## Number of recorded submissions containing multiple instances.
   Runtime* = object
-    ## Runtime timing counters updated once per frame.
+    ## Runtime state owned by the engine and accessed through `runtime`.
     frames: int
     age, delta: float32
     time: float
     stats: Stats
     onInputCallbacks: seq[InputCallback]
     exitOnEscape*: bool
+      ## Whether pressing Escape or Q requests application shutdown.
   Engine* = object
-    ## Internal engine state for the active application.
+    ## Opaque state for the active engine instance.
+    ##
+    ## Applications use `graphics`, `runtime`, and `window` instead of creating
+    ## this type directly.
     app: sapp.Desc
     window: Window
     graphics: Graphics
@@ -67,8 +89,10 @@ when defined(android):
     androidDesc: sapp.Desc
 
 let
-  graphics*: ptr Graphics = addr engine.graphics ## Shared graphics state.
-  runtime*: ptr Runtime = addr engine.runtime ## Shared runtime timing state.
+  graphics*: ptr Graphics = addr engine.graphics
+    ## Process-wide graphics state managed by the engine.
+  runtime*: ptr Runtime = addr engine.runtime
+    ## Process-wide runtime state managed by the engine.
 
 proc frameCallback() {.cdecl.} =
   engine.runtime.time = epochTime()
@@ -145,8 +169,20 @@ proc window*(
   load, draw, cleanup: proc(),
   fullscreen: bool = false,
 ) =
-  ## Creates a window with the specified width, height, and title.
-  ## It is the main entry point for the game loop.
+  ## Configure the application and start its windowing loop.
+  ##
+  ## `width` and `height` specify the initial framebuffer dimensions in pixels.
+  ## `title` is used as the native window title, and `fullscreen` requests a
+  ## fullscreen window when supported by the platform.
+  ##
+  ## Once the graphics context is ready, `load` runs once. `draw` then runs once
+  ## per frame after the color and depth buffers have been cleared. During
+  ## shutdown, callbacks registered with `onCleanup` run before `cleanup`.
+  ##
+  ## On non-Android targets this procedure enters Sokol's application loop and
+  ## does not return until that loop exits. On Android it only prepares the
+  ## descriptor returned by `alasgar_app_desc`; the host application owns the
+  ## loop.
   engine.window.title = title
   engine.window.size = uvec2(width, height)
   engine.graphics.size = engine.window.size
@@ -173,7 +209,9 @@ proc window*(
     sapp.run(engine.app)
 
 proc `age`*(runtime: ptr Runtime): float32 =
-  ## Return the age of the engine in seconds.
+  ## Return elapsed engine time in seconds.
+  ##
+  ## The value starts at zero and accumulates `delta` once per rendered frame.
   ##
   ## Example:
   ## ```nim
@@ -182,7 +220,7 @@ proc `age`*(runtime: ptr Runtime): float32 =
   runtime.age
 
 proc `delta`*(runtime: ptr Runtime): float32 =
-  ## Return the time elapsed since the last frame in seconds.
+  ## Return the duration of the latest frame in seconds.
   ##
   ## Example:
   ## ```nim
@@ -191,7 +229,7 @@ proc `delta`*(runtime: ptr Runtime): float32 =
   runtime.delta
 
 proc `frames`*(runtime: ptr Runtime): int =
-  ## Return the number of frames rendered since the start of the engine.
+  ## Return the number of frames started since engine initialization.
   ##
   ## Example:
   ## ```nim
@@ -200,7 +238,10 @@ proc `frames`*(runtime: ptr Runtime): int =
   runtime.frames
 
 proc `fps`*(runtime: ptr Runtime): float32 =
-  ## Return current frames per second.
+  ## Return the instantaneous frame rate derived from `delta`.
+  ##
+  ## This is `1.0 / runtime.delta`; it is not a smoothed average and is only
+  ## meaningful after frame timing has been initialized.
   ##
   ## Example:
   ## ```nim
@@ -209,11 +250,18 @@ proc `fps`*(runtime: ptr Runtime): float32 =
   1.0 / runtime.delta
 
 proc `stats`*(runtime: ptr Runtime): Stats =
-  ## Return the current frame's debug statistics.
+  ## Return a snapshot of the current frame's rendering counters.
+  ##
+  ## Counters are reset at the beginning of every frame and populated by calls
+  ## to `recordDraw`.
   runtime.stats
 
 proc recordDraw*(r: ptr Runtime, drawCalls, vertices, indices, instances: int) =
-  ## Add one rendered submission to the current frame's debug statistics.
+  ## Add rendering work to the current frame's statistics.
+  ##
+  ## Each argument is added to its corresponding counter. A call whose
+  ## `instances` value is greater than one also increments `Stats.batch` once.
+  ## This procedure records bookkeeping only; it does not issue a GPU command.
   r.stats.drawCalls += drawCalls
   r.stats.vertices += vertices
   r.stats.indices += indices
@@ -223,7 +271,7 @@ proc recordDraw*(r: ptr Runtime, drawCalls, vertices, indices, instances: int) =
 
 
 proc `size`*(g: ptr Graphics): UVec2 =
-  ## Return the render screen size.
+  ## Return the current framebuffer width and height in pixels.
   ##
   ## Example:
   ## ```nim
@@ -233,7 +281,7 @@ proc `size`*(g: ptr Graphics): UVec2 =
 
 
 proc `aspect`*(g: ptr Graphics): float32 =
-  ## Return the render screen aspect, 16/9 or etc.
+  ## Return the current framebuffer aspect ratio as width divided by height.
   ##
   ## Example:
   ## ```nim
@@ -243,9 +291,10 @@ proc `aspect`*(g: ptr Graphics): float32 =
 
 
 proc onWindowResize*(g: ptr Graphics, slot: Callback) =
-  ## Register a callback for framebuffer resize events.
+  ## Register `slot` to run after the framebuffer size changes.
   ##
-  ## Duplicate callbacks are ignored.
+  ## The engine updates `graphics.size` before invoking the callback. Registering
+  ## the same callback more than once has no effect.
   ##
   ## Example:
   ## ```nim
@@ -258,9 +307,11 @@ proc onWindowResize*(g: ptr Graphics, slot: Callback) =
 
 
 proc onInput*(r: ptr Runtime, slot: InputCallback) =
-  ## Register a callback any input events.
+  ## Register `slot` to receive Sokol application events.
   ##
-  ## Duplicate callbacks are ignored.
+  ## Input callbacks run before the engine's built-in quit, keyboard, and resize
+  ## handling. The event pointer is borrowed and is only valid for the duration
+  ## of the callback. Registering the same callback more than once has no effect.
   ##
   ## Example:
   ## ```nim
@@ -273,9 +324,10 @@ proc onInput*(r: ptr Runtime, slot: InputCallback) =
 
 
 proc onLoad*(g: ptr Graphics, slot: Callback) =
-  ## Register a callback for load events.
+  ## Register `slot` to run once after the application's `load` callback.
   ##
-  ## Duplicate callbacks are ignored.
+  ## The graphics context is initialized before either callback runs.
+  ## Registering the same callback more than once has no effect.
   ##
   ## Example:
   ## ```nim
@@ -287,9 +339,10 @@ proc onLoad*(g: ptr Graphics, slot: Callback) =
     g.onLoadCallbacks.add(slot)
 
 proc onCleanup*(g: ptr Graphics, slot: Callback) =
-  ## Register a callback for when engines goes down.
+  ## Register `slot` to run during application shutdown.
   ##
-  ## Duplicate callbacks are ignored.
+  ## Registered slots run before the `cleanup` callback passed to `window`.
+  ## Registering the same callback more than once has no effect.
   ##
   ## Example:
   ## ```nim
@@ -302,8 +355,9 @@ proc onCleanup*(g: ptr Graphics, slot: Callback) =
 
 
 proc alasgar_app_desc*(): sapp.Desc {.exportc: "alasgar_app_desc", cdecl.} =
-  ## Return the application descriptor for the engine.
-  ## This is specially useful when embedding the engine in an existing
-  ## application. For example, to run the application from a C/C++
-  ## program or an android app.
+  ## Return the Sokol application descriptor configured by `window`.
+  ##
+  ## This C-callable entry point is intended for hosts that own the application
+  ## loop, such as an Android or embedded C/C++ application. Call `window` first
+  ## to populate the descriptor. The exported C symbol is `alasgar_app_desc`.
   engine.app
