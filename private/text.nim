@@ -1,4 +1,4 @@
-import std/[strutils, unicode]
+import std/[unicode]
 
 import sokol/shape as shape
 
@@ -18,7 +18,6 @@ const
   AtlasWidth = AtlasColumns * GlyphWidth
   AtlasHeight = AtlasRows * GlyphHeight
   MonogramPixels = staticRead("assets/monogram.r8")
-  DefaultColor = vec4(1)
 
 type
   TextVertex = object
@@ -51,8 +50,8 @@ proc load() =
     pixels[index] = value.byte
 
   renderer.atlas = graphics.texture(
-    (AtlasColumns * GlyphWidth).uint32,
-    (AtlasRows * GlyphHeight).uint32,
+    (AtlasWidth).uint32,
+    (AtlasHeight).uint32,
     channels = 1,
     pixels = pixels[0].addr,
   )

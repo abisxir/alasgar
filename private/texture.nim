@@ -383,10 +383,10 @@ proc screen*(g: ptr Graphics) =
   ##
   ## The viewport is reset to the current render screen size.
   let size = g.size
-  var back = GL_BACK.GLenum
+  var back = GL_BACK
   glBindFramebuffer(GL_FRAMEBUFFER, 0)
   glDrawBuffers(1.GLsizei, back.addr)
-  glReadBuffer(GL_BACK.GLenum)
+  glReadBuffer(GL_BACK)
   glViewport(0, 0, size.x.GLsizei, size.y.GLsizei)
 
 proc destroy*(view: var View) =
