@@ -29,4 +29,6 @@ proc draw() =
 proc cleanup() =
   destroy(logo)
 
-window(800, 600, "My Game", load, draw, cleanup)
+settings.exitOnEscape = true
+settings.msaa = 4
+window(800, 600, "Text sample", load, draw, cleanup)

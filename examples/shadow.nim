@@ -69,6 +69,14 @@ var
   depthMap: View
   depthSampler: Sampler
 
+proc constructCamera() =
+  let
+    cameraTransform = lookAt(vec3(5.0, 4.0, 6.0), vec3(0.0, -0.15, 0.0), vec3(0.0, 1.0, 0.0))
+    lightTransform = lookAt(vec3(5.2, 7.0, 4.9), vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0))
+
+  camera = graphics.perspective(cameraTransform, 45.0, 0.1, 50.0)
+  lightCamera = graphics.ortho(lightTransform, 9.0, 1.0, 25.0)
+
 proc load() =
   let
     cameraTransform = lookAt(vec3(5.0, 4.0, 6.0), vec3(0.0, -0.15, 0.0), vec3(0.0, 1.0, 0.0))
@@ -78,11 +86,7 @@ proc load() =
     cube = graphics.cube(color=vec4(1.0, 0.32, 0.22, 1.0))
     plane = graphics.plane(color=vec4(0.72, 0.74, 0.68, 1.0))
 
-  camera = graphics.perspective(cameraTransform, 45.0, 0.1, 50.0)
-  lightCamera = graphics.ortho(lightTransform, 9.0, 1.0, 25.0)
-
   graphics.color = vec4(0.06, 0.07, 0.08, 1.0)
-
 
   cubeDepth = graphics.compact(cube, depthShader)
   planeDepth = graphics.compact(plane, depthShader)
@@ -91,6 +95,9 @@ proc load() =
 
   depthMap = graphics.depth(ShadowSize, ShadowSize)
   depthSampler = graphics.sampler(depthMap.texture, minFilter=tfNearest, magFilter=tfNearest)
+
+  constructCamera()
+  graphics.onWindowResize(constructCamera)
 
 proc renderDepth(pipeline: var Pipeline, model: Mat4) =
   pipeline.shader.set("MODEL", model)
@@ -122,4 +129,6 @@ proc cleanup() =
   destroy(depthSampler)
   destroy(depthMap)
 
+settings.exitOnEscape = true
+settings.msaa = 4
 window(960, 540, "Shadow Map", load, draw, cleanup)

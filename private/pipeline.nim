@@ -82,10 +82,11 @@ proc setupAttributes(layout: ShaderLayout, instanced: bool) =
   for attr in layout.attrs:
     if attr.instanced != instanced:
       continue
-    glVertexAttribPointer(attr.index.GLuint, attr.count.GLint, cGL_FLOAT, false, stride, cast[pointer](offset))
-    glEnableVertexAttribArray(attr.index.GLuint)
-    glVertexAttribDivisor(attr.index.GLuint, (if instanced: 1.GLuint else: 0.GLuint))
-    offset += attr.size
+    for row in 0..<attr.rows:
+      glVertexAttribPointer((attr.index + row).GLuint, attr.columns.GLint, cGL_FLOAT, false, stride, cast[pointer](offset))
+      glEnableVertexAttribArray((attr.index + row).GLuint)
+      glVertexAttribDivisor((attr.index + row).GLuint, (if instanced: 1.GLuint else: 0.GLuint))
+      offset += attr.columnSize
 
 proc pipeline*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], indices: openArray[I]): Pipeline =
   discard g

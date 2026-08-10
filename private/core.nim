@@ -39,8 +39,8 @@ type
   InputCallback = proc (e: ptr sapp.Event)
   Window* = object
     ## Opaque window configuration and state owned by the engine.
-    title: string
-    size: UVec2
+    title*: string
+    size*: UVec2
   Graphics* = object
     ## Graphics state owned by the engine and accessed through `graphics`.
     size: UVec2
@@ -59,6 +59,14 @@ type
     indices*: int ## Total number of submitted indices.
     instances*: int ## Total number of submitted instances.
     batch*: int ## Number of recorded submissions containing multiple instances.
+  Settings* = object
+    ## Contains application settings, like starting fullscreen etc.
+    fullscreen: bool
+      ## Requests a fullscreen window when supported by the platform.
+    exitOnEscape*: bool
+      ## Whether pressing Escape or Q requests application shutdown, when platform supports
+    msaa*: int
+      ## Multisample anti-aliasing sample count, for example 4 for 4× MSAA.
   Runtime* = object
     ## Runtime state owned by the engine and accessed through `runtime`.
     frames: int
@@ -66,8 +74,6 @@ type
     time: float
     stats: Stats
     onInputCallbacks: seq[InputCallback]
-    exitOnEscape*: bool
-      ## Whether pressing Escape or Q requests application shutdown.
   Engine* = object
     ## Opaque state for the active engine instance.
     ##
@@ -77,12 +83,13 @@ type
     window: Window
     graphics: Graphics
     runtime: Runtime
+    settings: Settings
     stopped: bool
     load, draw, cleanup: proc()
     vsync: bool
 
 var
-  engine = Engine(vsync: true)
+  engine = Engine(vsync: true, settings: Settings(fullscreen: false, exitOnEscape: false, msaa: 1))
 
 when defined(android):
   var
@@ -93,6 +100,7 @@ let
     ## Process-wide graphics state managed by the engine.
   runtime*: ptr Runtime = addr engine.runtime
     ## Process-wide runtime state managed by the engine.
+  settings*: ptr Settings = addr engine.settings
 
 proc frameCallback() {.cdecl.} =
   engine.runtime.time = epochTime()
@@ -101,8 +109,6 @@ proc frameCallback() {.cdecl.} =
   engine.runtime.frames += 1
   engine.runtime.stats = Stats()
 
-  #glBindRenderbuffer(GL_RENDERBUFFER, 0)
-  #glBindFramebuffer(GL_FRAMEBUFFER, 0)
   glEnable(GL_DEPTH_TEST)
   let
     width = sapp.width()
@@ -110,9 +116,6 @@ proc frameCallback() {.cdecl.} =
   engine.window.size = uvec2(width.uint32, height.uint32)
   engine.graphics.size = engine.window.size
   glViewport(0, 0, width.GLsizei, height.GLsizei)
-  #glEnable(GL_BLEND)
-  #glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-  #glDisable(GL_DEPTH_TEST)
   glClearColor(engine.graphics.color.x, engine.graphics.color.y, engine.graphics.color.z, engine.graphics.color.w)
   glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
 
@@ -148,8 +151,9 @@ proc eventCallback(event: ptr sapp.Event) {.cdecl.} =
   of eventTypeQuitRequested:
     engine.stopped = true
   of eventTypeKeyDown:
-    if runtime.exitOnEscape and event[].keyCode in {keyCodeEscape, keyCodeQ}:
-      engine.stopped = true
+    when not defined(emscripten):
+      engine.stopped = settings.exitOnEscape and event[].keyCode in {keyCodeEscape, keyCodeQ}
+    if engine.stopped:
       sapp.quit()
   of eventTypeResized:
     let
@@ -167,13 +171,11 @@ proc window*(
   width, height: uint32,
   title: string,
   load, draw, cleanup: proc(),
-  fullscreen: bool = false,
 ) =
   ## Configure the application and start its windowing loop.
   ##
   ## `width` and `height` specify the initial framebuffer dimensions in pixels.
-  ## `title` is used as the native window title, and `fullscreen` requests a
-  ## fullscreen window when supported by the platform.
+  ## `title` is used as the native window title.
   ##
   ## Once the graphics context is ready, `load` runs once. `draw` then runs once
   ## per frame after the color and depth buffers have been cleared. During
@@ -197,8 +199,8 @@ proc window*(
     eventCb: eventCallback,
     width: width.int32,
     height: height.int32,
-    fullscreen: fullscreen,
-    sampleCount: 1,
+    fullscreen: engine.settings.fullscreen,
+    sampleCount: engine.settings.msaa.int32,
     swapInterval: (if engine.vsync: 1 else: 0),
     windowTitle: title.cstring,
     glMajorVersion: OPENGL_MAJOR_VERSION,
@@ -207,6 +209,16 @@ proc window*(
 
   when not defined(android):
     sapp.run(engine.app)
+
+proc `window`*(runtime: ptr Runtime): Window =
+  ## Return window properties
+  ##
+  ## Example:
+  ## ```nim
+  ## echo runtime.window.size
+  ## ```
+  discard runtime
+  engine.window
 
 proc `age`*(runtime: ptr Runtime): float32 =
   ## Return elapsed engine time in seconds.

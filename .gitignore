@@ -74,3 +74,4 @@ nimble.develop
 nimble.paths
 nimbledeps
 examples/text
+examples/light

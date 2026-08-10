@@ -15,6 +15,9 @@ type
     index*: int
     size*: int
     instanced*: bool
+    rows*: int
+    columns*: int
+    columnSize*: int
   ShaderLayout* = object
     attrs*: seq[ShaderAttribute]
 
@@ -815,11 +818,34 @@ proc parseBracket(param: NimNode, res: var string, forceOut = false,
         res.add("out ")
       else:
         res.add("in ")
-        layout.attrs.add(ShaderAttribute(
-          typeName: param[2].strVal,
-          index: param[1].intVal.int,
-          size: param[2].getSize(),
-          instanced: instanced)
+        let
+          size = param[2].getSize()
+          typeName = param[2].strVal
+          (rows, columns) = case typeName:
+          of "Mat4":
+            (4, 4)
+          of "Mat3":
+            (3, 4)
+          of "Mat2":
+            (2, 2)
+          of "Vec4":
+            (1, 4)
+          of "Vec3":
+            (1, 3)
+          of "Vec2":
+            (1, 2)
+          else:
+            (1, 1)
+        layout.attrs.add(
+          ShaderAttribute(
+            typeName: typeName,
+            index: param[1].intVal.int,
+            size: size,
+            instanced: instanced,
+            rows: rows,
+            columns: columns,
+            columnSize: size div rows
+          )
         )
     if param[2].kind == nnkBracketExpr:
       return parseBracket(param[2], res, false, layout)
@@ -1104,17 +1130,6 @@ func `stride`*(layout: ShaderLayout): int =
 
 func `count`*(layout: ShaderLayout): int = len(layout.attrs)
 func `instanced`*(layout: ShaderLayout): bool = anyIt(layout.attrs, it.instanced)
-
-func `count`*(data: ShaderAttribute): int =
-  if data.typeName == "Vec2":
-    result = 2
-  elif data.typeName == "Vec3":
-    result = 3
-  elif data.typeName == "Vec4":
-    result = 4
-  else:
-    result = 1
-
 
 type
   Layout*[N, T] = T

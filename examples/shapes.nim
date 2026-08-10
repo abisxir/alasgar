@@ -48,10 +48,16 @@ proc newShape(geometry: Geometry, position, color, spin: Vec3): ShapeItem =
   result.color = vec4(color, 1)
   result.spin = spin
 
-proc load() =
-  let cameraTransform = lookAt(vec3(0.0, 0.0, 10.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0))
-
+proc constructCamera() =
+  let cameraTransform = lookAt(
+    vec3(0.0, 0.0, 12.0),
+    vec3(0.0, 0.0, 0.0),
+    vec3(0.0, 0.0, 0.0)
+  )
   camera = graphics.perspective(cameraTransform, 60, 0.1, 100)
+
+
+proc load() =
   graphics.color = vec4(0.08, 0.09, 0.12, 1)
 
   checkerTexture = graphics.texture(2, 2, pixels=CHECKER_PIXELS[0].addr)
@@ -62,6 +68,10 @@ proc load() =
   shapes[2] = newShape(graphics.cylinder(), vec3(0.0, 0.0, 0.0), vec3(0.35, 1.0, 0.5), vec3(1.0, 0.3, 0.7))
   shapes[3] = newShape(graphics.torus(), vec3(3.0, 0.0, 0.0), vec3(1.0, 0.8, 0.25), vec3(0.7, 1.1, 0.4))
   shapes[4] = newShape(graphics.plane(), vec3(6.0, 0.0, 0.0), vec3(0.85, 0.45, 1.0), vec3(1.1, 0.4, 0.9))
+
+  constructCamera()
+  graphics.onWindowResize(constructCamera)
+
 
 proc draw() =
   for item in shapes.mitems:
@@ -78,4 +88,6 @@ proc cleanup() =
   destroy(checkerSampler)
   destroy(checkerTexture)
 
+settings.exitOnEscape = true
+settings.msaa = 4
 window(960, 540, "Hello Shapes", load, draw, cleanup)

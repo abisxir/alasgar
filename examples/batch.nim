@@ -2,93 +2,110 @@ import std/math
 
 import alasgar
 
-type
-  InstanceData = object
-    offset: Vec3
-    scale: Vec3
-    color: Vec4
-
 proc vs(
   IN_POSITION: Layout[0, Vec3],
-  IN_UV: Layout[2, Vec2],
+  IN_NORMAL: Layout[1, Vec3],
   IN_COLOR: Layout[3, Vec4],
-  INSTANCE_OFFSET: Batch[4, Vec3],
-  INSTANCE_SCALE: Batch[5, Vec3],
-  INSTANCE_COLOR: Batch[6, Vec4],
-  MODEL: Uniform[Mat4],
+  MODEL: Batch[4, Mat4],
+  VS_POSITION: var Vec3,
+  VS_NORMAL: var Vec3,
   VS_COLOR: var Vec4,
-  VS_UV: var Vec2,
 ) =
-  let localPosition = IN_POSITION * INSTANCE_SCALE + INSTANCE_OFFSET
-  gl_Position = GLSL_CAMERA.PROJECTION * GLSL_CAMERA.VIEW * MODEL * vec4(localPosition, 1)
-  VS_COLOR = IN_COLOR * INSTANCE_COLOR
-  VS_UV = IN_UV
+  let
+    worldPosition = MODEL * vec4(IN_POSITION, 1.0)
+    worldNormal = MODEL * vec4(IN_NORMAL, 0.0)
+  gl_Position = GLSL_CAMERA.PROJECTION * GLSL_CAMERA.VIEW * worldPosition
+  VS_POSITION = worldPosition.xyz
+  VS_NORMAL = normalize(worldNormal.xyz)
+  VS_COLOR = IN_COLOR
 
 proc fs(
+  VS_POSITION: Vec3,
+  VS_NORMAL: Vec3,
   VS_COLOR: Vec4,
-  VS_UV: Vec2,
+  LIGHT_POSITION: Uniform[Vec3],
   OUT_COLOR: var Layout[0, Vec4],
 ) =
-  OUT_COLOR = VS_COLOR
+  let
+    normal = normalize(VS_NORMAL)
+    lightDirection = normalize(LIGHT_POSITION - VS_POSITION)
+    diffuse = max(dot(normal, lightDirection), 0.0)
+    brightness = 0.1 + diffuse * 0.2
+    color = brightness * VS_COLOR.xyz
+  OUT_COLOR = vec4(color, 1.0)
 
 const
-  TERRAIN_COLUMNS = 256
-  TERRAIN_ROWS = 256
+  TERRAIN_COLUMNS = 96
+  TERRAIN_ROWS = 96
   BATCH_COUNT = TERRAIN_COLUMNS * TERRAIN_ROWS
-  BAR_SPACING = 0.9'f32
-  BAR_WIDTH = 0.45'f32
-  MIN_HEIGHT = 0.18'f32
-  MAX_HEIGHT = 0.98'f32
+  ACTIVE_COLOR = vec4(0.8, 0.75, 0.75, 1.0)
+  ORBIT_SPEED = 1.0
+  ORBIT_RADIUS = 6.0
+  ORBIT_Y = 12.0
+  ORBIT_SCALE = 1.0
+  INFLUENCE_RADIUS = 15.0
+  BASE_HEIGHT = 0.5
 
 var
-  cube: Pipeline
-  model = Transform()
+  cube, sphere: Pipeline
   camera: Camera
-  checker: Texture
-  checkerSampler: Sampler
-  instances: array[BATCH_COUNT, InstanceData]
+  instances: array[BATCH_COUNT, Mat4]
+
+proc constructCamera() =
+  let transform = lookAt(
+    vec3(10.0, 30.0, 10.0),
+    vec3(0.0, 1.0, 0.0),
+    vec3(0.0, 1.0, 0.0),
+  )
+  camera = graphics.perspective(transform, 58.0, 0.1, 100.0)
 
 proc load() =
   let
-    cameraTransform = lookAt(vec3(0.0, 15.0, 24.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0))
     shader = graphics.shader(vs, fs)
 
-  camera = graphics.perspective(cameraTransform, 60, 0.1, 100.0)
-  graphics.color = vec4(0.035, 0.04, 0.052, 1.0)
+  constructCamera()
+  graphics.onWindowResize(constructCamera)
+  graphics.color = ACTIVE_COLOR
 
   cube = graphics.compact(graphics.cube(), shader)
+  sphere = graphics.compact(graphics.sphere(color=ACTIVE_COLOR))
 
-proc updateInstances() =
-  for i, instance in instances.mpairs:
+proc updateInstances(spherePosition: Vec3) =
+  for i in instances.low..instances.high:
     let
-      row = (i div TERRAIN_COLUMNS).float32
-      col = (i mod TERRAIN_COLUMNS).float32
-      x = (col - (TERRAIN_COLUMNS.float32 - 1.0) * 0.5) * BAR_SPACING
-      z = (row - (TERRAIN_ROWS.float32 - 1.0) * 0.5) * BAR_SPACING
-      distance = sqrt(x * x + z * z)
-      ripple = sin(distance * 1.15 - runtime.age * 3.2)
-      crossWave = cos((x * 0.75 + z * 0.45) + runtime.age * 2.1)
-      wave = (ripple + crossWave) * 0.5
-      normalized = wave * 0.5 + 0.5
-      pulse = 0.15 * sin(runtime.age * 5.0 + row * 0.35 + col * 0.2)
-      height = MIN_HEIGHT + (MAX_HEIGHT - MIN_HEIGHT) * (normalized + pulse).clamp(0.0, 1.0)
-      red = 0.25 + 0.75 * normalized
-      green = 0.35 + 0.45 * (1.0 - abs(wave))
-      blue = 0.95 - 0.55 * normalized
+      column = i mod TERRAIN_COLUMNS
+      row = i div TERRAIN_COLUMNS
+      x = (column.float32 - (TERRAIN_COLUMNS - 1).float32 * 0.5)
+      y = 0.float32
+      z = (row.float32 - (TERRAIN_ROWS - 1).float32 * 0.5)
 
-    instance.offset = vec3(x, height * 0.5, z)
-    instance.scale = vec3(BAR_WIDTH, height, BAR_WIDTH)
-    instance.color = vec4(red, green, blue, 1.0)
+      distance = length(vec2(x - spherePosition.x, z - spherePosition.z))
+      influence = 1.0 - smoothstep(0.0, INFLUENCE_RADIUS, distance)
+      peak = BASE_HEIGHT + influence * 10 * abs(sin(x * z))
+    instances[i] = Transform(position: vec3(x, y, z), scale: vec3(0.5, max(0.5, min(peak, 10.0)), 0.5)).mat4
+
+
 
 proc draw() =
-  updateInstances()
-  cube.shader.set("MODEL", model.world)
+  let
+    angle = runtime.age * ORBIT_SPEED
+    spherePosition = vec3(
+      ORBIT_RADIUS * sin(angle),
+      ORBIT_Y,
+      ORBIT_RADIUS * cos(angle),
+    )
+
+  updateInstances(spherePosition)
+  cube.shader.set("LIGHT_POSITION", spherePosition)
   graphics.render(cube, camera, instances)
+  sphere.shader.set("MODEL", Transform(position: spherePosition).world)
+  graphics.render(sphere, camera)
   graphics.debug()
 
 proc cleanup() =
   destroy(cube)
-  destroy(checkerSampler)
-  destroy(checker)
+  destroy(sphere)
 
+settings.exitOnEscape = true
+settings.msaa = 4
 window(960, 540, "Batch Draw", load, draw, cleanup)
