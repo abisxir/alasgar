@@ -61,7 +61,7 @@ type
     batch*: int ## Number of recorded submissions containing multiple instances.
   Settings* = object
     ## Contains application settings, like starting fullscreen etc.
-    fullscreen: bool
+    fullscreen*: bool
       ## Requests a fullscreen window when supported by the platform.
     exitOnEscape*: bool
       ## Whether pressing Escape or Q requests application shutdown, when platform supports

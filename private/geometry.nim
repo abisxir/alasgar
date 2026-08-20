@@ -1,3 +1,4 @@
+import std/math
 import sequtils
 
 import sokol/shape
@@ -44,6 +45,173 @@ proc initGeometry(sizes: shape.Sizes): tuple[geometry: Geometry, buffer: shape.B
       ),
     ),
   )
+
+proc addChamferedBoxPolygon(
+  geometry: var Geometry,
+  points: openArray[Vec3],
+  normal: Vec3,
+  color: uint32,
+  transform: common.Mat4,
+  vIndex: var int,
+  iIndex: var uint16,
+) =
+  let
+    first = vIndex.uint16
+    origin = points[0]
+    tangent = normalize(points[1] - origin)
+    bitangent = normalize(cross(normal, tangent))
+    transformedNormal = transform * vec4(normal, 0'f32)
+    faceNormal = normalize(transformedNormal.xyz)
+
+  var
+    minU = 0'f32
+    maxU = 0'f32
+    minV = 0'f32
+    maxV = 0'f32
+
+  for point in points:
+    let relative = point - origin
+    let projectedU = dot(relative, tangent)
+    let projectedV = dot(relative, bitangent)
+    minU = min(minU, projectedU)
+    maxU = max(maxU, projectedU)
+    minV = min(minV, projectedV)
+    maxV = max(maxV, projectedV)
+
+  let
+    uSize = maxU - minU
+    vSize = maxV - minV
+
+  for point in points:
+    let
+      transformedPoint = transform * point
+      relative = point - origin
+      u = (dot(relative, tangent) - minU) / uSize
+      v = (dot(relative, bitangent) - minV) / vSize
+    geometry.vertices[vIndex] = shape.Vertex(
+      x: transformedPoint.x,
+      y: transformedPoint.y,
+      z: transformedPoint.z,
+      normal: packSnorm4x8(faceNormal.x, faceNormal.y, faceNormal.z, 0'f32),
+      u: packUnorm16(u),
+      v: packUnorm16(v),
+      color: color,
+    )
+    inc vIndex
+
+  let winding = dot(cross(points[1] - points[0], points[2] - points[0]), normal)
+  for index in 1..<(points.len - 1):
+    if winding >= 0:
+      geometry.indices[iIndex] = first
+      inc iIndex
+      geometry.indices[iIndex] = first + index.uint16
+      inc iIndex
+      geometry.indices[iIndex] = first + (index + 1).uint16
+      inc iIndex
+    else:
+      geometry.indices[iIndex] = first
+      inc iIndex
+      geometry.indices[iIndex] = first + (index + 1).uint16
+      inc iIndex
+      geometry.indices[iIndex] = first + index.uint16
+      inc iIndex
+
+
+proc buildChamferedBox(
+  geometry: var Geometry,
+  box: Vec3,
+  bevel: float32,
+  color: uint32,
+  transform: common.Mat4,
+) =
+  let
+    dimensions = box
+    half = dimensions * 0.5'f32
+    bevelAmount = bevel
+    x0 = -half.x
+    x1 = half.x
+    y0 = -half.y
+    y1 = half.y
+    z0 = -half.z
+    z1 = half.z
+    b = bevelAmount
+
+  var
+    vIndex = 0.int
+    iIndex = 0.uint16
+
+  for side in [-1'f32, 1'f32]:
+    addChamferedBoxPolygon(geometry, [
+      vec3(x0 + b, side * y1, z0 + b),
+      vec3(x1 - b, side * y1, z0 + b),
+      vec3(x1 - b, side * y1, z1 - b),
+      vec3(x0 + b, side * y1, z1 - b),
+    ], vec3(0'f32, side, 0'f32), color, transform, vIndex, iIndex)
+
+    addChamferedBoxPolygon(geometry, [
+      vec3(side * x1, y0 + b, z0 + b),
+      vec3(side * x1, y1 - b, z0 + b),
+      vec3(side * x1, y1 - b, z1 - b),
+      vec3(side * x1, y0 + b, z1 - b),
+    ], vec3(side, 0'f32, 0'f32), color, transform, vIndex, iIndex)
+
+    addChamferedBoxPolygon(geometry, [
+      vec3(x0 + b, y0 + b, side * z1),
+      vec3(x1 - b, y0 + b, side * z1),
+      vec3(x1 - b, y1 - b, side * z1),
+      vec3(x0 + b, y1 - b, side * z1),
+    ], vec3(0'f32, 0'f32, side), color, transform, vIndex, iIndex)
+
+  for sy in [-1'f32, 1'f32]:
+    for sz in [-1'f32, 1'f32]:
+      let normal = normalize(vec3(0'f32, sy, sz))
+      addChamferedBoxPolygon(geometry, [
+        vec3(x0 + b, sy * (y1 - b), sz * z1),
+        vec3(x1 - b, sy * (y1 - b), sz * z1),
+        vec3(x1 - b, sy * y1, sz * (z1 - b)),
+        vec3(x0 + b, sy * y1, sz * (z1 - b)),
+      ], normal, color, transform, vIndex, iIndex)
+
+  for sx in [-1'f32, 1'f32]:
+    for sz in [-1'f32, 1'f32]:
+      let normal = normalize(vec3(sx, 0, sz))
+      addChamferedBoxPolygon(geometry, [
+        vec3(sx * (x1 - b), y0 + b, sz * z1),
+        vec3(sx * x1, y0 + b, sz * (z1 - b)),
+        vec3(sx * x1, y1 - b, sz * (z1 - b)),
+        vec3(sx * (x1 - b), y1 - b, sz * z1),
+      ], normal, color, transform, vIndex, iIndex)
+
+  for sx in [-1'f32, 1'f32]:
+    for sy in [-1'f32, 1'f32]:
+      let normal = normalize(vec3(sx, sy, 0))
+      addChamferedBoxPolygon(geometry, [
+        vec3(sx * x1, sy * (y1 - b), z0 + b),
+        vec3(sx * (x1 - b), sy * y1, z0 + b),
+        vec3(sx * (x1 - b), sy * y1, z1 - b),
+        vec3(sx * x1, sy * (y1 - b), z1 - b),
+      ], normal, color, transform, vIndex, iIndex)
+
+  for sx in [-1'f32, 1'f32]:
+    for sy in [-1'f32, 1'f32]:
+      for sz in [-1'f32, 1'f32]:
+        addChamferedBoxPolygon(geometry, [
+          vec3(sx * x1, sy * (y1 - b), sz * (z1 - b)),
+          vec3(sx * (x1 - b), sy * y1, sz * (z1 - b)),
+          vec3(sx * (x1 - b), sy * (y1 - b), sz * z1),
+        ], normalize(vec3(sx, sy, sz)), color, transform, vIndex, iIndex)
+
+proc chamferedBox*(
+  g: ptr Graphics,
+  box: Vec3 = vec3(2),
+  bevel: float32 = 0.1,
+  color: Vec4 = vec4(1),
+  transform: common.Mat4 = mat4(),
+): Geometry =
+  discard g
+  result.vertices.setLen(6 * 4 + 12 * 4 + 8 * 3)
+  result.indices.setLen(6 * 2 * 3 + 12 * 2 * 3 + 8 * 3)
+  buildChamferedBox(result, box, bevel, shape.color4f(color.x, color.y, color.z, color.w), transform)
 
 proc cube*(g: ptr Graphics, box: Vec3=vec3(2), tiles: uint16=1, color: Vec4=vec4(1), transform: common.Mat4=mat4()): Geometry =
   discard g

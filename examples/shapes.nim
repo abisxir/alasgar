@@ -37,7 +37,7 @@ const
   ]
 
 var
-  shapes: array[5, ShapeItem]
+  shapes: array[6, ShapeItem]
   camera: Camera
   checkerTexture: Texture
   checkerSampler: Sampler
@@ -50,7 +50,7 @@ proc newShape(geometry: Geometry, position, color, spin: Vec3): ShapeItem =
 
 proc constructCamera() =
   let cameraTransform = lookAt(
-    vec3(0.0, 0.0, 12.0),
+    vec3(0.0, 0.0, 15.0),
     vec3(0.0, 0.0, 0.0),
     vec3(0.0, 0.0, 0.0)
   )
@@ -63,11 +63,12 @@ proc load() =
   checkerTexture = graphics.texture(2, 2, pixels=CHECKER_PIXELS[0].addr)
   checkerSampler = graphics.sampler(checkerTexture, minFilter=tfNearest, magFilter=tfNearest)
 
-  shapes[0] = newShape(graphics.cube(), vec3(-6.0, 0.0, 0.0), vec3(1.0, 0.35, 0.25), vec3(0.8, 1.2, 0.2))
-  shapes[1] = newShape(graphics.sphere(), vec3(-3.0, 0.0, 0.0), vec3(0.25, 0.65, 1.0), vec3(0.2, 1.0, 0.8))
-  shapes[2] = newShape(graphics.cylinder(), vec3(0.0, 0.0, 0.0), vec3(0.35, 1.0, 0.5), vec3(1.0, 0.3, 0.7))
-  shapes[3] = newShape(graphics.torus(), vec3(3.0, 0.0, 0.0), vec3(1.0, 0.8, 0.25), vec3(0.7, 1.1, 0.4))
-  shapes[4] = newShape(graphics.plane(), vec3(6.0, 0.0, 0.0), vec3(0.85, 0.45, 1.0), vec3(1.1, 0.4, 0.9))
+  shapes[0] = newShape(graphics.cube(), vec3(-8.0, 0.0, 0.0), vec3(1.0, 0.35, 0.25), vec3(0.8, 1.2, 0.2))
+  shapes[1] = newShape(graphics.sphere(), vec3(-5.0, 0.0, 0.0), vec3(0.25, 0.65, 1.0), vec3(0.2, 1.0, 0.8))
+  shapes[2] = newShape(graphics.cylinder(), vec3(-2.0, 0.0, 0.0), vec3(0.35, 1.0, 0.5), vec3(1.0, 0.3, 0.7))
+  shapes[3] = newShape(graphics.torus(), vec3(2.0, 0.0, 0.0), vec3(1.0, 0.8, 0.25), vec3(0.7, 1.1, 0.4))
+  shapes[4] = newShape(graphics.plane(), vec3(5.0, 0.0, 0.0), vec3(0.85, 0.45, 1.0), vec3(1.1, 0.4, 0.9))
+  shapes[5] = newShape(graphics.chamferedBox(bevel=0.1), vec3(8.0, 0.0, 0.0), vec3(0.85, 0.45, 1.0), vec3(1.1, 0.4, 0.9))
 
   constructCamera()
   graphics.onWindowResize(constructCamera)
