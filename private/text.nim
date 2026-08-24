@@ -110,12 +110,12 @@ proc createInstances(text: string, instances: var seq[TextInstance]) =
     penX = 0
     penY = 0
     current = "#ffffffff"
-    color: Vec4 = current
+    rgba: Color = current
 
   for codepoint, style in codepoints(text):
     if style.len > 0 and style != current:
       current = style
-      color = style
+      rgba = style
     case codepoint
     of '\r'.ord:
       discard
@@ -131,11 +131,11 @@ proc createInstances(text: string, instances: var seq[TextInstance]) =
           instances.add TextInstance(
             offset: vec3(penX * GlyphAdvance, -penY * GlyphLineAdvance, 0),
             glyph: vec2(glyph mod AtlasColumns, glyph div AtlasColumns),
-            color: color,
+            color: color4v(rgba),
           )
       inc penX
 
-proc addPixel(geometry: var Geometry, x, y: float32, color: Vec4, transform: common.Mat4) =
+proc addPixel(geometry: var Geometry, x, y: float32, color: Color, transform: common.Mat4) =
   let first = geometry.vertices.len
   let vertex = proc (x, y: float32): shape.Vertex =
     let position = transform * vec3(x, y, 0)
@@ -146,7 +146,7 @@ proc addPixel(geometry: var Geometry, x, y: float32, color: Vec4, transform: com
       normal: 0,
       u: 0,
       v: 0,
-      color: shape.color4f(color.x, color.y, color.z, color.w),
+      color: color,
     )
   geometry.vertices.add(vertex(x, y))
   geometry.vertices.add(vertex(x + 1, y))
@@ -157,7 +157,7 @@ proc addPixel(geometry: var Geometry, x, y: float32, color: Vec4, transform: com
     first.uint16, (first + 2).uint16, (first + 3).uint16
   ])
 
-proc shape*(t: ptr TextRenderer, text: string, color: Vec4=vec4(1), transform: common.Mat4=mat4()): Geometry =
+proc shape*(t: ptr TextRenderer, text: string, color: Color="white", transform: common.Mat4=mat4()): Geometry =
   ## Create static geometry with one quad for every lit font pixel.
   discard t
 
@@ -165,7 +165,7 @@ proc shape*(t: ptr TextRenderer, text: string, color: Vec4=vec4(1), transform: c
     penX = 0
     penY = 0
     current = ""
-    pixelColor: Vec4 = color
+    pixelColor: Color = color
 
   for codepoint, style in codepoints(text):
     if style.len > 0 and style != current:

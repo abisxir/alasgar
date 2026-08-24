@@ -1,6 +1,7 @@
 import math
 
 type
+  Color* = uint32
   GVec2*[T] = object
     x*, y*: T
   GVec3*[T] = object

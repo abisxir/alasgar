@@ -47,7 +47,7 @@ type
     onWindowResizeCallbacks: seq[Callback]
     onLoadCallbacks: seq[Callback]
     onCleanupCallbacks: seq[Callback]
-    color*: Vec4
+    color*: Color
       ## RGBA clear color applied to the color buffer before each `draw` call.
   Stats* = object
     ## Rendering counters for the current frame.
@@ -113,10 +113,11 @@ proc frameCallback() {.cdecl.} =
   let
     width = sapp.width()
     height = sapp.height()
+    color = color4v(engine.graphics.color)
   engine.window.size = uvec2(width.uint32, height.uint32)
   engine.graphics.size = engine.window.size
   glViewport(0, 0, width.GLsizei, height.GLsizei)
-  glClearColor(engine.graphics.color.x, engine.graphics.color.y, engine.graphics.color.z, engine.graphics.color.w)
+  glClearColor(color.x, color.y, color.z, color.w)
   glClear(GL_DEPTH_BUFFER_BIT or GL_COLOR_BUFFER_BIT)
 
   if engine.draw != nil:

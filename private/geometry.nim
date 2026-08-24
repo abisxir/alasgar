@@ -92,7 +92,7 @@ proc addChamferedBoxPolygon(
       x: transformedPoint.x,
       y: transformedPoint.y,
       z: transformedPoint.z,
-      normal: packSnorm4x8(faceNormal.x, faceNormal.y, faceNormal.z, 0'f32),
+      normal: normal4f(faceNormal.x, faceNormal.y, faceNormal.z, 0'f32),
       u: packUnorm16(u),
       v: packUnorm16(v),
       color: color,
@@ -211,7 +211,7 @@ proc chamferedBox*(
   discard g
   result.vertices.setLen(6 * 4 + 12 * 4 + 8 * 3)
   result.indices.setLen(6 * 2 * 3 + 12 * 2 * 3 + 8 * 3)
-  buildChamferedBox(result, box, bevel, shape.color4f(color.x, color.y, color.z, color.w), transform)
+  buildChamferedBox(result, box, bevel, pack.color4f(color.x, color.y, color.z, color.w), transform)
 
 proc cube*(g: ptr Graphics, box: Vec3=vec3(2), tiles: uint16=1, color: Vec4=vec4(1), transform: common.Mat4=mat4()): Geometry =
   discard g
@@ -223,7 +223,7 @@ proc cube*(g: ptr Graphics, box: Vec3=vec3(2), tiles: uint16=1, color: Vec4=vec4
     height: box.y,
     depth: box.z,
     tiles: tiles,
-    color: shape.color4f(color.x, color.y, color.z, color.w),
+    color: pack.color4f(color.x, color.y, color.z, color.w),
     transform: toShapeMat4(transform),
   ))
 
@@ -239,7 +239,7 @@ proc plane*(g: ptr Graphics, size: Vec2=vec2(1), tiles: uint16=1, color: Vec4=ve
     width: size.x,
     depth: size.y,
     tiles: tiles,
-    color: shape.color4f(color.x, color.y, color.z, color.w),
+    color: pack.color4f(color.x, color.y, color.z, color.w),
     transform: toShapeMat4(transform),
   ))
 
@@ -262,7 +262,7 @@ proc sphere*(
     radius: radius,
     slices: slices,
     stacks: stacks,
-    color: shape.color4f(color.x, color.y, color.z, color.w),
+    color: pack.color4f(color.x, color.y, color.z, color.w),
     transform: toShapeMat4(transform),
   ))
 
@@ -287,7 +287,7 @@ proc cylinder*(
     height: height,
     slices: slices,
     stacks: stacks,
-    color: shape.color4f(color.x, color.y, color.z, color.w),
+    color: pack.color4f(color.x, color.y, color.z, color.w),
     transform: toShapeMat4(transform),
   ))
 
@@ -312,7 +312,7 @@ proc torus*(
     ringRadius: ringRadius,
     sides: sides,
     rings: rings,
-    color: shape.color4f(color.x, color.y, color.z, color.w),
+    color: pack.color4f(color.x, color.y, color.z, color.w),
     transform: toShapeMat4(transform),
   ))
 
