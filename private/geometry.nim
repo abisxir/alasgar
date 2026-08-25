@@ -205,15 +205,15 @@ proc chamferedBox*(
   g: ptr Graphics,
   box: Vec3 = vec3(2),
   bevel: float32 = 0.1,
-  color: Vec4 = vec4(1),
+  color: Color = vec4(1),
   transform: common.Mat4 = mat4(),
 ): Geometry =
   discard g
   result.vertices.setLen(6 * 4 + 12 * 4 + 8 * 3)
   result.indices.setLen(6 * 2 * 3 + 12 * 2 * 3 + 8 * 3)
-  buildChamferedBox(result, box, bevel, pack.color4f(color.x, color.y, color.z, color.w), transform)
+  buildChamferedBox(result, box, bevel, color, transform)
 
-proc cube*(g: ptr Graphics, box: Vec3=vec3(2), tiles: uint16=1, color: Vec4=vec4(1), transform: common.Mat4=mat4()): Geometry =
+proc cube*(g: ptr Graphics, box: Vec3=vec3(2), tiles: uint16=1, color: Color=vec4(1), transform: common.Mat4=mat4()): Geometry =
   discard g
   let sizes = shape.boxSizes(tiles.uint32)
   var (geometry, buffer) = initGeometry(sizes)
@@ -223,14 +223,14 @@ proc cube*(g: ptr Graphics, box: Vec3=vec3(2), tiles: uint16=1, color: Vec4=vec4
     height: box.y,
     depth: box.z,
     tiles: tiles,
-    color: pack.color4f(color.x, color.y, color.z, color.w),
+    color: color,
     transform: toShapeMat4(transform),
   ))
 
   doAssert buffer.valid
   result = geometry
 
-proc plane*(g: ptr Graphics, size: Vec2=vec2(1), tiles: uint16=1, color: Vec4=vec4(1), transform: common.Mat4=mat4()): Geometry =
+proc plane*(g: ptr Graphics, size: Vec2=vec2(1), tiles: uint16=1, color: Color=vec4(1), transform: common.Mat4=mat4()): Geometry =
   discard g
   let sizes = shape.planeSizes(tiles.uint32)
   var (geometry, buffer) = initGeometry(sizes)
@@ -239,7 +239,7 @@ proc plane*(g: ptr Graphics, size: Vec2=vec2(1), tiles: uint16=1, color: Vec4=ve
     width: size.x,
     depth: size.y,
     tiles: tiles,
-    color: pack.color4f(color.x, color.y, color.z, color.w),
+    color: color,
     transform: toShapeMat4(transform),
   ))
 
@@ -251,7 +251,7 @@ proc sphere*(
   radius: float32=1,
   slices: uint16=32,
   stacks: uint16=16,
-  color: Vec4=vec4(1),
+  color: Color=vec4(1),
   transform: common.Mat4=mat4()
 ): Geometry =
   discard g
@@ -262,7 +262,7 @@ proc sphere*(
     radius: radius,
     slices: slices,
     stacks: stacks,
-    color: pack.color4f(color.x, color.y, color.z, color.w),
+    color: color,
     transform: toShapeMat4(transform),
   ))
 
@@ -275,7 +275,7 @@ proc cylinder*(
   height: float32=2,
   slices: uint16=32,
   stacks: uint16=1,
-  color: Vec4=vec4(1),
+  color: Color=vec4(1),
   transform: common.Mat4=mat4()
 ): Geometry =
   discard g
@@ -287,7 +287,7 @@ proc cylinder*(
     height: height,
     slices: slices,
     stacks: stacks,
-    color: pack.color4f(color.x, color.y, color.z, color.w),
+    color: color,
     transform: toShapeMat4(transform),
   ))
 
@@ -300,7 +300,7 @@ proc torus*(
   ringRadius: float32=0.3,
   sides: uint16=16,
   rings: uint16=32,
-  color: Vec4=vec4(1),
+  color: Color=vec4(1),
   transform: common.Mat4=mat4()
 ): Geometry =
   discard g
@@ -312,7 +312,7 @@ proc torus*(
     ringRadius: ringRadius,
     sides: sides,
     rings: rings,
-    color: pack.color4f(color.x, color.y, color.z, color.w),
+    color: color,
     transform: toShapeMat4(transform),
   ))
 

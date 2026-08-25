@@ -183,7 +183,7 @@ proc toColor*(color: string): Color =
         return entry[1]
 
   if size notin [3, 4, 6, 8]:
-    raise newException(ValueError, "Hex color must be RGB, RGBA, RRGGBB, or RRGGBBAA")
+    return 0xffffffff'u32
 
   var value = 0'u32
   for index in start..<color.len:
@@ -221,3 +221,6 @@ func toHex*(c: Color): string =
 
 converter stringToColor*(color: string): Color = toColor(color)
 converter vec4ToColor*(v: Vec4): Color = color4f(v.x, v.y, v.z, v.w)
+converter vec3ToColor*(v: Vec3): Color = color4f(v.x, v.y, v.z, 1.0)
+converter colorToVec4*(c: Color): Vec4 = unpackUnorm4x8(c)
+converter int64ToColor*(c: int64): Color = c.uint32

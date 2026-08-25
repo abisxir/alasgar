@@ -52,7 +52,7 @@ const
 
 proc load() =
   logo = graphics.compact(graphics.text.shape("It is a [red]text [white]shape!", transform=translate(vec3(-60, -10, 0))))
-  box = graphics.compact(graphics.chamferedBox(bevel=0.2), graphics.shader(vs, fs))
+  box = graphics.compact(graphics.chamferedBox(bevel=0.005, color="cream"), graphics.shader(vs, fs))
   camera = graphics.perspective(vec3(5, 5, 5), vec3(0, 0, 0), 60, 0.1, 100.0)
   graphics.color = "black"
 
