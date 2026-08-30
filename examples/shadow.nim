@@ -79,8 +79,6 @@ proc constructCamera() =
 
 proc load() =
   let
-    cameraTransform = lookAt(vec3(5.0, 4.0, 6.0), vec3(0.0, -0.15, 0.0), vec3(0.0, 1.0, 0.0))
-    lightTransform = lookAt(vec3(5.2, 7.0, 4.9), vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0))
     depthShader = graphics.shader(depthVs, depthFs)
     sceneShader = graphics.shader(sceneVs, sceneFs)
     cube = graphics.cube(color=vec4(1.0, 0.32, 0.22, 1.0))

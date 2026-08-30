@@ -141,14 +141,6 @@ func unpackSnorm4x8*(v: uint32): Vec4 =
 func normal4f*(a, b, c, d: float32): uint32 = packSnorm4x8(a, b, c, d)
 func normal4f*(value: Vec4): uint32 = packSnorm4x8(value)
 
-func color4f*(a, b, c, d: float32): uint32 = packUnorm4x8(a, b, c, d)
-func color4f*(value: Vec4): uint32 = packUnorm4x8(value)
-func color3f*(a, b, c: float32): uint32 = packUnorm4x8(a, b, c, 1.0)
-func color3f*(value: Vec3): uint32 = packUnorm4x8(value.x, value.y, value.z, 1.0)
-func color4b*(a, b, c, d: byte): uint32 =
-  a.uint32 or (b.uint32 shl 8) or (c.uint32 shl 16) or (d.uint32 shl 24)
-func color3b*(a, b, c: byte): uint32 = color4b(a, b, c, 0xff)
-
 when isMainModule:
   doAssert packUnorm8(0.0) == 0
   doAssert packUnorm8(0.5) == 128
@@ -208,10 +200,6 @@ when isMainModule:
   doAssert unpackSnorm4x8(0x4000817f'u32).w == 64.0'f32 * INV_127
 
   doAssert normal4f(1.0, -1.0, 0.0, 0.5) == packSnorm4x8(1.0, -1.0, 0.0, 0.5)
-  doAssert color4f(1.0, 0.5, 0.0, 1.0) == packUnorm4x8(1.0, 0.5, 0.0, 1.0)
-  doAssert color3f(1.0, 0.5, 0.0) == 0xff0080ff'u32
-  doAssert color4b(255, 128, 0, 255) == 0xff0080ff'u32
-  doAssert color3b(255, 128, 0) == 0xff0080ff'u32
 
   var r: float32 = 0.0
   while r <= 1.0:
