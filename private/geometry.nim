@@ -50,7 +50,7 @@ proc addChamferedBoxPolygon(
   geometry: var Geometry,
   points: openArray[Vec3],
   normal: Vec3,
-  color: uint32,
+  color: Color,
   transform: common.Mat4,
   vIndex: var int,
   iIndex: var uint16,
@@ -121,7 +121,7 @@ proc buildChamferedBox(
   geometry: var Geometry,
   box: Vec3,
   bevel: float32,
-  color: uint32,
+  color: Color,
   transform: common.Mat4,
 ) =
   let

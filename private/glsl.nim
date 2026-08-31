@@ -1000,6 +1000,14 @@ proc getDeclartion(n: NimNode): string =
 
   result = result & " "
 
+proc isModuleOwned(n: NimNode): bool =
+  # Nim deprecated `owner` without providing another way to inspect a symbol's
+  # declaring scope. Keep this check isolated while preserving the distinction
+  # between module globals and local symbols.
+  {.push warning[Deprecated]: off.}
+  result = n.owner().symKind == nskModule
+  {.pop.}
+
 proc gatherFunction(
   topLevelNode: NimNode,
   functions: var Table[string, string],
@@ -1012,7 +1020,7 @@ proc gatherFunction(
       # Looking for globals.
       let name = n.strVal
       if name notin glslGlobals and name notin glslFunctions and name notin globals:
-        if n.owner().symKind == nskModule:
+        if n.isModuleOwned:
           let impl = n.getImpl()
           if impl.kind notin {nnkIteratorDef, nnkProcDef, nnkFuncDef} and
               impl.kind != nnkNilLit and
