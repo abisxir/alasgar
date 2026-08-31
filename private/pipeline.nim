@@ -5,7 +5,6 @@ import sokol/shape
 import ports/opengl
 import shaders/basic as basic
 import shader
-import glsl
 import core
 import transform
 import camera

@@ -1,16 +1,60 @@
+## Shader runtime and the GLSL shader compiler.
+##
+## The main compiler was loosly based on shady, a nice work of treeform:
+## https://github.com/treeform/shady
+##
+## There was an issue with using the deprecated `owner` function in newer
+## versions of Nim. Since the existing implementation was mostly a shallow copy
+## with only a few small fixes, I asked DeepSeek to rewrite it as a new module
+## supporting only GL410 and ES300. Thus, the entire `glsl/*` implementation
+## was rewritten with DeepSeek.
+##
+## `toGLSL` converts a shader proc (Nim typed AST) into GLSL source plus
+## vertex attribute layout metadata (locations, sizes, instancing).
+##
+## The actual compiler lives in `private/glsl/`:
+##
+##  - `dsl.nim`      : DSL wrappers (Layout/Batch/Uniform, samplers).
+##  - `builtins.nim` : single source of truth for GLSL names.
+##  - `typeinfo.nim` : structural Nim->GLSL type mapping.
+##  - `scope.nim`    : symbol resolution without the deprecated `owner`.
+##  - `ir.nim`       : minimal intermediate representation.
+##  - `capture.nim`  : typed AST -> IR.
+##  - `emit.nim`     : IR -> GLSL source text.
+
 import hashes
 import strformat
-import strutils
+import std/strutils
 import tables
+import macros
 
 import ports/opengl
 import texture
 import utils
 import aljebra
+import camera
 
-import glsl
+import glsl/dsl
+import glsl/ir
+import glsl/typeinfo
+import glsl/capture
+import glsl/emit
+
+export aljebra, camera, dsl
 
 type
+  ShaderAttribute* = object
+    typeName*: string
+    index*: int
+    size*: int
+    instanced*: bool
+    rows*: int
+    columns*: int
+    columnSize*: int
+
+  ShaderLayout* = object
+    attrs*: seq[ShaderAttribute]
+
   ShaderValueKind = enum
     svUint, svInt, svFloat, svVec2, svVec3, svVec4, svMat3, svMat4, svSampler
   ShaderParam = object
@@ -245,3 +289,94 @@ proc use*(shader: var Shader) =
   glUseProgram(shader.program)
   for key, param in pairs(shader.params):
     update(shader, key, param)
+
+proc emitCameraStruct(res: var string, def: NimNode) =
+  ## Generates the CameraGLSL struct from the actual Nim type, so runtime
+  ## writes (`GLSL_CAMERA.SCREEN_SIZE` etc.) can never drift from the
+  ## shader source shape.
+  var objTy = def
+  while objTy.kind == nnkTypeDef:
+    objTy = objTy[2]
+  if objTy.kind == nnkObjectTy or objTy.kind == nnkRecList:
+    let rex = if objTy.kind == nnkRecList: objTy else: objTy[^1]
+    for prop in rex:
+      if prop.kind == nnkIdentDefs:
+        let nm = if prop[0].kind == nnkPostfix: prop[0][1]
+          else: prop[0]
+        let info = glslTypeOf(prop[1])
+        res.add "\t"
+        res.add info.glslName
+        res.add " "
+        res.add nm.strVal
+        res.add ";\n"
+  else:
+    res.add "\tmat4 VIEW;\n\tmat4 PROJECTION;\n\tmat4 VIEW_PROJECTION;\n" &
+      "\tmat4 INV_VIEW;\n\tmat4 INV_PROJECTION;\n\tmat4 INV_VIEW_PROJECTION;\n" &
+      "\tvec3 POSITION;\n\tfloat NEAR_PLANE;\n\tvec3 DIRECTION;\n" &
+      "\tfloat FAR_PLANE;\n\tfloat ASPECT;\n"
+  res.add "};\n"
+
+proc prelude(version: string, cameraImpl: NimNode): string =
+  result.add "#version " & version & "\n"
+  result.add "precision highp float;\n"
+  result.add "precision highp int;\n"
+  if version.endsWith("es"):
+    result.add "precision highp sampler2DArray;\n" &
+      "precision highp sampler2DArrayShadow;\n"
+  result.add "\n"
+  result.add "struct CameraGLSL {\n"
+  emitCameraStruct(result, cameraImpl)
+  result.add "uniform CameraGLSL GLSL_CAMERA;\n\n"
+
+proc layoutInline(fn: GlslFn): ShaderLayout =
+  ## ShaderLayout metadata from the captured layout/batch params.
+  for p in fn.params:
+    if p.io in {piLayoutIn, piLayoutOut}:
+      let t = p.glslType
+      let rows = t.rows
+      let columns = t.columns
+      let size = t.sizeBytes
+      result.attrs.add ShaderAttribute(
+        typeName: p.attrTypeName,
+        index: p.location,
+        size: size,
+        instanced: p.instanced,
+        rows: rows,
+        columns: columns,
+        columnSize: (if rows > 0: size div rows else: size),
+      )
+
+proc toGLSLInner(s, cameraImpl: NimNode,
+                scopeFiles: seq[string]): (string, ShaderLayout) =
+  let (unit, cap) = captureUnit(s, scopeFiles)
+  discard cap
+  var code = if OPENGL_SHADER_VERSION == "300 es":
+    prelude("300 es", cameraImpl)
+  elif OPENGL_SHADER_VERSION == "410":
+    prelude("410", cameraImpl)
+  else:
+    prelude($OPENGL_SHADER_VERSION, cameraImpl)
+  emitUnitBody(code, unit)
+  emitMain(code, unit)
+  result = (code, unit.fn.layoutInline)
+
+macro toGLSL*(s: typed, scope: static[seq[string]] = @[],
+              ): (string, ShaderLayout) =
+  ## Converts a shader proc into (glslSource, ShaderLayout).
+  ##
+  ## `scope` lists additional file base names (e.g. @["helpers.nim"])
+  ## whose helper procs may be compiled into the shader.
+  let impl = s.getImpl()
+  let camImpl = bindSym("CameraGLSL").getImpl()
+  result = newLit(toGLSLInner(impl, camImpl, scope))
+
+func `stride`*(layout: ShaderLayout): int =
+  for data in layout.attrs:
+    result += data.size
+
+func `count`*(layout: ShaderLayout): int = layout.attrs.len
+func `instanced`*(layout: ShaderLayout): bool =
+  for data in layout.attrs:
+    if data.instanced:
+      return true
+  false

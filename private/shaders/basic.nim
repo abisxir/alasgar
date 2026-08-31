@@ -1,4 +1,4 @@
-import ../glsl
+import ../shader
 
 proc vs*(
   IN_POSITION: Layout[0, Vec3],
