@@ -17,7 +17,25 @@ func `+`*(a, b: Geometry): Geometry =
   result.vertices = concat(a.vertices, b.vertices)
   result.indices = concat(a.indices, bIndicesNormalized)
 
-func merge*(a, b: Geometry): Geometry = a + b
+func `+=`*(a: var Geometry, b: Geometry) =
+  a = a + b
+
+func merge*(a, b: Geometry): Geometry =
+  ## Merges the given geometries
+  a + b
+
+func transform*(a: var Geometry, model: common.Mat4): Geometry =
+  ## Transform the vertex positions and normals in-place and return the geometry.
+  let normalModel = transpose(inverse(model))
+  for v in mitems(a.vertices):
+    let
+      position = model * vec4(v.x, v.y, v.z, 1'f32)
+      normal = normalize((normalModel * vec4(unpackSnorm4x8(v.normal).xyz, 0'f32)).xyz)
+    v.x = position.x
+    v.y = position.y
+    v.z = position.z
+    v.normal = normal4f(normal.x, normal.y, normal.z, 0'f32)
+  result = a
 
 func toShapeMat4(transform: common.Mat4): shape.Mat4 =
   shape.Mat4(m: [
