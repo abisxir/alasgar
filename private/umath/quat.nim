@@ -178,7 +178,8 @@ proc fromToRotation*(a, b: Vec3): Quat =
   let
     p0 = normalize(a)
     p1 = normalize(b)
-  if p0 == -1 * p1:
+    dot01 = dot(p0, p1)
+  if dot01 < -0.9999:
     var mostOrthogonal = vec3(1, 0, 0)
     if abs(p0.y) < abs(p0.x):
       mostOrthogonal = vec3(0, 1, 0)

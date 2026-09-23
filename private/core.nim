@@ -67,6 +67,8 @@ type
       ## Whether pressing Escape or Q requests application shutdown, when platform supports
     msaa*: int
       ## Multisample anti-aliasing sample count, for example 4 for 4× MSAA.
+    blend*: bool
+      ## Blend alpha chennel or not, default to blend
   Runtime* = object
     ## Runtime state owned by the engine and accessed through `runtime`.
     frames: int
@@ -89,7 +91,7 @@ type
     vsync: bool
 
 var
-  engine = Engine(vsync: true, settings: Settings(fullscreen: false, exitOnEscape: false, msaa: 1))
+  engine = Engine(vsync: true, settings: Settings(fullscreen: false, exitOnEscape: false, msaa: 1, blend: true))
 
 when defined(android):
   var
@@ -110,6 +112,11 @@ proc frameCallback() {.cdecl.} =
   engine.runtime.stats = Stats()
 
   glEnable(GL_DEPTH_TEST)
+
+  if engine.settings.blend:
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
   let
     width = sapp.width()
     height = sapp.height()

@@ -28,9 +28,13 @@ func color4v*(c: Color): Vec4 = unpackUnorm4x8(c)
 func color4v*(r, g, b, a: uint8): Vec4 = color4v(color(r, g, b, a))
 func color4v*(r, g, b: uint8): Vec4 = color4v(r, g, b, 0xff)
 func rgb*(r, g, b: byte): Color = color(r, g, b)
+func rgb*(r: byte): Color = color(r, r, r)
 func rgba*(r, g, b, a: byte): Color = color(r, g, b, a)
+func rgba*(r: byte): Color = color(r, r, r, r)
 func rgb*(r, g, b: float32): Color = color(r, g, b)
+func rgb*(r: float32): Color = color(r, r, r)
 func rgba*(r, g, b, a: float32): Color = color(r, g, b, a)
+func rgba*(r: float32): Color = color(r, r, r, r)
 
 const webColorMap* = {
   "aliceblue": rgb(0xf0, 0xf8, 0xff),
