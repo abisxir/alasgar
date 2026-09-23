@@ -1,4 +1,4 @@
-import math
+import std/[math, strformat]
 
 type
   Color* = uint32
@@ -62,3 +62,6 @@ func `a`*(v: Vec4): float32 = v.w
 func `rgb`*(v: Vec4|Vec3): Vec3 = Vec3(x: v.x, y: v.y, z: v.z)
 func `rgba`*(v: Vec4): Vec4 = Vec4(x: v.x, y: v.y, z: v.z, w: v.w)
 func `rgba`*(v: Vec3): Vec4 = Vec4(x: v.x, y: v.y, z: v.z, w: 1.0)
+proc `repr`*(v: Vec2): string = &"vec2({v.x:.4f}'f32, {v.y:.4f}'f32)"
+proc `repr`*(v: Vec3): string = &"vec3({v.x:.4f}'f32, {v.y:.4f}'f32, {v.z:.4f}'f32)"
+proc `repr`*(v: Vec4|Quat): string = &"vec4({v.x:.4f}'f32, {v.y:.4f}'f32, {v.z:.4f}'f32, {v.w:.4f}'f32)"
