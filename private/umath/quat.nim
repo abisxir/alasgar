@@ -1,8 +1,8 @@
 import math
 import common, vec3, vec4
 
-func quat*(v: Vec3): Quat = Quat(x: v.x, y: v.y, z: v.z, w: 0.0)
-func quat*(x, y, z, w: float32): Quat = Quat(x: x, y: y, z: z, w: w)
+func quat*[T: SomeNumber](v: GVec3[T]): Quat = Quat(x: v.x.float32, y: v.y.float32, z: v.z.float32, w: 0.0)
+func quat*[X: SomeNumber, Y: SomeNumber, Z: SomeNumber, W: SomeNumber](x: X, y: Y, z: Z, w: W): Quat = Quat(x: x.float32, y: y.float32, z: z.float32, w: w.float32)
 func quat*(w: float32): Quat = Quat(x: 0.0, y: 0.0, z: 0.0, w: w)
 func quat*(): Quat = Quat(x: 0.0, y: 0.0, z: 0.0, w: 1.0)
 func quat*(v: openArray[float32], offset: int): Quat = quat(v[offset], v[offset + 1], v[offset + 2], v[offset + 3])
