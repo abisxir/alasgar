@@ -75,6 +75,16 @@ func stride(layout: ShaderLayout, instanced: bool): int =
     if attr.instanced == instanced:
       result += attr.size
 
+func bufferData[V](data: openArray[V]): pointer =
+  ## Data pointer for a vertex or index upload.
+  ##
+  ## Empty buffers upload zero bytes, for which the pointer is unused, so it is
+  ## reported as `nil` instead of indexing `data[0]` out of bounds.
+  if data.len > 0:
+    cast[pointer](unsafeAddr data[0])
+  else:
+    nil
+
 proc setupAttributes(layout: ShaderLayout, instanced: bool) =
   let stride = layout.stride(instanced).GLsizei
   var offset = 0
@@ -100,7 +110,7 @@ proc pipeline*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], in
 
   glGenBuffers(1, result.vbo.addr)
   glBindBuffer(GL_ARRAY_BUFFER, result.vbo)
-  glBufferData(GL_ARRAY_BUFFER, (len(vertices) * sizeof(V)).GLsizeiptr, cast[pointer](addr vertices[0]), GL_STATIC_DRAW)
+  glBufferData(GL_ARRAY_BUFFER, (len(vertices) * sizeof(V)).GLsizeiptr, bufferData(vertices), GL_STATIC_DRAW)
 
   setupAttributes(result.shader.layout, instanced = false)
 
@@ -112,7 +122,7 @@ proc pipeline*[V, I](g: ptr Graphics, shader: Shader, vertices: openArray[V], in
 
   glGenBuffers(1, result.ibo.addr)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ibo)
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(indices) * sizeof(I)).GLsizeiptr, cast[pointer](addr indices[0]), GL_STATIC_DRAW)
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(indices) * sizeof(I)).GLsizeiptr, bufferData(indices), GL_STATIC_DRAW)
 
   glBindVertexArray(0)
   glBindBuffer(GL_ARRAY_BUFFER, 0)
@@ -134,7 +144,7 @@ proc compact*(g: ptr Graphics, geometry: Geometry, shader: Shader): Pipeline =
 
   glGenBuffers(1, result.vbo.addr)
   glBindBuffer(GL_ARRAY_BUFFER, result.vbo)
-  glBufferData(GL_ARRAY_BUFFER, (len(geometry.vertices) * sizeof(Vertex)).GLsizeiptr, cast[pointer](geometry.vertices[0].addr), GL_STATIC_DRAW)
+  glBufferData(GL_ARRAY_BUFFER, (len(geometry.vertices) * sizeof(Vertex)).GLsizeiptr, bufferData(geometry.vertices), GL_STATIC_DRAW)
 
   const
     stride = sizeof(shape.Vertex).GLsizei
@@ -160,7 +170,7 @@ proc compact*(g: ptr Graphics, geometry: Geometry, shader: Shader): Pipeline =
 
   glGenBuffers(1, result.ibo.addr)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ibo)
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(geometry.indices) * sizeof(uint16)).GLsizeiptr, cast[pointer](geometry.indices[0].addr), GL_STATIC_DRAW)
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, (len(geometry.indices) * sizeof(uint16)).GLsizeiptr, bufferData(geometry.indices), GL_STATIC_DRAW)
 
   glBindVertexArray(0)
   glBindBuffer(GL_ARRAY_BUFFER, 0)
@@ -200,6 +210,6 @@ proc render*[T](g: ptr Graphics, p: var Pipeline, camera: Camera, instances: ope
   setCameraData(g, p.shader, camera)
   glBindVertexArray(p.vao)
   glBindBuffer(GL_ARRAY_BUFFER, p.instanceVbo)
-  glBufferData(GL_ARRAY_BUFFER, (len(instances) * sizeof(T)).GLsizeiptr, cast[pointer](addr instances[0]), GL_DYNAMIC_DRAW)
+  glBufferData(GL_ARRAY_BUFFER, (len(instances) * sizeof(T)).GLsizeiptr, bufferData(instances), GL_DYNAMIC_DRAW)
   glDrawElementsInstanced(GL_TRIANGLES, p.count.GLsizei, p.indexType, cast[pointer](0), len(instances).GLsizei)
   runtime.recordDraw(1, p.vertexCount * len(instances), p.count * len(instances), len(instances))

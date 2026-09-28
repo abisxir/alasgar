@@ -43,6 +43,6 @@ import private/geometry
 import private/debug
 import private/utils
 import private/texture
-import private/text
+import private/text/[renderer as text, font]
 
-export core, shader, glsl, aljebra, transform, pipeline, camera, geometry, debug, utils, texture, text
+export core, shader, glsl, aljebra, transform, pipeline, camera, geometry, debug, utils, texture, text, font

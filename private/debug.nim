@@ -2,7 +2,7 @@ import std/[strformat, strutils]
 
 import aljebra
 import core
-import text
+import text/renderer
 
 func colorByte(value: float32): int =
   int(max(0.0'f32, min(1.0'f32, value)) * 255.0'f32 + 0.5'f32)
