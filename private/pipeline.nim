@@ -178,7 +178,10 @@ proc compact*(g: ptr Graphics, geometry: Geometry, shader: Shader): Pipeline =
 
   return result
 
-proc compact*(g: ptr Graphics, geometry: Geometry): Pipeline = compact(g, geometry, g.shader(basic.vs, basic.fs))
+proc compact*(g: ptr Graphics, geometry: Geometry): Pipeline =
+  var basic = g.shader(basic.vs, basic.fs)
+  basic.set("MODEL", Transform())
+  compact(g, geometry, basic)
 
 proc setCameraData(g: ptr Graphics, shader: var Shader, camera: Camera) =
   let

@@ -82,10 +82,20 @@ cd alasgar/examples
 nim c -r text.nim
 ```
 
+## Where was AI used?
+
+I wrote the engine's core functionality by hand, without AI assistance, except for shader compilation. Here is where AI has helped:
+
+- **Examples:** AI generated some example code. Almost all of it was poor quality, and I revised it.
+- **Documentation:** I wrote the README myself, then used AI to correct the grammar and improve the wording.
+- **Debugging:** AI helped investigate some issues and identify incorrect values passed to shaders, saving me time inspecting GPU state and tracing those values manually.
+- **Shader compilation:** My initial implementation was a rough adaptation of [shady](https://github.com/treeform/shady), modified to work with the engine. After many improvements, I asked DeepSeek Flash to rewrite it and consolidate everything into a single package. It still needs work, but it is not a priority right now.
+
 Table of Contents
 =================
 
 * [Window and scene creation](#window-and-scene-creation)  
+* [First cube](#first-cube)
 * [Dependencies](#deps)
 
 Window and scene creation
@@ -119,6 +129,41 @@ When you create a window by default it runs in window mode, you can easily enabl
 # Creates a window named Step1 and enables fullscreen mode.
 window(800, 600, "Step1", load, draw, cleanup, fullscreen=true)
 ```
+
+First cube
+==========
+Here is a simple example that renders a cube with alasgar:
+```nim
+import alasgar
+
+var
+  box: Pipeline
+    ## A pipeline bundles the mesh, shader, and rendering resources.
+    ## You must release it explicitly; the engine does not do this for you.
+
+proc load() =
+  # Create a compact pipeline using alasgar's built-in basic shader.
+  box = graphics.compact(graphics.cube(color="cream"))
+  # Set the window's background color.
+  graphics.color = "black"
+
+proc draw() =
+  # Create a perspective camera. Recreating it each frame is inexpensive.
+  # You can also store it globally and update it when the window is resized.
+  let camera = graphics.perspective(vec3(5, 5, 5), vec3(0, 0, 0), 60, 0.1, 100.0)
+
+  # Render the cube using the camera. By default, it is at the origin with a scale of 1.
+  graphics.render(box, camera)
+
+proc cleanup() =
+  # Destroy the pipeline to release its shader and associated rendering resources.
+  destroy(box)
+
+# Enable 4x multisample anti-aliasing (MSAA) for smoother edges.
+settings.msaa = 4
+window(800, 600, "My Cube", load, draw, cleanup)
+```
+This gives you a plain, bright cube in the center of the window—a starting point for more interesting scenes. To keep resource management lightweight, alasgar deliberately avoids Nim's `ref object` types for these resources. Release them explicitly rather than relying on garbage collection.
 
 Dependencies
 ============
