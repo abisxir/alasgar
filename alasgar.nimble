@@ -1,19 +1,17 @@
 # Package
 
-version     = "0.4.4"
+version     = "1.0.0"
 author      = "Abi Mohammadi"
 description = "Game Engine"
 license     = "MIT"
 
 # Directory configuration
-installDirs = @["alasgar", "assets"]
+installDirs = @["alasgar", "private", "assets"]
 installFiles = @["alasgar.nim"]
 
 requires "nim >= 2.2.0"
 
 # Dependencies
-requires "checksums == 0.2.1"
-requires "chroma == 0.2.7"
-requires "stb_image == 2.5"
-requires "jnim == 0.5.2" # For android target
-requires "https://github.com/yglukhov/android"
+requires "sokol == 0.6.0"
+
+# monogram font used as default bitmap font: https://itch.io/t/214662/monogram-a-free-monospace-pixel-font

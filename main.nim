@@ -1,68 +1,75 @@
+import math
+
 import alasgar
 
-settings.exitOnEsc = true
-# Creates a window named Step4
-window("Alasgar", 800, 600)
-   
-let 
-    # Creates a new scene
-    scene = newScene()
-    # Creates the camera entity
-    cameraEntity = newEntity(scene, "Camera")
+var
+  logo: Pipeline
+  camera: Camera
+  box: Pipeline
 
-# Sets the background color
-scene.background = parseHex("909090")
-scene.ambient = parseHex("ffffff")
+proc vs(
+  IN_POSITION: Layout[0, Vec3],
+  IN_NORMAL: Layout[1, Vec3],
+  IN_COLOR: Layout[3, Vec4],
+  MODEL: Uniform[Mat4],
+  VS_POSITION: var Vec3,
+  VS_NORMAL: var Vec3,
+  VS_COLOR: var Vec4,
+) =
+  let
+    worldPosition = MODEL * vec4(IN_POSITION, 1)
+    worldNormal = MODEL * vec4(IN_NORMAL, 0)
 
-# Sets the camera position
-cameraEntity.transform.position = vec3(2)
-# Adds a perspective camera component to entity
-add(
-    cameraEntity, 
-    newPerspectiveCamera(
-        75, 
-        runtime.ratio, 
-        0.1, 
-        100.0, 
-        vec3(0) - cameraEntity.transform.position
-    )
-)
-addCameraController(cameraEntity)
-# Makes the camera entity child of the scene
-add(scene, cameraEntity)
+  gl_Position = GLSL_CAMERA.PROJECTION * GLSL_CAMERA.VIEW * worldPosition
+  VS_POSITION = worldPosition.xyz
+  VS_NORMAL = worldNormal.xyz
+  VS_COLOR = IN_COLOR
 
-# Creates the cube entity, by default position is 0, 0, 0
-let cubeEntity = newEntity(scene, "Cube")
-# Add a cube mesh component to entity
-add(cubeEntity, newCubeMesh())
-# Adds a script component to the cube entity
-program(cubeEntity, proc(script: ScriptComponent) =
-    let t = 2 * runtime.age
-    # Rotates the cube using euler angles
-    script.transform.euler = vec3(
-        sin(t),
-        cos(t),
-        sin(t) * cos(t),
-    )
-)
-# Makes the cube enity child of the scene
-add(scene, cubeEntity)
-# Scale it up
-cubeEntity.transform.scale = vec3(2)
+proc fs(
+  VS_POSITION: Vec3,
+  VS_NORMAL: Vec3,
+  VS_COLOR: Vec4,
+  LIGHT_POSITION: Uniform[Vec3],
+  LIGHT_COLOR: Uniform[Vec3],
+  OUT_COLOR: var Layout[0, Vec4],
+) =
+  let
+    normal = normalize(VS_NORMAL)
+    lightDirection = normalize(LIGHT_POSITION - VS_POSITION)
+    diffuse = max(dot(normal, lightDirection), 0.0)
+    brightness = 0.18 + diffuse * 0.82
+    color = VS_COLOR.xyz * LIGHT_COLOR * brightness
 
-# Creates the light entity
-let lightEntity = newEntity(scene, "Light")
-# Sets light position
-lightEntity.transform.position = vec3(10)
-# Adds a point light component to entity
-add(
-    lightEntity, 
-    newPointLightComponent()
-)
-# Makes the light entity child of the scene
-add(scene, lightEntity)
+  OUT_COLOR = vec4(
+    color,
+    VS_COLOR.w,
+  )
 
-# Renders an empty scene
-render(scene)
-# Runs game main loop
-loop()
+const
+  LightPosition = vec3(3.0, 4.0, 2.0)
+  LightColor = vec3(1.0, 0.92, 0.78)
+
+proc load() =
+  logo = graphics.compact(graphics.text.shape("It is a [bold #558899]text[/] [italic]shape![/italic]", transform=translate(vec3(-60, -10, 0))))
+  box = graphics.compact(graphics.chamferedBox(bevel=0.005, color="cream"), graphics.shader(vs, fs))
+  camera = graphics.perspective(vec3(5, 5, 5), vec3(0, 0, 0), 60, 0.1, 100.0)
+  graphics.color = "black"
+
+proc draw() =
+  let
+    speed = 20.0
+    r = runtime.age * runtime.delta * speed
+  logo.shader.set("MODEL", Transform(scale:vec3(0.1), rotation: fromEuler(r, r, 0.0)))
+  graphics.render(logo, camera)
+  box.shader.set("LIGHT_POSITION", LightPosition)
+  box.shader.set("LIGHT_COLOR", LightColor)
+  #box.shader.set("MODEL", Transform(rotation: fromEuler(r, r, 0.0)))
+  graphics.render(box, camera)
+  graphics.debug()
+
+proc cleanup() =
+  destroy(logo)
+
+settings.exitOnEscape = true
+settings.msaa = 4
+window(800, 600, "My Game", load, draw, cleanup)

@@ -1,0 +1,32 @@
+import math
+
+import alasgar
+
+var
+  logo: Pipeline
+  camera: Camera
+
+proc load() =
+  logo = graphics.compact(
+    graphics.text.shape(
+      "It is a [gold]text [white]shape[red]!",
+      transform=translate(vec3(-60, -10, 0))
+    )
+  )
+  camera = graphics.perspective(vec3(5, 5, 5), vec3(0, 0, 0), 60, 0.1, 100.0)
+  graphics.color = vec4(0.0, 0.0, 0.0, 1.0)
+
+proc draw() =
+  let
+    speed = 20.0
+    r = runtime.age * runtime.delta * speed
+  logo.shader.set("MODEL", Transform(scale:vec3(0.1), rotation: fromEuler(r, r, 0.0)))
+  graphics.render(logo, camera)
+  graphics.text.draw("[lime]ALASGAR [white]is running [gold]:)", vec2(8, 8))
+
+proc cleanup() =
+  destroy(logo)
+
+settings.exitOnEscape = true
+settings.msaa = 4
+window(800, 600, "Text sample", load, draw, cleanup)

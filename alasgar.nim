@@ -1,99 +1,48 @@
-import sugar
-import sequtils
-import strutils
-import alasgar/core
-import alasgar/scene
-import alasgar/resources/image
-import alasgar/resources/obj
-import alasgar/resources/gltf
-import alasgar/components/camera
-import alasgar/components/catmull
-import alasgar/components/interactive
-import alasgar/components/collision
-import alasgar/components/line
-import alasgar/components/light
-import alasgar/components/script
-import alasgar/components/sprite
-import alasgar/components/sound
-import alasgar/components/timer
-import alasgar/geometry/cube
-import alasgar/geometry/grid
-import alasgar/geometry/sphere
-import alasgar/geometry/plane
-import alasgar/engine
-import alasgar/logger
-import alasgar/utils
-import alasgar/system
-import alasgar/physics/collision as physics_collision
-import alasgar/physics/ray as physics_ray
-import alasgar/physics/tools as physics_tools
-import alasgar/misc/easing
-import alasgar/shaders/base
-import alasgar/shaders/compile
-import alasgar/shaders/common
-import alasgar/effects/fxaa
-import alasgar/effects/ssao
-import alasgar/effects/hbao
-import alasgar/effects/bloom
-import alasgar/config
-import alasgar/render/gpu
-import alasgar/misc/camera as misc_camera
+## Alasgar engine public API.
+##
+## Import this module from applications and examples to access the engine's
+## public types and helpers from one place:
+##
+## ```nim
+## import alasgar
+## ```
+##
+## The module re-exports the main engine API:
+##
+## - `core`: window, graphics, runtime, and engine state.
+## - `aljebra`: vectors, matrices, quaternions, and math helpers.
+## - `transform`: position, rotation, scale, and matrix conversion.
+## - `camera`: perspective and orthographic camera construction.
+## - `shader` and `glsl`: shader creation, uniforms, and Nim-to-GLSL helpers.
+## - `pipeline`: vertex/index buffer setup and rendering.
+##
+## Basic use:
+##
+## ```nim
+## import alasgar
+##
+## proc load() = discard
+## proc draw() = discard
+## proc cleanup() = discard
+## window(800, 600, "My Game", load, draw, cleanup)
+## ```
+##
+## Math types are available directly after importing `alasgar`:
+##
+## ```nim
+## let position = vec3(1, 2, 3)
+## let color = vec4(1, 0, 0, 1)
+## ```
+import private/core
+import private/shader
+import private/aljebra
+import private/transform
+import private/pipeline
+import private/camera
+import private/geometry
+import private/debug
+import private/utils
+import private/texture
+import private/text/[renderer as text, font]
 
-
-export core,
-       system,
-       scene,
-       image,
-       camera,
-       line,
-       light,
-       script,
-       sprite,
-       sound,
-       timer,
-       interactive,
-       collision,
-       cube,
-       sphere,
-       plane,
-       grid,
-       obj,
-       logger,
-       utils,
-       color,
-       engine,
-       physics_collision,
-       physics_ray,
-       physics_tools,
-       helpers,
-       image,
-       quat,
-       mat4,
-       vec2,
-       vec3,
-       vec4,
-       easing,
-       catmull,
-       sugar,
-       sequtils,
-       strutils,
-       base,
-       compile,
-       common,
-       fxaa,
-       bloom,
-       ssao,
-       hbao,
-       config,
-       gpu,
-       misc_camera
-
-
-proc window*(title: string, width, height: int, fullscreen: bool=false, resizable: bool=false) =
-    initEngine(
-        width,
-        height,
-        title=title,
-        fullscreen=fullscreen,
-        resizable=resizable,
-    )
+export core, shader, glsl, aljebra, transform, pipeline, camera, geometry, debug, utils, texture, text, font
