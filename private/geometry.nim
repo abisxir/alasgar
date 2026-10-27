@@ -5,6 +5,8 @@ import sokol/shape
 import aljebra
 import core
 
+export shape.Vertex
+
 type
   Geometry* = object
     vertices*: seq[shape.Vertex]

@@ -22,8 +22,7 @@
 ## remain valid for the lifetime of the process and are managed by the engine;
 ## callers must not free them.
 
-import std/strformat
-import std/times
+import std/[strformat, times]
 
 import sokol/app as sapp
 import ports/opengl
@@ -44,6 +43,7 @@ type
   Graphics* = object
     ## Graphics state owned by the engine and accessed through `graphics`.
     size: UVec2
+    maxTextureSize: int
     onWindowResizeCallbacks: seq[Callback]
     onLoadCallbacks: seq[Callback]
     onCleanupCallbacks: seq[Callback]
@@ -142,14 +142,18 @@ proc initCallback() {.cdecl.} =
   initOpenGL()
   echo "* Context initialized!"
 
+  var limit: GLint
+  glGetIntegerv(GL_MAX_TEXTURE_SIZE, addr limit)
+  engine.graphics.maxTextureSize = limit.int
+
   engine.window.size = uvec2(sapp.width().uint32, sapp.height().uint32)
   engine.graphics.size = engine.window.size
   engine.stopped = false
 
   if engine.load != nil:
-    engine.load()
     for cb in engine.graphics.onLoadCallbacks:
       cb()
+    engine.load()
 
 
 proc eventCallback(event: ptr sapp.Event) {.cdecl.} =
@@ -276,6 +280,7 @@ proc `stats`*(runtime: ptr Runtime): Stats =
   ## to `recordDraw`.
   runtime.stats
 
+
 proc recordDraw*(r: ptr Runtime, drawCalls, vertices, indices, instances: int) =
   ## Add rendering work to the current frame's statistics.
   ##
@@ -288,6 +293,20 @@ proc recordDraw*(r: ptr Runtime, drawCalls, vertices, indices, instances: int) =
   r.stats.instances += instances
   if instances > 1:
     r.stats.batch += 1
+
+
+proc `maxTextureSize`*(g: ptr Graphics): int =
+  ## Return the largest width or height a 2D texture may use, in pixels.
+  ##
+  ## The engine caches `GL_MAX_TEXTURE_SIZE` when the graphics context is
+  ## initialized, so the value is zero before then. GLES 3 and WebGL 2
+  ## guarantee at least 2048; desktop drivers commonly report 16384.
+  ##
+  ## Example:
+  ## ```nim
+  ## let limit = graphics.maxTextureSize
+  ## ```
+  g.maxTextureSize
 
 
 proc `size`*(g: ptr Graphics): UVec2 =

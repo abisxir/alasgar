@@ -98,7 +98,7 @@ proc draw() =
   updateInstances(spherePosition)
   cube.shader.set("LIGHT_POSITION", spherePosition)
   graphics.render(cube, camera, instances)
-  sphere.shader.set("MODEL", Transform(position: spherePosition).world)
+  sphere.shader.set("MODEL", Transform(position: spherePosition))
   graphics.render(sphere, camera)
   graphics.debug()
 

@@ -76,3 +76,4 @@ nimbledeps
 examples/text
 examples/light
 tests/glsl_checks/
+examples/font

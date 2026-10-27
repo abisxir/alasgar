@@ -78,7 +78,7 @@ proc draw() =
   for item in shapes.mitems:
     let spin = item.spin * runtime.age
     item.transform.rotation = fromEuler(spin.x, spin.y, spin.z)
-    item.pipeline.shader.set("MODEL", item.transform.world)
+    item.pipeline.shader.set("MODEL", item.transform)
     item.pipeline.shader.set("TINT", item.color)
     item.pipeline.shader.set("ALBEDO", checkerSampler, 0)
     graphics.render(item.pipeline, camera)

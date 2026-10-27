@@ -29,16 +29,9 @@ import tables
 import macros
 
 import ports/opengl
-import texture
-import utils
-import aljebra
-import camera
+import texture, utils, aljebra, camera, transform
 
-import glsl/dsl
-import glsl/ir
-import glsl/typeinfo
-import glsl/capture
-import glsl/emit
+import glsl/[dsl, ir, typeinfo, capture, emit]
 
 export aljebra, camera, dsl
 
@@ -257,6 +250,8 @@ proc set*(shader: var Shader, key: string, value: Mat4) =
     kind: svMat4,
     mat4Val: value
   )
+
+proc set*(shader: var Shader, key: string, value: Transform) = shader.set(key, value.world)
 
 proc set*(shader: var Shader, key: string, value: Sampler, slot: int) =
   shader.params[key] = ShaderParam(

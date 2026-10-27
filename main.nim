@@ -4,7 +4,6 @@ import alasgar
 
 var
   logo: Pipeline
-  t = Transform(scale:vec3(1.0))
   camera: Camera
   box: Pipeline
 
@@ -51,7 +50,7 @@ const
   LightColor = vec3(1.0, 0.92, 0.78)
 
 proc load() =
-  logo = graphics.compact(graphics.text.shape("It is a [red]text [white]shape!", transform=translate(vec3(-60, -10, 0))))
+  logo = graphics.compact(graphics.text.shape("It is a [bold #558899]text[/] [italic]shape![/italic]", transform=translate(vec3(-60, -10, 0))))
   box = graphics.compact(graphics.chamferedBox(bevel=0.005, color="cream"), graphics.shader(vs, fs))
   camera = graphics.perspective(vec3(5, 5, 5), vec3(0, 0, 0), 60, 0.1, 100.0)
   graphics.color = "black"
@@ -60,12 +59,11 @@ proc draw() =
   let
     speed = 20.0
     r = runtime.age * runtime.delta * speed
-  t.rotation = fromEuler(r, r, 0.0)
-  logo.shader.set("MODEL", t.world)
-  #graphics.render(logo, camera)
+  logo.shader.set("MODEL", Transform(scale:vec3(0.1), rotation: fromEuler(r, r, 0.0)))
+  graphics.render(logo, camera)
   box.shader.set("LIGHT_POSITION", LightPosition)
   box.shader.set("LIGHT_COLOR", LightColor)
-  box.shader.set("MODEL", t.world)
+  #box.shader.set("MODEL", Transform(rotation: fromEuler(r, r, 0.0)))
   graphics.render(box, camera)
   graphics.debug()
 

@@ -4,7 +4,6 @@ import alasgar
 
 var
   logo: Pipeline
-  t = Transform(scale:vec3(0.1))
   camera: Camera
 
 proc load() =
@@ -21,8 +20,7 @@ proc draw() =
   let
     speed = 20.0
     r = runtime.age * runtime.delta * speed
-  t.rotation = fromEuler(r, r, 0.0)
-  logo.shader.set("MODEL", t.world)
+  logo.shader.set("MODEL", Transform(scale:vec3(0.1), rotation: fromEuler(r, r, 0.0)))
   graphics.render(logo, camera)
   graphics.text.draw("[lime]ALASGAR [white]is running [gold]:)", vec2(8, 8))
 
