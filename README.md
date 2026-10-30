@@ -169,3 +169,6 @@ Dependencies
 ============
 ## sokol
 The engine relies on [sokol](https://github.com/floooh/sokol-nim) for window creation and input handling but does not use anything further. When the window is created, it creates the OpenGL context and works directly on top of OpenGL, not sokol functions and paradigms for rendering.
+
+Sokol is asked for the OpenGL backend (`-d:gl`, already enabled by default in `config.nims`), so the same rendering path is used on Windows, macOS, and Linux.
+

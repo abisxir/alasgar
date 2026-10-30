@@ -215,8 +215,10 @@ proc window*(
     sampleCount: engine.settings.msaa.int32,
     swapInterval: (if engine.vsync: 1 else: 0),
     windowTitle: title.cstring,
-    glMajorVersion: OPENGL_MAJOR_VERSION,
-    glMinorVersion: OPENGL_MINOR_VERSION
+    gl: GlDesc(
+      majorVersion: OPENGL_MAJOR_VERSION,
+      minorVersion: OPENGL_MINOR_VERSION,
+    )
   )
 
   when not defined(android):

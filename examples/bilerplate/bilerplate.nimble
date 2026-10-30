@@ -44,7 +44,13 @@ proc isUsablePackagePath(packageName, path: string): bool =
   result = path.len > 0 and dirExists(path / packageName)
   if result and packageName == "sokol":
     let appModule = path / packageName / "app.nim"
-    result = fileExists(appModule) and readFile(appModule).contains("glMajorVersion")
+    if fileExists(appModule):
+      # sokol-nim exposes GL version selection as `Desc.gl: GlDesc` since commit
+      # 6754adc (2025-12-02); older revisions used flat `Desc.glMajorVersion`.
+      let appSource = readFile(appModule)
+      result = appSource.contains("GlDesc") or appSource.contains("glMajorVersion")
+    else:
+      result = false
 
 proc packagePathSwitch(packageName: string): string =
   let nimblePathOutput = staticExec(&"nimble path {packageName} 2>/dev/null || true")
