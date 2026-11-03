@@ -33,6 +33,13 @@ export aljebra, sapp.Event
 when (defined(windows) or defined(macosx)) and not defined(gl):
   {.error: "The current renderer still uses raw OpenGL; compile with -d:gl when using Sokol on this platform.".}
 
+when defined(emscripten):
+  # Sokol schedules browser frames and returns immediately. Keep Nim's
+  # globals alive instead of letting ARC destroy callbacks and resources
+  # when the main module finishes, before the first animation frame.
+  proc emscripten_exit_with_live_runtime() {.importc, cdecl, header: "<emscripten/emscripten.h>", noreturn.}
+
+
 type
   Callback = proc ()
   InputCallback = proc (e: ptr sapp.Event)
@@ -193,10 +200,11 @@ proc window*(
   ## per frame after the color and depth buffers have been cleared. During
   ## shutdown, callbacks registered with `onCleanup` run before `cleanup`.
   ##
-  ## On non-Android targets this procedure enters Sokol's application loop and
-  ## does not return until that loop exits. On Android it only prepares the
-  ## descriptor returned by `alasgar_app_desc`; the host application owns the
-  ## loop.
+  ## On desktop targets this procedure enters Sokol's application loop and
+  ## does not return until that loop exits. In a browser it schedules frames
+  ## and transfers control to the browser while keeping application state alive.
+  ## On Android it only prepares the descriptor returned by `alasgar_app_desc`;
+  ## the host application owns the loop.
   engine.window.title = title
   engine.window.size = uvec2(width, height)
   engine.graphics.size = engine.window.size
@@ -223,6 +231,8 @@ proc window*(
 
   when not defined(android):
     sapp.run(engine.app)
+    when defined(emscripten):
+      emscripten_exit_with_live_runtime()
 
 proc `window`*(runtime: ptr Runtime): Window =
   ## Return window properties

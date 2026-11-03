@@ -29,3 +29,14 @@ proc debug*(g: ptr Graphics, position = vec2(8, 8), color = vec4(0.5, 1.0, 0.4, 
     ]
 
   g.text.draw(colorTag(color) & lines.join("\n"), position)
+
+proc fps*(g: ptr Graphics, position = vec2(8, 8), color = vec4(0.5, 1.0, 0.4, 1.0)) =
+  let
+    fps: float32 = runtime.fps
+    ms = runtime.delta * 1000.0
+    lines = [
+      &"[lightgray]FPS: [lime]{fps:>5.1f}",
+      &"[lightgray]FRAME MS: [gold]{ms:>5.2f}",
+    ]
+
+  g.text.draw(colorTag(color) & lines.join("\n"), position)

@@ -18,7 +18,7 @@ This example renders a rotating colored cube and includes build paths for native
 ```text
 .
 ├── src/main.nim                 # Example Alasgar app
-├── bilerplate.nimble            # Nimble package and build tasks
+├── boilerplate.nimble           # Nimble package and build tasks
 ├── platforms/web/               # Emscripten shell and Dockerfile
 ├── platforms/android/           # Android Gradle project and Dockerfile
 └── scripts/                     # Android build helpers
@@ -72,6 +72,20 @@ For local web builds, ensure `emcc` is available on `PATH`, then run:
 ```sh
 nimble webLocal
 ```
+
+The starter builds without external resources. If you add a `res/` directory,
+web builds preload it into the app's virtual filesystem.
+
+Serve the generated files over HTTP (opening `index.html` directly will not load
+WebAssembly):
+
+```sh
+python3 -m http.server 8000 --directory build/web
+```
+
+Open `http://localhost:8000` in a browser with WebGL 2 support. Deploy the entire
+`build/web/` directory, including the JavaScript, WebAssembly, and any generated
+resource data files.
 
 ## License
 

@@ -6,6 +6,10 @@ when withDir(thisDir(), system.fileExists("nimble.paths")):
 import std/os
 import std/strutils
 
+when defined(emscripten) or defined(asmjs) or defined(wasm):
+  if dirExists(thisDir() / "res"):
+    switch("passL", "--preload-file res")
+
 let nativeOutDir = thisDir() / "build" / "native"
 discard staticExec("mkdir -p " & quoteShell(nativeOutDir))
 

@@ -18,7 +18,6 @@ const
   nativeCache = "build/nimcache/native"
   webOut = "build/web/index.html"
   webCache = "build/nimcache/web"
-  webShellFile = "platforms/web/index.html"
   webDockerfile = "platforms/web/Dockerfile"
   androidOut = "build/android"
   dockerImage = "alasgar-emscripten"
@@ -85,7 +84,7 @@ proc webCompileCommand(release: bool; extraSwitches = ""; includeLocalAlasgar = 
     alasgarSwitch &
     extraSwitches &
     "--passC:\"-O3 -sUSE_WEBGL2=1 -sFULL_ES3=1\" " &
-    "--passL:\"-O3 -sUSE_WEBGL2=1 -sFULL_ES3=1 -sUSE_PTHREADS=0 -sALLOW_MEMORY_GROWTH=1 --preload-file res --shell-file " & webShellFile & "\" " &
+    "--passL:\"-O3\" " &
     entry
 
 proc buildWeb(release: bool) =
